@@ -11,6 +11,8 @@ def startproject(project_name):
     # Initialise le dépôt Git
     subprocess.run(["git", "init", project_path])
     print(f"Git repo initialized in {project_path}")
+    subprocess.run(["alembic", "init", project_path])
+    print(f"Alembic a été initialisé dans {project_path}")
 
     with open(f"{project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
@@ -37,17 +39,26 @@ def startproject(project_name):
     else:
         print("Le dossier source 'main' est introuvable.")
 
-    # Création de l'environnement virtuel dans le dossier settings
-    env_path = os.path.join(settings_path, "env")
+    # Créer l'environnement virtuel directement dans le dossier du projet (pas dans 'settings')
+    env_path = os.path.join(project_path, "env")
     subprocess.run(["virtualenv", env_path])
     print(f"Environnement virtuel créé dans {env_path}")
 
     # Installation des dépendances avec pip
     requirements_file = os.path.join(settings_path, "requirements.txt")
-    print(f"Installation des dépendances à partir de {requirements_file}...")
-    subprocess.run(
-        [os.path.join(env_path, "Scripts", "pip"), "install", "-r", requirements_file]
-    )
+    if os.path.exists(requirements_file):
+        print(f"Installation des dépendances à partir de {requirements_file}...")
+        subprocess.run(
+            [
+                os.path.join(env_path, "Scripts", "pip"),
+                "install",
+                "-r",
+                requirements_file,
+            ]
+        )
+    else:
+        print("Le fichier requirements.txt n'a pas été trouvé.")
+
 
     print(f"Le projet {project_name} a été créé avec succès.")
 
@@ -78,30 +89,7 @@ def startapp(app_name):
         print("Le dossier 'sqlapp' est introuvable.")
 
 
-def generate_appuser():
-    parent_dir = os.getcwd()
-    project_folders = [
-        f
-        for f in os.listdir(parent_dir)
-        if os.path.isdir(os.path.join(parent_dir, f)) and not f.startswith(".")
-    ]
 
-    if not project_folders:
-        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
-        return
-
-    project_folder = os.path.join(parent_dir, project_folders[0])
-    appuser_path = os.path.join(project_folder, "appuser")
-    os.makedirs(appuser_path, exist_ok=True)
-
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    appuser_source = os.path.join(script_dir, "appuser")
-
-    if os.path.exists(appuser_source):
-        shutil.copytree(appuser_source, appuser_path, dirs_exist_ok=True)
-        print("Le contenu de 'appuser' a été copié avec succès.")
-    else:
-        print("Le dossier source 'appuser' est introuvable.")
 
 
 def main():
@@ -116,8 +104,6 @@ def main():
         startproject(name)
     elif command == "startapp":
         startapp(name)
-    elif command == "generate" and name == "appuser":
-        generate_appuser()
     else:
         print(f"Commande inconnue: {command}")
 

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="harlequelrah_fastapi",
-    version="0.5.5",
+    version="0.5.6",
     packages=find_packages(),
     description="Package personnalisé pour faciliter  le développement avec python avec fastapi",
     long_description=open("README.md").read(),
