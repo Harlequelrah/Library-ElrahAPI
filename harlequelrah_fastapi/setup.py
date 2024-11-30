@@ -1,11 +1,14 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name="harlequelrah_fastapi",
-    version="0.5.6",
+    version="0.5.7",
     packages=find_packages(),
     description="Package personnalisé pour faciliter  le développement avec python avec fastapi",
-    long_description=open("README.md").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     author="Harlequelrah",
     author_email="maximeatsoudegbovi@example.com",
