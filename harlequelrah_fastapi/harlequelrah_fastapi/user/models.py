@@ -17,7 +17,7 @@ class User():
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
-    password = Column(String(1024))
+    password = Column(String(1024),nullable=False)
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, nullable=False, default=func.now())
@@ -25,7 +25,6 @@ class User():
 
     def set_password(self, password: str):
         self.password = Ph.hash(password)
-        return self.password
 
     def check_password(self, password: str) -> bool:
         try:
@@ -58,7 +57,7 @@ class UserUpdateModel(BaseModel):
     password: Optional[str] = None
 
 
-class UserModel(UserBaseModel):
+class UserPydanticModel(UserBaseModel):
     id: int
     is_active: bool
     date_created: datetime

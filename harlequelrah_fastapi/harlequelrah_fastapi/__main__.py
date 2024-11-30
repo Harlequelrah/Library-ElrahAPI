@@ -11,7 +11,7 @@ def startproject(project_name):
     # Initialise le dépôt Git
     subprocess.run(["git", "init", project_path])
     print(f"Git repo initialized in {project_path}")
-    subprocess.run(["alembic", "init", project_path])
+    subprocess.run(["alembic", "init","alembic"], cwd=project_path)
     print(f"Alembic a été initialisé dans {project_path}")
 
     with open(f"{project_path}/__init__.py", "w") as f:
@@ -59,7 +59,6 @@ def startproject(project_name):
     else:
         print("Le fichier requirements.txt n'a pas été trouvé.")
 
-
     print(f"Le projet {project_name} a été créé avec succès.")
 
 
@@ -68,7 +67,9 @@ def startapp(app_name):
     project_folders = [
         f
         for f in os.listdir(parent_dir)
-        if os.path.isdir(os.path.join(parent_dir, f)) and not f.startswith(".")
+        if os.path.isdir(os.path.join(parent_dir, f))
+        and not (f.startswith("env") or f.startswith("alembic"))
+        and not f.startswith(".")
     ]
 
     if not project_folders:
@@ -89,7 +90,36 @@ def startapp(app_name):
         print("Le dossier 'sqlapp' est introuvable.")
 
 
+def generate_userapp():
+    """
+    Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
+    """
+    parent_dir = os.getcwd()
+    project_folders = [
+        f
+        for f in os.listdir(parent_dir)
+        if os.path.isdir(os.path.join(parent_dir, f))
+        and not (f.startswith("env") or f.startswith("alembic"))
+        and not f.startswith(".")
+    ]
 
+    if not project_folders:
+        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
+        return
+
+    project_folder = os.path.join(parent_dir, project_folders[0])
+    target_userapp_path = os.path.join(project_folder, "userapp")
+    os.makedirs(target_userapp_path, exist_ok=True)
+
+    # Path vers le dossier source 'userapp' dans la bibliothèque
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    source_userapp_path = os.path.join(script_dir, "user/userapp")
+
+    if os.path.exists(source_userapp_path):
+        shutil.copytree(source_userapp_path, target_userapp_path, dirs_exist_ok=True)
+        print(f"L'application 'userapp' a été copiée dans {target_userapp_path}.")
+    else:
+        print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
 
 
 def main():
@@ -104,6 +134,8 @@ def main():
         startproject(name)
     elif command == "startapp":
         startapp(name)
+    elif command == "generate" and name == "userapp":
+        generate_userapp()
     else:
         print(f"Commande inconnue: {command}")
 

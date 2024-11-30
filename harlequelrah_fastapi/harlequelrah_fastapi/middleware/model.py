@@ -1,22 +1,19 @@
-from decimal import Decimal
 from sqlalchemy import (
-    Boolean,
     Column,
     Integer,
     String,
     DateTime,
+    Numeric
 )
 from sqlalchemy.sql import func
-from typing import List, Optional
-from datetime import datetime
 
 
-class Logger:
+
+class LoggerMiddlewareModel:
     id = Column(Integer, primary_key=True, index=True)
     status_code = Column(Integer, index=True)
     method = Column(String(30), nullable=False)
     url = Column(String(30), nullable=False)
     date_created = Column(DateTime, nullable=False, default=func.now())
-    process_time = Column(Decimal, nullable=False)
-    db_name = Column(String(30), nullable=False)
-    user_agent = Column(String(36), nullable=False)
+    process_time = Column(Numeric(precision=10,scale=6), nullable=False)
+    user_agent = Column(String(255), nullable=False)
