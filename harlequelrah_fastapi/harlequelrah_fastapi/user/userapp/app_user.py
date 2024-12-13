@@ -17,7 +17,7 @@ UserUpdateModel=authentication.UserUpdateModel
 UserPydanticModel=authentication.UserPydanticModel
 UserLoginModel=authentication.UserLoginModel
 
-@app_user.get("/count-users")
+@app_user.get("/count-users",response_model=List[UserPydanticModel])
 async def count_users():
     return await crud.get_count_users()
 
@@ -83,8 +83,8 @@ async def login_api_user(
     refresh_token = authentication.create_refresh_token(data)
 
     return {
-        "access_token": access_token["access_token"],
-        "refresh_token": refresh_token["refresh_token"],
+        "access_token": access_token.access_token,
+        "refresh_token": refresh_token.refresh_token,
         "token_type": "bearer",
     }
 
@@ -107,17 +107,16 @@ async def login(usermodel: UserLoginModel):
     if (usermodel.email is None) ^ (usermodel.username is None):
         credential = usermodel.username if usermodel.username else usermodel.email
         user = await authentication.authenticate_user(
-             credential, usermodel.password
+            credential, usermodel.password
         )
         if not user:
             raise AUTHENTICATION_EXCEPTION
         data = {"sub": credential}
-        access_token = authentication.create_access_token(data)
-        refresh_token = authentication.create_refresh_token(data)
-        return {
-            "access_token": access_token["access_token"],
-            "refresh_token": refresh_token["refresh_token"],
-            "token_type": "bearer",
-        }
+        access_token_data = authentication.create_access_token(data)
+        refresh_token_data = authentication.create_refresh_token(data)
+        return {"access_token": access_token_data.access_token,
+                "refresh_token": refresh_token_data.refresh_token,
+                "token_type":"bearer"}
+
     else:
         raise AUTHENTICATION_EXCEPTION

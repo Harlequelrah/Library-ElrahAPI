@@ -51,8 +51,9 @@ class Authentication():
         self.oauth2_scheme=oauth2_scheme
 
     async def authenticate_user(self, username_or_email: str, password: str):
+        db=self.get_session()
         user = (
-        self.db.query(self.User)
+        db.query(self.User)
         .filter(or_(self.User.username == username_or_email ,self.User.email == username_or_email))
         .first()
     )
@@ -68,7 +69,7 @@ class Authentication():
             expire = datetime.utcnow() + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
         encode_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
-        return AccessToken(**{"access_token": encode_jwt, "token_type": "bearer"})
+        return {"access_token":encode_jwt,"token_type":"bearer"}
 
     def create_refresh_token(self,data: dict, expires_delta: timedelta = None) -> RefreshToken:
         to_encode = data.copy()
@@ -78,22 +79,20 @@ class Authentication():
             expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire})
         encode_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
-        return RefreshToken(**{"refresh_token": encode_jwt,"token_type":"bearer"})
+        return {"refresh_token":encode_jwt,"token_type":"bearer"}
 
     async def get_current_user(
         self, token: str = Depends(oauth2_scheme)
     ):
         try:
+            db=self.get_session()
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             sub: str = payload.get("sub")
-            print("sub"+sub)
             if sub is None:
-                print("sub is none")
                 raise self.CREDENTIALS_EXCEPTION
         except JWTError:
-            print("error decoding")
             raise self.CREDENTIALS_EXCEPTION
-        user = self.db.query(self.User).filter(or_(self.User.username == sub,self.User.email == sub)).first()
+        user = db.query(self.User).filter(or_(self.User.username == sub,self.User.email == sub)).first()
         if user is None:
             print("user is none")
             raise self.CREDENTIALS_EXCEPTION
@@ -101,10 +100,11 @@ class Authentication():
 
     def refresh_token(self,token:RefreshToken):
         try:
+            db=self.self.get_session()
             payload=jwt.decode(token.refresh_token,self.SECRET_KEY,algorithms=[self.ALGORITHM])
             sub=payload.get("sub")
             if sub is None : raise self.CREDENTIALS_EXCEPTION
-            user=self.db.query(self.User).filter(or_(self.User.username==sub , self.User.email==sub)).first()
+            user=db.query(self.User).filter(or_(self.User.username==sub , self.User.email==sub)).first()
             if user is None: raise self.CREDENTIALS_EXCEPTION
             ACCESS_TOKEN_EXPIRE_MINUTES=timedelta(self.ACCESS_TOKEN_EXPIRE_MINUTES_MINUTES)
             access_token=self.create_access_token(

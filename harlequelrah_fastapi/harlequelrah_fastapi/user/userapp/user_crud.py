@@ -5,6 +5,7 @@ from settings.database  import authentication
 from sqlalchemy import or_
 from harlequelrah_fastapi.utility.utils import update_entity
 
+
 User = authentication.User
 UserLoginModel = authentication.User
 UserCreate = authentication.UserCreateModel
@@ -22,10 +23,9 @@ async def is_unique(sub: str, db:Session=dependencies[0]):
 async def create_user(
     user: UserCreate,
     db: Session = dependencies[0],
-    access_token: str = dependencies[1],
 ):
     new_user = User(**user.dict())
-    if not is_unique(db, new_user.email) or not is_unique(db, new_user.username):
+    if not await is_unique(db, new_user.email) or not await is_unique(db, new_user.username):
         raise HE(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Le nom d'utilisateur ou l'email existe déjà",
