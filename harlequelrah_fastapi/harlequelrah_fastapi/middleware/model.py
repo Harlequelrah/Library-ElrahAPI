@@ -16,5 +16,6 @@ class LoggerMiddlewareModel:
     url = Column(String(255), nullable=False)
     error_message=Column(String(255))
     date_created = Column(DateTime, nullable=False, default=func.now())
+    remote_address = Column(String(255), nullable=False)
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)
-    user_agent = Column(String(255), nullable=False)
+

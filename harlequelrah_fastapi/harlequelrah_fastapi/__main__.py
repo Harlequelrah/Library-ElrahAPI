@@ -7,6 +7,8 @@ import subprocess
 def startproject(project_name):
     project_path = os.path.join(os.getcwd(), project_name)
     os.makedirs(project_path, exist_ok=True)
+    sub_project_path = os.path.join(project_path, project_name)
+    os.makedirs(sub_project_path, exist_ok=True)
 
     # Initialise le dépôt Git
     subprocess.run(["git", "init", project_path])
@@ -17,8 +19,20 @@ def startproject(project_name):
     with open(f"{project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
 
-    sub_project_path = os.path.join(project_path, project_name)
-    os.makedirs(sub_project_path, exist_ok=True)
+    with open(f"{sub_project_path}/__init__.py", "w") as f:
+        f.write("# __init__.py\n")
+
+    alembic_src_path = os.path.join(project_path, "alembic")
+    alembic_dest_path = os.path.join(sub_project_path, "alembic")
+    shutil.move(alembic_src_path, alembic_dest_path)
+    print(f"Le dossier 'alembic' a été déplacé vers {alembic_dest_path}")
+
+    # Vérifier que `alembic.ini` reste dans le répertoire principal
+    alembic_ini_path = os.path.join(project_path, "alembic.ini")
+    if os.path.exists(alembic_ini_path):
+        print(f"'alembic.ini' reste dans {project_path}")
+    else:
+        print("Erreur : 'alembic.ini' introuvable après le déplacement.")
 
     settings_path = os.path.join(sub_project_path, "settings")
     os.makedirs(settings_path, exist_ok=True)
