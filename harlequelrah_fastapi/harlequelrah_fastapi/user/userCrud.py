@@ -29,10 +29,10 @@ class UserCrud:
 
     async def create_user(self, user, db: Session):
         new_user = self.User(**user.dict())
+        new_user.set_password(new_user.password)
         if not await self.is_unique(new_user.email,db) or not await self.is_unique(
             new_user.username,db
         ):
-            print("wakawaka")
             raise HE(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User already registred",
@@ -72,7 +72,7 @@ class UserCrud:
         db: Session ,
     ):
         existing_user = await self.get_user(db, user_id)
-        update_entity(existing_user, userUpdated)
+        existing_user=update_entity(existing_user, userUpdated)
         db.commit()
         db.refresh(existing_user)
         return existing_user

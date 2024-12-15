@@ -22,9 +22,21 @@ class User():
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, nullable=False, default=func.now())
     is_active = Column(Boolean, default=True)
+    attempt_login = Column(Integer, default=0)
+
+    def try_login(self,is_success:bool):
+        if is_success:
+            self.attempt_login = 0
+        else:
+            self.attempt_login += 1
+        if self.attempt_login >= 3:
+            self.is_active = False
+
+
 
     def set_password(self, password: str):
         self.password = Ph.hash(password)
+
 
     def check_password(self, password: str) -> bool:
         try:
