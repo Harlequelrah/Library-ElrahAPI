@@ -1,34 +1,35 @@
 from sqlalchemy import (
-    Boolean,
     Column,
     Integer,
     String,
-    DateTime,
 )
 from sqlalchemy.sql import func
-from argon2 import PasswordHasher, exceptions as Ex
+from sqlalchemy.orm import validates
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from datetime import datetime
 
 class Role():
     id=Column(Integer, primary_key=True,index=True)
     name=Column(String(100),nullable=False)
     normalizedName=Column(String(100),nullable=False)
 
+    @validates('name')
+    def validate_name(self,key,value):
+        self.normalizedName= value.upper() if value else None
+
+
 
 class RoleBaseModel(BaseModel):
     name : str = Field(example="Admin")
-    normalizedName : str = Field(example="ADMIN")
 
 class RoleCreate(RoleBaseModel):
     pass
 
-class RoleUpdate(RoleBaseModel):
+class RoleUpdate(BaseModel):
     name:Optional[str]=Field(example="Admin",default=None)
-    normalizedName:Optional[str]=Field(example="ADMIN",default=None)
 
 class Role(RoleCreate):
     id:int
+    normalizedName:str
     class setting:
         from_orm=True
