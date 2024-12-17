@@ -37,9 +37,13 @@ class UserCrud:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User already registred",
             )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        try :
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+        except HE as e :
+            db.rollback()
+            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during creating user , detail : {str(e)}")
         return new_user
 
     async def get_user(self,db:Session,id: int = None,sub: str = None):
@@ -54,6 +58,8 @@ class UserCrud:
             )
             .first()
         )
+        if not user:
+            raise HE(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return user
 
     async def get_users(
@@ -62,8 +68,9 @@ class UserCrud:
         skip: int = 0,
         limit: int = None,
     ):
-        limit = await self.get_count_users(db)
+        if limit is None :limit = await self.get_count_users(db)
         users = db.query(self.User).offset(skip).limit(limit).all()
+        if not users: raise HE(status_code=status.HTTP_404_NOT_FOUND,detail="Any users found")
         return users
 
     async def update_user(self,
@@ -73,12 +80,20 @@ class UserCrud:
     ):
         existing_user = await self.get_user(db, user_id)
         existing_user=update_entity(existing_user, userUpdated)
-        db.commit()
-        db.refresh(existing_user)
+        try:
+            db.commit()
+            db.refresh(existing_user)
+        except HE as e:
+            db.rollback()
+            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during updating user, detail : {str(e)}")
         return existing_user
 
     async def delete_user(self,user_id:int,db:Session):
         user = await self.get_user(db,id=user_id)
-        db.delete(user)
-        db.commit()
+        try:
+            db.delete(user)
+            db.commit()
+        except HE as e:
+            db.rollback()
+            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during deleting user, detail : {str(e)}")
         return JSONResponse(status_code=200,content={'message': 'User deleted successfully'})
