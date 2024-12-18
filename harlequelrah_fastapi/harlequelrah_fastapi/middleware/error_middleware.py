@@ -5,49 +5,69 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from harlequelrah_fastapi.middleware.crud_middleware import save_log
+
+
 class ErrorHandlingMiddleware(BaseHTTPMiddleware):
 
-    def __init__(self, app, LoggerMiddlewareModel=None, db_session: Session=None):
+    def __init__(self, app, LoggerMiddlewareModel=None, session_factory=None):
         super().__init__(app)
-        self.db_session = db_session
+        self.session_factory = session_factory
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
-        self.has_log= self.db_session and self.LoggerMiddlewareModel
+        self.has_log = self.session_factory and self.LoggerMiddlewareModel
 
     async def dispatch(self, request: Request, call_next):
 
         try:
+            print("error middleware dispatch")
             return await call_next(request)
         except SQLAlchemyError as db_error:
+            print("error middleware dispatch sqlalchemy error")
+            db = self.session_factory()
             if self.has_log:
                 await save_log(
-                request,call_next,self.LoggerMiddlewareModel,self.db_session(),error=f"Database error : details , {str(db_error)}"
+                    request,
+                    call_next,
+                    self.LoggerMiddlewareModel,
+                    db,
+                    error=f"Database error : details , {str(db_error)}",
                 )
+            else:
+                print("sqlalchemy water")
             return JSONResponse(
                 status_code=500,
                 content={"error": "Database error", "details": str(db_error)},
             )
         except HTTPException as http_exc:
+            print("error middleware dispatch http error")
             if self.has_log:
+                print("fire")
+                db = self.session_factory()
                 await save_log(
                     request,
                     call_next,
                     self.LoggerMiddlewareModel,
-                    self.db_session(),
+                    db,
                     error=f"HTTP error , details : {str(http_exc.detail)}",
                 )
+            else:
+                print("http water")
             return JSONResponse(
                 status_code=http_exc.status_code, content={"detail": http_exc.detail}
             )
         except Exception as exc:
+            print("error middleware dispatch unexpected error")
             if self.has_log:
+                db = self.session_factory()
                 await save_log(
                     request,
                     call_next,
                     self.LoggerMiddlewareModel,
-                    self.db_session(),
+                    db,
                     error=f"An unexpected error occurred , details : {str(exc)}",
                 )
-            return  JSONResponse(
+            else:
+                print("water unocuured error")
+            return JSONResponse(
                 status_code=500,
                 content={"error": "An unexpected error occurred", "details": str(exc)},
             )

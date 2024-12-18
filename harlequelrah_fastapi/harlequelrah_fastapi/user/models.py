@@ -67,6 +67,7 @@ class UserUpdateModel(BaseModel):
     firstname: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
+    attempt_login: Optional[int] = None
 
 
 class UserPydanticModel(UserBaseModel):

@@ -1,4 +1,4 @@
-from .database import Base
+from settings.database import Base
 from harlequelrah_fastapi.middleware.model import LoggerMiddlewareModel
 
 class Logger(Base, LoggerMiddlewareModel):

@@ -28,7 +28,7 @@ class RoleCreate(RoleBaseModel):
 class RoleUpdate(BaseModel):
     name:Optional[str]=Field(example="Admin",default=None)
 
-class Role(RoleCreate):
+class RolePydanticModel(RoleCreate):
     id:int
     normalizedName:str
     class setting:

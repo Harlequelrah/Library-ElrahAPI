@@ -4,15 +4,17 @@ from sqlalchemy.orm import  Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from harlequelrah_fastapi.middleware.crud_middleware import save_log
 class LoggerMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app,LoggerMiddlewareModel, db_session:Session ):
+    def __init__(self, app,LoggerMiddlewareModel, session_factory ):
         super().__init__(app)
-        self.db_session=db_session
+        self.session_factory=session_factory
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
     async def dispatch(self, request : Request, call_next):
         try:
-            db=self.db_session()
+            print("logger middleware dispatch")
+            db=self.session_factory()
             return await save_log(request,call_next,self.LoggerMiddlewareModel,db)
         except Exception as e:
+            print("logger middleware dispatch exception")
             db.rollback()
             raise e
         finally:

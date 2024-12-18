@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, HTTPException, status
 import uvicorn
 from settings.database import engine, authentication, sessionLocal
-from settings import logger_model
+from harlequelrah_fastapi.middleware.logapp import log_model
 from settings.models_metadata import target_metadata
 # from userapp.app_user import app_user
 from harlequelrah_fastapi.middleware.error_middleware import ErrorHandlingMiddleware

@@ -75,6 +75,37 @@ def startproject(project_name):
 
     print(f"Le projet {project_name} a été créé avec succès.")
 
+def generate_loggerapp():
+    """
+    Copie le contenu du dossier loggerapp (source) dans le dossier 'loggerapp' du projet.
+    """
+    parent_dir = os.getcwd()
+    project_folders = [
+        f
+        for f in os.listdir(parent_dir)
+        if os.path.isdir(os.path.join(parent_dir, f))
+        and not (f.startswith("env") or f.startswith("alembic"))
+        and not f.startswith(".")
+    ]
+
+    if not project_folders:
+        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
+        return
+
+    project_folder = os.path.join(parent_dir, project_folders[0])
+    target_loggerapp_path = os.path.join(project_folder, "loggerapp")
+    os.makedirs(target_loggerapp_path, exist_ok=True)
+
+    # Path vers le dossier source 'userapp' dans la bibliothèque
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    source_loggerapp_path = os.path.join(script_dir, "middleware/loggerapp")
+
+    if os.path.exists(source_loggerapp_path):
+        shutil.copytree(source_loggerapp_path, target_loggerapp_path, dirs_exist_ok=True)
+        print(f"L'application 'loggerapp' a été copiée dans {target_loggerapp_path}.")
+    else:
+        print("Le dossier source 'loggerapp' est introuvable dans la bibliothèque.")
+
 
 def startapp(app_name):
     parent_dir = os.getcwd()
@@ -150,6 +181,8 @@ def main():
         startapp(name)
     elif command == "generate" and name == "userapp":
         generate_userapp()
+    elif command=="generate" and name=="loggerapp":
+        generate_loggerapp()
     else:
         print(f"Commande inconnue: {command}")
 

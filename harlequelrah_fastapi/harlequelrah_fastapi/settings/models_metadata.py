@@ -1,7 +1,7 @@
 # from todolistapp import model
 from sqlalchemy import MetaData
 # from userapp import user_model
-from settings import logger_model
+from harlequelrah_fastapi.middleware.logapp import log_model
 
 
 target_metadata = MetaData()

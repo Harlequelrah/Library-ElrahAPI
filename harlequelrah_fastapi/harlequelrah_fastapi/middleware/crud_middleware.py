@@ -8,6 +8,8 @@ async def save_log(
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         return await call_next(request)
+    if error: print("Error saving log")
+    else:print("no error saving log")
     start_time= time.time()
     response = await call_next(request)
     process_time=time.time() - start_time

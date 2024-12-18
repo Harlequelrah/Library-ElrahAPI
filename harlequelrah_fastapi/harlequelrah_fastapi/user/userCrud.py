@@ -16,10 +16,12 @@ class UserCrud:
         self.UserCreate = self.authentication.UserCreateModel
         self.UserUpdate = self.authentication.UserUpdateModel
 
-    async def get_count_users(self,db:Session):
-        return db.query(func.count(self.User.id)).scalar()
+    async def get_count_users(self):
+        db=self.authentication.session_factory()
+        return self.db.query(func.count(self.User.id)).scalar()
 
-    async def is_unique(self, sub: str,db:Session):
+    async def is_unique(self, sub: str):
+        db = self.authentication.session_factory()
         user = (
             db.query(self.User)
             .filter(or_(self.User.email == sub, self.User.username == sub))
@@ -27,7 +29,8 @@ class UserCrud:
         )
         return user is None
 
-    async def create_user(self, user, db: Session):
+    async def create_user(self, user):
+        db = self.authentication.session_factory()
         new_user = self.User(**user.dict())
         new_user.set_password(new_user.password)
         if not await self.is_unique(new_user.email,db) or not await self.is_unique(
@@ -46,7 +49,8 @@ class UserCrud:
             raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during creating user , detail : {str(e)}")
         return new_user
 
-    async def get_user(self,db:Session,id: int = None,sub: str = None):
+    async def get_user(self,id: int = None,sub: str = None):
+        db = self.authentication.session_factory()
         user = (
             db.query(self.User)
             .filter(
@@ -64,10 +68,10 @@ class UserCrud:
 
     async def get_users(
         self,
-        db: Session ,
         skip: int = 0,
         limit: int = None,
     ):
+        db = self.authentication.session_factory()
         if limit is None :limit = await self.get_count_users(db)
         users = db.query(self.User).offset(skip).limit(limit).all()
         if not users: raise HE(status_code=status.HTTP_404_NOT_FOUND,detail="Any users found")
@@ -76,8 +80,8 @@ class UserCrud:
     async def update_user(self,
         user_id: int,
         userUpdated,
-        db: Session ,
     ):
+        db = self.authentication.session_factory()
         existing_user = await self.get_user(db, user_id)
         existing_user=update_entity(existing_user, userUpdated)
         try:
@@ -88,7 +92,8 @@ class UserCrud:
             raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during updating user, detail : {str(e)}")
         return existing_user
 
-    async def delete_user(self,user_id:int,db:Session):
+    async def delete_user(self,user_id:int):
+        db = self.authentication.session_factory()
         user = await self.get_user(db,id=user_id)
         try:
             db.delete(user)
