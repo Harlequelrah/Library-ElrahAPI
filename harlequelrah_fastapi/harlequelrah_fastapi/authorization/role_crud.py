@@ -73,3 +73,14 @@ async def delete_role(db: Session, role_id: int):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error during deleting role {role_id}, details : {str(e)}",
         )
+
+async def add_role_to_user(self,db:Session,user,role_id):
+    role = await get_role(db, role_id)
+    user.roles.append(role)
+    try:
+        db.commit()
+        db.refresh(user)
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Role added successfully"})
+    except HE as e:
+        db.rollback()
+        raise HE(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error adding role to user {user.id}, details : {str(e)}")

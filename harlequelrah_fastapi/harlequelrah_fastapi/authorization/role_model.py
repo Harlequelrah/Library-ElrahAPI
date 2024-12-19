@@ -15,21 +15,22 @@ class Role():
 
     @validates('name')
     def validate_name(self,key,value):
-        self.normalizedName= value.upper() if value else None
+        self.normalizedName= value.upper().strip() if value else None
 
 
 
 class RoleBaseModel(BaseModel):
     name : str = Field(example="Admin")
 
-class RoleCreate(RoleBaseModel):
+class RoleCreateModel(RoleBaseModel):
     pass
 
-class RoleUpdate(BaseModel):
+class RoleUpdateModel(BaseModel):
     name:Optional[str]=Field(example="Admin",default=None)
 
-class RolePydanticModel(RoleCreate):
+class RolePydanticModel(BaseModel):
     id:int
+    name:str
     normalizedName:str
     class setting:
         from_orm=True

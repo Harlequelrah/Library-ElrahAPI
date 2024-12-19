@@ -1,5 +1,6 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException as CHE
 
 from fastapi import HTTPException as HE,status
 
@@ -16,7 +17,8 @@ class LoggerCrud:
         db = self.session_local()
         log=db.query(self.LoggerModel).filter(self.LoggerModel.id==log_id).first()
         if log is None :
-            raise HE(status_code=status.HTTP_404_NOT_FOUND,detail=f"Log {log_id} not found")
+            http_exc=HE(status_code=status.HTTP_404_NOT_FOUND,detail=f"Log {log_id} not found")
+            raise CHE(http_exception= http_exc)
         return log
 
     async def get_logs(self,skip:int=None,limit:int=None):

@@ -16,6 +16,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             print("logger middleware dispatch exception")
             db.rollback()
-            raise e
+            return await save_log(request, call_next, self.LoggerMiddlewareModel, db,error=f"error during saving log , detail :{str(e)}")
         finally:
             db.close()
