@@ -12,10 +12,10 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         try:
             print("logger middleware dispatch")
             db=self.session_factory()
-            return await save_log(request,call_next,self.LoggerMiddlewareModel,db)
+            return await save_log(request=request,call_next=call_next,LoggerMiddlewareModel=self.LoggerMiddlewareModel,db=db)
         except Exception as e:
             print("logger middleware dispatch exception")
             db.rollback()
-            return await save_log(request, call_next, self.LoggerMiddlewareModel, db,error=f"error during saving log , detail :{str(e)}")
+            return await save_log(request, call_next=call_next,LoggerMiddlewareModel= self.LoggerMiddlewareModel, db=db,error=f"error during saving log , detail :{str(e)}")
         finally:
             db.close()

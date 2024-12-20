@@ -21,9 +21,11 @@ class LoggerCrud:
             raise CHE(http_exception= http_exc)
         return log
 
-    async def get_logs(self,skip:int=None,limit:int=None):
+    async def get_logs(self,skip:int=0,limit:int=None):
         db = self.session_local()
         if limit is None:limit = await  self.get_count_logs()
+        if skip is not None:print("skipping not defined")
+        else:print("limit is not specified")
         logs = db.query(self.LoggerModel).offset(skip).limit(limit).all()
         if not logs:
             http_exception = HE(
