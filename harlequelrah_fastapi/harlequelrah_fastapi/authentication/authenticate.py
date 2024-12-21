@@ -1,7 +1,7 @@
-from fastapi import Depends, HTTPException, status
+from harlequelrah_fastapi.exception.auth_exception import AUTHENTICATION_EXCEPTION
 from sqlalchemy.orm import Session,sessionmaker
+from fastapi import Depends
 
-from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException
 from .token import AccessToken,RefreshToken
 from datetime import datetime, timedelta
 from sqlalchemy import or_
@@ -9,12 +9,7 @@ import secrets
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from harlequelrah_fastapi.user.models import UserPydanticModel,UserCreateModel,UserLoginModel,UserUpdateModel,User
-HTTP_EXCEPTION=HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-AUTHENTICATION_EXCEPTION = CustomHttpException(HTTP_EXCEPTION)
+
 class Authentication():
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/tokenUrl")
     UserPydanticModel=UserPydanticModel

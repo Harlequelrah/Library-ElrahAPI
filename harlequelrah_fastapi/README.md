@@ -87,6 +87,12 @@ loggerapp/
 ### `Modules`
 ####  Module `exception`
 Ce module contient des exceptions personnalisées utilisés dans cette bibliothèque
+##### 1. Sous module auth_exception
+ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
+
+- `AUTHENTICATION_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
+
+##### 2. Sous module custom_http_exception
 - `**CustomHttpException**` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 ```python
   from fastapi import HTTPException , status
@@ -110,22 +116,29 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
 #### Module `authentication`
 Ce module contient des classes et des fonctions utilisées pour l'authentification.
 
-##### `token`
-Ce sous-module définit des classes pydantics pour la gestions des tokens :
-- AccessToken : access_token : `str` , token_type :` str`
-- RefreshToken : refresh_token : `str` , token_type :` str`
-- Token : access_token : `str` ,refresh_token : `str` , token_type :` str`
+##### 1. Sous module `token`
+Ce sous module définit des classes pydantics pour la gestions des tokens :
+- AccessToken : access_token : **str** , token_type : **str**
+- RefreshToken : refresh_token : **str** , token_type : **str**
+- Token : access_token : **str** ,refresh_token : **str** , token_type : **str**
 
-##### `authenticate`
-ce sous-module définit les classes et fonctions utilisées pour l'authentification
-- AUTHENTICATION_EXCEPTION : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
-- Authentication : classe principale pour gérer l'authentification
-  - oauth2_scheme : définit le schéma d'authentication
-  - User : le modèle d'utilisateur SQLAlchemy
-  - UserCreateModel : le modèle pydantic pour la création d'utilisateur
-  - UserUpdateModel : le modèle pydantic pour la mise à jour d'utilisateur
-  - UserPydanticModel : le modèle pydantic pour lire un utilisateur
-  - UserLoginModel : le modèle pydantic la connexion d'utilisateur
+##### 2. Sous module `authenticate`
+ce sous module définit les classes et fonctions utilisées pour l'authentification
+
+- **`Classe Authentication`**:classe principale pour gérer l'authentification
+- `oauth2_scheme` : définit le schéma d'authentication
+- `User` : le modèle d'utilisateur SQLAlchemy
+- `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
+- `UserUpdateModel` : le modèle pydantic pour la mise à jour d'utilisateur
+- `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
+- `UserLoginModel` : le modèle pydantic la connexion d'utilisateur
+- `SECRET_KEY` : une clé secrète générer par défaut
+- `ALGORITHM` : un algorithm par défaut `HS256`
+- `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
+- `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
+- `session_factory` : un générateur de session
+- `CREDENTIALS_EXCEPTION` : une exception de type `CustomHttpException` à lever lorsque l'authentification échoue
+  
 
 # Contact ou Support
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.
