@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
-from harlequelrah_fastapi.authorization.role_model import Role, RoleCreate, RoleUpdate
+from harlequelrah_fastapi.authorization.role_model import Role, RoleCreateModel, RoleUpdateModel
 from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy.orm import Session
 from fastapi import HTTPException as HE, status
@@ -10,7 +10,7 @@ async def get_count_roles(db: Session):
     return db.query(func.count((Role.id))).scalar()
 
 
-async def create_role(db: Session, role_create: RoleCreate):
+async def create_role(db: Session, role_create: RoleCreateModel):
     new_role = Role(**role_create)
     try:
         db.add(new_role)
@@ -43,7 +43,7 @@ async def get_roles(db: Session, skip: int = 0, limit: int = None):
     return roles
 
 
-async def update_role(db: Session, role_id: int, role_update: RoleUpdate):
+async def update_role(db: Session, role_id: int, role_update: RoleUpdateModel):
     existingRole = await get_role(db, role_id)
     existingRole = update_entity(existingRole, role_update)
     try:

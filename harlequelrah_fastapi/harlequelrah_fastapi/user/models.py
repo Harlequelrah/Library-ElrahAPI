@@ -69,11 +69,12 @@ class UserUpdateModel(BaseModel):
     password: Optional[str] = None
     attempt_login: Optional[int] = None
 
-
-class UserPydanticModel(UserBaseModel):
+class AdditionalUserPydanticModelField():
     id: int
     is_active: bool
     date_created: datetime
+class UserPydanticModel(UserBaseModel,AdditionalUserPydanticModelField):
+    pass
 
 
 class UserLoginModel(BaseModel):

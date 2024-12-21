@@ -6,7 +6,7 @@ from settings.database import authentication
 from sqlalchemy import or_
 from harlequelrah_fastapi.utility.utils import update_entity
 from harlequelrah_fastapi.authentication.authenticate import Authentication
-
+from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException as CHE
 
 class UserCrud:
     def __init__(self, authentication: Authentication):
@@ -18,7 +18,7 @@ class UserCrud:
 
     async def get_count_users(self):
         db=self.authentication.session_factory()
-        return self.db.query(func.count(self.User.id)).scalar()
+        return db.query(func.count(self.User.id)).scalar()
 
     async def is_unique(self, sub: str):
         db = self.authentication.session_factory()
@@ -33,20 +33,22 @@ class UserCrud:
         db = self.authentication.session_factory()
         new_user = self.User(**user.dict())
         new_user.set_password(new_user.password)
-        if not await self.is_unique(new_user.email,db) or not await self.is_unique(
-            new_user.username,db
+        if not await self.is_unique(new_user.email) or not await self.is_unique(
+            new_user.username
         ):
-            raise HE(
+            http_exc = HE(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User already registred",
             )
+            raise  CHE(http_exc)
         try :
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
         except HE as e :
             db.rollback()
-            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during creating user , detail : {str(e)}")
+            http_exc=HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during creating user , detail : {str(e)}")
+            raise  CHE(http_exc)
         return new_user
 
     async def get_user(self,id: int = None,sub: str = None):
@@ -63,7 +65,10 @@ class UserCrud:
             .first()
         )
         if not user:
-            raise HE(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            http_exc = HE(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+            raise CHE(http_exc)
         return user
 
     async def get_users(
@@ -72,9 +77,13 @@ class UserCrud:
         limit: int = None,
     ):
         db = self.authentication.session_factory()
-        if limit is None :limit = await self.get_count_users(db)
+        if limit is None :limit = await self.get_count_users()
         users = db.query(self.User).offset(skip).limit(limit).all()
-        if not users: raise HE(status_code=status.HTTP_404_NOT_FOUND,detail="Any users found")
+        if not users:
+            http_exc = HE(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Any users found"
+            )
+            raise CHE(http_exc)
         return users
 
     async def update_user(self,
@@ -89,7 +98,11 @@ class UserCrud:
             db.refresh(existing_user)
         except HE as e:
             db.rollback()
-            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during updating user, detail : {str(e)}")
+            http_exc = HE(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error during updating user, detail : {str(e)}",
+            )
+            raise CHE(http_exc)
         return existing_user
 
     async def delete_user(self,user_id:int):
@@ -100,5 +113,9 @@ class UserCrud:
             db.commit()
         except HE as e:
             db.rollback()
-            raise HE(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error during deleting user, detail : {str(e)}")
+            http_exc = HE(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error during deleting user, detail : {str(e)}",
+            )
+            raise CHE(http_exc)
         return JSONResponse(status_code=200,content={'message': 'User deleted successfully'})
