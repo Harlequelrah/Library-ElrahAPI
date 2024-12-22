@@ -1,6 +1,9 @@
-# Harlequelrah
+# Description
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
+
+# Logo
+
 
 ## Installation
 
@@ -138,7 +141,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
 - `session_factory` : un générateur de session
 - `CREDENTIALS_EXCEPTION` : une exception de type `CustomHttpException` à lever lorsque l'authentification échoue
-  
+
 
 # Contact ou Support
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.
