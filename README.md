@@ -3,7 +3,7 @@
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
 # Logo
-![Logo](https://github.com/Harlequelrah/Library-harlequelrah_fastapi/blob/main/harlequelrah.png)
+![Logo](harlequelrah.png)
 
 ## Installation
 
