@@ -22,17 +22,8 @@ def startproject(project_name):
     with open(f"{sub_project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
 
-    alembic_src_path = os.path.join(project_path, "alembic")
-    alembic_dest_path = os.path.join(sub_project_path, "alembic")
-    shutil.move(alembic_src_path, alembic_dest_path)
-    print(f"Le dossier 'alembic' a été déplacé vers {alembic_dest_path}")
 
-    # Vérifier que `alembic.ini` reste dans le répertoire principal
-    alembic_ini_path = os.path.join(project_path, "alembic.ini")
-    if os.path.exists(alembic_ini_path):
-        print(f"'alembic.ini' reste dans {project_path}")
-    else:
-        print("Erreur : 'alembic.ini' introuvable après le déplacement.")
+
 
     settings_path = os.path.join(sub_project_path, "settings")
     os.makedirs(settings_path, exist_ok=True)
@@ -57,9 +48,13 @@ def startproject(project_name):
     env_path = os.path.join(project_path, "env")
     subprocess.run(["virtualenv", env_path])
     print(f"Environnement virtuel créé dans {env_path}")
+    requirements_src_path = os.path.join(settings_path, "requirements.txt")
+    requirements_dest_path = os.path.join(sub_project_path, "requirements.txt")
+    shutil.move(requirements_src_path, requirements_dest_path)
+    print(f"Le ficher 'requirements.txt' a été déplacé vers {requirements_dest_path}")
 
     # Installation des dépendances avec pip
-    requirements_file = os.path.join(settings_path, "requirements.txt")
+    requirements_file = os.path.join(project_path, "requirements.txt")
     if os.path.exists(requirements_file):
         print(f"Installation des dépendances à partir de {requirements_file}...")
         subprocess.run(

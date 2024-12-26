@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
-from harlequelrah_fastapi.authorization.role_model import Role, RoleCreateModel, RoleUpdateModel
+from harlequelrah_fastapi.authorization.role.role_model import Role, RoleCreateModel, RoleUpdateModel
 from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy.orm import Session
 from fastapi import HTTPException as HE, status
@@ -74,7 +74,7 @@ async def delete_role(db: Session, role_id: int):
             detail=f"Error during deleting role {role_id}, details : {str(e)}",
         )
 
-async def add_role_to_user(self,db:Session,user,role_id):
+async def add_role_to_user(db:Session,user,role_id):
     role = await get_role(db, role_id)
     user.roles.append(role)
     try:

@@ -1,4 +1,4 @@
-from settings.database import Base, authentication
+# from myproject.settings.database import Base, authentication
 from harlequelrah_fastapi.user import models
 
 

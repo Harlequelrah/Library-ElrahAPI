@@ -33,16 +33,16 @@ Cette commande permet de générer un projet FASTAPI avec une archictecture déf
 nomduprojet/
 ├── __init__.py
 ├── .gitignore
+├── alembic/
 ├── alembic.ini
+├── requirements.txt
 ├── env/
 ├── nomduprojet/
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── alembic/
 │   ├── settings/
 │       ├── .gitignore
 │       ├── __init__.py
-│       ├── requirements.txt
 │       ├── database.py
 │       ├── secret.py
 │       └── models_metadata.py
@@ -96,7 +96,7 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 - `AUTHENTICATION_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
 
 ##### 2. Sous module custom_http_exception
-- `**CustomHttpException**` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
+- `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 ```python
   from fastapi import HTTPException , status
   from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException
@@ -142,6 +142,249 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `session_factory` : un générateur de session
 - `CREDENTIALS_EXCEPTION` : une exception de type `CustomHttpException` à lever lorsque l'authentification échoue
 
+#### Module `authorization`
+Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
+##### Sous module `role`
+Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Role .
+- sous module `role_model`
+
+`Role`:
+- id : int
+- name : str
+- normalized_name : str (automatique à l'ajout de name)
+
+Les classes pydantic sont : `RolePydanticModel`,`RoleCreateModel`,`RoleUpdateModel`
+
+- Sous module `role_crud`
+ce sous module définit les cruds :
+- **`get_count_roles`**
+  - `paramètres` :
+    - db : **Session**
+  - `sortie` : **int**
+- **`create_role`**
+  - `paramètres` :
+    - db : **Session**
+    - role_create : **RoleCreateModel**
+  -  `sortie`:
+    - role : **Role**
+- **`get_role`**
+  - `paramètres` :
+    - db : **Session**
+    - role_id : **int**
+  - `sortie` : **Role**
+- **`get_roles`**
+  - `paramètres` :
+    - db : **Session**
+    - skip : **int**
+    - limit : **int**
+  - `sortie` : **List[Role]**
+- **`update_role`**
+  - `paramètres` :
+    - db : **Session**
+    - role_id : **int**
+    - role_update : **RoleUpdateModel**
+  - `sortie`: **Role**
+- **`delete_role`**
+  - `paramètres` :
+    - db : **Session**
+    - role_id : **int**
+  - `sortie`: **JSONResponse**
+- **`add_role_to_user`**
+  - `paramètres` :
+    - db : **Session**
+    - user : **User**
+    - role_id : **int**
+  - `sortie`: **JsonResponse**
+
+##### Sous module `privilege`
+Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Privilege .
+- sous module `privilege_model`
+
+`Privilege`:
+- id : int
+- name : str
+- normalized_name : str (automatique à l'ajout de name)
+
+Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`PrivilegeUpdateModel`
+
+- Sous module `privilege_crud`
+ce sous module définit les cruds :
+- **`get_count_privileges`**
+  - `paramètres` :
+    - db : **Session**
+  - `sortie` : **int**
+- **`create_privilege`**
+  - `paramètres` :
+    - db : **Session**
+    - privilege_create : **PrivilegeCreateModel**
+  -  `sortie`:
+    - privilege : **Privilege**
+- **`get_privilege`**
+  - `paramètres` :
+    - db : **Session**
+    - privilege_id : **int**
+  - `sortie` : **Privilege**
+- **`get_privileges`**
+  - `paramètres` :
+    - db : **Session**
+    - skip : **int**
+    - limit : **int**
+  - `sortie` : **List[Privilege]**
+- **`update_privilege`**
+  - `paramètres` :
+    - db : **Session**
+    - privilege_id : **int**
+    - privilege_update : **PrivilegeUpdateModel**
+  - `sortie`: **Privilege**
+- **`delete_privilege`**
+  - `paramètres` :
+    - db : **Session**
+    - privilege_id : **int**
+  - `sortie`: **JSONResponse**
+
+#### Module `middleware`
+Ce module regroupe toute la gestion des middelwares
+
+##### Sous module `model`
+Ce sous module définit les  modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
+
+**Attributs prédéfinis**:
+- id : **int**
+- status_code : **int**
+- method : **str**
+- url : **str**
+- error_message : **str**
+- date_created : **datetime**
+- process_time : **float**
+- remote_adress: **str**
+
+##### Sous module `log_middleware`
+Ce sous module définit les  middelwares de loggins
+
+- Class **`LoggerMiddleware`**
+  - `paramètres` :
+    - LoggerMiddlewareModel : définit le modèle de Log a utilisé
+    - session_factory : le générateur de session
+
+##### Sous module `error_middleware`
+Ce sous module définit les  middelwares d'erreurs
+
+- Class **`ErrorMiddleware`**
+  - `paramètres optionels` :
+    - LoggerMiddlewareModel : définit le modèle de Log a utilisé
+    - session_factory : le générateur de session
+
+##### Sous module logCrud
+ce sous module définit une classe pour le crud des logs
+
+Class **`LogCrud`**
+
+- `paramètres` :
+  - LoggerModel : définit le modèle de Log à utiliser
+  - session_factory : le générateur de session
+
+- `methodes` :
+  - `get_count_logs` : retourne le nombre total de log
+  - `get_log` :
+    - `paramètres` :
+      - id : **int**
+    - `sortie` : **LoggerModel**
+
+  - `get_logs` :
+    - `paramètres` :
+      - skip : **int**
+      - limit : **int**
+    - `sortie` : **List[LoggerModel]**
+
+#### Module `user`
+Ce module comporte toute la gestion des utilisateurs
+
+##### Sous module `models`
+Ce sous module comporte tous les models pour l'entité utilisateur
+
+class **`User`**
+`Attributs`:
+- id : **int**
+- email : **str**
+- username : **str**
+- password : **str**
+- lastname : **str**
+- date_created : **datetime**
+- is_active : **bool**
+- attempt_login : **int**
+
+
+`Methodes` :
+- try_login :
+tente de connecter un utilisateur et mets à jour attempt_login en fonction
+  - paramètres :
+     - is_success : **bool**
+  - sortie : **bool**
+
+- set_password
+  - paramètres :
+   - password : **str**
+  - sortie : **None**
+
+- check_password
+  - paramètres :
+   - password : **str**
+  - sortie : **bool**
+
+Models pydantics pour la validations :
+- `UserBaseModel`
+- `UserCreateModel`
+- `UserUpdateModel`
+- `UserPydanticModel`
+- `AdditionalUserPydanticModelField`
+
+- `UserLoginModel` :
+  - username : **Optional[str]**
+  - password : **str**
+  - email : **Optional[str]**
+
+##### Sous module userCrud
+
+class **`UserCrud`**
+
+paramètres de __init__ :
+- authentication : **Authentication**
+
+Methodes :
+- get_count_users
+  - sortie : **int**
+
+- is_unique
+  - paramètres :
+    - sub : **str** (id or username)
+  - sortie : **bool**
+
+- create_user
+  - paramètres :
+    - user : **authentication.UserCreateModel**
+  - sortie : **authentication.User**
+
+- get_user
+  - paramètres :
+    id : **Optional[int]**
+    sub : **Optional[str]** (username)
+  - sortie : **authentication.User**
+
+- get_users
+  - paramètres :
+    - skip : **Optional[int]**
+    - limit : **Optional[int]**
+   - sortie : **List[authentication.User]**
+
+- update_user
+  - paramètres :
+    - user_id : **int**
+    - userUpdated : **authentication.UserUpdateModel**
+  - sortie : **List[authentication.User]**
+- delete_user
+  - paramètres :
+    - user_id : **int**
+  - sortie : **JsonResponse**
 # Contact ou Support
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

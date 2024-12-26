@@ -23,13 +23,13 @@ class LoggerMiddlewareModel:
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)
 
 
-class LoggerPydanticModel(BaseModel):
+class LoggerMiddlewarePydanticModel(BaseModel):
     id:int
     status_code:int
     method:str
     url:str
     error_message:str
     date_created:datetime
-    proccess_time:int
-    remote_adress:str
+    proccess_time:float
+    remote_address:str
 

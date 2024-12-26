@@ -1,12 +1,15 @@
 from fastapi.responses import JSONResponse
-from sqlalchemy.sql import func
-from sqlalchemy.orm import Session
-from fastapi import HTTPException as HE, Response, status, Depends
-from settings.database import authentication
-from sqlalchemy import or_
-from harlequelrah_fastapi.utility.utils import update_entity
 from harlequelrah_fastapi.authentication.authenticate import Authentication
-from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException as CHE
+from harlequelrah_fastapi.exception.custom_http_exception import \
+    CustomHttpException as CHE
+from harlequelrah_fastapi.utility.utils import update_entity
+from sqlalchemy import or_
+from sqlalchemy.sql import func
+
+from fastapi import Depends
+from fastapi import HTTPException as HE
+from fastapi import  status
+
 
 class UserCrud:
     def __init__(self, authentication: Authentication):

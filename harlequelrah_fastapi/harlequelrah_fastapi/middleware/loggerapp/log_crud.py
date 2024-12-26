@@ -1,5 +1,5 @@
 from harlequelrah_fastapi.middleware.logCrud import LogCrud
-from settings.secret import authentication
+# from myproject.settings.secret import authentication
 from log_model import Logger
 
 

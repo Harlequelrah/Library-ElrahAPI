@@ -3,11 +3,11 @@ from fastapi import Depends, HTTPException, status
 from harlequelrah_fastapi.authentication.token import Token, AccessToken, RefreshToken
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends
-import userapp.user_crud as crud
-from settings.database import authentication
+# import myproject.userapp.user_crud as crud
+# from myproject.settings.database import authentication
 from sqlalchemy.orm import Session
 from typing import List
-from settings.database import authentication
+# from myproject.settings.database import authentication
 from harlequelrah_fastapi.authentication.authenticate import AUTHENTICATION_EXCEPTION
 from harlequelrah_fastapi.user.userCrud import UserCrud
 
