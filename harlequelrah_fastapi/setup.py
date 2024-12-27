@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="harlequelrah_fastapi",
-    version="0.6.3",
+    version="1.0.1",
     packages=find_packages(),
     description="Package personnalisé pour faciliter  le développement avec python avec fastapi",
     long_description=long_description,

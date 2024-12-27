@@ -51,7 +51,7 @@ def startproject(project_name):
     subprocess.run(["virtualenv", env_path])
     print(f"Environnement virtuel créé dans {env_path}")
     requirements_src_path = os.path.join(settings_path, "requirements.txt")
-    requirements_dest_path = os.path.join(sub_project_path, "requirements.txt")
+    requirements_dest_path = os.path.join(project_path, "requirements.txt")
     shutil.move(requirements_src_path, requirements_dest_path)
     print(f"Le ficher 'requirements.txt' a été déplacé vers {requirements_dest_path}")
 
@@ -130,6 +130,7 @@ def startapp(app_name):
         print(f"L'application {app_name} a été créée avec succès.")
     else:
         print("Le dossier 'sqlapp' est introuvable.")
+
 
 
 def generate_userapp():
