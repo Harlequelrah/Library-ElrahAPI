@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import (
     Column,
     Integer,
@@ -28,8 +29,8 @@ class LoggerMiddlewarePydanticModel(BaseModel):
     status_code:int
     method:str
     url:str
-    error_message:str
+    error_message:Optional[str]
     date_created:datetime
-    proccess_time:float
+    process_time:float
     remote_address:str
 

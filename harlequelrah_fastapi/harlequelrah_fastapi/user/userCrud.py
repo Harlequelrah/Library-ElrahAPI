@@ -81,13 +81,7 @@ class UserCrud:
     ):
         db = self.authentication.session_factory()
         if limit is None :limit = await self.get_count_users()
-        users = db.query(self.User).offset(skip).limit(limit).all()
-        if not users:
-            http_exc = HE(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Any users found"
-            )
-            raise CHE(http_exc)
-        return users
+        return db.query(self.User).offset(skip).limit(limit).all()
 
     async def update_user(self,
         user_id: int,

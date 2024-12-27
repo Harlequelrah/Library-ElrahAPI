@@ -24,10 +24,4 @@ class LoggerCrud:
     async def get_logs(self,skip:int=0,limit:int=None):
         db = self.session_local()
         if limit is None:limit = await  self.get_count_logs()
-        logs = db.query(self.LoggerModel).offset(skip).limit(limit).all()
-        if not logs:
-            http_exception = HE(
-                status_code=status.HTTP_404_NOT_FOUND, detail="No logs found"
-            )
-            raise CHE(http_exception)
-        return logs
+        return db.query(self.LoggerModel).offset(skip).limit(limit).all()

@@ -37,10 +37,7 @@ async def get_role(db: Session, role_id: int):
 async def get_roles(db: Session, skip: int = 0, limit: int = None):
     if limit is None:
         limit = await get_count_roles(db)
-    roles = db.query(Role).skip(skip).offset(limit).all()
-    if not roles:
-        raise HE(status_code=status.HTTP_404_NOT_FOUND, detail=f"Any roles found")
-    return roles
+    return db.query(Role).skip(skip).offset(limit).all()
 
 
 async def update_role(db: Session, role_id: int, role_update: RoleUpdateModel):

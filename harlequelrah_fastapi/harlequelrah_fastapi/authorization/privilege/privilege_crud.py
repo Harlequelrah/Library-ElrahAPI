@@ -37,10 +37,7 @@ async def get_privilege(db: Session, privilege_id: int):
 async def get_privileges(db: Session, skip: int = 0, limit: int = None):
     if limit is None:
         limit = await get_count_privileges(db)
-    privileges = db.query(Privilege).skip(skip).offset(limit).all()
-    if not privileges:
-        raise HE(status_code=status.HTTP_404_NOT_FOUND, detail=f"Any privileges found")
-    return privileges
+    return db.query(Privilege).skip(skip).offset(limit).all()
 
 
 async def update_privilege(db: Session, privilege_id: int, privilege_update: PrivilegeUpdateModel):
