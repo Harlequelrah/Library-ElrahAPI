@@ -37,9 +37,10 @@ nomduprojet/
 ├── alembic.ini
 ├── requirements.txt
 ├── env/
+├── __main__.py
 ├── nomduprojet/
 │   ├── __init__.py
-│   ├── __main__.py
+│   ├── main.py
 │   ├── settings/
 │       ├── .gitignore
 │       ├── __init__.py

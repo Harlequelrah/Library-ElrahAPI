@@ -2,8 +2,6 @@
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
-# Logo
-![Logo](harlequelrah.png)
 
 ## Installation
 
@@ -37,9 +35,10 @@ nomduprojet/
 ├── alembic.ini
 ├── requirements.txt
 ├── env/
+├── __main__.py
 ├── nomduprojet/
 │   ├── __init__.py
-│   ├── __main__.py
+│   ├── main.py
 │   ├── settings/
 │       ├── .gitignore
 │       ├── __init__.py

@@ -22,27 +22,29 @@ def startproject(project_name):
     with open(f"{sub_project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
 
-
-
-
     settings_path = os.path.join(sub_project_path, "settings")
     os.makedirs(settings_path, exist_ok=True)
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_settings_path = os.path.join(script_dir, "settings")
     main_path_dir = os.path.join(script_dir, "main")
+    main_script_src_path = os.path.join(main_path_dir, "main.py")
+    main_script_dest_path = os.path.join(sub_project_path, "main.py")
+    shutil.move(main_script_src_path, main_script_dest_path)
+    print(f"Le ficher 'main.py' a été copié vers {main_script_dest_path}")
+
+    main_project_files_path = os.path.join(main_path_dir,"project_files")
+    if os.path.exists(main_project_files_path):
+        shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
+        print("Les fichiers .env .gitignore __main__.py ont été copiés avec succès.")
+    else:
+        print("Le dossier source 'main_project_files' est introuvable.")
 
     if os.path.exists(source_settings_path):
         shutil.copytree(source_settings_path, settings_path, dirs_exist_ok=True)
         print("Le dossier settings a été copié avec succès.")
     else:
         print("Le dossier source 'settings' est introuvable.")
-
-    if os.path.exists(main_path_dir):
-        shutil.copytree(main_path_dir, sub_project_path, dirs_exist_ok=True)
-        print("Le ficher main  a été copié avec succès.")
-    else:
-        print("Le dossier source 'main' est introuvable.")
 
     # Créer l'environnement virtuel directement dans le dossier du projet (pas dans 'settings')
     env_path = os.path.join(project_path, "env")
