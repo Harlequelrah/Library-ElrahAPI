@@ -30,7 +30,7 @@ def startproject(project_name):
     main_path_dir = os.path.join(script_dir, "main")
     main_script_src_path = os.path.join(main_path_dir, "main.py")
     main_script_dest_path = os.path.join(sub_project_path, "main.py")
-    shutil.move(main_script_src_path, main_script_dest_path)
+    shutil.copyfile(main_script_src_path, main_script_dest_path)
     print(f"Le ficher 'main.py' a été copié vers {main_script_dest_path}")
 
     main_project_files_path = os.path.join(main_path_dir,"project_files")
