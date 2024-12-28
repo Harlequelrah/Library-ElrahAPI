@@ -10,5 +10,5 @@
 # app_todolist = APIRouter(prefix="/items", tags=["items"])
 # dependencies = [
 #     Depends(authentication.get_session),
-#     Depends(authentication.get_current_user),
+#     Depends(authentication.get_access_token),
 # ]

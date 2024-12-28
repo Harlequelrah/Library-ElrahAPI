@@ -3,6 +3,7 @@ from fastapi import Request , status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
+from harlequelrah_fastapi.websocket.connectionManager import ConnectionManager
 async def get_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (
@@ -18,7 +19,7 @@ async def get_process_time(request:Request,call_next=None,response:Response=None
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LoggerMiddlewareModel, db: Session,call_next=None,error=None,response:Response=None
+    request: Request,LoggerMiddlewareModel, db: Session,call_next=None,error=None,response:Response=None,manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -36,12 +37,13 @@ async def save_log(
         db.add(logger)
         db.commit()
         db.refresh(logger)
+        if error is not None and manager is not None:
+            message=f"An error occurred during the request with the status code {response.status_code}, please check the log {logger.id} for more information"
+            manager.send_message(message)
     except Exception as err:
         db.rollback()
-        logger.error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
-        db.add(logger)
-        db.commit()
-        db.refresh(logger)
+        error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
+        print(error_message)
     return response
 
 

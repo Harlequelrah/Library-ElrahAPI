@@ -4,7 +4,7 @@ from harlequelrah_fastapi.authentication.token import Token, AccessToken, Refres
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends
 # import myproject.userapp.user_crud as crud
-# from myproject.settings.database import authentication
+from myproject.settings.database import authentication
 from sqlalchemy.orm import Session
 from typing import List
 # from myproject.settings.database import authentication
@@ -14,57 +14,51 @@ from harlequelrah_fastapi.user.userCrud import UserCrud
 app_user = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={404: {"description": "Utilisateur non trouvé"}},
 )
-dependencies = [
-    Depends(authentication.get_session),
-    Depends(authentication.get_current_user),
-]
+token_dependency = Depends(authentication.get_access_token)
 UserCreateModel = authentication.UserCreateModel
 UserUpdateModel = authentication.UserUpdateModel
 UserPydanticModel = authentication.UserPydanticModel
 UserLoginModel = authentication.UserLoginModel
+usercrud = UserCrud(authentication)
 
 
-usercrud=  UserCrud (authentication)
 @app_user.get("/count-users")
-async def count_users(db:Session=dependencies[0]):
-    return await usercrud.get_count_users(db)
+async def count_users(access_token: str = token_dependency):
+    return await usercrud.get_count_users()
 
 
 @app_user.get("/get-user/{credential}", response_model=UserPydanticModel)
-async def get_user(credential: str, db: Session = dependencies[0]):
+async def get_user(credential: str, access_token: str = token_dependency):
     if credential.isdigit():
-        return await usercrud.get_user(db,credential)
-    return await usercrud.get_user(db,sub=credential)
+        return await usercrud.get_user(credential)
+    return await usercrud.get_user(sub=credential)
 
 
 @app_user.get("/get-users", response_model=List[UserPydanticModel])
-async def get_users(db: Session = dependencies[0]):
-    return await usercrud.get_users(db)
+async def get_users(access_token: str = token_dependency):
+    return await usercrud.get_users()
 
 
 @app_user.post("/create-user", response_model=UserPydanticModel)
-async def create_user(user: UserCreateModel, db: Session = dependencies[0]):
-        return await usercrud.create_user(user=user,db=db)
+async def create_user(user: UserCreateModel):
+    return await usercrud.create_user(user=user)
 
 
 @app_user.delete("/delete-user/{id}")
-async def delete_user(
-    id: int, db: Session = dependencies[0], access_token=dependencies[1]
-):
-    return await usercrud.delete_user(id,db)
+async def delete_user(id: int, access_token: str = token_dependency):
+    return await usercrud.delete_user(id)
 
 
 @app_user.put("/update-user/{id}", response_model=UserPydanticModel)
-async def update_user(user: UserUpdateModel, id: int, db: Session = dependencies[0],access_token=dependencies[1]):
-    return await usercrud.update_user(id,user, db)
+async def update_user(
+    user: UserUpdateModel, id: int, access_token: str = token_dependency
+):
+    return await usercrud.update_user(id, user)
 
 
 @app_user.get("/current-user", response_model=UserPydanticModel)
-async def get_current_user(
-    access_token: str = dependencies[1],
-):
+async def get_current_user(access_token: str = token_dependency):
     return access_token
 
 

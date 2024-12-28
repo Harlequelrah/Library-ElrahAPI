@@ -60,7 +60,7 @@ sqlapp/
 ├── __init__.py
 ├── crud.py
 ├── model.py
-├── route.py
+├── router.py
 ├── schema.py
 ├── util.py
 ```
@@ -86,6 +86,7 @@ loggerapp/
 ├── log_user.py
 ├── log_model.py
 ├── log_crud.py
+├── log_router.py
 ├── log_schema.py
 ```
 ### `Modules`
@@ -276,6 +277,19 @@ Ce sous module définit les  middelwares d'erreurs
     - LoggerMiddlewareModel : définit le modèle de Log a utilisé
     - session_factory : le générateur de session
 
+##### Sous module crud_middelware
+ce sous module définit les methodes pour sauvegarder les logs .
+- **`save_log`** : enregistre les logs
+  - `paramètres`:
+    - *request*: Request
+    - *LoggerMiddelewareModel*
+    - *db* : Session
+    - *call_next* : Optional
+    - *error* : Optional[str]
+    - *response* : Optional[Response]
+    - *manager*: Optional[ConnectionManager]
+ - `sortie`: **response : Response**
+
 ##### Sous module logCrud
 ce sous module définit une classe pour le crud des logs
 
@@ -387,5 +401,17 @@ Methodes :
   - paramètres :
     - user_id : **int**
   - sortie : **JsonResponse**
+
+#### Module `websocket`
+Ce module comporte certaines classes et methodes pour interagir avec des websockets
+##### Sous module `connectionManager`
+Contient la classe ConnectionManager pour gérer une connextion avec un websocket .
+
+- **methodes**:
+  - __init__
+  - **connect** (self,websocket)
+  - **disconnect** (self,websocket)
+  - **send_message** (self,str):
+
 # Contact ou Support
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

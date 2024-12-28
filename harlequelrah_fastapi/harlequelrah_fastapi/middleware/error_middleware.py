@@ -7,13 +7,14 @@ from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
 import time
-
+from harlequelrah_fastapi.websocket.connectionManager import ConnectionManager
 
 class ErrorHandlingMiddleware:
-    def __init__(self, app, LoggerMiddlewareModel=None, session_factory=None):
+    def __init__(self, app, LoggerMiddlewareModel=None, session_factory=None , manager:ConnectionManager=None):
         self.app = app
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
         self.session_factory = session_factory
+        self.manager=manager
         self.has_log = self.session_factory and self.LoggerMiddlewareModel
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
@@ -42,6 +43,7 @@ class ErrorHandlingMiddleware:
                     self.LoggerMiddlewareModel,
                     db,
                     response=response,
+                    manager=self.manager,
                     error=f"HTTP error , details : {str(http_exc.detail)}",
                 )
             await response(scope, receive, send)
@@ -57,6 +59,7 @@ class ErrorHandlingMiddleware:
                     self.LoggerMiddlewareModel,
                     db,
                     response=response,
+                    manager=self.manager,
                     error=f"Database error : details , {str(db_error)}",
                 )
             await response(scope, receive, send)
@@ -72,6 +75,7 @@ class ErrorHandlingMiddleware:
                     self.LoggerMiddlewareModel,
                     db,
                     response=response,
+                    manager=self.manager,
                     error=f"An unexpected error occurred , details : {str(exc)}",
                 )
             await response(scope, receive, send)

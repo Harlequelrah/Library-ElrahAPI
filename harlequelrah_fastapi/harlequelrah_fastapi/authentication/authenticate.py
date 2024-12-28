@@ -99,6 +99,8 @@ class Authentication():
             print("user is none")
             raise self.CREDENTIALS_EXCEPTION
         return user
+    async def get_access_token(self,token: str = Depends(oauth2_scheme)):
+        return  token
 
     def refresh_token(self,token:RefreshToken):
         try:
