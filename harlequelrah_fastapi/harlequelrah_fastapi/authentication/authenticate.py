@@ -57,7 +57,7 @@ class Authentication():
         if user and not user.check_password(password):
             user.try_login(False)
         if not user or not user.check_password(password) or not user.is_active:
-            raise self.self.CREDENTIALS_EXCEPTION
+            raise self.CREDENTIALS_EXCEPTION
         user.try_login(True)
         db.commit()
         db.refresh(user)
