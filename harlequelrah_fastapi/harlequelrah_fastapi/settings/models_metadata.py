@@ -1,6 +1,6 @@
-# from todolistapp import model
+# from myproject.todolistapp import model
 from sqlalchemy import MetaData
-# from userapp import user_model
+# from myproject.userapp import user_model
 from harlequelrah_fastapi.middleware.logapp import log_model
 
 
