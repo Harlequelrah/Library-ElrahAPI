@@ -33,10 +33,7 @@ class Authentication():
         self.session_factory=session_factory
     def get_session(self):
         db=self.session_factory()
-        try:
-            yield db
-        finally:
-            db.close()
+        return db
 
     def set_algorithm(self,algorithm):
         self.ALGORITHM=algorithm

@@ -39,7 +39,7 @@ async def save_log(
         db.refresh(logger)
         if error is not None and manager is not None:
             message=f"An error occurred during the request with the status code {response.status_code}, please check the log {logger.id} for more information"
-            manager.send_message(message)
+            await manager.send_message(message)
     except Exception as err:
         db.rollback()
         error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
