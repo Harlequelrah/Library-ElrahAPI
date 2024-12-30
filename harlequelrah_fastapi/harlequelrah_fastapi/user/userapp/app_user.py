@@ -84,18 +84,18 @@ async def login_api_user(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@app_user.post("/refresh-token", response_model=AccessToken)
+@app_user.post("/get-refresh-token", response_model=RefreshToken)
 async def refresh_token(
     current_user: UserPydanticModel = Depends(authentication.get_current_user),
 ):
     data = {"sub": current_user.username}
-    access_token = authentication.create_access_token(data)
-    return access_token
+    refresh_token = authentication.create_refresh_token(data)
+    return refresh_token
 
 
-@app_user.post("/get-refresh-token-with-access-token", response_model=AccessToken)
+@app_user.post("/refresh-token", response_model=AccessToken)
 async def refresh_token(refresh_token: RefreshToken):
-    access_token = authentication.refresh_token(refresh_token)
+    access_token = authentication.create_refresh_token(refresh_token)
     return access_token
 
 

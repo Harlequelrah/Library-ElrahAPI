@@ -7,11 +7,14 @@ class ConnectionManager:
 
     async def connect(self,webSocket:WebSocket):
         await webSocket.accept()
-        self.active_connections.append(WebSocket)
+        self.active_connections.append(webSocket)
 
     async def disconnect(self,webSocket:WebSocket):
         self.active_connections.remove(webSocket)
 
     async def send_message(self,message:str):
         for connection in self.active_connections:
-            await connection.send_text(message)
+            try :
+                await connection.send_text(message)
+            except WebSocketDisconnect:
+                self.disconnect(connection)
