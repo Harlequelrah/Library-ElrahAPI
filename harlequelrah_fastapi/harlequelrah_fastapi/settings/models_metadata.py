@@ -1,10 +1,9 @@
-# from myproject.todolistapp import model
+from fastapi_gestschool.myapp import metadata as myapp_metadata
+from fastapi_gestschool.myapp2 import metadata as myapp_metadata2
 from sqlalchemy import MetaData
-# from myproject.userapp import user_model
-from harlequelrah_fastapi.middleware.logapp import log_model
-
 
 target_metadata = MetaData()
-# target_metadata = model.Base.metadata
-# target_metadata = logger_model.Base.metadata
-# target_metadata = user_model.Base.metadata
+
+# target_metadata = Base.metadata
+target_metadata = myapp_metadata
+target_metadata = myapp2_metadata

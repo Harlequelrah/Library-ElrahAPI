@@ -1,7 +1,6 @@
 from harlequelrah_fastapi.exception.auth_exception import AUTHENTICATION_EXCEPTION
 from sqlalchemy.orm import Session,sessionmaker
 from fastapi import Depends
-
 from .token import AccessToken,RefreshToken
 from datetime import datetime, timedelta
 from sqlalchemy import or_
@@ -33,7 +32,11 @@ class Authentication():
     def set_db_session(self,session_factory):
         self.session_factory=session_factory
     def get_session(self):
-        return self.session_factory()
+        db=self.session_factory()
+        try:
+            yield db
+        finally:
+            db.close()
 
     def set_algorithm(self,algorithm):
         self.ALGORITHM=algorithm
