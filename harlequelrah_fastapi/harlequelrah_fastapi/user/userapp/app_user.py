@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from typing import List
 # from myproject.settings.database import authentication
 from harlequelrah_fastapi.authentication.authenticate import AUTHENTICATION_EXCEPTION
-from harlequelrah_fastapi.user.userCrud import UserCrud
+from .user_crud import usercrud
 
 app_user = APIRouter(
     prefix="/users",
@@ -20,7 +20,7 @@ UserCreateModel = authentication.UserCreateModel
 UserUpdateModel = authentication.UserUpdateModel
 UserPydanticModel = authentication.UserPydanticModel
 UserLoginModel = authentication.UserLoginModel
-usercrud = UserCrud(authentication)
+
 
 
 @app_user.get("/count-users")
