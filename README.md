@@ -413,5 +413,138 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
   - **disconnect** (self,websocket)
   - **send_message** (self,str):
 
+#### Module `crud`
+Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des cruds.
+
+##### Sous module `crud_model`
+Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
+
+**`CrudForgery`**:
+- **`__init__`** :
+    - **paramètres** :
+      - `entity_name`: **str**
+      - `session_factory`: **sessionmaker**
+      - `SQLAlchemyModel` : Le model SQLAlchemy
+      - `CreatePydanticModel` : Le model Pydantic pour la création .
+      - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
+
+- **`create`** :
+    - **paramètres** :
+      - `create_ob`: **CreatePydanticModel**
+    - **sortie** : **SQLAlchemyModel**
+
+- **`count`** :
+    - **sortie** : **int**
+
+- **`read_all`** :
+    - **paramètres** :
+      - `skip`: **Optional[int]**
+      - `limit`: **Optional[int]**
+    - **sortie** : **List[SQLAlchemyModel]**
+
+- **`read_all_by_filter`** :
+    - **paramètres** :
+      - `filter`: **str**
+      - `value`: **str**
+      - `skip`: **Optional[int]**
+      - `limit`: **Optional[int]**
+    - **sortie** : **List[SQLAlchemyModel]**
+
+- **`read_one`** :
+    - **paramètres** :
+      - `id`: **int**
+      - `db`: **Optional[Session]** : pour utiliser la même session lors de update et delete .
+    - **sortie** : **SQLAlchemyModel**
+
+- **`update`** :
+    - **paramètres** :
+      - `id`: **int**
+      - `update_obj`: **UpdatePydanticModel**
+    - **sortie** : **SQLAlchemyModel**
+
+- **`delete`** :
+    - **paramètres** :
+      - `id`: **int**
+    - **sortie** : **JsonResponse**
+
+#### Module `router`
+Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des router.
+
+##### Sous module `route_config`
+Ce sous module comporte la classe RouteConfig pour configurer un CustomRouterProvider .
+
+`RouteConfig`
+- `__init__` :
+  - `paramètres`:
+    - `route_name`: **str**
+    - `is_activated`: **bool** , default : `False`
+    - `is_protected`: **bool** , default : `False`
+
+##### Sous module `route_provider`
+Ce sous module comporte la classe CustomRouterProvider pour configurer un CustomRouterProvider .
+`CustomRouterProvider`
+
+**`Attributs de classe`**
+```python
+ROUTES_NAME : List[str]=[
+    "count",
+    "read-one",
+    "read-all",
+    "read-all-by-filter",
+    "create",
+    "update",
+    "delete",
+  ]
+DEFAULT_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=False) for route_name in ROUTES_NAME]
+AUTH_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=True) for route_name in ROUTES_NAME]
+```
+- `__init__` :
+  - `paramètres`:
+    - `prefix`: **str**
+    - `tags`: **List[str]**
+    - `PydanticModel`: **Model de reponse Pydantic**
+    - `crud` : **CrudForgery**
+    - `get_access_token` : **Option[callable]**
+    - `get_session` : **callable**
+
+  - `utilisation` :
+```python
+router_provider = CustomRouterProvider(
+    prefix="/items",
+    tags=["item"],
+    PydanticModel=model.PydanticModel,
+    crud=myapp_crud,
+    get_session=authentication.get_session,
+    get_access_token=authentication.get_access_token,
+)
+```
+
+- **`get_default_router`** : renvoie un router avec la configuration de `DEFAULT_CONFIG`
+
+  - `sortie`: **APIRouter**
+
+
+- **`get_protected_router`** : renvoie un router avec la configuration de `AUTH_CONFIG`
+  - `sortie`: **APIRouter**
+
+
+
+- **`initialize_router`** : renvoie un router avec une configuration personnalisée .
+  - `paramètres`:
+    -  `init_data`: **List[RouteConfig]**
+  - `sortie`: **APIRouter**
+  - `utilisation` :
+
+```python
+init_data: List[RouteConfig] = [
+    RouteConfig(route_name="create", is_activated=True),
+    RouteConfig(route_name="read-one", is_activated=True),
+    RouteConfig(route_name="update", is_activated=True, is_protected=True),
+    RouteConfig(route_name="delete", is_activated=True, is_protected=True),
+]
+app_myapp = router_provider.initialize_router(init_data=init_data)
+```
+
+
 # Contact ou Support
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.
