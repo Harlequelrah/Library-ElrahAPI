@@ -104,7 +104,7 @@ class UserCrud:
 
     async def delete_user(self,user_id:int):
         db = self.authentication.session_factory()
-        user = await self.get_user(db,id=user_id)
+        user = await self.get_user(id=user_id)
         try:
             db.delete(user)
             db.commit()
