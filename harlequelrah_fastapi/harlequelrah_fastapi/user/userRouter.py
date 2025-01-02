@@ -20,7 +20,6 @@ class UserRouterProvider(CustomRouterProvider):
         "refresh-token",
         "login",
         "change-password",
-        "read-one-user"
     ]
     USER_AUTH_CONFIG: List[RouteConfig] = [
         RouteConfig(
@@ -89,10 +88,10 @@ class UserRouterProvider(CustomRouterProvider):
         self.crud : UserCrudForgery = crud
 
     def get_default_router(self, exclude_routes_name: Optional[List[str]] = None):
-        return super().get_default_router(["read-one"])
+        return super().get_default_router()
 
     def get_protected_router(self, exclude_routes_name: Optional[List[str]] = None):
-        return super().get_protected_router(["read-one"])
+        return super().get_protected_router()
 
     def initialize_router(self,init_data:List[RouteConfig]):
         self.router = super().initialize_router(init_data)
