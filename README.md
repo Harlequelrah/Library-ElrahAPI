@@ -16,6 +16,12 @@ Passioné par la programmation et le développement avec python je me lance dans
    pip install harlequelrah_fastapi
    ```
 
+- **Avec pip via Github:**
+  ```bash
+    pip install git+https://github.com/Harlequelrah/Library-harlequelrah_fastapi.git#subdirectory=harlequelrah_fastapi
+  ```
+
+  
 ## Utilisation
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 

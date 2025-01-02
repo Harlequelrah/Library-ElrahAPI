@@ -96,9 +96,8 @@ class UserRouterProvider(CustomRouterProvider):
     def initialize_router(self,init_data:List[RouteConfig]):
         self.router = super().initialize_router(init_data)
         for config in init_data:
-            if config.route_path == "read-one" and config.is_activated and config.is_unlocked:
-
-                @self.router.post(
+            if config.route_name == "read-one" and config.is_activated and config.is_unlocked:
+                @self.router.get(
                     path=config.route_path,
                     response_model=self.PydanticModel,
                     summary=config.summary if config.summary else None,
