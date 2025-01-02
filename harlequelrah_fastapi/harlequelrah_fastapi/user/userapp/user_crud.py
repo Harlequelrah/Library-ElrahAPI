@@ -5,9 +5,9 @@ from fastapi import HTTPException as HE, Response, status, Depends
 from myproject.settings.database import authentication
 from sqlalchemy import or_
 from harlequelrah_fastapi.utility.utils import update_entity
-from harlequelrah_fastapi.user.userCrud import UserCrud
-from harlequelrah_fastapi.crud.crud_model import CrudForgery
-usercrud = UserCrud(authentication)
+from harlequelrah_fastapi.user.userCrud import  UserCrudForgery
+
+userCrud = UserCrudForgery(authentication)
 
 async def get_count_users(db: Session):
     pass
