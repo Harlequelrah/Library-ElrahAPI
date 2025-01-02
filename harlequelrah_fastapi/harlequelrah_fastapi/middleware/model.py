@@ -4,7 +4,8 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
-    Numeric
+    Numeric,
+    Text
 )
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -18,7 +19,7 @@ class LoggerMiddlewareModel:
     status_code = Column(Integer, index=True)
     method = Column(String(30), nullable=False)
     url = Column(String(255), nullable=False)
-    error_message=Column(String(255))
+    error_message=Column(Text)
     date_created = Column(DateTime, nullable=False, default=func.now())
     remote_address = Column(String(255), nullable=False)
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)

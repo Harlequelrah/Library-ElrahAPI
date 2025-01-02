@@ -13,7 +13,7 @@ from datetime import datetime
 
 
 Ph=PasswordHasher()
-class User():
+class User:
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
@@ -81,3 +81,13 @@ class UserLoginModel(BaseModel):
     username: Optional[str] = None
     password: str
     email: Optional[str] = None
+
+class UserLoginRequestModel(BaseModel):
+    credential : str
+    password: str
+
+
+class UserChangePasswordRequestModel(BaseModel):
+    credential : str
+    current_password: str
+    new_password: str
