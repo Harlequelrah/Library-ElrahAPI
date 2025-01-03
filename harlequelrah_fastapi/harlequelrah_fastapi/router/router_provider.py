@@ -57,13 +57,13 @@ class CustomRouterProvider:
 
     def get_default_router(self, exclude_routes_name: Optional[List[str]] = None):
         init_data = self.exclude_route(
-            self.DEFAULT_CONFIG + self.USER_AUTH_CONFIG, exclude_routes_name
+            self.DEFAULT_CONFIG , exclude_routes_name
         )
         return self.initialize_router(init_data)
 
     def get_protected_router(self, exclude_routes_name: Optional[List[str]] = None):
         init_data = self.exclude_route(
-            self.AUTH_CONFIG + self.USER_AUTH_CONFIG, exclude_routes_name
+            self.AUTH_CONFIG , exclude_routes_name
         )
         return self.initialize_router(init_data)
 

@@ -99,8 +99,7 @@ class CrudForgery :
             existing_obj=await self.read_one(id,session)
             session.delete(existing_obj)
             session.commit()
-            message=f"Delete {self.entity_name} successfully for {self.entity_name} with id {id}."
-            return JSONResponse(status_code=status.HTTP_200_OK,content={"message":message})
+            return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             session.rollback()
             detail=f"Error occurred while deleting {self.entity_name} with id {id} , details : {str(e)}"

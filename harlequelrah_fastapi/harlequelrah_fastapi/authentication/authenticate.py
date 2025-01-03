@@ -120,14 +120,14 @@ class Authentication():
             custom_http_exc= CHE(http_exc)
             raise custom_http_exc
 
-    async def refresh_token(self,token:RefreshToken):
-        db=self.self.get_session()
-        payload = await self.validate_token(token.refresh_token)
+    async def refresh_token(self,refresh_token_data:RefreshToken):
+        db=self.get_session()
+        payload = await self.validate_token(refresh_token_data.refresh_token)
         sub=payload.get("sub")
         if sub is None : raise self.CREDENTIALS_EXCEPTION
         user=db.query(self.User).filter(or_(self.User.username==sub , self.User.email==sub)).first()
         if user is None: raise self.CREDENTIALS_EXCEPTION
-        ACCESS_TOKEN_EXPIRE_MINUTES=timedelta(self.ACCESS_TOKEN_EXPIRE_MINUTES_MINUTES)
+        ACCESS_TOKEN_EXPIRE_MINUTES=timedelta(self.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token=self.create_access_token(
             data={"sub":sub},expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
         )

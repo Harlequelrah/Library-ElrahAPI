@@ -88,10 +88,10 @@ class UserRouterProvider(CustomRouterProvider):
         self.crud : UserCrudForgery = crud
 
     def get_default_router(self, exclude_routes_name: Optional[List[str]] = None):
-        return super().get_default_router()
+        return super().get_default_router(exclude_routes_name)
 
     def get_protected_router(self, exclude_routes_name: Optional[List[str]] = None):
-        return super().get_protected_router()
+        return super().get_protected_router(exclude_routes_name)
 
     def initialize_router(self,init_data:List[RouteConfig]):
         self.router = super().initialize_router(init_data)
@@ -161,8 +161,8 @@ class UserRouterProvider(CustomRouterProvider):
                     description=config.description if config.description else None,
                     response_model=AccessToken,
                 )
-                async def refresh_access_token(form_data: RefreshToken):
-                    return await self.authentication.refresh_token(form_data.refresh_token)
+                async def refresh_access_token(refresh_token: RefreshToken):
+                    return await self.authentication.refresh_token(refresh_token_data=refresh_token)
 
             if config.route_name=='login' and config.is_activated:
 
