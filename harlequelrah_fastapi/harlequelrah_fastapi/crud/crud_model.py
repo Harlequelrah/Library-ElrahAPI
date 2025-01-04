@@ -49,13 +49,20 @@ class CrudForgery :
         if limit is None : limit = await self.count()
         return session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
 
+    async def validate_filter_value(self,value):
+        if value in ["true","True"]: value = True
+        elif value in ["false","False"]: value = False
+        elif value.isdigit():
+            value = int(value)
+        return value
+
+
     async def read_all_by_filter(self,filter,value,skip:int=0,limit:int=None):
         session=self.session_factory()
         if limit is None : limit = await self.count()
         exist_filter = getattr(self.SQLAlchemyModel,filter,None)
         if exist_filter:
-            if value in ["true","True"]: value = True
-            elif value in ["false","False"]: value = False
+            value = await self.validate_filter_value(value)
             return session.query(self.SQLAlchemyModel).filter(exist_filter==value).offset(skip).limit(limit).all()
         else :
             detail = f"Invalid filter {filter} for entity {self.entity_name}"

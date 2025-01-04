@@ -113,7 +113,7 @@ class UserRouterProvider(CustomRouterProvider):
                     form_data: OAuth2PasswordRequestForm = Depends(),
                 ):
                     user = await self.authentication.authenticate_user(
-                        form_data.username, form_data.password
+                        form_data.password, form_data.username
                     )
                     data = {"sub": user.username}
                     access_token = self.authentication.create_access_token(data)
@@ -168,7 +168,7 @@ class UserRouterProvider(CustomRouterProvider):
                         usermodel.username if usermodel.username else usermodel.email
                     )
                     user = await self.authentication.authenticate_user(
-                        credential, usermodel.password
+                    usermodel.password, credential
                     )
                     data = {"sub": usermodel.credential}
                     access_token_data = self.authentication.create_access_token(data)

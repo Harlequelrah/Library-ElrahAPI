@@ -1,6 +1,6 @@
 from fastapi import Request
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.types import Scope, Receive, Send
 from fastapi import HTTPException as HE
 from harlequelrah_fastapi.middleware.crud_middleware import save_log
@@ -24,6 +24,7 @@ class ErrorHandlingMiddleware:
             return
 
         request = Request(scope, receive)
+
         db = self.session_factory() if self.has_log else None
 
         try:
@@ -32,21 +33,22 @@ class ErrorHandlingMiddleware:
             # Appelle l'application principale
             await self.app(scope, receive, send)
 
-        except HE as http_exc :
-            responsse = JSONResponse(
-                status_code=http_exc.status_code,
-                content={"detail": http_exc.detail},
-            )
-            if self.has_log:
-                await save_log(
-                    request,
-                    self.LoggerMiddlewareModel,
-                    db,
-                    response=response,
-                    manager=self.manager,
-                    error=f"HTTP error , details : {str(http_exc.detail)}",
-                )
-            await response(scope, receive, send)
+        # except HE as http_exc :
+        #     print("http excp")
+        #     responsse = JSONResponse(
+        #         status_code=http_exc.status_code,
+        #         content={"detail": http_exc.detail},
+        #     )
+        #     if self.has_log:
+        #         await save_log(
+        #             request,
+        #             self.LoggerMiddlewareModel,
+        #             db,
+        #             response=response,
+        #             manager=self.manager,
+        #             error=f"HTTP error , details : {str(http_exc.detail)}",
+        #         )
+        #     await response(scope, receive, send)
         except CHE as custom_http_exc:
             http_exc=custom_http_exc.http_exception
             # Gère une exception personnalisée
