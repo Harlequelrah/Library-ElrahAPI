@@ -12,7 +12,7 @@ from harlequelrah_fastapi.router.router_namespace import (
     DEFAULTROUTESNAME,
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
-    USER_AUTH_CONFIG,
+    USER_AUTH_CONFIG_ROUTES,
 )
 from harlequelrah_fastapi.router.router_provider import CustomRouterProvider
 from harlequelrah_fastapi.user.models import (
@@ -44,21 +44,18 @@ class UserRouterProvider(CustomRouterProvider):
     def get_public_router(
         self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
     ) -> APIRouter:
-        return self.initialize_router(
-            exclude_route(ROUTES_PUBLIC_CONFIG, [DEFAULTROUTESNAME.READ_ONE]) + USER_AUTH_CONFIG,
-            exclude_routes_name,
+        routes = USER_AUTH_CONFIG_ROUTES + exclude_route(
+            ROUTES_PUBLIC_CONFIG, [DEFAULTROUTESNAME.READ_ONE]
         )
-
+        return self.initialize_router(routes, exclude_routes_name)
 
     def get_protected_router(
         self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
     ) -> APIRouter:
-        return  self.initialize_router(
-            exclude_route(ROUTES_PROTECTED_CONFIG, [DEFAULTROUTESNAME.READ_ONE])
-            + USER_AUTH_CONFIG,
-            exclude_routes_name,
+        routes = USER_AUTH_CONFIG_ROUTES + exclude_route(
+            ROUTES_PROTECTED_CONFIG, [DEFAULTROUTESNAME.READ_ONE]
         )
-
+        return self.initialize_router(routes, exclude_routes_name)
 
     def initialize_router(
         self,
@@ -165,8 +162,9 @@ class UserRouterProvider(CustomRouterProvider):
                     description=config.description if config.description else None,
                 )
                 async def login(usermodel: UserLoginRequestModel):
+                    credential = usermodel.username if usermodel.username else usermodel.email
                     user = await self.authentication.authenticate_user(
-                        usermodel.credential, usermodel.password
+                        credential, usermodel.password
                     )
                     data = {"sub": usermodel.credential}
                     access_token_data = self.authentication.create_access_token(data)

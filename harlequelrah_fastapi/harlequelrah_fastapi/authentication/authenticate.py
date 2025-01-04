@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException as HE , status
 from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException as CHE
 from jose import ExpiredSignatureError, jwt, JWTError
-from harlequelrah_fastapi.user.models import UserPydanticModel,UserCreateModel,UserLoginModel,UserUpdateModel,User
+from harlequelrah_fastapi.user.models import UserPydanticModel,UserCreateModel,UserUpdateModel,User
 
 class Authentication():
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/tokenUrl")
@@ -18,7 +18,6 @@ class Authentication():
     User=User
     UserCreateModel=UserCreateModel
     UserUpdateModel=UserUpdateModel
-    UserLoginModel=UserLoginModel
     SECRET_KEY = str(secrets.token_hex(32))
     ALGORITHM = "HS256"
     REFRESH_TOKEN_EXPIRE_DAYS = 7

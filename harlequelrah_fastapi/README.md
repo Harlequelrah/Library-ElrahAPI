@@ -2,31 +2,34 @@
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
-
 ## Installation
 
 - **Avec Github :**
-   ```bash
-   git clone https://github.com/Harlequelrah/Library-harlequelrah_fastapi
-   ```
+  ```bash
+  git clone https://github.com/Harlequelrah/Library-harlequelrah_fastapi
+  ```
 - **Avec pip :**
-   ```bash
-   pip install harlequelrah_fastapi
-   ```
+  ```bash
+  pip install harlequelrah_fastapi
+  ```
 
 ## Utilisation
+
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
 ### `Commandes`
 
 #### 1. Commande de création du projet
+
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
- ```bash
+```bash
 
-   harlequelrah_fastapi startproject nomduprojet
- ```
- **`architecture`:**
+  harlequelrah_fastapi startproject nomduprojet
+```
+
+**`architecture`:**
+
 ```
 nomduprojet/
 ├── __init__.py
@@ -48,11 +51,15 @@ nomduprojet/
 ```
 
 #### 2. Commande de génération d'une application
+
 Cette commande permet de créer une application dans le projet
+
 ```bash
   harlequelrah_fastapi startapp nomappli
 ```
+
 **`architecture`:**
+
 ```
 sqlapp/
 ├── __init__.py
@@ -62,10 +69,13 @@ sqlapp/
 ├── schema.py
 ├── util.py
 ```
+
 #### 3. Commande génération d'une application utilisateur
+
 Cette commande permet de créer une application utilisateur
 
 **`architecture`:**
+
 ```
 userapp/
 ├── __init__.py
@@ -75,9 +85,11 @@ userapp/
 ```
 
 #### 4. Commande de génération d'une application de log
+
 Cette commande permet de créer une application de log
 
 **`architecture`:**
+
 ```
 loggerapp/
 ├── __init__.py
@@ -87,24 +99,34 @@ loggerapp/
 ├── log_router.py
 ├── log_schema.py
 ```
+
 ### `Modules`
-####  Module `exception`
+
+#### Module `exception`
+
 Ce module contient des exceptions personnalisées utilisés dans cette bibliothèque
+
 ##### 1. Sous module auth_exception
+
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
 - `AUTHENTICATION_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
 
 ##### 2. Sous module custom_http_exception
+
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
+
 ```python
   from fastapi import HTTPException , status
   from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException
   http_exception= HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="La requête a provoquée une exception non gérée")
   raise CustomHttpException(http_exception)
 ```
+
 #### Module `utility`
+
 Ce module contient des utilitaires utilisés dans cette bibliothèque.
+
 - `update_entity` : mets à jour les champs d'une entité objet
   - paramètres : `existing_entity` , `update_entity`
   - retourne : `existing_entity`
@@ -117,15 +139,19 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
   ```
 
 #### Module `authentication`
+
 Ce module contient des classes et des fonctions utilisées pour l'authentification.
 
 ##### 1. Sous module `token`
+
 Ce sous module définit des classes pydantics pour la gestions des tokens :
+
 - AccessToken : access_token : **str** , token_type : **str**
 - RefreshToken : refresh_token : **str** , token_type : **str**
 - Token : access_token : **str** ,refresh_token : **str** , token_type : **str**
 
 ##### 2. Sous module `authenticate`
+
 ce sous module définit les classes et fonctions utilisées pour l'authentification
 
 - **`Classe Authentication`**:classe principale pour gérer l'authentification
@@ -134,7 +160,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
 - `UserUpdateModel` : le modèle pydantic pour la mise à jour d'utilisateur
 - `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
-- `UserLoginModel` : le modèle pydantic la connexion d'utilisateur
+- `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
 - `SECRET_KEY` : une clé secrète générer par défaut
 - `ALGORITHM` : un algorithm par défaut `HS256`
 - `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
@@ -143,13 +169,17 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `CREDENTIALS_EXCEPTION` : une exception de type `CustomHttpException` à lever lorsque l'authentification échoue
 
 #### Module `authorization`
+
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
 ##### Sous module `role`
+
 Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Role .
+
 - sous module `role_model`
 
 `Role`:
+
 - id : int
 - name : str
 - normalized_name : str (automatique à l'ajout de name)
@@ -157,7 +187,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l
 Les classes pydantic sont : `RolePydanticModel`,`RoleCreateModel`,`RoleUpdateModel`
 
 - Sous module `role_crud`
-ce sous module définit les cruds :
+  ce sous module définit les cruds :
 - **`get_count_roles`**
   - `paramètres` :
     - db : **Session**
@@ -166,8 +196,8 @@ ce sous module définit les cruds :
   - `paramètres` :
     - db : **Session**
     - role_create : **RoleCreateModel**
-  -  `sortie`:
-    - role : **Role**
+  - `sortie`:
+  - role : **Role**
 - **`get_role`**
   - `paramètres` :
     - db : **Session**
@@ -198,10 +228,13 @@ ce sous module définit les cruds :
   - `sortie`: **JsonResponse**
 
 ##### Sous module `privilege`
+
 Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Privilege .
+
 - sous module `privilege_model`
 
 `Privilege`:
+
 - id : int
 - name : str
 - normalized_name : str (automatique à l'ajout de name)
@@ -209,7 +242,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l
 Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`PrivilegeUpdateModel`
 
 - Sous module `privilege_crud`
-ce sous module définit les cruds :
+  ce sous module définit les cruds :
 - **`get_count_privileges`**
   - `paramètres` :
     - db : **Session**
@@ -218,8 +251,8 @@ ce sous module définit les cruds :
   - `paramètres` :
     - db : **Session**
     - privilege_create : **PrivilegeCreateModel**
-  -  `sortie`:
-    - privilege : **Privilege**
+  - `sortie`:
+  - privilege : **Privilege**
 - **`get_privilege`**
   - `paramètres` :
     - db : **Session**
@@ -244,12 +277,15 @@ ce sous module définit les cruds :
   - `sortie`: **JSONResponse**
 
 #### Module `middleware`
+
 Ce module regroupe toute la gestion des middelwares
 
 ##### Sous module `model`
-Ce sous module définit les  modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
+
+Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
 
 **Attributs prédéfinis**:
+
 - id : **int**
 - status_code : **int**
 - method : **str**
@@ -260,7 +296,8 @@ Ce sous module définit les  modèles de Log : `LoggerMiddlewareModel` et `Logge
 - remote_adress: **str**
 
 ##### Sous module `log_middleware`
-Ce sous module définit les  middelwares de loggins
+
+Ce sous module définit les middelwares de loggins
 
 - Class **`LoggerMiddleware`**
   - `paramètres` :
@@ -268,7 +305,8 @@ Ce sous module définit les  middelwares de loggins
     - session_factory : le générateur de session
 
 ##### Sous module `error_middleware`
-Ce sous module définit les  middelwares d'erreurs
+
+Ce sous module définit les middelwares d'erreurs
 
 - Class **`ErrorMiddleware`**
   - `paramètres optionels` :
@@ -276,30 +314,36 @@ Ce sous module définit les  middelwares d'erreurs
     - session_factory : le générateur de session
 
 ##### Sous module crud_middelware
+
 ce sous module définit les methodes pour sauvegarder les logs .
+
 - **`save_log`** : enregistre les logs
   - `paramètres`:
-    - *request*: Request
-    - *LoggerMiddelewareModel*
-    - *db* : Session
-    - *call_next* : Optional
-    - *error* : Optional[str]
-    - *response* : Optional[Response]
-    - *manager*: Optional[ConnectionManager]
- - `sortie`: **response : Response**
+    - _request_: Request
+    - _LoggerMiddelewareModel_
+    - _db_ : Session
+    - _call_next_ : Optional
+    - _error_ : Optional[str]
+    - _response_ : Optional[Response]
+    - _manager_: Optional[ConnectionManager]
+- `sortie`: **response : Response**
 
 ##### Sous module logCrud
+
 ce sous module définit une classe pour le crud des logs
 
 Class **`LogCrud`**
 
 - `paramètres` :
+
   - LoggerModel : définit le modèle de Log à utiliser
   - session_factory : le générateur de session
 
 - `methodes` :
+
   - `get_count_logs` : retourne le nombre total de log
   - `get_log` :
+
     - `paramètres` :
       - id : **int**
     - `sortie` : **LoggerModel**
@@ -311,13 +355,16 @@ Class **`LogCrud`**
     - `sortie` : **List[LoggerModel]**
 
 #### Module `user`
+
 Ce module comporte toute la gestion des utilisateurs
 
 ##### Sous module `models`
+
 Ce sous module comporte tous les models pour l'entité utilisateur
 
 class **`User`**
 `Attributs`:
+
 - id : **int**
 - email : **str**
 - username : **str**
@@ -327,32 +374,35 @@ class **`User`**
 - is_active : **bool**
 - attempt_login : **int**
 
-
 `Methodes` :
+
 - try_login :
-tente de connecter un utilisateur et mets à jour attempt_login en fonction
+  tente de connecter un utilisateur et mets à jour attempt_login en fonction
+
   - paramètres :
-     - is_success : **bool**
+    - is_success : **bool**
   - sortie : **bool**
 
 - set_password
+
   - paramètres :
-   - password : **str**
+  - password : **str**
   - sortie : **None**
 
 - check_password
   - paramètres :
-   - password : **str**
+  - password : **str**
   - sortie : **bool**
 
 Models pydantics pour la validations :
+
 - `UserBaseModel`
 - `UserCreateModel`
 - `UserUpdateModel`
 - `UserPydanticModel`
 - `AdditionalUserPydanticModelField`
 
-- `UserLoginModel` :
+- `UserLoginRequestModel` :
   - username : **Optional[str]**
   - password : **str**
   - email : **Optional[str]**
@@ -361,34 +411,41 @@ Models pydantics pour la validations :
 
 class **`UserCrud`**
 
-paramètres de __init__ :
+paramètres de **init** :
+
 - authentication : **Authentication**
 
 Methodes :
+
 - get_count_users
+
   - sortie : **int**
 
 - is_unique
+
   - paramètres :
     - sub : **str** (id or username)
   - sortie : **bool**
 
 - create_user
+
   - paramètres :
     - user : **authentication.UserCreateModel**
   - sortie : **authentication.User**
 
 - get_user
+
   - paramètres :
     id : **Optional[int]**
     sub : **Optional[str]** (username)
   - sortie : **authentication.User**
 
 - get_users
+
   - paramètres :
     - skip : **Optional[int]**
     - limit : **Optional[int]**
-   - sortie : **List[authentication.User]**
+  - sortie : **List[authentication.User]**
 
 - update_user
   - paramètres :
@@ -401,77 +458,93 @@ Methodes :
   - sortie : **JsonResponse**
 
 #### Module `websocket`
+
 Ce module comporte certaines classes et methodes pour interagir avec des websockets
+
 ##### Sous module `connectionManager`
+
 Contient la classe ConnectionManager pour gérer une connextion avec un websocket .
 
 - **methodes**:
-  - __init__
+  - **init**
   - **connect** (self,websocket)
   - **disconnect** (self,websocket)
   - **send_message** (self,str):
 
 #### Module `crud`
+
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des cruds.
 
 ##### Sous module `crud_model`
+
 Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
 **`CrudForgery`**:
+
 - **`__init__`** :
-    - **paramètres** :
-      - `entity_name`: **str**
-      - `session_factory`: **sessionmaker**
-      - `SQLAlchemyModel` : Le model SQLAlchemy
-      - `CreatePydanticModel` : Le model Pydantic pour la création .
-      - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
+
+  - **paramètres** :
+    - `entity_name`: **str**
+    - `session_factory`: **sessionmaker**
+    - `SQLAlchemyModel` : Le model SQLAlchemy
+    - `CreatePydanticModel` : Le model Pydantic pour la création .
+    - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
 
 - **`create`** :
-    - **paramètres** :
-      - `create_ob`: **CreatePydanticModel**
-    - **sortie** : **SQLAlchemyModel**
+
+  - **paramètres** :
+    - `create_ob`: **CreatePydanticModel**
+  - **sortie** : **SQLAlchemyModel**
 
 - **`count`** :
-    - **sortie** : **int**
+
+  - **sortie** : **int**
 
 - **`read_all`** :
-    - **paramètres** :
-      - `skip`: **Optional[int]**
-      - `limit`: **Optional[int]**
-    - **sortie** : **List[SQLAlchemyModel]**
+
+  - **paramètres** :
+    - `skip`: **Optional[int]**
+    - `limit`: **Optional[int]**
+  - **sortie** : **List[SQLAlchemyModel]**
 
 - **`read_all_by_filter`** :
-    - **paramètres** :
-      - `filter`: **str**
-      - `value`: **str**
-      - `skip`: **Optional[int]**
-      - `limit`: **Optional[int]**
-    - **sortie** : **List[SQLAlchemyModel]**
+
+  - **paramètres** :
+    - `filter`: **str**
+    - `value`: **str**
+    - `skip`: **Optional[int]**
+    - `limit`: **Optional[int]**
+  - **sortie** : **List[SQLAlchemyModel]**
 
 - **`read_one`** :
-    - **paramètres** :
-      - `id`: **int**
-      - `db`: **Optional[Session]** : pour utiliser la même session lors de update et delete .
-    - **sortie** : **SQLAlchemyModel**
+
+  - **paramètres** :
+    - `id`: **int**
+    - `db`: **Optional[Session]** : pour utiliser la même session lors de update et delete .
+  - **sortie** : **SQLAlchemyModel**
 
 - **`update`** :
-    - **paramètres** :
-      - `id`: **int**
-      - `update_obj`: **UpdatePydanticModel**
-    - **sortie** : **SQLAlchemyModel**
+
+  - **paramètres** :
+    - `id`: **int**
+    - `update_obj`: **UpdatePydanticModel**
+  - **sortie** : **SQLAlchemyModel**
 
 - **`delete`** :
-    - **paramètres** :
-      - `id`: **int**
-    - **sortie** : **JsonResponse**
+  - **paramètres** :
+    - `id`: **int**
+  - **sortie** : **JsonResponse**
 
 #### Module `router`
+
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des router.
 
 ##### Sous module `route_config`
+
 Ce sous module comporte la classe RouteConfig pour configurer un CustomRouterProvider .
 
 `RouteConfig`
+
 - `__init__` :
   - `paramètres`:
     - `route_name`: **str**
@@ -479,10 +552,12 @@ Ce sous module comporte la classe RouteConfig pour configurer un CustomRouterPro
     - `is_protected`: **bool** , default : `False`
 
 ##### Sous module `route_provider`
+
 Ce sous module comporte la classe CustomRouterProvider pour configurer un CustomRouterProvider .
 `CustomRouterProvider`
 
 **`Attributs de classe`**
+
 ```python
 ROUTES_NAME : List[str]=[
     "count",
@@ -496,8 +571,11 @@ ROUTES_NAME : List[str]=[
 DEFAULT_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=False) for route_name in ROUTES_NAME]
 AUTH_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=True) for route_name in ROUTES_NAME]
 ```
+
 - `__init__` :
+
   - `paramètres`:
+
     - `prefix`: **str**
     - `tags`: **List[str]**
     - `PydanticModel`: **Model de reponse Pydantic**
@@ -506,6 +584,7 @@ AUTH_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_pro
     - `get_session` : **callable**
 
   - `utilisation` :
+
 ```python
 router_provider = CustomRouterProvider(
     prefix="/items",
@@ -521,15 +600,13 @@ router_provider = CustomRouterProvider(
 
   - `sortie`: **APIRouter**
 
-
 - **`get_protected_router`** : renvoie un router avec la configuration de `AUTH_CONFIG`
+
   - `sortie`: **APIRouter**
-
-
 
 - **`initialize_router`** : renvoie un router avec une configuration personnalisée .
   - `paramètres`:
-    -  `init_data`: **List[RouteConfig]**
+    - `init_data`: **List[RouteConfig]**
   - `sortie`: **APIRouter**
   - `utilisation` :
 
@@ -543,6 +620,6 @@ init_data: List[RouteConfig] = [
 app_myapp = router_provider.initialize_router(init_data=init_data)
 ```
 
-
 # Contact ou Support
+
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

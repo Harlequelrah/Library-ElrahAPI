@@ -1,6 +1,6 @@
 from typing import List,Optional
 from harlequelrah_fastapi.router.route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
-from harlequelrah_fastapi.router.router_namespace import DEFAULT_ROUTES_CONFIGS, DEFAULTROUTESNAME
+from harlequelrah_fastapi.router.router_namespace import DEFAULT_ROUTES_CONFIGS, DEFAULTROUTESNAME , USER_AUTH_CONFIG
 
 
 def exclude_route(
@@ -16,11 +16,14 @@ def exclude_route(
 
 
 def get_single_route(route_name:DEFAULTROUTESNAME , type_route : Optional[str] = None)->RouteConfig:
-    config : DEFAULT_ROUTE_CONFIG = DEFAULT_ROUTES_CONFIGS[route_name]
-    return RouteConfig(
-        route_name=route_name.value,
-        is_activated=True,
-        summary=config.summary,
-        description=config.description,
-        is_protected= type_route == "protected"
-        )
+    config : DEFAULT_ROUTE_CONFIG = DEFAULT_ROUTES_CONFIGS.get(route_name.value)
+    if config :
+        return RouteConfig(
+            route_name=route_name.value,
+            is_activated=True,
+            summary=config.summary,
+            description=config.description,
+            is_protected= type_route == "protected"
+            )
+    else:
+        return USER_AUTH_CONFIG[route_name.value]

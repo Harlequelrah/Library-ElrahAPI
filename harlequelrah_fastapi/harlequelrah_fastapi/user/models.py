@@ -12,19 +12,21 @@ from typing import List, Optional
 from datetime import datetime
 
 
-Ph=PasswordHasher()
+Ph = PasswordHasher()
+
+
 class User:
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
-    password = Column(String(1024),nullable=False)
+    password = Column(String(1024), nullable=False)
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, nullable=False, default=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
 
-    def try_login(self,is_success:bool):
+    def try_login(self, is_success: bool):
         if is_success:
             self.attempt_login = 0
         else:
@@ -32,11 +34,8 @@ class User:
         if self.attempt_login >= 3:
             self.is_active = False
 
-
-
     def set_password(self, password: str):
         self.password = Ph.hash(password)
-
 
     def check_password(self, password: str) -> bool:
         try:
@@ -69,25 +68,27 @@ class UserUpdateModel(BaseModel):
     password: Optional[str] = None
     attempt_login: Optional[int] = None
 
-class AdditionalUserPydanticModelField():
+
+class AdditionalUserPydanticModelField:
     id: int
     is_active: bool
     date_created: datetime
-class UserPydanticModel(UserBaseModel,AdditionalUserPydanticModelField):
+
+
+class UserPydanticModel(UserBaseModel, AdditionalUserPydanticModelField):
     pass
 
 
-class UserLoginModel(BaseModel):
+class UserLoginRequestModel(BaseModel):
     username: Optional[str] = None
     password: str
     email: Optional[str] = None
 
-class UserLoginRequestModel(BaseModel):
-    credential : str
-    password: str
+
+
 
 
 class UserChangePasswordRequestModel(BaseModel):
-    credential : str
+    credential: str
     current_password: str
     new_password: str
