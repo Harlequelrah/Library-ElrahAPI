@@ -9,15 +9,12 @@ class DEFAULTROUTESNAME(str,Enum):
     CREATE='create'
     UPDATE='update'
     DELETE='delete'
-
-USER_AUTH_ROUTES_NAME: List[str] = [
-    "read-current-user",
-    "tokenUrl",
-    "get-refresh-token",
-    "refresh-token",
-    "login",
-    "change-password",
-]
+    READ_CURRENT_USER='read-current-user'
+    TOKEN_URL='tokenUrl'
+    GET_REFRESH_TOKEN='get-refresh-token'
+    REFRESH_TOKEN='refresh-token'
+    LOGIN='login'
+    CHANGE_PASSWORD='change-password'
 
 
 DEFAULT_ROUTES_CONFIGS: dict[str,DEFAULT_ROUTE_CONFIG] = {
