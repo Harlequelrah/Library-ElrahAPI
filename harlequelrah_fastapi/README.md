@@ -110,7 +110,7 @@ Ce module contient des exceptions personnalisées utilisés dans cette biblioth�
 
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
-- `AUTHENTICATION_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
+- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
 
 ##### 2. Sous module custom_http_exception
 

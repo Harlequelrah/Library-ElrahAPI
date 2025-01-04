@@ -5,7 +5,9 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.authentication.token import AccessToken, RefreshToken, Token
-from harlequelrah_fastapi.exception.auth_exception import AUTHENTICATION_EXCEPTION
+from harlequelrah_fastapi.exception.auth_exception import (
+    INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
+)
 from harlequelrah_fastapi.router.route_config import RouteConfig
 from harlequelrah_fastapi.router.router_crud import exclude_route
 from harlequelrah_fastapi.router.router_namespace import (
@@ -62,7 +64,7 @@ class UserRouterProvider(CustomRouterProvider):
         init_data: List[RouteConfig],
         exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
     ):
-        self.router=super().initialize_router(init_data, exclude_routes_name)
+        self.router = super().initialize_router(init_data, exclude_routes_name)
         for config in init_data:
             if (
                 config.route_name == "read-one"
@@ -162,7 +164,9 @@ class UserRouterProvider(CustomRouterProvider):
                     description=config.description if config.description else None,
                 )
                 async def login(usermodel: UserLoginRequestModel):
-                    credential = usermodel.username if usermodel.username else usermodel.email
+                    credential = (
+                        usermodel.username if usermodel.username else usermodel.email
+                    )
                     user = await self.authentication.authenticate_user(
                         credential, usermodel.password
                     )
