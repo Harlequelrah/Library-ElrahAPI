@@ -1,22 +1,20 @@
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from harlequelrah_fastapi.router.route_config import RouteConfig
+from harlequelrah_fastapi.router.router_namespace import DEFAULTROUTESNAME
+from harlequelrah_fastapi.router.router_provider import CustomRouterProvider
 from .log_crud import logCrud
+from my_project.settings.database import authentication
 from .log_schema import LoggerMiddlewarePydanticModel as LMPD
-app_logger=APIRouter(
-    tags=['logs'],prefix='/logs'
+
+router_provider = CustomRouterProvider(
+    prefix="/logs",
+    tags=["logs"],
+    PydanticModel=LMPD,
+    crud=logCrud,
+    get_access_token=authentication.get_access_token,
 )
-
-@app_logger.get('/get-count-logs')
-async def get_count_logs():
-    return await logCrud.get_count_logs()
-
-@app_logger.get('/get-log/{log_id}',response_model=LMPD)
-async def get_log(log_id:int):
-    return await logCrud.get_log(log_id)
-
-@app_logger.get('/get-logs',response_model=List[LMPD])
-async def get_logs(skip:int=None,limit:int=None):
-    return await logCrud.get_logs(skip=skip,limit=limit)
-
-
-
+app_logger = router_provider.get_protected_router(
+    [DEFAULTROUTESNAME.UPDATE, DEFAULTROUTESNAME.DELETE, DEFAULTROUTESNAME.CREATE]
+)

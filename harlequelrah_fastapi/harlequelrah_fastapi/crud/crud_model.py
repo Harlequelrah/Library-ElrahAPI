@@ -6,7 +6,7 @@ from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 class CrudForgery :
-    def __init__(self,entity_name:str,session_factory,SQLAlchemyModel,CreatePydanticModel,UpdatePydanticModel):
+    def __init__(self,entity_name:str,session_factory,SQLAlchemyModel,CreatePydanticModel=None,UpdatePydanticModel=None):
         self.SQLAlchemyModel = SQLAlchemyModel
         self.CreatePydanticModel=CreatePydanticModel
         self.UpdatePydanticModel=UpdatePydanticModel
@@ -54,6 +54,8 @@ class CrudForgery :
         if limit is None : limit = await self.count()
         exist_filter = getattr(self.SQLAlchemyModel,filter,None)
         if exist_filter:
+            if value in ["true","True"]: value = True
+            elif value in ["false","False"]: value = False
             return session.query(self.SQLAlchemyModel).filter(exist_filter==value).offset(skip).limit(limit).all()
         else :
             detail = f"Invalid filter {filter} for entity {self.entity_name}"

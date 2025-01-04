@@ -2,6 +2,7 @@ from fastapi import Request
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import JSONResponse
 from starlette.types import Scope, Receive, Send
+from fastapi import HTTPException as HE
 from harlequelrah_fastapi.middleware.crud_middleware import save_log
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
@@ -30,6 +31,22 @@ class ErrorHandlingMiddleware:
             request.state.start_time = time.time()
             # Appelle l'application principale
             await self.app(scope, receive, send)
+
+        except HE as http_exc :
+            responsse = JSONResponse(
+                status_code=http_exc.status_code,
+                content={"detail": http_exc.detail},
+            )
+            if self.has_log:
+                await save_log(
+                    request,
+                    self.LoggerMiddlewareModel,
+                    db,
+                    response=response,
+                    manager=self.manager,
+                    error=f"HTTP error , details : {str(http_exc.detail)}",
+                )
+            await response(scope, receive, send)
         except CHE as custom_http_exc:
             http_exc=custom_http_exc.http_exception
             # Gère une exception personnalisée
@@ -44,7 +61,7 @@ class ErrorHandlingMiddleware:
                     db,
                     response=response,
                     manager=self.manager,
-                    error=f"HTTP error , details : {str(http_exc.detail)}",
+                    error=f"Custom HTTP error , details : {str(http_exc.detail)}",
                 )
             await response(scope, receive, send)
         except SQLAlchemyError as db_error:

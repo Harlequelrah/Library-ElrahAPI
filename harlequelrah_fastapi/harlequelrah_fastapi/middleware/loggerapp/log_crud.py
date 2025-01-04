@@ -1,6 +1,9 @@
-from harlequelrah_fastapi.middleware.logCrud import LogCrud
-# from myproject.settings.secret import authentication
-from log_model import Logger
+from harlequelrah_fastapi.crud.crud_model import CrudForgery
+from my_project.settings.secret import authentication
+from .log_model import Logger
 
-
-logCrud= LogCrud(session_factory=authentication.session_factory,LoggerModel=Logger)
+logCrud = CrudForgery(
+    entity_name="log",
+    session_factory=authentication.session_factory,
+    SQLAlchemyModel=Logger,
+)
