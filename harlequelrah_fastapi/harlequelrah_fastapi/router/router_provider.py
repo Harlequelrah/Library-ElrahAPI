@@ -37,6 +37,7 @@ class CustomRouterProvider:
         init_data: List[RouteConfig] = [],
         public_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
         protected_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
+        exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
     ) -> APIRouter:
         for route_name in public_routes_name:
             route=get_single_route(route_name)
@@ -44,8 +45,8 @@ class CustomRouterProvider:
         for route_name in protected_routes_name:
             route=get_single_route(route_name,"protected")
             init_data.append(route)
-        return self.initialize_router(init_data)
-
+        custom_init_data=exclude_route(init_data,exclude_routes_name)
+        return self.initialize_router(custom_init_data)
 
     def get_protected_router(self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None) -> APIRouter:
         return self.initialize_router(ROUTES_PROTECTED_CONFIG, exclude_routes_name)
