@@ -27,6 +27,8 @@ async def save_log(
             return
         else : return await call_next(request)
     response,process_time= await get_process_time(request,call_next,response)
+    if error is None :
+        error = await read_response_body(response)
     logger = LoggerMiddlewareModel(
     process_time=process_time,
     status_code=response.status_code,
@@ -48,30 +50,31 @@ async def save_log(
         print(error_message)
     return response
 
+async def read_response_body(response: Response)  -> str | None:
+    """Capture, décode le corps de la réponse et extrait la valeur du champ 'detail'."""
+    body = b""
+    if response.body_iterator:
+        async for chunk in response.body_iterator:
+            body += chunk
+        # Réinitialise l'itérateur pour un usage futur
+        response.body_iterator = recreate_async_iterator(body)
 
-async def save_current_log(
-    request: Request,LoggerMiddlewareModel, db: Session,call_next,error=None
-):
-    if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
-        return await call_next(request)
-    start_time=time.time()
-    response = await call_next(request)
-    process_time=time.time() - start_time
-    logger = LoggerMiddlewareModel(
-    process_time=process_time,
-    status_code=response.status_code,
-    url=str(request.url),
-    method=request.method,
-    error_message=error,
-    remote_address=str(request.client.host))
-    try :
-        db.add(logger)
-        db.commit()
-        db.refresh(logger)
-    except Exception as err:
-        db.rollback()
-        logger.error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
-        db.add(logger)
-        db.commit()
-        db.refresh(logger)
-    return response
+    # Décoder en UTF-8
+    decoded_body = body.decode("utf-8")
+
+    # Vérifier si 'detail' est présent
+    try:
+        body_json = json.loads(decoded_body)
+        if isinstance(body_json, dict) and "detail" in body_json:
+            return str(body_json["detail"])
+    except json.JSONDecodeError:
+        # Si le corps n'est pas du JSON valide
+        pass
+    return None
+
+
+
+async def recreate_async_iterator(body: bytes):
+    """Crée un nouvel itérateur asynchrone pour la réponse."""
+    for chunk in [body]:
+        yield chunk
