@@ -170,7 +170,7 @@ class UserRouterProvider(CustomRouterProvider):
                     user = await self.authentication.authenticate_user(
                     usermodel.password, credential
                     )
-                    data = {"sub": usermodel.credential}
+                    data = {"sub": credential}
                     access_token_data = self.authentication.create_access_token(data)
                     refresh_token_data = self.authentication.create_refresh_token(data)
                     return {
