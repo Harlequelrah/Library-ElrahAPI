@@ -27,7 +27,7 @@ async def save_log(
             return
         else : return await call_next(request)
     response,process_time= await get_process_time(request,call_next,response)
-    if error is None :
+    if error is None and (response.status_code <200 or response.status_code > 299)  :
         error = await read_response_body(response)
     logger = LoggerMiddlewareModel(
     process_time=process_time,
