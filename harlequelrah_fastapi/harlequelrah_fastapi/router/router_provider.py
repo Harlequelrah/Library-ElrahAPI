@@ -179,6 +179,7 @@ class CustomRouterProvider:
                         if self.get_access_token and config.is_protected
                         else []
                     ),
+                    status_code=204
                 )
                 async def delete(
                     id: int,
