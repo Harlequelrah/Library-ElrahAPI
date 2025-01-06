@@ -7,7 +7,7 @@ from harlequelrah_fastapi.router.router_namespace import (
     DEFAULTROUTESNAME,
     USER_AUTH_CONFIG_ROUTES,
 )
-from harlequelrah_fastapi.user.userRouter import UserRouterProvider
+from harlequelrah_fastapi.router.user_router_provider import UserRouterProvider
 
 
 user_router_provider = UserRouterProvider(

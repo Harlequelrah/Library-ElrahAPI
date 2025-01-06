@@ -21,7 +21,7 @@ from harlequelrah_fastapi.user.models import (
     UserChangePasswordRequestModel,
     UserLoginRequestModel,
 )
-from harlequelrah_fastapi.user.userCrud import UserCrudForgery
+from harlequelrah_fastapi.crud.user_crud_forgery import UserCrudForgery
 from sqlalchemy.orm import Session
 
 

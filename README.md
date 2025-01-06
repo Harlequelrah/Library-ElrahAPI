@@ -18,10 +18,6 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install harlequelrah_fastapi
   ```
 
-- **Avec pip via Github:**
-  ```bash
-    pip install git+https://github.com/Harlequelrah/Library-harlequelrah_fastapi.git#subdirectory=harlequelrah_fastapi
-  ```
 
 ## Utilisation
 
@@ -34,7 +30,6 @@ Ce package contient plusieurs modules utiles pour accélérer et modulariser le 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
 ```bash
-
   harlequelrah_fastapi startproject nomduprojet
 ```
 
@@ -120,18 +115,21 @@ Ce module contient des exceptions personnalisées utilisés dans cette biblioth�
 
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
-- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée à léver lorsqu'une erreur d'authentification se produit
+- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de paramètres d'authentification invalides .
 
-##### 2. Sous module custom_http_exception
+- `INACTIVE_USER_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de compte utilisateur inactive .
+##### 2. Sous module exceptions_utils
+ce sous module contient des fonction utilitaires pour les exceptions
+(status_code:int,detail:str)
+- `raise_custom_http_exception` : lève une erreur CustomHttpException
+  - **paramètre** :
+    - `status_code` : **int**
+    - `detail` : **str**
+##### 3. Sous module custom_http_exception
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 
-```python
-  from fastapi import HTTPException , status
-  from harlequelrah_fastapi.exception.custom_http_exception import CustomHttpException
-  http_exception= HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="La requête a provoquée une exception non gérée")
-  raise CustomHttpException(http_exception)
-```
+
 
 #### Module `utility`
 
@@ -171,12 +169,12 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `UserUpdateModel` : le modèle pydantic pour la mise à jour d'utilisateur
 - `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
 - `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
-- `SECRET_KEY` : une clé secrète générer par défaut
-- `ALGORITHM` : un algorithm par défaut `HS256`
+- `SECRET_KEY` : une clé secrète générer par défaut **str**
+- `ALGORITHM` : un algorithm par défaut **[`HS256`]**
 - `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
 - `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
-- `session_factory` : un générateur de session
-- `CREDENTIALS_EXCEPTION` : une exception de type `CustomHttpException` à lever lorsque l'authentification échoue
+- `session_factory` : **sessionmaker[Session]**
+
 
 #### Module `authorization`
 
@@ -290,7 +288,7 @@ Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`Pri
 
 Ce module regroupe toute la gestion des middelwares
 
-##### Sous module `model`
+##### Sous module `models`
 
 Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
 
@@ -312,7 +310,8 @@ Ce sous module définit les middelwares de loggins
 - Class **`LoggerMiddleware`**
   - `paramètres` :
     - LoggerMiddlewareModel : définit le modèle de Log a utilisé
-    - session_factory : le générateur de session
+    - session_factory : **sessionmaker[Session]**
+    - manager : **ConnectionManager**
 
 ##### Sous module `error_middleware`
 
@@ -321,7 +320,8 @@ Ce sous module définit les middelwares d'erreurs
 - Class **`ErrorMiddleware`**
   - `paramètres optionels` :
     - LoggerMiddlewareModel : définit le modèle de Log a utilisé
-    - session_factory : le générateur de session
+    - session_factory : **sessionmaker[Session]**
+    - manager : **ConnectionManager**
 
 ##### Sous module crud_middelware
 
@@ -329,13 +329,13 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 - **`save_log`** : enregistre les logs
   - `paramètres`:
-    - _request_: Request
-    - _LoggerMiddelewareModel_
-    - _db_ : Session
-    - _call_next_ : Optional
-    - _error_ : Optional[str]
-    - _response_ : Optional[Response]
-    - _manager_: Optional[ConnectionManager]
+    - *request*: Request
+    - *LoggerMiddelewareModel*
+    - *db* : Session
+    - *call_next_*: Optional
+    - *error* : Optional[str]
+    - *response* : Optional[Response]
+    - *manager*: Optional[ConnectionManager]
 - `sortie`: **response : Response**
 
 ##### Sous module logCrud
