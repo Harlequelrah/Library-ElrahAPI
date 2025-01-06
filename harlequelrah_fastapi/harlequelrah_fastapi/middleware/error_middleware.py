@@ -26,7 +26,7 @@ class ErrorHandlingMiddleware:
         self.has_log = self.session_factory and self.LoggerMiddlewareModel
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
-        if scope["type"] not in ("http", "websocket"):
+        if scope["type"] not in ("http"):
             await self.app(scope, receive, send)
             return
 
