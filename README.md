@@ -180,33 +180,31 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
-##### Sous module `role`
+##### Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Role .
 
-- sous module `role_model`
-
 `Role`:
 
-- id : int
-- name : str
-- normalized_name : str (automatique à l'ajout de name)
+- id : **Column(Integer)**
+- name : **Column(String)**
+- normalized_name : **Column(String)**  automatique à l'ajout de name
+- is_active : **Column(Boolean)**
 
 Les classes pydantic sont : `RolePydanticModel`,`RoleCreateModel`,`RoleUpdateModel`
 
 
-
-##### Sous module `privilege`
+##### Sous module `privilege_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Privilege .
 
 - sous module `privilege_model`
 
-`Privilege`:
-
-- id : int
-- name : str
-- normalized_name : str (automatique à l'ajout de name)
+- id : **Column(Integer)**
+- name : **Column(String)**
+- normalized_name : **Column(String)**  automatique à l'ajout de name
+- is_active : **Column(Boolean)**
+- description : **Column(String)**
 
 Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`PrivilegeUpdateModel`
 

@@ -68,6 +68,15 @@ class Authentication:
     def set_authentication_scheme(self, oauth2_scheme):
         self.oauth2_scheme = oauth2_scheme
 
+
+    async def is_authorized(user:User,privilege_id):
+        role= user.role
+        if not role.is_active : return False
+        for privilege in role.privileges:
+            return privilege.id==privilege_id and privilege.is_active
+        else : return False
+
+
     async def authenticate_user(
         self,
         password: str,
@@ -132,7 +141,6 @@ class Authentication:
 
     async def get_current_user(
         self,
-        # token:str
         token: str = Depends(oauth2_scheme),
     ):
         db = self.get_session()

@@ -1,16 +1,16 @@
 from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from my_project.settings.database import authentication
-from harlequelrah_fastapi.authorization.privilege.privilege_model import (
+from harlequelrah_fastapi.authorization.privilege_model import (
     PrivilegeCreateModel,
     PrivilegeUpdateModel,
     PrivilegePydanticModel,
 )
-from harlequelrah_fastapi.authorization.role.role_model import (
+from harlequelrah_fastapi.authorization.role_model import (
     RoleCreateModel,
     RoleUpdateModel,
     RolePydanticModel,
 )
-from .authorization_model import Privilege, Role
+from .user_model import Privilege, Role
 
 
 roleCrud = CrudForgery(
