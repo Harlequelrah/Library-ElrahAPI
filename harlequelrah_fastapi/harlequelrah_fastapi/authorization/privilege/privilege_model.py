@@ -1,14 +1,16 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from sqlalchemy import Boolean, Column, Integer,String
-from sqlalchemy.orm import validates,Session
+from sqlalchemy import Boolean, Column, ForeignKey, Integer,String
+from sqlalchemy.orm import validates,Session,relationship
 
-class Privilege:
+
+class PrivilegeModel:
     id=Column(Integer,primary_key=True,index=True)
     name=Column(String(50),unique=True)
     normalizedName=Column(String(50),unique=True)
     description=Column(String(255),nullable=False)
     is_active=Column(Boolean,default=True)
+
 
 
 

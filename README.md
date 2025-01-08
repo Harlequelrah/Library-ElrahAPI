@@ -18,7 +18,6 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install harlequelrah_fastapi
   ```
 
-
 ## Utilisation
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
@@ -118,18 +117,20 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 - `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de paramètres d'authentification invalides .
 
 - `INACTIVE_USER_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de compte utilisateur inactive .
+
 ##### 2. Sous module exceptions_utils
+
 ce sous module contient des fonction utilitaires pour les exceptions
 (status_code:int,detail:str)
+
 - `raise_custom_http_exception` : lève une erreur CustomHttpException
   - **paramètre** :
     - `status_code` : **int**
     - `detail` : **str**
+
 ##### 3. Sous module custom_http_exception
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
-
-
 
 #### Module `utility`
 
@@ -175,7 +176,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
 - `session_factory` : **sessionmaker[Session]**
 
-
 #### Module `authorization`
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
@@ -194,46 +194,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l
 
 Les classes pydantic sont : `RolePydanticModel`,`RoleCreateModel`,`RoleUpdateModel`
 
-- Sous module `role_crud`
-  ce sous module définit les cruds :
-- **`get_count_roles`**
-  - `paramètres` :
-    - db : **Session**
-  - `sortie` : **int**
-- **`create_role`**
-  - `paramètres` :
-    - db : **Session**
-    - role_create : **RoleCreateModel**
-  - `sortie`:
-  - role : **Role**
-- **`get_role`**
-  - `paramètres` :
-    - db : **Session**
-    - role_id : **int**
-  - `sortie` : **Role**
-- **`get_roles`**
-  - `paramètres` :
-    - db : **Session**
-    - skip : **int**
-    - limit : **int**
-  - `sortie` : **List[Role]**
-- **`update_role`**
-  - `paramètres` :
-    - db : **Session**
-    - role_id : **int**
-    - role_update : **RoleUpdateModel**
-  - `sortie`: **Role**
-- **`delete_role`**
-  - `paramètres` :
-    - db : **Session**
-    - role_id : **int**
-  - `sortie`: **JSONResponse**
-- **`add_role_to_user`**
-  - `paramètres` :
-    - db : **Session**
-    - user : **User**
-    - role_id : **int**
-  - `sortie`: **JsonResponse**
+
 
 ##### Sous module `privilege`
 
@@ -249,40 +210,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l
 
 Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`PrivilegeUpdateModel`
 
-- Sous module `privilege_crud`
-  ce sous module définit les cruds :
-- **`get_count_privileges`**
-  - `paramètres` :
-    - db : **Session**
-  - `sortie` : **int**
-- **`create_privilege`**
-  - `paramètres` :
-    - db : **Session**
-    - privilege_create : **PrivilegeCreateModel**
-  - `sortie`:
-  - privilege : **Privilege**
-- **`get_privilege`**
-  - `paramètres` :
-    - db : **Session**
-    - privilege_id : **int**
-  - `sortie` : **Privilege**
-- **`get_privileges`**
-  - `paramètres` :
-    - db : **Session**
-    - skip : **int**
-    - limit : **int**
-  - `sortie` : **List[Privilege]**
-- **`update_privilege`**
-  - `paramètres` :
-    - db : **Session**
-    - privilege_id : **int**
-    - privilege_update : **PrivilegeUpdateModel**
-  - `sortie`: **Privilege**
-- **`delete_privilege`**
-  - `paramètres` :
-    - db : **Session**
-    - privilege_id : **int**
-  - `sortie`: **JSONResponse**
+
 
 #### Module `middleware`
 
@@ -291,9 +219,20 @@ Ce module regroupe toute la gestion des middelwares
 ##### Sous module `models`
 
 Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
-
+`LoggerMiddlewareModel`:
 **Attributs prédéfinis**:
 
+- id : **Column(Integer)**
+- status_code :**Column(Integer)**
+- method : **Column(String)**
+- url : **Column(String)**
+- error_message : **Column(Text)**
+- date_created : **Column(DateTime)**
+- process_time : **Column(Numeric)**
+- remote_adress: **Column(String)**
+
+`LoggerMiddlewarePydanticModel`:
+**Attributs prédéfinis**:
 - id : **int**
 - status_code : **int**
 - method : **str**
@@ -302,7 +241,6 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 - date_created : **datetime**
 - process_time : **float**
 - remote_adress: **str**
-
 ##### Sous module `log_middleware`
 
 Ce sous module définit les middelwares de loggins
@@ -329,40 +267,32 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 - **`save_log`** : enregistre les logs
   - `paramètres`:
-    - *request*: Request
-    - *LoggerMiddelewareModel*
-    - *db* : Session
-    - *call_next_*: Optional
-    - *error* : Optional[str]
-    - *response* : Optional[Response]
-    - *manager*: Optional[ConnectionManager]
+    - **request**: Request
+    - **LoggerMiddelewareModel**
+    - **db** : Session
+    - **call_next**: Optional
+    - **error** : Optional[str]
+    - **response** : Optional[Response]
+    - **manager**: Optional[ConnectionManager]
 - `sortie`: **response : Response**
 
-##### Sous module logCrud
+- **`get_response_and_process_time`** : renvoie le temps de la requete et la reponse
+  - `paramètres`:
+    - **request**: Request
+    - **call_next**:callable
+    - **response** : Response
+    - **call_next**: Optional
+- `sortie`: [ **response** , **process_time** ]
 
-ce sous module définit une classe pour le crud des logs
+- **`read_response_body`** : **renvoie le une chaine de caractère contenant la partie du detail si elle existe du corps de la requête**
+  - `paramètres`:
+    - **response** : Response
+- `sortie`: **str**
 
-Class **`LogCrud`**
+- **`recreate_async_iterator`** : **recree un nouvel itérateur pour la requete**
+  - `paramètres`:
+    - **body** : bytes
 
-- `paramètres` :
-
-  - LoggerModel : définit le modèle de Log à utiliser
-  - session_factory : le générateur de session
-
-- `methodes` :
-
-  - `get_count_logs` : retourne le nombre total de log
-  - `get_log` :
-
-    - `paramètres` :
-      - id : **int**
-    - `sortie` : **LoggerModel**
-
-  - `get_logs` :
-    - `paramètres` :
-      - skip : **int**
-      - limit : **int**
-    - `sortie` : **List[LoggerModel]**
 
 #### Module `user`
 
@@ -375,14 +305,15 @@ Ce sous module comporte tous les models pour l'entité utilisateur
 class **`User`**
 `Attributs`:
 
-- id : **int**
-- email : **str**
-- username : **str**
-- password : **str**
-- lastname : **str**
-- date_created : **datetime**
-- is_active : **bool**
-- attempt_login : **int**
+- id : **Column(Integer)**
+- email : **Column(String)**
+- username : **Column(String)**
+- password : **Column(String)**
+- lastname : **Column(String)**
+- date_created : **Column(DateTime)**
+- date_updated : **Column(DateTime)**
+- is_active : **Column(Boolean)**
+- attempt_login : **Column(Integer)**
 
 `Methodes` :
 
@@ -393,13 +324,12 @@ class **`User`**
     - is_success : **bool**
   - sortie : **bool**
 
-- set_password
-
+- set_password : permet de modifier le mot de passe .
   - paramètres :
   - password : **str**
   - sortie : **None**
 
-- check_password
+- check_password : permet de vérifier le mot de passe.
   - paramètres :
   - password : **str**
   - sortie : **bool**
@@ -410,62 +340,29 @@ Models pydantics pour la validations :
 - `UserCreateModel`
 - `UserUpdateModel`
 - `UserPydanticModel`
-- `AdditionalUserPydanticModelField`
+
+class **`UserPydanticModel`**
+`Attributs`:
+
+- id : **int**
+- email : **str**
+- username : **str**
+- password : **str**
+- lastname : **str**
+- date_created : **datetime**
+- is_active : **bool**
+- attempt_login : **int**
 
 - `UserLoginRequestModel` :
   - username : **Optional[str]**
   - password : **str**
   - email : **Optional[str]**
 
-##### Sous module userCrud
+- `UserChangePasswordRequestMode(UserLoginRequestMode)` :
+  - current_password : **str**
+  - new_password : **str**
 
-class **`UserCrud`**
 
-paramètres de **init** :
-
-- authentication : **Authentication**
-
-Methodes :
-
-- get_count_users
-
-  - sortie : **int**
-
-- is_unique
-
-  - paramètres :
-    - sub : **str** (id or username)
-  - sortie : **bool**
-
-- create_user
-
-  - paramètres :
-    - user : **authentication.UserCreateModel**
-  - sortie : **authentication.User**
-
-- get_user
-
-  - paramètres :
-    id : **Optional[int]**
-    sub : **Optional[str]** (username)
-  - sortie : **authentication.User**
-
-- get_users
-
-  - paramètres :
-    - skip : **Optional[int]**
-    - limit : **Optional[int]**
-  - sortie : **List[authentication.User]**
-
-- update_user
-  - paramètres :
-    - user_id : **int**
-    - userUpdated : **authentication.UserUpdateModel**
-  - sortie : **List[authentication.User]**
-- delete_user
-  - paramètres :
-    - user_id : **int**
-  - sortie : **JsonResponse**
 
 #### Module `websocket`
 

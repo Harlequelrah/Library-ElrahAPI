@@ -188,7 +188,7 @@ class UserRouterProvider(CustomRouterProvider):
                     description=config.description if config.description else None,
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
-                    credential = form_data.credential
+                    credential = form_data.username if form_data.username else form_data.email
                     old_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.crud.change_password(

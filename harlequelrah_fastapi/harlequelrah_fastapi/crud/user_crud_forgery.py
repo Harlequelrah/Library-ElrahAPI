@@ -30,7 +30,7 @@ class UserCrudForgery(CrudForgery):
 
     async def change_password(self, credential : str ,current_password:str, new_password:str):
         session=self.authentication.get_session()
-        current_user = await self.authentication.authenticate_user(credential,current_password,session)
+        current_user = await self.authentication.authenticate_user(password=current_password,username_or_email=credential,session=session)
         if current_user.check_password(current_password):
             current_user.set_password(new_password)
             session.commit()

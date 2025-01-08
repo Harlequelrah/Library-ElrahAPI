@@ -12,9 +12,6 @@ from typing import List, Optional
 from datetime import datetime
 
 
-Ph = PasswordHasher()
-
-
 class User:
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(256), unique=True, index=True)
@@ -23,23 +20,29 @@ class User:
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, nullable=False, default=func.now())
+    date_updated = Column(DateTime, onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
+
+    MAX_ATTEMPT_LOGIN = 3
+
+    def __init__(self):
+        self.PasswordHasher = PasswordHasher()
 
     def try_login(self, is_success: bool):
         if is_success:
             self.attempt_login = 0
         else:
             self.attempt_login += 1
-        if self.attempt_login >= 3:
+        if self.attempt_login >= self.MAX_ATTEMPT_LOGIN:
             self.is_active = False
 
     def set_password(self, password: str):
-        self.password = Ph.hash(password)
+        self.password = self.PasswordHasher.hash(password)
 
     def check_password(self, password: str) -> bool:
         try:
-            Ph.verify(self.password, password)
+            self.PasswordHasher.verify(self.password, password)
             return True
         except Ex.VerifyMismatchError:
             return False
@@ -69,14 +72,11 @@ class UserUpdateModel(BaseModel):
     attempt_login: Optional[int] = None
 
 
-class AdditionalUserPydanticModelField:
+class UserPydanticModel(UserBaseModel):
     id: int
     is_active: bool
     date_created: datetime
-
-
-class UserPydanticModel(UserBaseModel, AdditionalUserPydanticModelField):
-    pass
+    date_updated: datetime
 
 
 class UserLoginRequestModel(BaseModel):
@@ -85,10 +85,6 @@ class UserLoginRequestModel(BaseModel):
     email: Optional[str] = None
 
 
-
-
-
-class UserChangePasswordRequestModel(BaseModel):
-    credential: str
+class UserChangePasswordRequestModel(UserLoginRequestModel):
     current_password: str
     new_password: str
