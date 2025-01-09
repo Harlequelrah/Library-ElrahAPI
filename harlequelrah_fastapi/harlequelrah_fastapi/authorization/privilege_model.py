@@ -37,7 +37,7 @@ class PrivilegePydanticModel(BaseModel):
     description: str
     is_active:bool
     role_id:int
-    class config :
+    class Config :
         from_orm=True
 
 class MetaPrivilege(BaseModel):

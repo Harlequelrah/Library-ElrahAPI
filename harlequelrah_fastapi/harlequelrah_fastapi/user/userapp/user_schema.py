@@ -9,11 +9,10 @@ class UserCreateModel(models.UserCreateModel):
 class UserUpdateModel(models.UserUpdateModel):
     pass
 
-class AdditionalUserPydanticModelField(models.AdditionalUserPydanticModelField):
-    pass
 
-class UserPydanticModel(UserBaseModel,AdditionalUserPydanticModelField):
-    pass
+class UserPydanticModel(UserBaseModel):
+    class Config :
+        from_orm=True
 
 authentication.UserPydanticModel = UserPydanticModel
 authentication.UserCreateModel = UserCreateModel

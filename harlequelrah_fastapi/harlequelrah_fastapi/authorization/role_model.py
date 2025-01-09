@@ -32,6 +32,7 @@ class RoleCreateModel(RoleBaseModel):
 
 class RoleUpdateModel(BaseModel):
     name: Optional[str] = Field(example="Admin", default=None)
+    is_active : Optional[bool] = Field(example=True, default=None)
 
 
 class RolePydanticModel(BaseModel):
@@ -41,5 +42,5 @@ class RolePydanticModel(BaseModel):
     is_active: bool
     privileges: List[MetaPrivilege]
 
-    class setting:
+    class Config:
         from_orm = True

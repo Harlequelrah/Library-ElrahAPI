@@ -121,7 +121,7 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 ##### 2. Sous module exceptions_utils
 
 ce sous module contient des fonction utilitaires pour les exceptions
-(status_code:int,detail:str)
+
 
 - `raise_custom_http_exception` : lève une erreur CustomHttpException
   - **paramètre** :
@@ -139,13 +139,7 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
 - `update_entity` : mets à jour les champs d'une entité objet
   - paramètres : `existing_entity` , `update_entity`
   - retourne : `existing_entity`
-  - utilisation :
-  ```python
-  from harlequelrah_fastapi.utility.utils import update_entity
-  existing_entity = {"id": 1, "name": "John"}
-  update_entity = {"id":1 , "name" : "Johnson"}
-  existing_entity=update_entity(existing_entity,update_entity)
-  ```
+
 
 #### Module `authentication`
 
@@ -156,25 +150,42 @@ Ce module contient des classes et des fonctions utilisées pour l'authentificati
 Ce sous module définit des classes pydantics pour la gestions des tokens :
 
 - AccessToken : access_token : **str** , token_type : **str**
+
 - RefreshToken : refresh_token : **str** , token_type : **str**
+
 - Token : access_token : **str** ,refresh_token : **str** , token_type : **str**
 
 ##### 2. Sous module `authenticate`
 
 ce sous module définit les classes et fonctions utilisées pour l'authentification
 
-- **`Classe Authentication`**:classe principale pour gérer l'authentification
+**`Classe Authentication`**: classe principale pour gérer l'authentification
+
+**Attributs**
+
 - `oauth2_scheme` : définit le schéma d'authentication
+
 - `User` : le modèle d'utilisateur SQLAlchemy
+
 - `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
+
 - `UserUpdateModel` : le modèle pydantic pour la mise à jour d'utilisateur
+
 - `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
+
 - `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
-- `SECRET_KEY` : une clé secrète générer par défaut **str**
-- `ALGORITHM` : un algorithm par défaut **[`HS256`]**
+
+- `SECRET_KEY` : **str** [une clé secrète générer par défaut]
+
+- `ALGORITHM` : **List[str]**un tableau d'algorithm [par défaut **[`HS256`]**]
+
 - `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
+
 - `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
+
 - `session_factory` : **sessionmaker[Session]**
+
+**methodes**
 
 #### Module `authorization`
 
@@ -182,32 +193,97 @@ Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
 ##### Sous module `role_model`
 
-Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Role .
+Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entité Role .
 
 `Role`:
 
 - id : **Column(Integer)**
+
 - name : **Column(String)**
+
 - normalized_name : **Column(String)**  automatique à l'ajout de name
+
 - is_active : **Column(Boolean)**
 
-Les classes pydantic sont : `RolePydanticModel`,`RoleCreateModel`,`RoleUpdateModel`
+`RoleCreateModel` :
+
+- name : **str**
+
+`RoleUpdateModel`
+
+- name : **Optional[str]**
+
+- is_active : **Optional[bool]**
+
+`RolePydanticModel` :
+
+- id : **int**
+
+- name : **str**
+
+- normalizedName : **str**
+
+- is_active : **bool**
+
+- privileges : **List[MetaPrivilege]**
 
 
 ##### Sous module `privilege_model`
 
-Ce sous module contient les models SQLAlchemy et classes pydantic et crud pour l'entité Privilege .
+Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entité Privilege .
 
 - sous module `privilege_model`
 
 - id : **Column(Integer)**
+
 - name : **Column(String)**
+
 - normalized_name : **Column(String)**  automatique à l'ajout de name
+
 - is_active : **Column(Boolean)**
+
 - description : **Column(String)**
 
-Les classes pydantic sont : `PrivilegePydanticModel`,`PrivilegeCreateModel`,`PrivilegeUpdateModel`
+`PrivilegeCreateModel`:
 
+- name : **str**
+
+- description : **str**
+
+- role_id : **int**
+
+`PrivilegeUpdateModel` :
+
+- name : **Optional[str]**
+
+- description : **Optional[str]**
+
+- role_id : **Optional[int]**
+
+
+`PrivilegePydanticModel` :
+
+- id : **int**
+
+- name : **str**
+
+- normalizedName : **str**
+
+- description : **str**
+
+- is_active : **str**
+
+- role_id : **int**
+
+`MetaPrivilege` :
+
+- id : **int**
+
+- normalizedName : **str**
+
+- description : **str**
+
+- is_active : **str**
 
 
 #### Module `middleware`
