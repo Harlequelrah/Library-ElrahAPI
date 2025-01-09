@@ -186,6 +186,32 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `session_factory` : **sessionmaker[Session]**
 
 **methodes**
+- `__init__` :
+
+  - paramètres :
+
+    - database_username : **str**
+
+    - database_password : **str**
+
+    - connector : **str**
+
+    - database_name : **str**
+
+    - server : **str**
+
+- `set_db_session` :
+
+  - paramètres : pour définir le générateur de session
+
+    - session_factory : **sessionmaker[Session]**
+
+- `get_session` : renvoie une session .
+
+  - sortie : **Session**
+
+
+
 
 #### Module `authorization`
 

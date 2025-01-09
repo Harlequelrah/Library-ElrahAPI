@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from harlequelrah_fastapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
@@ -30,7 +30,7 @@ class Authentication:
     UserCreateModel = UserCreateModel
     UserUpdateModel = UserUpdateModel
     SECRET_KEY = str(secrets.token_hex(32))
-    ALGORITHM = "HS256"
+    ALGORITHM = ["HS256"]
     REFRESH_TOKEN_EXPIRE_DAYS = 7
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
     session_factory: sessionmaker[Session] = None
@@ -49,15 +49,21 @@ class Authentication:
         self.database_name = database_name
         self.server = server
 
-    def set_db_session(self, session_factory):
+    def set_db_session(self, session_factory: sessionmaker[Session]):
         self.session_factory = session_factory
 
     def get_session(self):
         db = self.session_factory()
         return db
 
-    def set_algorithm(self, algorithm):
-        self.ALGORITHM = algorithm
+    def set_algorithms(self, algorithms: List[str]):
+        self.ALGORITHM = algorithms
+
+    def add_algorithm(self,algorithm:str):
+        self.ALGORITHM.append(algorithm)
+
+    def remove_algorithms(self,algorithm:str):
+        self.ALGORITHM.remove(algorithm)
 
     def set_REFRESH_TOKEN_EXPIRE_DAYS(self, REFRESH_TOKEN_EXPIRE_DAYS):
         self.REFRESH_TOKEN_EXPIRE_DAYS = REFRESH_TOKEN_EXPIRE_DAYS
@@ -68,14 +74,13 @@ class Authentication:
     def set_authentication_scheme(self, oauth2_scheme):
         self.oauth2_scheme = oauth2_scheme
 
-
     async def is_authorized(user:User,privilege_id):
         role= user.role
         if not role.is_active : return False
         for privilege in role.privileges:
             return privilege.id==privilege_id and privilege.is_active
-        else : return False
-
+        else:
+            return False
 
     async def authenticate_user(
         self,
@@ -159,7 +164,7 @@ class Authentication:
 
     async def validate_token(self, token: str):
         try:
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=self.ALGORITHM)
             return payload
         except ExpiredSignatureError:
             detail = "Token has expired"
