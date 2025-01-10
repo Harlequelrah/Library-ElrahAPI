@@ -80,7 +80,8 @@ class Authentication:
         return db
 
     async def is_authorized(self,user_id:int, privilege_id:int)->bool:
-        user = self.get_session()
+        session = self.get_session()
+        user=session.query(self.User).filter(self.User.id==user_id).first()
         role = user.role
         if not role.is_active:
             return False

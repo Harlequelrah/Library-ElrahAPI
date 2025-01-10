@@ -29,7 +29,7 @@ Ce package contient plusieurs modules utiles pour accélérer et modulariser le 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
 ```bash
-  harlequelrah_fastapi startproject nomduprojet
+harlequelrah_fastapi startproject nomduprojet
 ```
 
 **`architecture`:**
@@ -114,7 +114,7 @@ Ce module contient des exceptions personnalisées utilisés dans cette biblioth�
 
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
-- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de paramètres d'authentification invalides .
+- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de **paramètres** d'authentification invalides .
 
 - `INACTIVE_USER_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de compte utilisateur inactive .
 
@@ -123,9 +123,13 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 ce sous module contient des fonction utilitaires pour les exceptions
 
 - `raise_custom_http_exception` : lève une erreur CustomHttpException
-  - **paramètre** :
+
+  - **paramètres** :
+
     - `status_code` : **int**
+
     - `detail` : **str**
+
 
 ##### 3. Sous module custom_http_exception
 
@@ -135,9 +139,16 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
 Ce module contient des utilitaires utilisés dans cette bibliothèque.
 
-- `update_entity` : mets à jour les champs d'une entité objet
-  - paramètres : `existing_entity` , `update_entity`
-  - retourne : `existing_entity`
+- `update_entity` : mets à jour les champs d'une entité objet .
+
+  - **paramètres :
+
+    - existing_entity : l'entité existante à mettre à jour.
+
+    - update_entity : l'entité pour mettre  : l'entité pour la mise à jour .
+
+  - **sortie** : **existing_entity**
+
 
 #### Module `authentication`
 
@@ -187,7 +198,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `__init__` :
 
-  - paramètres :
+  - **paramètres** :
 
     - database_username : **str**
 
@@ -202,21 +213,21 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `get_session` : retourne une session
 
-  - sortie : `Session`
+  - **sortie** : `Session`
 
 - `is_authorized` : verifie si un utilisateur a un privilège
 
-  - paramètres :
+  - **paramètres** :
 
     - user_id : **int**
 
     - privilege_id : **int**
 
-  - sortie : **bool**
+  - **sortie** : **bool**
 
 -  `authenticate_user`
 
-  - paramètres :
+  - **paramètres** :
 
     - password : **str**
 
@@ -224,43 +235,51 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
    - session : **Optional[Session]**
 
-  - sortie : **User**
+  - **sortie** : **User**
 
 -  `create_access_token`
 
-  - paramètres :
+  - **paramètres** :
 
     - data : **dict**
 
     - expires_delta : **timedelta**
 
-  - sortie : **AccessToken**
+  - **sortie** : **AccessToken**
 
 -  `create_refresh_token`
 
-  - paramètres :
+  - **paramètres** :
 
     - data : **dict**
 
     - expires_delta : **timedelta**
 
-  - sortie : **RefreshToken**
+  - **sortie** : **RefreshToken**
 
 -  `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
 
-  - sortie : **str**
+  - **sortie** : **str**
 
 -  `get_current_user` : retourne  l'utilisateur actuellement authentifié .
 
-  - sortie : **User**
+  - **sortie** : **User**
 
 -  `validate_token` : valide le token et retourne un payload
 
-  - paramètres :
+  - **paramètres** :
 
     - token : **str**
 
-  - sortie : **dict[str,any**
+  - **sortie** : **dict[str,any]**
+
+- `refresh_token`
+
+  - **paramètres** :
+
+    - refresh_token_datat : **RefreshToken**
+
+  - **sortie** : **AccessToken**
 
 #### Module `authorization`
 
@@ -369,44 +388,69 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 **Attributs prédéfinis**:
 
 - id : **Column(Integer)**
+
 - status_code :**Column(Integer)**
+
 - method : **Column(String)**
+
 - url : **Column(String)**
+
 - error_message : **Column(Text)**
+
 - date_created : **Column(DateTime)**
+
 - process_time : **Column(Numeric)**
+
 - remote_adress: **Column(String)**
+
 
 `LoggerMiddlewarePydanticModel`:
 **Attributs prédéfinis**:
 
 - id : **int**
+
 - status_code : **int**
+
 - method : **str**
+
 - url : **str**
+
 - error_message : **str**
+
 - date_created : **datetime**
+
 - process_time : **float**
+
 - remote_adress: **str**
+
 
 ##### Sous module `log_middleware`
 
 Ce sous module définit les middelwares de loggins
 
 - Class **`LoggerMiddleware`**
-  - `paramètres` :
-    - LoggerMiddlewareModel : définit le modèle de Log a utilisé
+
+  - **paramètres** :
+
+    - LoggerMiddlewareModel : définit le modèle de Log
+
     - session_factory : **sessionmaker[Session]**
+
     - manager : **ConnectionManager**
+
 
 ##### Sous module `error_middleware`
 
 Ce sous module définit les middelwares d'erreurs
 
 - Class **`ErrorMiddleware`**
-  - `paramètres optionels` :
-    - LoggerMiddlewareModel : définit le modèle de Log a utilisé
+
+  - **paramètres** :
+
+    - LoggerMiddlewareModel : définit le modèle de Log
+
     - session_factory : **sessionmaker[Session]**
+
     - manager : **ConnectionManager**
 
 ##### Sous module crud_middelware
@@ -414,32 +458,56 @@ Ce sous module définit les middelwares d'erreurs
 ce sous module définit les methodes pour sauvegarder les logs .
 
 - **`save_log`** : enregistre les logs
-  - `paramètres`:
-    - **request**: Request
+
+  - **paramètres**:
+
+    - **request** : Request
+
     - **LoggerMiddelewareModel**
+
     - **db** : Session
+
     - **call_next**: Optional
+
     - **error** : Optional[str]
+
     - **response** : Optional[Response]
+
     - **manager**: Optional[ConnectionManager]
-- `sortie`: **response : Response**
 
-- **`get_response_and_process_time`** : renvoie le temps de la requete et la reponse
-  - `paramètres`:
+- **paramètres**: **Response**
+
+
+- **`get_response_and_process_time`** : renvoie le temps de la requete et la reponse .
+
+  - **paramètres**:
+
     - **request**: Request
-    - **call_next**:callable
-    - **response** : Response
-    - **call_next**: Optional
-- `sortie`: [ **response** , **process_time** ]
 
-- **`read_response_body`** : **renvoie le une chaine de caractère contenant la partie du detail si elle existe du corps de la requête**
-  - `paramètres`:
+    - **call_next**:callable
+
     - **response** : Response
-- `sortie`: **str**
+
+    - **call_next**: Optional
+
+- **paramètres**: [ **response** , **process_time** ]
+
+
+- **`read_response_body`** : **renvoie  une chaine de caractère contenant la partie du detail du body si elle existe du corps de la requête**
+
+  - **paramètres**:
+
+    - **response** : Response
+
+- **paramètres**: **str**
+
 
 - **`recreate_async_iterator`** : **recree un nouvel itérateur pour la requete**
+
   - `paramètres`:
+
     - **body** : bytes
+
 
 #### Module `user`
 
@@ -447,69 +515,135 @@ Ce module comporte toute la gestion des utilisateurs
 
 ##### Sous module `models`
 
-Ce sous module comporte tous les models pour l'entité utilisateur
+Ce sous module comporte tous les models pour l'entité utilisateur .
 
 class **`User`**
+
 `Attributs`:
 
 - id : **Column(Integer)**
+
 - email : **Column(String)**
+
 - username : **Column(String)**
+
 - password : **Column(String)**
+
 - lastname : **Column(String)**
+
 - date_created : **Column(DateTime)**
+
 - date_updated : **Column(DateTime)**
+
 - is_active : **Column(Boolean)**
+
 - attempt_login : **Column(Integer)**
+
 
 `Methodes` :
 
-- try_login :
-  tente de connecter un utilisateur et mets à jour attempt_login en fonction
+- `try_login` :
+  tente de connecter un utilisateur et mets à jour attempt_login en fonction .
 
-  - paramètres :
+  - **paramètres** :
+
     - is_success : **bool**
-  - sortie : **bool**
 
-- set_password : permet de modifier le mot de passe .
+  - **sortie** : **bool**
 
-  - paramètres :
+- `set_password` : permet de modifier le mot de passe .
+
+  - **paramètres** :
+
   - password : **str**
-  - sortie : **None**
 
-- check_password : permet de vérifier le mot de passe.
-  - paramètres :
+  - **sortie** : **None**
+
+
+- `check_password` : permet de vérifier le mot de passe.
+
+  - **paramètres** :
+
+
   - password : **str**
-  - sortie : **bool**
+
+
+  - **sortie** : **bool**
+
+
 
 Models pydantics pour la validations :
 
-- `UserBaseModel`
+
 - `UserCreateModel`
+  - email  : **str**
+
+  - username : **str**
+
+  - lastname : **str**
+
+  - firstname : **str**
+
+  - password : **str**
+
+
+
 - `UserUpdateModel`
-- `UserPydanticModel`
+  -  email: **Optional[str]**
+
+  -  username: **Optional[str]**
+
+  -  lastname: **Optional[str]**
+
+  -  firstname: **Optional[str]**
+
+  -  is_active: **Optional[bool]**
+
+  -  password: **Optional[str]**
+
 
 class **`UserPydanticModel`**
+
 `Attributs`:
 
 - id : **int**
+
 - email : **str**
+
 - username : **str**
+
 - password : **str**
+
 - lastname : **str**
+
 - date_created : **datetime**
+
 - is_active : **bool**
+
 - attempt_login : **int**
+
 
 - `UserLoginRequestModel` :
 
   - username : **Optional[str]**
+
   - password : **str**
+
   - email : **Optional[str]**
 
-- `UserChangePasswordRequestMode(UserLoginRequestMode)` :
+
+- `UserChangePasswordRequestMode` :
+
   - current_password : **str**
+
   - new_password : **str**
+
+  - username : **Optional[str]**
+
+  - password : **str**
+
+  - email : **Optional[str]**
+
 
 #### Module `websocket`
 
@@ -519,11 +653,26 @@ Ce module comporte certaines classes et methodes pour interagir avec des websock
 
 Contient la classe ConnectionManager pour gérer une connextion avec un websocket .
 
-- **methodes**:
-  - **init**
-  - **connect** (self,websocket)
-  - **disconnect** (self,websocket)
-  - **send_message** (self,str):
+**methodes**:
+
+- **connect** : permet de  connecter un websocket au manager
+
+  - **paramètres:**
+
+    - websocket : WebSocket
+
+- **disconnect** : permet de déconnecter un websocket
+
+  - **paramètres:**
+
+    - websocket : WebSocket
+
+- **send_message**  : permet d'envoyer un message
+
+  - **paramètres:**
+
+    - message : **str**
+
 
 #### Module `crud`
 
@@ -537,7 +686,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
 - **`__init__`** :
 
-  - **paramètres** :
+  - **paramètres :
     - `entity_name`: **str**
     - `session_factory`: **sessionmaker**
     - `SQLAlchemyModel` : Le model SQLAlchemy
@@ -600,7 +749,7 @@ Ce sous module comporte la classe RouteConfig pour configurer un CustomRouterPro
 `RouteConfig`
 
 - `__init__` :
-  - `paramètres`:
+  - **paramètres**:
     - `route_name`: **str**
     - `is_activated`: **bool** , default : `False`
     - `is_protected`: **bool** , default : `False`
@@ -628,7 +777,7 @@ AUTH_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_pro
 
 - `__init__` :
 
-  - `paramètres`:
+  - **paramètres**:
 
     - `prefix`: **str**
     - `tags`: **List[str]**
@@ -652,16 +801,16 @@ router_provider = CustomRouterProvider(
 
 - **`get_default_router`** : renvoie un router avec la configuration de `DEFAULT_CONFIG`
 
-  - `sortie`: **APIRouter**
+  - **paramètres**: **APIRouter**
 
 - **`get_protected_router`** : renvoie un router avec la configuration de `AUTH_CONFIG`
 
-  - `sortie`: **APIRouter**
+  - **paramètres**: **APIRouter**
 
 - **`initialize_router`** : renvoie un router avec une configuration personnalisée .
-  - `paramètres`:
+  - **paramètres**:
     - `init_data`: **List[RouteConfig]**
-  - `sortie`: **APIRouter**
+  - **paramètres**: **APIRouter**
   - `utilisation` :
 
 ```python

@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException as HE
 from starlette.types import Scope, Receive, Send
-from harlequelrah_fastapi.middleware.crud_middleware import get_process_time, save_log
+from harlequelrah_fastapi.middleware.crud_middleware import save_log
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
