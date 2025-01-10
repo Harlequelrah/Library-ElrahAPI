@@ -29,11 +29,9 @@ class Authentication:
     User = User
     UserCreateModel = UserCreateModel
     UserUpdateModel = UserUpdateModel
-    SECRET_KEY = str(secrets.token_hex(32))
-    ALGORITHM = ["HS256"]
+    ALGORITHMS = ["HS256"]
     REFRESH_TOKEN_EXPIRE_DAYS = 7
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
-    session_factory: sessionmaker[Session] = None
 
     def __init__(
         self,
@@ -48,21 +46,30 @@ class Authentication:
         self.connector = connector
         self.database_name = database_name
         self.server = server
+        self.__secret_key = str(secrets.token_hex(32))
+        self.__algorithms= self.ALGORITHMS
+        self.__refresh_token_expire_days = self.REFRESH_TOKEN_EXPIRE_DAYS
+        self.__access_token_expire_minutes = self.ACCESS_TOKEN_EXPIRE_MINUTES
+        self.__session_factory:sessionmaker[Session]  = None
+    @property
+    def session_factory(self):
+        return self.__session_factory
 
-    def set_db_session(self, session_factory: sessionmaker[Session]):
-        self.session_factory = session_factory
+    @session_factory.setter
+    def session_factory(self, session_factory: sessionmaker[Session]):
+        self.__session_factory = session_factory
 
     def get_session(self):
-        db = self.session_factory()
+        db= self.__session_factory()
         return db
 
     def set_algorithms(self, algorithms: List[str]):
         self.ALGORITHM = algorithms
 
-    def add_algorithm(self,algorithm:str):
+    def add_algorithm(self, algorithm: str):
         self.ALGORITHM.append(algorithm)
 
-    def remove_algorithms(self,algorithm:str):
+    def remove_algorithms(self, algorithm: str):
         self.ALGORITHM.remove(algorithm)
 
     def set_REFRESH_TOKEN_EXPIRE_DAYS(self, REFRESH_TOKEN_EXPIRE_DAYS):
@@ -74,11 +81,12 @@ class Authentication:
     def set_authentication_scheme(self, oauth2_scheme):
         self.oauth2_scheme = oauth2_scheme
 
-    async def is_authorized(user:User,privilege_id):
-        role= user.role
-        if not role.is_active : return False
+    async def is_authorized(user: User, privilege_id):
+        role = user.role
+        if not role.is_active:
+            return False
         for privilege in role.privileges:
-            return privilege.id==privilege_id and privilege.is_active
+            return privilege.id == privilege_id and privilege.is_active
         else:
             return False
 

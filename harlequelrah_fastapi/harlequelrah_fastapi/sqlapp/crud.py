@@ -10,7 +10,7 @@ from myproject.settings.database import authentication
 
 myapp_crud = CrudForgery(
     entity_name="myapp",
-    session_factory=authentication.session_factory,
+    session_factory=authentication.get_session_factory(),
     SQLAlchemyModel=SQLAlchemyModel,
     CreatePydanticModel=CreatePydanticModel,
     UpdatePydanticModel=UpdatePydanticModel,

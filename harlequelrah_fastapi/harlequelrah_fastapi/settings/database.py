@@ -14,4 +14,4 @@ finally:
     engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
     sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
-    authentication.set_db_session(session_factory=sessionLocal)
+    authentication.set_session_factory(session_factory=sessionLocal)

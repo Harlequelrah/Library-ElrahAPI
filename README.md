@@ -122,7 +122,6 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 
 ce sous module contient des fonction utilitaires pour les exceptions
 
-
 - `raise_custom_http_exception` : lève une erreur CustomHttpException
   - **paramètre** :
     - `status_code` : **int**
@@ -139,7 +138,6 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
 - `update_entity` : mets à jour les champs d'une entité objet
   - paramètres : `existing_entity` , `update_entity`
   - retourne : `existing_entity`
-
 
 #### Module `authentication`
 
@@ -186,6 +184,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `session_factory` : **sessionmaker[Session]**
 
 **methodes**
+
 - `__init__` :
 
   - paramètres :
@@ -200,7 +199,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - server : **str**
 
-- `set_db_session` :
+- `set_session_factory` :
 
   - paramètres : pour définir le générateur de session
 
@@ -210,16 +209,13 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - sortie : **Session**
 
-
-
-
 #### Module `authorization`
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
 ##### Sous module `role_model`
 
-Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entité Role .
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
 `Role`:
 
@@ -227,7 +223,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entit�
 
 - name : **Column(String)**
 
-- normalized_name : **Column(String)**  automatique à l'ajout de name
+- normalized_name : **Column(String)** automatique à l'ajout de name
 
 - is_active : **Column(Boolean)**
 
@@ -253,10 +249,9 @@ Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entit�
 
 - privileges : **List[MetaPrivilege]**
 
-
 ##### Sous module `privilege_model`
 
-Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entité Privilege .
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Privilege .
 
 - sous module `privilege_model`
 
@@ -264,7 +259,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entit�
 
 - name : **Column(String)**
 
-- normalized_name : **Column(String)**  automatique à l'ajout de name
+- normalized_name : **Column(String)** automatique à l'ajout de name
 
 - is_active : **Column(Boolean)**
 
@@ -285,7 +280,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entit�
 - description : **Optional[str]**
 
 - role_id : **Optional[int]**
-
 
 `PrivilegePydanticModel` :
 
@@ -311,7 +305,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic  pour l'entit�
 
 - is_active : **str**
 
-
 #### Module `middleware`
 
 Ce module regroupe toute la gestion des middelwares
@@ -333,6 +326,7 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 `LoggerMiddlewarePydanticModel`:
 **Attributs prédéfinis**:
+
 - id : **int**
 - status_code : **int**
 - method : **str**
@@ -341,6 +335,7 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 - date_created : **datetime**
 - process_time : **float**
 - remote_adress: **str**
+
 ##### Sous module `log_middleware`
 
 Ce sous module définit les middelwares de loggins
@@ -393,7 +388,6 @@ ce sous module définit les methodes pour sauvegarder les logs .
   - `paramètres`:
     - **body** : bytes
 
-
 #### Module `user`
 
 Ce module comporte toute la gestion des utilisateurs
@@ -425,6 +419,7 @@ class **`User`**
   - sortie : **bool**
 
 - set_password : permet de modifier le mot de passe .
+
   - paramètres :
   - password : **str**
   - sortie : **None**
@@ -454,6 +449,7 @@ class **`UserPydanticModel`**
 - attempt_login : **int**
 
 - `UserLoginRequestModel` :
+
   - username : **Optional[str]**
   - password : **str**
   - email : **Optional[str]**
@@ -461,8 +457,6 @@ class **`UserPydanticModel`**
 - `UserChangePasswordRequestMode(UserLoginRequestMode)` :
   - current_password : **str**
   - new_password : **str**
-
-
 
 #### Module `websocket`
 
