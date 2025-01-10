@@ -250,6 +250,10 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - sortie : **str**
 
+-  `get_current_user` : retourne  l'utilisateur actuellement authentifié .
+
+  - sortie : **User**
+
 #### Module `authorization`
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
