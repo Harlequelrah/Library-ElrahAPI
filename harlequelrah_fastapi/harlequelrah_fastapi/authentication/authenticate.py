@@ -13,9 +13,6 @@ from sqlalchemy import or_
 import secrets
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException as HE, status
-from harlequelrah_fastapi.exception.custom_http_exception import (
-    CustomHttpException as CHE,
-)
 from jose import ExpiredSignatureError, jwt, JWTError
 from harlequelrah_fastapi.user.models import (
     UserPydanticModel,
@@ -100,7 +97,7 @@ class Authentication:
     ):
         if username_or_email is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = session if session else self.get_session() 
+        db = session if session else self.get_session()
         user = (
             db.query(self.User)
             .filter(

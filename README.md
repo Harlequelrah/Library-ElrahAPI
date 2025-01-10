@@ -254,6 +254,14 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - sortie : **User**
 
+-  `validate_token` : valide le token et retourne un payload
+
+  - paramètres :
+
+    - token : **str**
+
+  - sortie : **dict[str,any**
+
 #### Module `authorization`
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
