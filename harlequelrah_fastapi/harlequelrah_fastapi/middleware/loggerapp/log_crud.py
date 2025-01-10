@@ -4,6 +4,6 @@ from .log_model import Logger
 
 logCrud = CrudForgery(
     entity_name="log",
-    session_factory=authentication.get_session_factory(),
+    session_factory=authentication.get_session_factory,
     SQLAlchemyModel=Logger,
 )

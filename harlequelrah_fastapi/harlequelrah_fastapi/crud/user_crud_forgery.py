@@ -18,7 +18,7 @@ class UserCrudForgery(CrudForgery):
     def __init__(self, authentication: Authentication):
         super().__init__(
             entity_name="user",
-            session_factory=authentication.get_session_factory(),
+            session_factory=authentication.get_session_factory,
             SQLAlchemyModel=authentication.User,
             CreatePydanticModel=authentication.UserCreateModel,
             UpdatePydanticModel=authentication.UserUpdateModel,

@@ -15,7 +15,7 @@ from .user_model import Privilege, Role
 
 roleCrud = CrudForgery(
     entity_name="role",
-    session_factory=authentication.get_session_factory(),
+    session_factory=authentication.get_session_factory,
     SQLAlchemyModel=Role,
     CreatePydanticModel=RoleCreateModel,
     UpdatePydanticModel=RoleUpdateModel,
@@ -23,7 +23,7 @@ roleCrud = CrudForgery(
 
 privilegeCrud = CrudForgery(
     entity_name="privilege",
-    session_factory=authentication.get_session_factory(),
+    session_factory=authentication.get_session_factory,
     SQLAlchemyModel=Privilege,
     CreatePydanticModel=PrivilegeCreateModel,
     UpdatePydanticModel=PrivilegeUpdateModel,

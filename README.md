@@ -161,7 +161,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 **Attributs**
 
-- `oauth2_scheme` : définit le schéma d'authentication
+- `__oauth2_scheme` : définit le schéma d'authentication
 
 - `User` : le modèle d'utilisateur SQLAlchemy
 
@@ -173,15 +173,15 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
 
-- `SECRET_KEY` : **str** [une clé secrète générer par défaut]
+- `__secret_key` : **str** [une clé secrète générer par défaut]
 
-- `ALGORITHM` : **List[str]**un tableau d'algorithm [par défaut **[`HS256`]**]
+- `__algorithms` : **List[str]**un tableau d'algorithm [par défaut **[`HS256`]**]
 
 - `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
 
 - `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
 
-- `session_factory` : **sessionmaker[Session]**
+- `__session_factory` : **sessionmaker[Session]**
 
 **methodes**
 
@@ -199,15 +199,56 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - server : **str**
 
-- `set_session_factory` :
 
-  - paramètres : pour définir le générateur de session
+- `get_session` : retourne une session
 
-    - session_factory : **sessionmaker[Session]**
+  - sortie : `Session`
 
-- `get_session` : renvoie une session .
+- `is_authorized` : verifie si un utilisateur a un privilège
 
-  - sortie : **Session**
+  - paramètres :
+
+    - user_id : **int**
+
+    - privilege_id : **int**
+
+  - sortie : **bool**
+
+-  `authenticate_user`
+
+  - paramètres :
+
+    - password : **str**
+
+    - username_or_email : **str**
+
+   - session : **Optional[Session]**
+
+  - sortie : **User**
+
+-  `create_access_token`
+
+  - paramètres :
+
+    - data : **dict**
+
+    - expires_delta : **timedelta**
+
+  - sortie : **AccessToken**
+
+-  `create_refresh_token`
+
+  - paramètres :
+
+    - data : **dict**
+
+    - expires_delta : **timedelta**
+
+  - sortie : **RefreshToken**
+
+-  `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
+
+  - sortie : **str**
 
 #### Module `authorization`
 

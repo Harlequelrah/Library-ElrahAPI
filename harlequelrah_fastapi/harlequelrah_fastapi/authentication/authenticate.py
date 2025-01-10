@@ -5,6 +5,8 @@ from harlequelrah_fastapi.exception.auth_exception import (
 )
 from sqlalchemy.orm import Session, sessionmaker
 from fastapi import Depends
+
+from harlequelrah_fastapi.exception.exceptions_utils import raise_custom_http_exception
 from .token import AccessToken, RefreshToken
 from datetime import datetime, timedelta
 from sqlalchemy import or_
@@ -24,7 +26,7 @@ from harlequelrah_fastapi.user.models import (
 
 
 class Authentication:
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/tokenUrl")
+    tokenUrl = "users/tokenUrl"
     UserPydanticModel = UserPydanticModel
     User = User
     UserCreateModel = UserCreateModel
@@ -48,9 +50,25 @@ class Authentication:
         self.server = server
         self.__secret_key = str(secrets.token_hex(32))
         self.__algorithms= self.ALGORITHMS
-        self.__refresh_token_expire_days = self.REFRESH_TOKEN_EXPIRE_DAYS
-        self.__access_token_expire_minutes = self.ACCESS_TOKEN_EXPIRE_MINUTES
         self.__session_factory:sessionmaker[Session]  = None
+        self.__oauth2_scheme = OAuth2PasswordBearer(tokenUrl=self.tokenUrl)
+
+    @property
+    def algorithms(self):
+        return self.__algorithms
+
+    @algorithms.setter
+    def algorithms(self,algorithms:List[str]):
+        self.__algorithms=algorithms
+
+    @property
+    def oauth2_scheme(self):
+        return self.__oauth2_scheme
+
+    @oauth2_scheme.setter
+    def oauth2_scheme(self,oauth2_scheme):
+        self.__oauth2_scheme = oauth2_scheme
+
     @property
     def session_factory(self):
         return self.__session_factory
@@ -61,32 +79,16 @@ class Authentication:
 
     def get_session(self):
         db= self.__session_factory()
+        if not db : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
         return db
 
-    def set_algorithms(self, algorithms: List[str]):
-        self.ALGORITHM = algorithms
-
-    def add_algorithm(self, algorithm: str):
-        self.ALGORITHM.append(algorithm)
-
-    def remove_algorithms(self, algorithm: str):
-        self.ALGORITHM.remove(algorithm)
-
-    def set_REFRESH_TOKEN_EXPIRE_DAYS(self, REFRESH_TOKEN_EXPIRE_DAYS):
-        self.REFRESH_TOKEN_EXPIRE_DAYS = REFRESH_TOKEN_EXPIRE_DAYS
-
-    def set_ACCESS_TOKEN_EXPIRE_MINUTES(self, ACCESS_TOKEN_EXPIRE_MINUTES):
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
-
-    def set_authentication_scheme(self, oauth2_scheme):
-        self.oauth2_scheme = oauth2_scheme
-
-    async def is_authorized(user: User, privilege_id):
+    async def is_authorized(self,user_id:int, privilege_id:int)->bool:
+        user = self.get_session()
         role = user.role
         if not role.is_active:
             return False
         for privilege in role.privileges:
-            return privilege.id == privilege_id and privilege.is_active
+            return (privilege.id == privilege_id and privilege.is_active)
         else:
             return False
 
@@ -98,7 +100,7 @@ class Authentication:
     ):
         if username_or_email is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = self.get_session() if session is None else session
+        db = session if session else self.get_session() 
         user = (
             db.query(self.User)
             .filter(
@@ -133,7 +135,7 @@ class Authentication:
                 minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES
             )
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
         return {"access_token": encode_jwt, "token_type": "bearer"}
 
     def create_refresh_token(
@@ -145,7 +147,7 @@ class Authentication:
         else:
             expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
     async def get_access_token(self, token=Depends(oauth2_scheme)):
@@ -160,44 +162,42 @@ class Authentication:
         payload = await self.validate_token(token)
         sub: str = payload.get("sub")
         if sub is None:
-            raise self.CREDENTIALS_EXCEPTION
+            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         user = (
             db.query(self.User)
             .filter(or_(self.User.username == sub, self.User.email == sub))
             .first()
         )
         if user is None:
-            raise self.CREDENTIALS_EXCEPTION
+            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
 
     async def validate_token(self, token: str):
         try:
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=self.ALGORITHM)
+            payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithms)
             return payload
         except ExpiredSignatureError:
-            detail = "Token has expired"
-            http_exc = HE(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
-            custom_http_exc = CHE(http_exc)
-            raise custom_http_exc
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
+            )
         except JWTError:
-            detail = "Invalid token"
-            http_exc = HE(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
-            custom_http_exc = CHE(http_exc)
-            raise custom_http_exc
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
 
     async def refresh_token(self, refresh_token_data: RefreshToken):
         db = self.get_session()
         payload = await self.validate_token(refresh_token_data.refresh_token)
         sub = payload.get("sub")
         if sub is None:
-            raise self.CREDENTIALS_EXCEPTION
+            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         user = (
             db.query(self.User)
             .filter(or_(self.User.username == sub, self.User.email == sub))
             .first()
         )
         if user is None:
-            raise self.CREDENTIALS_EXCEPTION
+            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(self.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = self.create_access_token(
             data={"sub": sub}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
