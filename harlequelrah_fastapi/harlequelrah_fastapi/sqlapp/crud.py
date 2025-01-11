@@ -5,12 +5,12 @@ from myproject.myapp.model import SQLAlchemyModel
 from myproject.myapp.schema import CreatePydanticModel, UpdatePydanticModel
 from sqlalchemy.orm import Session
 from harlequelrah_fastapi.utility.utils import update_entity
-from harlequelrah_fastapi.crud.crud_model import CrudForgery
+from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from myproject.settings.database import authentication
 
 myapp_crud = CrudForgery(
     entity_name="myapp",
-    session_factory=authentication.get_session_factory,
+    session_factory=authentication.session_factory,
     SQLAlchemyModel=SQLAlchemyModel,
     CreatePydanticModel=CreatePydanticModel,
     UpdatePydanticModel=UpdatePydanticModel,

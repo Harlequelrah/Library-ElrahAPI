@@ -1,10 +1,11 @@
 from typing import Optional
 from fastapi.responses import JSONResponse
 from harlequelrah_fastapi.authentication.authenticate import Authentication
-from harlequelrah_fastapi.crud.crud_model import CrudForgery
+from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
+from harlequelrah_fastapi.exception.exceptions_utils import raise_custom_http_exception
 from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy import or_
 from sqlalchemy.sql import func
@@ -18,7 +19,7 @@ class UserCrudForgery(CrudForgery):
     def __init__(self, authentication: Authentication):
         super().__init__(
             entity_name="user",
-            session_factory=authentication.get_session_factory,
+            session_factory=authentication.session_factory,
             SQLAlchemyModel=authentication.User,
             CreatePydanticModel=authentication.UserCreateModel,
             UpdatePydanticModel=authentication.UserUpdateModel,
@@ -42,10 +43,10 @@ class UserCrudForgery(CrudForgery):
                 content={"message": "Password updated successfully"},
             )
         else:
-            detail = "Your current password you enter  is incorrect"
-            http_exc = HE(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
-            custom_http_exception = CHE(http_exc)
-            raise custom_http_exception
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Your current password you enter  is incorrect"
+            )
+
 
     async def is_unique(self, sub: str):
         db = self.session_factory()

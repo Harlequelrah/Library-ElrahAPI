@@ -686,18 +686,27 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
 - **`__init__`** :
 
-  - **paramètres :
+  - **paramètres** :
+
     - `entity_name`: **str**
+
     - `session_factory`: **sessionmaker**
+
     - `SQLAlchemyModel` : Le model SQLAlchemy
+
     - `CreatePydanticModel` : Le model Pydantic pour la création .
+
     - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
+
 
 - **`create`** :
 
   - **paramètres** :
+
     - `create_ob`: **CreatePydanticModel**
+
   - **sortie** : **SQLAlchemyModel**
+
 
 - **`count`** :
 
@@ -706,37 +715,77 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 - **`read_all`** :
 
   - **paramètres** :
+
     - `skip`: **Optional[int]**
+
     - `limit`: **Optional[int]**
+
   - **sortie** : **List[SQLAlchemyModel]**
+
 
 - **`read_all_by_filter`** :
 
   - **paramètres** :
+
     - `filter`: **str**
+
     - `value`: **str**
+
     - `skip`: **Optional[int]**
+
     - `limit`: **Optional[int]**
+
   - **sortie** : **List[SQLAlchemyModel]**
+
 
 - **`read_one`** :
 
   - **paramètres** :
+
     - `id`: **int**
+
     - `db`: **Optional[Session]** : pour utiliser la même session lors de update et delete .
+
   - **sortie** : **SQLAlchemyModel**
 
 - **`update`** :
 
   - **paramètres** :
+
+
     - `id`: **int**
+
     - `update_obj`: **UpdatePydanticModel**
+
   - **sortie** : **SQLAlchemyModel**
 
 - **`delete`** :
+
   - **paramètres** :
+
     - `id`: **int**
+
   - **sortie** : **JsonResponse**
+
+##### Sous module user_crud_forgery
+Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour offire un crud personnalisé pour l'utilisateur .
+
+**Méthodes** :
+
+- `__init__`
+
+  - **paramètres** :
+
+    - authentication : Authentication
+
+- `change_password`  : méthode pour changer le mot de passe d'un utilisateur
+
+  - **paramètres** :
+
+    -  : Authentication
+
+
+
 
 #### Module `router`
 

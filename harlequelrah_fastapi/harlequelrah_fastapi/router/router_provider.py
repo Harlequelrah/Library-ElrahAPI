@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends
 from harlequelrah_fastapi.authentication.authenticate import Authentication
 from typing import List, Optional
-from harlequelrah_fastapi.crud.crud_model import CrudForgery
+from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from harlequelrah_fastapi.router.route_config import RouteConfig
 from harlequelrah_fastapi.router.router_crud import exclude_route, get_single_route
-from harlequelrah_fastapi.router.router_namespace import  DEFAULTROUTESNAME, ROUTES_PROTECTED_CONFIG, ROUTES_PUBLIC_CONFIG
+from harlequelrah_fastapi.router.router_namespace import (
+    DEFAULTROUTESNAME,
+    ROUTES_PROTECTED_CONFIG,
+    ROUTES_PUBLIC_CONFIG,
+)
 
 
 class CustomRouterProvider:
@@ -14,7 +18,7 @@ class CustomRouterProvider:
         prefix: str,
         tags: List[str],
         PydanticModel,
-        crud: CrudForgery ,
+        crud: CrudForgery,
         get_access_token: Optional[callable] = None,
     ):
         self.crud = crud
@@ -30,7 +34,7 @@ class CustomRouterProvider:
     def get_public_router(
         self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
     ) -> APIRouter:
-        return  self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
+        return self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
 
     def get_mixed_router(
         self,
@@ -40,22 +44,24 @@ class CustomRouterProvider:
         exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
     ) -> APIRouter:
         for route_name in public_routes_name:
-            route=get_single_route(route_name)
+            route = get_single_route(route_name)
             init_data.append(route)
         for route_name in protected_routes_name:
-            route=get_single_route(route_name,"protected")
+            route = get_single_route(route_name, "protected")
             init_data.append(route)
-        custom_init_data=exclude_route(init_data,exclude_routes_name)
+        custom_init_data = exclude_route(init_data, exclude_routes_name)
         return self.initialize_router(custom_init_data)
 
-    def get_protected_router(self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None) -> APIRouter:
+    def get_protected_router(
+        self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
+    ) -> APIRouter:
         return self.initialize_router(ROUTES_PROTECTED_CONFIG, exclude_routes_name)
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
         exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
-    )->APIRouter:
+    ) -> APIRouter:
         init_data = exclude_route(init_data, exclude_routes_name)
         for config in init_data:
             if config.route_name == "count" and config.is_activated:
@@ -74,7 +80,11 @@ class CustomRouterProvider:
                     count = await self.crud.count()
                     return {"count": count}
 
-            if config.route_name == "read-one" and config.is_activated and not config.is_unlocked:
+            if (
+                config.route_name == "read-one"
+                and config.is_activated
+                and not config.is_unlocked
+            ):
 
                 @self.router.get(
                     path=config.route_path,
@@ -179,10 +189,11 @@ class CustomRouterProvider:
                         if self.get_access_token and config.is_protected
                         else []
                     ),
-                    status_code=204
+                    status_code=204,
                 )
                 async def delete(
                     id: int,
                 ):
                     return await self.crud.delete(id)
+
         return self.router
