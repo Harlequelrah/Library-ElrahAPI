@@ -242,59 +242,59 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 -  `authenticate_user`
 
-  - **paramètres** :
+   - **paramètres** :
 
-    - password : **str**
+     - password : **str**
 
-    - username_or_email : **str**
+     - username_or_email : **str**
 
-   - session : **Optional[Session]**
+     - session : **Optional[Session]**
 
-  - **sortie** : **User**
+   - **sortie** : **User**
 
 -  `create_access_token`
 
-  - **paramètres** :
+   - **paramètres** :
 
-    - data : **dict**
+     - data : **dict**
 
-    - expires_delta : **timedelta**
+     - expires_delta : **timedelta**
 
-  - **sortie** : **AccessToken**
+   - **sortie** : **AccessToken**
 
 -  `create_refresh_token`
 
-  - **paramètres** :
+   - **paramètres** :
 
-    - data : **dict**
+     - data : **dict**
 
-    - expires_delta : **timedelta**
+     - expires_delta : **timedelta**
 
-  - **sortie** : **RefreshToken**
+   - **sortie** : **RefreshToken**
 
 -  `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
 
-  - **sortie** : **str**
+   - **sortie** : **str**
 
 -  `get_current_user` : retourne  l'utilisateur actuellement authentifié .
 
-  - **sortie** : **User**
+   - **sortie** : **User**
 
 -  `validate_token` : valide le token et retourne un payload
 
-  - **paramètres** :
+   - **paramètres** :
 
-    - token : **str**
+     - token : **str**
 
-  - **sortie** : **dict[str,any]**
+   - **sortie** : **dict[str,any]**
 
 - `refresh_token`
 
-  - **paramètres** :
+   - **paramètres** :
 
-    - refresh_token_datat : **RefreshToken**
+     - refresh_token_datat : **RefreshToken**
 
-  - **sortie** : **AccessToken**
+   - **sortie** : **AccessToken**
 
 #### Module `authorization`
 
@@ -822,23 +822,66 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
   - **sortie** : **bool**
 
 
-
-
 #### Module `router`
 
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des router.
 
 ##### Sous module `route_config`
 
-Ce sous module comporte la classe RouteConfig pour configurer un CustomRouterProvider .
+Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterProvider et une classe utilitaire `DEFAULT_ROUTE_CONFIG`.
+
+`DEFAULT_ROUTE_CONFIG`
+
+`__init__` :
+
+  - **paramètres**
+
+    - summary : **str**
+
+    - description : **str**
+
 
 `RouteConfig`
 
+**Constantes**
+
+```python
+  DEFAULT_DETAIL_ROUTES_NAME = ["delete", "update", "read-one"]
+```
+
 - `__init__` :
+
   - **paramètres**:
+
     - `route_name`: **str**
+
+    - `route_path`: **str**
+
+    - `summary`: **Optional[str]**
+
+    - `description`: **Optional[str]**
+
     - `is_activated`: **bool** , default : `False`
+
     - `is_protected`: **bool** , default : `False`
+
+    - `is_unlocked`: **Optional[bool]** , default : `False`
+
+##### Sous module `route_namespace`
+
+Ce sous module comporte des Constantes et classes réutilisables dans le contexte du routage .
+
+- **class `DEFAULTROUTESNAME` (str,Enum)** : contient les noms des routes définies par le routage .
+
+- **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** :  contient une configuration de base pour définir les routes par défaut .
+
+- **`ROUTES_PUBLIC_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
+
+- **`ROUTES_PROTECTED_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut  protégés .
+
+- **`USER_AUTH_CONFIG` : dict[str,RouteConfig]** : contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
+
+- **`USER_AUTH_CONFIG_ROUTES` : List[RouteConfig]** : contient toutes les RouteConfig définit par `USER_AUTH_CONFIG`
 
 ##### Sous module `route_provider`
 
