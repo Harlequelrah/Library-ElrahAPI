@@ -114,7 +114,7 @@ Ce module contient des exceptions personnalisées utilisés dans cette biblioth�
 
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
-- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de **paramètres** d'authentification invalides .
+- `INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de paramètres d'authentification invalides .
 
 - `INACTIVE_USER_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de compte utilisateur inactive .
 
@@ -141,7 +141,7 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
 
 - `update_entity` : mets à jour les champs d'une entité objet .
 
-  - **paramètres :
+  - **paramètres** :
 
     - existing_entity : l'entité existante à mettre à jour.
 
@@ -158,11 +158,26 @@ Ce module contient des classes et des fonctions utilisées pour l'authentificati
 
 Ce sous module définit des classes pydantics pour la gestions des tokens :
 
-- AccessToken : access_token : **str** , token_type : **str**
+- AccessToken :
 
-- RefreshToken : refresh_token : **str** , token_type : **str**
+  - access_token : **str**
 
-- Token : access_token : **str** ,refresh_token : **str** , token_type : **str**
+  -  token_type : **str**
+
+- RefreshToken :
+
+  - refresh_token : **str**
+
+  - token_type : **str**
+
+- Token :
+
+  - access_token : **str**
+
+  - refresh_token : **str**
+
+  - token_type : **str**
+
 
 ##### 2. Sous module `authenticate`
 
@@ -555,7 +570,7 @@ class **`User`**
 
   - **paramètres** :
 
-  - password : **str**
+    - password : **str**
 
   - **sortie** : **None**
 
@@ -564,9 +579,7 @@ class **`User`**
 
   - **paramètres** :
 
-
-  - password : **str**
-
+    - password : **str**
 
   - **sortie** : **bool**
 
@@ -804,7 +817,7 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
   - **paramètres** :
 
     -  credential : **str|int**
-    -  db : Optional[Session] = None 
+    -  db : Optional[Session] = None
 
   - **sortie** : **bool**
 
