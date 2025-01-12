@@ -82,6 +82,9 @@ class UserLoginRequestModel(BaseModel):
     username: Optional[str] = None
     password: str
     email: Optional[str] = None
+    @property
+    def username_or_email(self):
+        return self.username or self.email
 
 
 class UserChangePasswordRequestModel(UserLoginRequestModel):

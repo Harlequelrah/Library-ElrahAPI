@@ -5,9 +5,9 @@ from fastapi import HTTPException as HE, Response,status
 from harlequelrah_fastapi.exception.exceptions_utils import raise_custom_http_exception
 from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,sessionmaker
 class CrudForgery :
-    def __init__(self,entity_name:str,session_factory,SQLAlchemyModel,CreatePydanticModel=None,UpdatePydanticModel=None):
+    def __init__(self,entity_name:str,session_factory:sessionmaker[Session],SQLAlchemyModel,CreatePydanticModel=None,UpdatePydanticModel=None):
         self.SQLAlchemyModel = SQLAlchemyModel
         self.CreatePydanticModel=CreatePydanticModel
         self.UpdatePydanticModel=UpdatePydanticModel
@@ -70,7 +70,7 @@ class CrudForgery :
         read_obj=session.query(self.SQLAlchemyModel).filter(self.SQLAlchemyModel.id==id).first()
         if read_obj is None:
             detail=f"{self.entity_name} with id {id} not found"
-            await raise_custom_http_exception(status.HTTP_404_NOT_FOUND,detail)
+            await raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail=detail)
         return read_obj
 
     async def update(self,id:int,update_obj):
@@ -87,22 +87,19 @@ class CrudForgery :
                 http_exc = che.http_exception
                 if http_exc.status_code == status.HTTP_404_NOT_FOUND :
                     detail = f"Error occurred while updating {self.entity_name} with id {id} , details : {http_exc.detail}"
-                    await raise_custom_http_exception(status.HTTP_404_NOT_FOUND,detail)
+                    await raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail=detail)
             except Exception as e:
                 session.rollback()
                 detail=f"Error occurred while updating {self.entity_name} with id {id} , details : {str(e)}"
-                await raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR,detail)
+                await raise_custom_http_exception(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail=detail)
         else:
             detail=f"Invalid {self.entity_name}  object for update"
-            raise_custom_http_exception(detail,)
-            http_exception=HE(status_code=status.HTTP_400_BAD_REQUEST,detail=detail)
-            custom_http_exception=CHE(http_exception=http_exception)
-            raise custom_http_exception
+            raise_custom_http_exception(status_code=status.HTTP_400_BAD_REQUEST,detail=detail)
 
     async def delete(self,id):
         session=self.session_factory()
         try :
-            existing_obj=await self.read_one(id,session)
+            existing_obj=await self.read_one(id=id,db=session)
             session.delete(existing_obj)
             session.commit()
         except CHE as che :

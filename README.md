@@ -631,6 +631,7 @@ class **`UserPydanticModel`**
 
   - email : **Optional[str]**
 
+ - **property** : username_or_email
 
 - `UserChangePasswordRequestMode` :
 
@@ -678,7 +679,7 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
 
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des cruds.
 
-##### Sous module `crud_model`
+##### Sous module `crud_forgery`
 
 Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
@@ -765,7 +766,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `id`: **int**
 
-  - **sortie** : **JsonResponse**
+  - **sortie** : **Reponse avec status code 204**
 
 ##### Sous module user_crud_forgery
 Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour offire un crud personnalisé pour l'utilisateur .
@@ -782,7 +783,30 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
 
   - **paramètres** :
 
-    -  : Authentication
+    -  username_or_email : **str**
+
+    -  current_password : **str**
+
+    -  new_passowrd : **str**
+
+  - **sortie** : **Reponse avec status code 204**
+
+- `is_unique`  : méthode pour vérifier si l'email ou le username est unique .
+
+  - **paramètres** :
+
+    -  sub : **str**
+
+  - **sortie** : **bool**
+
+- `read_one`  : méthode lire un utilisateur à partir de son id , son email ou de son username .
+
+  - **paramètres** :
+
+    -  credential : **str|int**
+    -  db : Optional[Session] = None 
+
+  - **sortie** : **bool**
 
 
 

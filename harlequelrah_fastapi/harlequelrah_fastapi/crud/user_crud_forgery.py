@@ -28,25 +28,20 @@ class UserCrudForgery(CrudForgery):
         self.get_current_user: callable = authentication.get_current_user
 
     async def change_password(
-        self, credential: str, current_password: str, new_password: str
+        self, username_or_email: str, current_password: str, new_password: str
     ):
         session = self.authentication.get_session()
         current_user = await self.authentication.authenticate_user(
-            password=current_password, username_or_email=credential, session=session
+            password=current_password, username_or_email=username_or_email, session=session
         )
         if current_user.check_password(current_password):
             current_user.set_password(new_password)
             session.commit()
             session.refresh(current_user)
-            return JSONResponse(
-                status_code=200,
-                content={"message": "Password updated successfully"},
-            )
         else:
             raise_custom_http_exception(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Your current password you enter  is incorrect"
             )
-
 
     async def is_unique(self, sub: str):
         db = self.session_factory()
@@ -85,7 +80,7 @@ class UserCrudForgery(CrudForgery):
                 detail = (
                     f"{self.entity_name} with username or email {credential} not found"
                 )
-                http_exc = HE(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
-                custom_http_exception = CHE(http_exc)
-                raise custom_http_exception
+                raise_custom_http_exception(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=detail
+                )
         return user

@@ -164,13 +164,11 @@ class UserRouterProvider(CustomRouterProvider):
                     description=config.description if config.description else None,
                 )
                 async def login(usermodel: UserLoginRequestModel):
-                    credential = (
-                        usermodel.username if usermodel.username else usermodel.email
-                    )
+                    username_or_email = usermodel.username_or_email
                     user = await self.authentication.authenticate_user(
-                    usermodel.password, credential
+                    usermodel.password, username_or_email
                     )
-                    data = {"sub": credential}
+                    data = {"sub": username_or_email}
                     access_token_data = self.authentication.create_access_token(data)
                     refresh_token_data = self.authentication.create_refresh_token(data)
                     return {
@@ -183,16 +181,17 @@ class UserRouterProvider(CustomRouterProvider):
 
                 @self.router.post(
                     response_model=Token,
+                    status_code= 204,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
-                    credential = form_data.username if form_data.username else form_data.email
+                    username_or_email = form_data.username_or_email
                     old_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.crud.change_password(
-                        credential, old_password, new_password
+                        username_or_email, old_password, new_password
                     )
 
         return self.router
