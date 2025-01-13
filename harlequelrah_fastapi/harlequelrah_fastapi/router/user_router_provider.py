@@ -39,7 +39,7 @@ class UserRouterProvider(CustomRouterProvider):
             tags=tags,
             PydanticModel=self.authentication.UserPydanticModel,
             crud=crud,
-            get_access_token=self.authentication.get_access_token,
+            get_access_token  =self.authentication.get_access_token,
         )
         self.crud: UserCrudForgery = crud
 
@@ -180,7 +180,7 @@ class UserRouterProvider(CustomRouterProvider):
             if config.route_name == "change-password" and config.is_activated:
 
                 @self.router.post(
-                    response_model=Token,
+
                     status_code= 204,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,

@@ -23,7 +23,7 @@ from harlequelrah_fastapi.user.models import (
 
 
 class Authentication:
-    tokenUrl = "users/tokenUrl"
+    oauth2_scheme=OAuth2PasswordBearer("users/tokenUrl")
     UserPydanticModel = UserPydanticModel
     User = User
     UserCreateModel = UserCreateModel
@@ -48,7 +48,7 @@ class Authentication:
         self.__secret_key = str(secrets.token_hex(32))
         self.__algorithms= self.ALGORITHMS
         self.__session_factory:sessionmaker[Session]  = None
-        self.__oauth2_scheme = OAuth2PasswordBearer(tokenUrl=self.tokenUrl)
+
 
     @property
     def algorithms(self):
@@ -58,13 +58,7 @@ class Authentication:
     def algorithms(self,algorithms:List[str]):
         self.__algorithms=algorithms
 
-    @property
-    def oauth2_scheme(self):
-        return self.__oauth2_scheme
 
-    @oauth2_scheme.setter
-    def oauth2_scheme(self,oauth2_scheme):
-        self.__oauth2_scheme = oauth2_scheme
 
     @property
     def session_factory(self):
@@ -148,7 +142,7 @@ class Authentication:
         encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
-    async def get_access_token(self, token=Depends(oauth2_scheme)):
+    async def get_access_token(self, token= Depends(oauth2_scheme)):
         await self.validate_token(token)
         return token
 
