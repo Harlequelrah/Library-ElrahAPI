@@ -130,7 +130,6 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
     - `detail` : **str**
 
-
 ##### 3. Sous module custom_http_exception
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
@@ -145,10 +144,22 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
 
     - existing_entity : l'entité existante à mettre à jour.
 
-    - update_entity : l'entité pour mettre  : l'entité pour la mise à jour .
+    - update_entity : l'entité pour mettre : l'entité pour la mise à jour .
 
   - **sortie** : **existing_entity**
 
+- `validate_value_type` : permet valider une valeur pour s'assurer qu'il est conforme à son type
+
+  - **paramètres** :
+
+    - value : la valeur à vérifier.
+
+  - **sortie** : **value**
+
+  - **utilisation** :
+  ```python
+  myvalue= validate_value_type("True") # retourne True
+  ```
 
 #### Module `authentication`
 
@@ -162,7 +173,7 @@ Ce sous module définit des classes pydantics pour la gestions des tokens :
 
   - access_token : **str**
 
-  -  token_type : **str**
+  - token_type : **str**
 
 - RefreshToken :
 
@@ -177,7 +188,6 @@ Ce sous module définit des classes pydantics pour la gestions des tokens :
   - refresh_token : **str**
 
   - token_type : **str**
-
 
 ##### 2. Sous module `authenticate`
 
@@ -225,7 +235,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - server : **str**
 
-
 - `get_session` : retourne une session
 
   - **sortie** : `Session`
@@ -240,61 +249,61 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **bool**
 
--  `authenticate_user`
+- `authenticate_user`
 
-   - **paramètres** :
+  - **paramètres** :
 
-     - password : **str**
+    - password : **str**
 
-     - username_or_email : **str**
+    - username_or_email : **str**
 
-     - session : **Optional[Session]**
+    - session : **Optional[Session]**
 
-   - **sortie** : **User**
+  - **sortie** : **User**
 
--  `create_access_token`
+- `create_access_token`
 
-   - **paramètres** :
+  - **paramètres** :
 
-     - data : **dict**
+    - data : **dict**
 
-     - expires_delta : **timedelta**
+    - expires_delta : **timedelta**
 
-   - **sortie** : **AccessToken**
+  - **sortie** : **AccessToken**
 
--  `create_refresh_token`
+- `create_refresh_token`
 
-   - **paramètres** :
+  - **paramètres** :
 
-     - data : **dict**
+    - data : **dict**
 
-     - expires_delta : **timedelta**
+    - expires_delta : **timedelta**
 
-   - **sortie** : **RefreshToken**
+  - **sortie** : **RefreshToken**
 
--  `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
+- `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
 
-   - **sortie** : **str**
+  - **sortie** : **str**
 
--  `get_current_user` : retourne  l'utilisateur actuellement authentifié .
+- `get_current_user` : retourne l'utilisateur actuellement authentifié .
 
-   - **sortie** : **User**
+  - **sortie** : **User**
 
--  `validate_token` : valide le token et retourne un payload
+- `validate_token` : valide le token et retourne un payload
 
-   - **paramètres** :
+  - **paramètres** :
 
-     - token : **str**
+    - token : **str**
 
-   - **sortie** : **dict[str,any]**
+  - **sortie** : **dict[str,any]**
 
 - `refresh_token`
 
-   - **paramètres** :
+  - **paramètres** :
 
-     - refresh_token_datat : **RefreshToken**
+    - refresh_token_datat : **RefreshToken**
 
-   - **sortie** : **AccessToken**
+  - **sortie** : **AccessToken**
 
 #### Module `authorization`
 
@@ -399,7 +408,9 @@ Ce module regroupe toute la gestion des middelwares
 ##### Sous module `models`
 
 Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
+
 `LoggerMiddlewareModel`:
+
 **Attributs prédéfinis**:
 
 - id : **Column(Integer)**
@@ -418,8 +429,8 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 - remote_adress: **Column(String)**
 
-
 `LoggerMiddlewarePydanticModel`:
+
 **Attributs prédéfinis**:
 
 - id : **int**
@@ -438,7 +449,6 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 - remote_adress: **str**
 
-
 ##### Sous module `log_middleware`
 
 Ce sous module définit les middelwares de loggins
@@ -452,7 +462,6 @@ Ce sous module définit les middelwares de loggins
     - session_factory : **sessionmaker[Session]**
 
     - manager : **ConnectionManager**
-
 
 ##### Sous module `error_middleware`
 
@@ -492,7 +501,6 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 - **paramètres**: **Response**
 
-
 - **`get_response_and_process_time`** : renvoie le temps de la requete et la reponse .
 
   - **paramètres**:
@@ -507,8 +515,7 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 - **paramètres**: [ **response** , **process_time** ]
 
-
-- **`read_response_body`** : **renvoie  une chaine de caractère contenant la partie du detail du body si elle existe du corps de la requête**
+- **`read_response_body`** : **renvoie une chaine de caractère contenant la partie du detail du body si elle existe du corps de la requête**
 
   - **paramètres**:
 
@@ -516,13 +523,11 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 - **paramètres**: **str**
 
-
 - **`recreate_async_iterator`** : **recree un nouvel itérateur pour la requete**
 
   - `paramètres`:
 
     - **body** : bytes
-
 
 #### Module `user`
 
@@ -554,7 +559,6 @@ class **`User`**
 
 - attempt_login : **Column(Integer)**
 
-
 `Methodes` :
 
 - `try_login` :
@@ -574,7 +578,6 @@ class **`User`**
 
   - **sortie** : **None**
 
-
 - `check_password` : permet de vérifier le mot de passe.
 
   - **paramètres** :
@@ -583,13 +586,11 @@ class **`User`**
 
   - **sortie** : **bool**
 
-
-
 Models pydantics pour la validations :
 
-
 - `UserCreateModel`
-  - email  : **str**
+
+  - email : **str**
 
   - username : **str**
 
@@ -599,21 +600,19 @@ Models pydantics pour la validations :
 
   - password : **str**
 
-
-
 - `UserUpdateModel`
-  -  email: **Optional[str]**
 
-  -  username: **Optional[str]**
+  - email: **Optional[str]**
 
-  -  lastname: **Optional[str]**
+  - username: **Optional[str]**
 
-  -  firstname: **Optional[str]**
+  - lastname: **Optional[str]**
 
-  -  is_active: **Optional[bool]**
+  - firstname: **Optional[str]**
 
-  -  password: **Optional[str]**
+  - is_active: **Optional[bool]**
 
+  - password: **Optional[str]**
 
 class **`UserPydanticModel`**
 
@@ -635,7 +634,6 @@ class **`UserPydanticModel`**
 
 - attempt_login : **int**
 
-
 - `UserLoginRequestModel` :
 
   - username : **Optional[str]**
@@ -644,9 +642,9 @@ class **`UserPydanticModel`**
 
   - email : **Optional[str]**
 
- - **property** : username_or_email
+- **property** : username_or_email
 
-- `UserChangePasswordRequestMode` :
+- `UserChangePasswordRequestModel` :
 
   - current_password : **str**
 
@@ -658,7 +656,6 @@ class **`UserPydanticModel`**
 
   - email : **Optional[str]**
 
-
 #### Module `websocket`
 
 Ce module comporte certaines classes et methodes pour interagir avec des websockets
@@ -669,7 +666,7 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
 
 **methodes**:
 
-- **connect** : permet de  connecter un websocket au manager
+- **connect** : permet de connecter un websocket au manager
 
   - **paramètres:**
 
@@ -681,12 +678,11 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
 
     - websocket : WebSocket
 
-- **send_message**  : permet d'envoyer un message
+- **send_message** : permet d'envoyer un message
 
   - **paramètres:**
 
     - message : **str**
-
 
 #### Module `crud`
 
@@ -712,7 +708,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
 
-
 - **`create`** :
 
   - **paramètres** :
@@ -720,7 +715,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
     - `create_ob`: **CreatePydanticModel**
 
   - **sortie** : **SQLAlchemyModel**
-
 
 - **`count`** :
 
@@ -736,7 +730,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **sortie** : **List[SQLAlchemyModel]**
 
-
 - **`read_all_by_filter`** :
 
   - **paramètres** :
@@ -751,7 +744,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **sortie** : **List[SQLAlchemyModel]**
 
-
 - **`read_one`** :
 
   - **paramètres** :
@@ -765,7 +757,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 - **`update`** :
 
   - **paramètres** :
-
 
     - `id`: **int**
 
@@ -782,6 +773,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - **sortie** : **Reponse avec status code 204**
 
 ##### Sous module user_crud_forgery
+
 Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour offire un crud personnalisé pour l'utilisateur .
 
 **Méthodes** :
@@ -792,35 +784,34 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
 
     - authentication : Authentication
 
-- `change_password`  : méthode pour changer le mot de passe d'un utilisateur
+- `change_password` : méthode pour changer le mot de passe d'un utilisateur
 
   - **paramètres** :
 
-    -  username_or_email : **str**
+    - username_or_email : **str**
 
-    -  current_password : **str**
+    - current_password : **str**
 
-    -  new_passowrd : **str**
+    - new_passowrd : **str**
 
   - **sortie** : **Reponse avec status code 204**
 
-- `is_unique`  : méthode pour vérifier si l'email ou le username est unique .
+- `is_unique` : méthode pour vérifier si l'email ou le username est unique .
 
   - **paramètres** :
 
-    -  sub : **str**
+    - sub : **str**
 
   - **sortie** : **bool**
 
-- `read_one`  : méthode lire un utilisateur à partir de son id , son email ou de son username .
+- `read_one` : méthode lire un utilisateur à partir de son id , son email ou de son username .
 
   - **paramètres** :
 
-    -  credential : **str|int**
-    -  db : Optional[Session] = None
+    - credential : **str|int**
+    - db : Optional[Session] = None
 
   - **sortie** : **bool**
-
 
 #### Module `router`
 
@@ -834,12 +825,11 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
 `__init__` :
 
-  - **paramètres**
+- **paramètres**
 
-    - summary : **str**
+  - summary : **str**
 
-    - description : **str**
-
+  - description : **str**
 
 `RouteConfig`
 
@@ -873,11 +863,11 @@ Ce sous module comporte des Constantes et classes réutilisables dans le context
 
 - **class `DEFAULTROUTESNAME` (str,Enum)** : contient les noms des routes définies par le routage .
 
-- **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** :  contient une configuration de base pour définir les routes par défaut .
+- **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** : contient une configuration de base pour définir les routes par défaut .
 
 - **`ROUTES_PUBLIC_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
 
-- **`ROUTES_PROTECTED_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut  protégés .
+- **`ROUTES_PROTECTED_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut protégés .
 
 - **`USER_AUTH_CONFIG` : dict[str,RouteConfig]** : contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
 
@@ -890,30 +880,23 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un Custom
 
 **`Attributs de classe`**
 
-```python
-ROUTES_NAME : List[str]=[
-    "count",
-    "read-one",
-    "read-all",
-    "read-all-by-filter",
-    "create",
-    "update",
-    "delete",
-  ]
-DEFAULT_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=False) for route_name in ROUTES_NAME]
-AUTH_CONFIG : List[RouteConfig]=[RouteConfig(route_name,is_activated=True,is_protected=True) for route_name in ROUTES_NAME]
-```
 
 - `__init__` :
 
   - **paramètres**:
 
     - `prefix`: **str**
+
     - `tags`: **List[str]**
+
     - `PydanticModel`: **Model de reponse Pydantic**
+
     - `crud` : **CrudForgery**
+
     - `get_access_token` : **Option[callable]**
+
     - `get_session` : **callable**
+
 
   - `utilisation` :
 
@@ -928,18 +911,40 @@ router_provider = CustomRouterProvider(
 )
 ```
 
-- **`get_default_router`** : renvoie un router avec la configuration de `DEFAULT_CONFIG`
+- **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
 
-  - **paramètres**: **APIRouter**
+  - **paramètres**:
 
-- **`get_protected_router`** : renvoie un router avec la configuration de `AUTH_CONFIG`
+   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
 
-  - **paramètres**: **APIRouter**
+- **`get_protected_router`** : renvoie un router avec la configuration de `ROUTES_PROTECTED_AUTH_CONFIG`
+
+  - **paramètres**:
+
+   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+- **`get_mixed_router`** : renvoie un router avec une configuration personnalisée entre routes publics et protégés .
+
+  - **paramètres**:
+
+    - `init_data`: **List[RouteConfig]**
+
+   - public_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+   - protected_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
 
 - **`initialize_router`** : renvoie un router avec une configuration personnalisée .
+
   - **paramètres**:
+
     - `init_data`: **List[RouteConfig]**
-  - **paramètres**: **APIRouter**
+
+   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+
   - `utilisation` :
 
 ```python
