@@ -863,6 +863,8 @@ Ce sous module comporte des Constantes et classes réutilisables dans le context
 
 - **class `DEFAULTROUTESNAME` (str,Enum)** : contient les noms des routes définies par le routage .
 
+- **class `TypeRoute` (str,Enum)** : contient les types de routes  .
+
 - **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** : contient une configuration de base pour définir les routes par défaut .
 
 - **`ROUTES_PUBLIC_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
@@ -956,6 +958,30 @@ init_data: List[RouteConfig] = [
 ]
 app_myapp = router_provider.initialize_router(init_data=init_data)
 ```
+#####  Sous module `router_crud`
+Ce sous module comporte certaines fonctions utilisées  dans le cadre du routage .
+
+- `exclude_route` : permet d'exclure des routes d'une liste de routes
+
+  - **paramètres:**
+
+    - routes : **List[RouteConfig]**
+
+    - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+  - **sortie** : **List[RouteConfig]**
+
+- `get_single_route` : permet d'avoir une configuration par défaut d'une route particulière .
+
+  - **paramètres:**
+
+    - route_name : **DEFAULTROUTESNAME**
+
+    - type_route : Optional[str]=None [protected]
+
+    - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+
+  - **sortie** : **List[RouteConfig]**
 
 # Contact ou Support
 

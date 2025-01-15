@@ -16,6 +16,9 @@ class DEFAULTROUTESNAME(str,Enum):
     LOGIN='login'
     CHANGE_PASSWORD='change-password'
 
+class TypeRoute(str,Enum):
+    PUBLIC='public'
+    PROTECTED='protected'
 
 DEFAULT_ROUTES_CONFIGS: dict[str,DEFAULT_ROUTE_CONFIG] = {
     "count": DEFAULT_ROUTE_CONFIG(
