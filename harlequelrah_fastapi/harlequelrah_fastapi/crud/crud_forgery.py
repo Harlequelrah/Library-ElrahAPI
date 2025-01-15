@@ -59,14 +59,10 @@ class CrudForgery:
 
     async def read_all(self, skip: int = 0, limit: int = None):
         session = self.session_factory()
-        if limit is None:
-            limit = await self.count()
         return session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
 
     async def read_all_by_filter(self, filter, value, skip: int = 0, limit: int = None):
         session = self.session_factory()
-        if limit is None:
-            limit = await self.count()
         exist_filter = getattr(self.SQLAlchemyModel, filter, None)
         if exist_filter:
             value = await validate_value_type(value)
