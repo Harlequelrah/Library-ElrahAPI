@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .secret import authentication
-from harlequelrah_fastapi.utility.database_utils import create_database_if_not_exists
+from harlequelrah_fastapi.utility.utils import create_database_if_not_exists
 
 DATABASE_URL = f"{authentication.connector}://{authentication.database_username}:{authentication.database_password}@{authentication.server}"
 

@@ -5,7 +5,7 @@ from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from harlequelrah_fastapi.router.route_config import RouteConfig
 from harlequelrah_fastapi.router.router_crud import exclude_route, get_single_route
 from harlequelrah_fastapi.router.router_namespace import (
-    DEFAULTROUTESNAME,
+    DefaultRoutesName,
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
 )
@@ -32,16 +32,16 @@ class CustomRouterProvider:
         )
 
     def get_public_router(
-        self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
+        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
         return self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
 
     def get_mixed_router(
         self,
         init_data: List[RouteConfig] = [],
-        public_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
-        protected_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
-        exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
+        public_routes_name: Optional[List[DefaultRoutesName]] = None,
+        protected_routes_name: Optional[List[DefaultRoutesName]] = None,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
         for route_name in public_routes_name:
             route = get_single_route(route_name)
@@ -53,14 +53,14 @@ class CustomRouterProvider:
         return self.initialize_router(custom_init_data)
 
     def get_protected_router(
-        self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
+        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
         return self.initialize_router(ROUTES_PROTECTED_CONFIG, exclude_routes_name)
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
-        exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
         init_data = exclude_route(init_data, exclude_routes_name)
         for config in init_data:

@@ -23,7 +23,8 @@ from harlequelrah_fastapi.user.models import (
 
 
 class Authentication:
-    oauth2_scheme=OAuth2PasswordBearer("users/tokenUrl")
+    TOKEN_URL = "users/tokenUrl"
+    OAUTH2_SCHEME=OAuth2PasswordBearer(TOKEN_URL)
     UserPydanticModel = UserPydanticModel
     User = User
     UserCreateModel = UserCreateModel
@@ -49,7 +50,6 @@ class Authentication:
         self.__algorithms= self.ALGORITHMS
         self.__session_factory:sessionmaker[Session]  = None
 
-
     @property
     def algorithms(self):
         return self.__algorithms
@@ -58,6 +58,8 @@ class Authentication:
     def algorithms(self,algorithms:List[str]):
         self.__algorithms=algorithms
 
+    def set_oauth2_scheme(self,OAUTH2_CLASS:type):
+        self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
 
 
     @property
@@ -142,13 +144,13 @@ class Authentication:
         encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
-    async def get_access_token(self, token= Depends(oauth2_scheme)):
+    async def get_access_token(self, token= Depends(OAUTH2_SCHEME)):
         await self.validate_token(token)
         return token
 
     async def get_current_user(
         self,
-        token: str = Depends(oauth2_scheme),
+        token: str = Depends(OAUTH2_SCHEME),
     ):
         db = self.get_session()
         payload = await self.validate_token(token)

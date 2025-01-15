@@ -4,7 +4,7 @@ from typing import List
 from harlequelrah_fastapi.router.route_config import RouteConfig
 from harlequelrah_fastapi.router.router_crud import get_single_route
 from harlequelrah_fastapi.router.router_namespace import (
-    DEFAULTROUTESNAME,
+    DefaultRoutesName,
     USER_AUTH_CONFIG_ROUTES,
 )
 from harlequelrah_fastapi.router.user_router_provider import UserRouterProvider
@@ -17,6 +17,6 @@ user_router_provider = UserRouterProvider(
 )
 app_user = user_router_provider.get_mixed_router(
     init_data=USER_AUTH_CONFIG_ROUTES,
-    public_routes_name=[DEFAULTROUTESNAME.CREATE],
-    protected_routes_name=[DEFAULTROUTESNAME.READ_ALL_BY_FILTER],
+    public_routes_name=[DefaultRoutesName.CREATE],
+    protected_routes_name=[DefaultRoutesName.READ_ALL_BY_FILTER],
 )

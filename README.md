@@ -157,9 +157,18 @@ Ce module contient des utilitaires utilisés dans cette bibliothèque.
   - **sortie** : **value**
 
   - **utilisation** :
+
   ```python
   myvalue= validate_value_type("True") # retourne True
   ```
+
+- **create_database_if_not_exists** : créer la base de donnée si elle n'existe pas .
+
+  - **paramètres** :
+
+    - database_url  : **str** [l'url de la base de donnée dans le nom de la base de donnée] .
+
+    -  database_name : **str** [le nom de la base de donnée]
 
 #### Module `authentication`
 
@@ -197,7 +206,9 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 **Attributs**
 
-- `__oauth2_scheme` : définit le schéma d'authentication
+- `TOKEN_URL` : définit l'url du schéma d'authentication
+
+- `OAUTH2_SCHEME` : définit le schéma d'authentication
 
 - `User` : le modèle d'utilisateur SQLAlchemy
 
@@ -234,6 +245,14 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
     - database_name : **str**
 
     - server : **str**
+
+- `set_oauth2_scheme` : modifie le schéma d'authentification
+
+  - **paramètres** :
+
+    - OAUTH2_CLASS: **type**
+
+
 
 - `get_session` : retourne une session
 
@@ -861,9 +880,9 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
 Ce sous module comporte des Constantes et classes réutilisables dans le contexte du routage .
 
-- **class `DEFAULTROUTESNAME` (str,Enum)** : contient les noms des routes définies par le routage .
+- **class `DefaultRoutesName` (str,Enum)** : contient les définitions des noms des routes définies par le routage .
 
-- **class `TypeRoute` (str,Enum)** : contient les types de routes  .
+- **class `TypeRoute` (str,Enum)** : contient les définitions des types de routes .
 
 - **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** : contient une configuration de base pour définir les routes par défaut .
 
@@ -882,7 +901,6 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un Custom
 
 **`Attributs de classe`**
 
-
 - `__init__` :
 
   - **paramètres**:
@@ -898,7 +916,6 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un Custom
     - `get_access_token` : **Option[callable]**
 
     - `get_session` : **callable**
-
 
   - `utilisation` :
 
@@ -917,13 +934,13 @@ router_provider = CustomRouterProvider(
 
   - **paramètres**:
 
-   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+  - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
 - **`get_protected_router`** : renvoie un router avec la configuration de `ROUTES_PROTECTED_AUTH_CONFIG`
 
   - **paramètres**:
 
-   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+  - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
 - **`get_mixed_router`** : renvoie un router avec une configuration personnalisée entre routes publics et protégés .
 
@@ -931,12 +948,11 @@ router_provider = CustomRouterProvider(
 
     - `init_data`: **List[RouteConfig]**
 
-   - public_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+  - public_routes_name : **Optional[List[DefaultRoutesName]]**
 
-   - protected_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+  - protected_routes_name : **Optional[List[DefaultRoutesName]]**
 
-   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
-
+  - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
 - **`initialize_router`** : renvoie un router avec une configuration personnalisée .
 
@@ -944,8 +960,7 @@ router_provider = CustomRouterProvider(
 
     - `init_data`: **List[RouteConfig]**
 
-   - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
-
+  - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
   - `utilisation` :
 
@@ -958,8 +973,10 @@ init_data: List[RouteConfig] = [
 ]
 app_myapp = router_provider.initialize_router(init_data=init_data)
 ```
-#####  Sous module `router_crud`
-Ce sous module comporte certaines fonctions utilisées  dans le cadre du routage .
+
+##### Sous module `router_crud`
+
+Ce sous module comporte certaines fonctions utilisées dans le cadre du routage .
 
 - `exclude_route` : permet d'exclure des routes d'une liste de routes
 
@@ -967,7 +984,7 @@ Ce sous module comporte certaines fonctions utilisées  dans le cadre du routage
 
     - routes : **List[RouteConfig]**
 
-    - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
   - **sortie** : **List[RouteConfig]**
 
@@ -975,13 +992,28 @@ Ce sous module comporte certaines fonctions utilisées  dans le cadre du routage
 
   - **paramètres:**
 
-    - route_name : **DEFAULTROUTESNAME**
+    - route_name : **DefaultRoutesName**
 
-    - type_route : Optional[str]=None [protected]
+    - type_route : **Optional[TypeRoute]= TypeRoute.PROTECTED**
 
-    - exclude_routes_name : **Optional[List[DEFAULTROUTESNAME]]**
+    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
-  - **sortie** : **List[RouteConfig]**
+  - **sortie** : **RouteConfig**
+
+##### Sous module `user_router_provider`
+ce sous module continent  UserRouterProvider qui hérite de CustomRouterProvider , personnalisé pour l'utilisateur .
+
+- `__init__` :
+
+  - **paramètres** :
+
+    - crud: **UserCrudForgery**
+
+    - prefix : **str**
+
+    - tags : **List[str]**
+
+
 
 # Contact ou Support
 

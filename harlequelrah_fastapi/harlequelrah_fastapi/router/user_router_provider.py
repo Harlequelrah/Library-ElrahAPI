@@ -11,7 +11,7 @@ from harlequelrah_fastapi.exception.auth_exception import (
 from harlequelrah_fastapi.router.route_config import RouteConfig
 from harlequelrah_fastapi.router.router_crud import exclude_route
 from harlequelrah_fastapi.router.router_namespace import (
-    DEFAULTROUTESNAME,
+    DefaultRoutesName,
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
     USER_AUTH_CONFIG_ROUTES,
@@ -39,30 +39,30 @@ class UserRouterProvider(CustomRouterProvider):
             tags=tags,
             PydanticModel=self.authentication.UserPydanticModel,
             crud=crud,
-            get_access_token  =self.authentication.get_access_token,
+            get_access_token=self.authentication.get_access_token,
         )
         self.crud: UserCrudForgery = crud
 
     def get_public_router(
-        self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
+        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
         routes = USER_AUTH_CONFIG_ROUTES + exclude_route(
-            ROUTES_PUBLIC_CONFIG, [DEFAULTROUTESNAME.READ_ONE]
+            ROUTES_PUBLIC_CONFIG, [DefaultRoutesName.READ_ONE]
         )
         return self.initialize_router(routes, exclude_routes_name)
 
     def get_protected_router(
-        self, exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None
+        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
         routes = USER_AUTH_CONFIG_ROUTES + exclude_route(
-            ROUTES_PROTECTED_CONFIG, [DEFAULTROUTESNAME.READ_ONE]
+            ROUTES_PROTECTED_CONFIG, [DefaultRoutesName.READ_ONE]
         )
         return self.initialize_router(routes, exclude_routes_name)
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
-        exclude_routes_name: Optional[List[DEFAULTROUTESNAME]] = None,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ):
         self.router = super().initialize_router(init_data, exclude_routes_name)
         for config in init_data:
@@ -166,7 +166,7 @@ class UserRouterProvider(CustomRouterProvider):
                 async def login(usermodel: UserLoginRequestModel):
                     username_or_email = usermodel.username_or_email
                     user = await self.authentication.authenticate_user(
-                    usermodel.password, username_or_email
+                        usermodel.password, username_or_email
                     )
                     data = {"sub": username_or_email}
                     access_token_data = self.authentication.create_access_token(data)
@@ -180,8 +180,7 @@ class UserRouterProvider(CustomRouterProvider):
             if config.route_name == "change-password" and config.is_activated:
 
                 @self.router.post(
-
-                    status_code= 204,
+                    status_code=204,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
