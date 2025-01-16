@@ -61,7 +61,6 @@ class Authentication:
     def set_oauth2_scheme(self,OAUTH2_CLASS:type):
         self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
 
-
     @property
     def session_factory(self):
         return self.__session_factory
@@ -75,16 +74,15 @@ class Authentication:
         if not db : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
         return db
 
-    async def is_authorized(self,user_id:int, privilege_id:int)->bool:
+    async def is_authorized(self,user_id:int,privilege_name:Optional[str]=None,role_name:Optional[str]=None)->bool:
         session = self.get_session()
         user=session.query(self.User).filter(self.User.id==user_id).first()
-        role = user.role
-        if not role.is_active:
-            return False
-        for privilege in role.privileges:
-            return (privilege.id == privilege_id and privilege.is_active)
-        else:
-            return False
+        if not user : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
+        if role_name:
+            return user.has_role(role_name)
+        if privilege_name:
+            return user.has_privilege(privilege_name)
+
 
     async def authenticate_user(
         self,
