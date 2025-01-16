@@ -15,12 +15,12 @@ class User(Base, models.User):
     privileges = relationship("UserPrivilege",back_populates="user")
 
     def has_role(self,role_name:str):
-        if role_name.upper() == self.role.normalizedName : return True
+        if role_name.upper() == self.role.normalizedName and self.role.is_active : return True
         else :raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
     def has_privilege(self,privilege_name:str):
         for privilege in self.privileges :
-            if privilege.normalizedName == privilege_name.upper() :
+            if privilege.normalizedName == privilege_name.upper() and privilege.is_active:
                 return True
         else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
