@@ -1,4 +1,4 @@
-# from myproject.settings.database import Base, authentication
+from myproject.settings.database import Base, authentication
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table
 from harlequelrah_fastapi.exception.auth_exception import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 from harlequelrah_fastapi.user import models

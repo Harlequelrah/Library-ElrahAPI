@@ -77,7 +77,9 @@ sqlapp/
 #### 3. Commande génération d'une application utilisateur
 
 Cette commande permet de créer une application utilisateur
-
+```bash
+harlequelrah_fastapi generate userapp
+```
 **`architecture`:**
 
 ```

@@ -19,15 +19,16 @@ class User:
     password = Column(String(1024), nullable=False)
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
-    date_created = Column(DateTime, nullable=False, default=func.now())
+    date_created = Column(DateTime,  default=func.now())
     date_updated = Column(DateTime, onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
 
     MAX_ATTEMPT_LOGIN = 3
+    PasswordHasher = PasswordHasher()
 
-    def __init__(self):
-        self.PasswordHasher = PasswordHasher()
+    # def __init__(self):
+    #     self.PasswordHasher = PasswordHasher()
 
     def try_login(self, is_success: bool):
         if is_success:
@@ -75,7 +76,7 @@ class UserPydanticModel(UserBaseModel):
     id: int
     is_active: bool
     date_created: datetime
-    date_updated: datetime
+    date_updated: Optional[datetime]
 
 
 class UserLoginRequestModel(BaseModel):
