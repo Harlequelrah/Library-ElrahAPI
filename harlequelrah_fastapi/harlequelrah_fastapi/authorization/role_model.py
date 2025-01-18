@@ -17,6 +17,7 @@ class RoleModel:
     normalizedName = Column(String(100), nullable=False)
     is_active = Column(Boolean, default=True)
 
+
     @validates("name")
     def validate_name(self, key, value):
         self.normalizedName = value.upper().strip() if value else None

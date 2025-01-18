@@ -83,7 +83,6 @@ class CustomRouterProvider:
             if (
                 config.route_name == "read-one"
                 and config.is_activated
-                and not config.is_unlocked
             ):
 
                 @self.router.get(

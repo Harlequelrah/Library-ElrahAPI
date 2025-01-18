@@ -37,12 +37,12 @@ class CrudForgery:
             except Exception as e:
                 session.rollback()
                 detail = f"Error occurred while creating {self.entity_name} , details : {str(e)}"
-                await raise_custom_http_exception(
+                raise_custom_http_exception(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail
                 )
         else:
             detail = f"Invalid {self.entity_name} object for creation"
-            await raise_custom_http_exception(
+            raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
@@ -53,7 +53,7 @@ class CrudForgery:
             return count
         except Exception as e:
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
-            await raise_custom_http_exception(
+            raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
@@ -75,7 +75,7 @@ class CrudForgery:
             )
         else:
             detail = f"Invalid filter {filter} for entity {self.entity_name}"
-            await raise_custom_http_exception(
+            raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
@@ -91,7 +91,7 @@ class CrudForgery:
         )
         if read_obj is None:
             detail = f"{self.entity_name} with id {id} not found"
-            await raise_custom_http_exception(
+            raise_custom_http_exception(
                 status_code=status.HTTP_404_NOT_FOUND, detail=detail
             )
         return read_obj
@@ -112,13 +112,13 @@ class CrudForgery:
                 http_exc = che.http_exception
                 if http_exc.status_code == status.HTTP_404_NOT_FOUND:
                     detail = f"Error occurred while updating {self.entity_name} with id {id} , details : {http_exc.detail}"
-                    await raise_custom_http_exception(
+                    raise_custom_http_exception(
                         status_code=status.HTTP_404_NOT_FOUND, detail=detail
                     )
             except Exception as e:
                 session.rollback()
                 detail = f"Error occurred while updating {self.entity_name} with id {id} , details : {str(e)}"
-                await raise_custom_http_exception(
+                raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
                 )
         else:
@@ -138,10 +138,8 @@ class CrudForgery:
             http_exc = che.http_exception
             if http_exc.status_code == status.HTTP_404_NOT_FOUND:
                 detail = f"Error occurred while deleting {self.entity_name} with id {id} , details : {http_exc.detail}"
-                await raise_custom_http_exception(status.HTTP_404_NOT_FOUND, detail)
+                raise_custom_http_exception(status.HTTP_404_NOT_FOUND, detail)
         except Exception as e:
             session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with id {id} , details : {str(e)}"
-            await raise_custom_http_exception(
-                status.HTTP_500_INTERNAL_SERVER_ERROR, detail
-            )
+            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)

@@ -11,6 +11,7 @@ class PrivilegeModel:
     description=Column(String(255),nullable=False)
     is_active=Column(Boolean,default=True)
 
+
     validates('name')
     def validate_name(self,key,value):
         if value is not None:

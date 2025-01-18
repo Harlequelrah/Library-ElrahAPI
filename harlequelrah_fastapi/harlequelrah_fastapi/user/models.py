@@ -1,15 +1,19 @@
 from sqlalchemy import (
-    Boolean,
-    Column,
     Integer,
     String,
     DateTime,
+    Boolean,
+    Column,
+    ForeignKey,
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from argon2 import PasswordHasher, exceptions as Ex
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
+
+from harlequelrah_fastapi.exception.auth_exception import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
 class User:
@@ -23,12 +27,13 @@ class User:
     date_updated = Column(DateTime, onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
+    role_id = Column(Integer, ForeignKey("roles.id"))
+
+
+
 
     MAX_ATTEMPT_LOGIN = 3
     PasswordHasher = PasswordHasher()
-
-    # def __init__(self):
-    #     self.PasswordHasher = PasswordHasher()
 
     def try_login(self, is_success: bool):
         if is_success:
@@ -50,6 +55,23 @@ class User:
         except Ex.InvalidHashError:
             self.set_password(password)
             return self.check_password(password)
+
+    def has_role(self, role_name: str):
+        if role_name.upper() == self.role.normalizedName and self.role.is_active:
+            return True
+        else:
+            raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+
+    def has_privilege(self, privilege_name: str):
+        for user_privilege in self.privileges:
+            privilege = user_privilege.privilege
+            if (
+                privilege.normalizedName == privilege_name.upper()
+                and privilege.is_active
+            ):
+                return True
+        else:
+            raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
 class UserBaseModel(BaseModel):
@@ -88,6 +110,13 @@ class UserLoginRequestModel(BaseModel):
         return self.username or self.email
 
 
-class UserChangePasswordRequestModel(UserLoginRequestModel):
+class UserChangePasswordRequestModel(BaseModel):
+    username_or_email: str
     current_password: str
     new_password: str
+
+
+class UserPrivilege:
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    privilege_id = Column(Integer, ForeignKey("privileges.id"), primary_key=True)
+    is_active = Column(Boolean, default=True)

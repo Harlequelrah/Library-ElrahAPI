@@ -32,7 +32,9 @@ class UserCrudForgery(CrudForgery):
     ):
         session = self.authentication.get_session()
         current_user = await self.authentication.authenticate_user(
-            password=current_password, username_or_email=username_or_email, session=session
+            password=current_password,
+            username_or_email=username_or_email,
+            session=session,
         )
         if current_user.check_password(current_password):
             current_user.set_password(new_password)
@@ -40,7 +42,8 @@ class UserCrudForgery(CrudForgery):
             session.refresh(current_user)
         else:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Your current password you enter  is incorrect"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your current password you enter  is incorrect",
             )
 
     async def is_unique(self, sub: str):
@@ -57,30 +60,23 @@ class UserCrudForgery(CrudForgery):
         )
         return user is None
 
-    async def read_one(self, credential: int | str, db: Optional[Session] = None):
-        user = None
-        if db:
-            session = db
-        else:
-            session = self.session_factory()
-        if isinstance(credential, int):
-            user = await super().read_one(id, db=session)
-        elif isinstance(credential, str):
-            user = (
-                session.query(self.SQLAlchemyModel)
-                .filter(
-                    or_(
-                        self.SQLAlchemyModel.username == credential,
-                        self.SQLAlchemyModel.email == credential,
-                    )
+    async def read_one_user(self,username_or_email:str):
+        session = self.session_factory()
+        user = (
+            session.query(self.SQLAlchemyModel)
+            .filter(
+                or_(
+                    self.SQLAlchemyModel.username == username_or_email,
+                    self.SQLAlchemyModel.email == username_or_email,
                 )
-                .first()
             )
-            if not user:
-                detail = (
-                    f"{self.entity_name} with username or email {credential} not found"
-                )
-                raise_custom_http_exception(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=detail
-                )
+            .first()
+        )
+        if not user:
+            detail = f"{self.entity_name} with username or email {username_or_email} not found"
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+            )
         return user
+
+

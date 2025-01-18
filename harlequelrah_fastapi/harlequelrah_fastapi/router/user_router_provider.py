@@ -67,9 +67,8 @@ class UserRouterProvider(CustomRouterProvider):
         self.router = super().initialize_router(init_data, exclude_routes_name)
         for config in init_data:
             if (
-                config.route_name == "read-one"
+                config.route_name == "read-one-user"
                 and config.is_activated
-                and config.is_unlocked
             ):
 
                 @self.router.get(
@@ -83,8 +82,8 @@ class UserRouterProvider(CustomRouterProvider):
                         else []
                     ),
                 )
-                async def read_one_user(credential: str | int):
-                    return await self.crud.read_one(credential)
+                async def read_one_user(username_or_email:str):
+                    return await self.crud.read_one_user(username_or_email)
 
             if config.route_name == "read-current-user" and config.is_activated:
 
@@ -113,12 +112,12 @@ class UserRouterProvider(CustomRouterProvider):
                     form_data: OAuth2PasswordRequestForm = Depends(),
                 ):
                     user = await self.authentication.authenticate_user(
-                        form_data.password, form_data.username
-                    )
+                        password=form_data.password, username_or_email= form_data.username
+                        )
+
                     data = {"sub": user.username}
                     access_token = self.authentication.create_access_token(data)
                     refresh_token = self.authentication.create_refresh_token(data)
-
                     return {
                         "access_token": access_token["access_token"],
                         "refresh_token": refresh_token["refresh_token"],

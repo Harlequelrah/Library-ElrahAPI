@@ -47,16 +47,16 @@ class Authentication:
         self.database_name = database_name
         self.server = server
         self.__secret_key = str(secrets.token_hex(32))
-        self.__algorithms= self.ALGORITHMS
+        self.__algorithm= self.ALGORITHMS[0]
         self.__session_factory:sessionmaker[Session]  = None
 
     @property
-    def algorithms(self):
-        return self.__algorithms
+    def algorithm(self):
+        return self.__algorithm
 
-    @algorithms.setter
-    def algorithms(self,algorithms:List[str]):
-        self.__algorithms=algorithms
+    @algorithm.setter
+    def algorithms(self,algorithm:str):
+        self.__algorithm=algorithm
 
     def set_oauth2_scheme(self,OAUTH2_CLASS:type):
         self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
@@ -71,7 +71,7 @@ class Authentication:
 
     def get_session(self):
         db= self.__session_factory()
-        if not db : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
+        if not db :  raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
         return db
 
     async def is_authorized(self,user_id:int,privilege_name:Optional[str]=None,role_name:Optional[str]=None)->bool:
@@ -127,7 +127,7 @@ class Authentication:
                 minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES
             )
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
+        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
         return {"access_token": encode_jwt, "token_type": "bearer"}
 
     def create_refresh_token(
@@ -139,7 +139,7 @@ class Authentication:
         else:
             expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithms)
+        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
     async def get_access_token(self, token= Depends(OAUTH2_SCHEME)):
@@ -166,7 +166,7 @@ class Authentication:
 
     async def validate_token(self, token: str):
         try:
-            payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithms)
+            payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
             return payload
         except ExpiredSignatureError:
             raise_custom_http_exception(
