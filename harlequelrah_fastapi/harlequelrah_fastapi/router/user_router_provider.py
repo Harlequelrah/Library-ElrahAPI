@@ -39,7 +39,6 @@ class UserRouterProvider(CustomRouterProvider):
             tags=tags,
             PydanticModel=self.authentication.UserPydanticModel,
             crud=crud,
-            get_access_token=self.authentication.get_access_token,
         )
         self.crud: UserCrudForgery = crud
 

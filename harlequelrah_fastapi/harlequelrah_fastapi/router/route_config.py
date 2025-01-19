@@ -25,6 +25,8 @@ class RouteConfig:
         is_activated: bool = False,
         is_protected: bool = False,
         is_unlocked: Optional[bool] = False,
+        role : Optional[str] = None,
+        privileges: Optional[List[str]] = None,
     ):
         self.route_name = route_name
         self.is_activated = is_activated
@@ -48,3 +50,7 @@ class RouteConfig:
         self.summary = summary
         self.description = description
         self.is_unlocked = is_unlocked
+        self.role= role.strip().upper() if role else None
+        self.privileges = [auth.strip.upper() for auth in privileges] if privileges else []
+
+

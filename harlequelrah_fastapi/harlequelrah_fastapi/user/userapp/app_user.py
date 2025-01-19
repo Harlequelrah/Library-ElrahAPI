@@ -18,5 +18,10 @@ user_router_provider = UserRouterProvider(
 app_user = user_router_provider.get_mixed_router(
     init_data=USER_AUTH_CONFIG_ROUTES,
     public_routes_name=[DefaultRoutesName.CREATE],
-    protected_routes_name=[DefaultRoutesName.READ_ALL_BY_FILTER],
+    protected_routes_name=[
+        DefaultRoutesName.READ_ALL_BY_FILTER,
+        DefaultRoutesName.READ_ALL,
+        DefaultRoutesName.READ_ONE,
+    ],
 )
+

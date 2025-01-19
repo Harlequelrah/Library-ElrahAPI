@@ -18,7 +18,7 @@ from harlequelrah_fastapi.user.models import (
     UserPydanticModel,
     UserCreateModel,
     UserUpdateModel,
-    User,
+    UserModel as User,
 )
 
 
@@ -74,9 +74,8 @@ class Authentication:
         if not db :  raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
         return db
 
-    async def is_authorized(self,user_id:int,privilege_name:Optional[str]=None,role_name:Optional[str]=None)->bool:
-        session = self.get_session()
-        user=session.query(self.User).filter(self.User.id==user_id).first()
+    async def is_authorized(self,privilege_name:Optional[str]=None,role_name:Optional[str]=None)->bool:
+        user= await self.get_current_user()
         if not user : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
         if role_name:
             return user.has_role(role_name)

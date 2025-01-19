@@ -16,7 +16,7 @@ from datetime import datetime
 from harlequelrah_fastapi.exception.auth_exception import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
-class User:
+class UserModel:
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
@@ -63,16 +63,22 @@ class User:
             raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
     def has_privilege(self, privilege_name: str):
-        for user_privilege in self.privileges:
-            privilege = user_privilege.privilege
-            if (
-                privilege.normalizedName == privilege_name.upper()
-                and privilege.is_active
-            ):
-                return True
+        for user_privilege in self.user_privileges:
+            if user_privilege.is_active:
+                privilege = user_privilege.privilege
+                if (
+                    privilege.normalizedName == privilege_name.upper()
+                    and privilege.is_active
+                ):
+                    return True
+            else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
         else:
             raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
+class UserPrivilegeModel:
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    privilege_id = Column(Integer, ForeignKey("privileges.id"), primary_key=True)
+    is_active = Column(Boolean, default=True)
 
 class UserBaseModel(BaseModel):
     email: str = Field(example="user@example.com")
@@ -83,6 +89,8 @@ class UserBaseModel(BaseModel):
 
 class UserCreateModel(UserBaseModel):
     password: str = Field(example="m*td*pa**e")
+    role_id : Optional[int] = Field(example=1,default=None)
+
 
 
 class UserUpdateModel(BaseModel):
@@ -92,6 +100,8 @@ class UserUpdateModel(BaseModel):
     firstname: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
+    role_id : Optional[int] = None
+    user_privileges: Optional[List["MetaUserPrivilegesUpdateModel"]] = None
 
 
 class UserPydanticModel(UserBaseModel):
@@ -99,24 +109,35 @@ class UserPydanticModel(UserBaseModel):
     is_active: bool
     date_created: datetime
     date_updated: Optional[datetime]
+    role_id : Optional[int]
+    user_privileges: Optional[List["MetaUserPrivilegesModel"]] = None
 
+class UserPrivilegePydanticModel(BaseModel):
+    user_id: int
+    privilege_id: int
+    is_active: bool
 
-class UserLoginRequestModel(BaseModel):
+class MetaUserPrivilegesModel(BaseModel):
+    privilege_id:int
+    is_active:bool
+
+class MetaUserPrivilegesUpdateModel(BaseModel):
+    privilege_id:Optional[int]
+    is_active:Optional[bool]
+
+class UserRequestModel(BaseModel):
     username: Optional[str] = None
-    password: str
     email: Optional[str] = None
     @property
     def username_or_email(self):
         return self.username or self.email
+class UserLoginRequestModel(UserRequestModel):
+    password: str
 
 
-class UserChangePasswordRequestModel(BaseModel):
-    username_or_email: str
+
+class UserChangePasswordRequestModel(UserRequestModel):
     current_password: str
     new_password: str
 
 
-class UserPrivilege:
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    privilege_id = Column(Integer, ForeignKey("privileges.id"), primary_key=True)
-    is_active = Column(Boolean, default=True)

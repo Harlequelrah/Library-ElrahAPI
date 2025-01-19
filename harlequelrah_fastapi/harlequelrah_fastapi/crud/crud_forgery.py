@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi.responses import JSONResponse
+from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
@@ -14,7 +15,7 @@ class CrudForgery:
     def __init__(
         self,
         entity_name: str,
-        session_factory: sessionmaker[Session],
+        authentication:Authentication,
         SQLAlchemyModel,
         CreatePydanticModel=None,
         UpdatePydanticModel=None,
@@ -22,13 +23,17 @@ class CrudForgery:
         self.SQLAlchemyModel = SQLAlchemyModel
         self.CreatePydanticModel = CreatePydanticModel
         self.UpdatePydanticModel = UpdatePydanticModel
-        self.session_factory = session_factory
         self.entity_name = entity_name
+        self.authentication=authentication
+        self.session_factory=authentication.session_factory
 
     async def create(self, create_obj):
+
         if isinstance(create_obj, self.CreatePydanticModel):
             session = self.session_factory()
-            new_obj = self.SQLAlchemyModel(**create_obj.dict())
+            dict_obj=create_obj.dict()
+            new_obj = self.SQLAlchemyModel(**dict_obj)
+
             try:
                 session.add(new_obj)
                 session.commit()

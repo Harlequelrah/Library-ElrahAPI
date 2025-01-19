@@ -19,10 +19,11 @@ class CustomRouterProvider:
         tags: List[str],
         PydanticModel,
         crud: CrudForgery,
-        get_access_token: Optional[callable] = None,
     ):
         self.crud = crud
-        self.get_access_token: callable = get_access_token
+        self.get_access_token: callable = crud.authentication.get_access_token
+        self.is_authorized: callable = crud.authentication.is_authorized
+        self.session_factory:callable=crud.authentication.session_factory
         self.PydanticModel = PydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
@@ -65,6 +66,7 @@ class CustomRouterProvider:
         init_data = exclude_route(init_data, exclude_routes_name)
         for config in init_data:
             if config.route_name == "count" and config.is_activated:
+                print("count role in",config.role)
 
                 @self.router.get(
                     path=config.route_path,
@@ -73,7 +75,9 @@ class CustomRouterProvider:
                     dependencies=(
                         [Depends(self.get_access_token)]
                         if self.get_access_token and config.is_protected
-                        else []
+                        else []+
+                        [Depends(lambda : self.is_authorized(role_name=config.role))] if config.role else []
+
                     ),
                 )
                 async def count():

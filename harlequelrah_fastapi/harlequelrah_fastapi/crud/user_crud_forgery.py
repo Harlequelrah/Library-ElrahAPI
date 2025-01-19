@@ -19,12 +19,11 @@ class UserCrudForgery(CrudForgery):
     def __init__(self, authentication: Authentication):
         super().__init__(
             entity_name="user",
-            session_factory=authentication.session_factory,
+            authentication=authentication,
             SQLAlchemyModel=authentication.User,
             CreatePydanticModel=authentication.UserCreateModel,
             UpdatePydanticModel=authentication.UserUpdateModel,
         )
-        self.authentication = authentication
         self.get_current_user: callable = authentication.get_current_user
 
     async def change_password(

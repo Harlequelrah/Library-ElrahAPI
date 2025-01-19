@@ -1,6 +1,10 @@
 from my_project.settings.database import authentication
-from harlequelrah_fastapi.authorization.privilege_model import PrivilegeCreateModel,PrivilegeUpdateModel,PrivilegePydanticModel
-from harlequelrah_fastapi.authorization.role_model import RoleCreateModel,RoleUpdateModel,RolePydanticModel
+from harlequelrah_fastapi.authorization.privilege_model import (
+    PrivilegePydanticModel,
+)
+from harlequelrah_fastapi.authorization.role_model import (
+    RolePydanticModel,
+)
 from harlequelrah_fastapi.router.router_provider import CustomRouterProvider
 
 from .authorization_crud import privilegeCrud, roleCrud
@@ -11,7 +15,6 @@ role_router_provider = CustomRouterProvider(
     tags=["roles"],
     PydanticModel=RolePydanticModel,
     crud=roleCrud,
-    get_access_token=authentication.get_access_token,
 )
 
 privilege_router_provider = CustomRouterProvider(
@@ -19,7 +22,6 @@ privilege_router_provider = CustomRouterProvider(
     tags=["privileges"],
     PydanticModel=PrivilegePydanticModel,
     crud=privilegeCrud,
-    get_access_token=authentication.get_access_token,
 )
 
 

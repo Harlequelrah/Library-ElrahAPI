@@ -13,7 +13,6 @@ router_provider = CustomRouterProvider(
     tags=["logs"],
     PydanticModel=LMPD,
     crud=logCrud,
-    get_access_token=authentication.get_access_token,
 )
 app_logger = router_provider.get_protected_router(
     [DefaultRoutesName.UPDATE, DefaultRoutesName.DELETE, DefaultRoutesName.CREATE]
