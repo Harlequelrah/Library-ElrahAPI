@@ -120,6 +120,8 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 
 - `INACTIVE_USER_CUSTOM_HTTP_EXCEPTION` : exception personnalisée de compte utilisateur inactive .
 
+- `INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée lorsqu'un utilisateur n'a pas les permissions suffisantes pour acceder à une ressource .
+
 ##### 2. Sous module exceptions_utils
 
 ce sous module contient des fonction utilitaires pour les exceptions
@@ -138,7 +140,12 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
 #### Module `utility`
 
-Ce module contient des utilitaires utilisés dans cette bibliothèque.
+Ce module contient des utilitaires .
+
+##### 1. Sous module utils
+
+Ce sous module contient des quelques fonctions utiles .
+
 
 - `update_entity` : mets à jour les champs d'une entité objet .
 
@@ -224,7 +231,10 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `__secret_key` : **str** [une clé secrète générer par défaut]
 
-- `__algorithms` : **List[str]**un tableau d'algorithm [par défaut **[`HS256`]**]
+
+- `ALGORITHMS` : **List[str]** [un tableau d'algorithm [par défaut **[`HS256`]**]
+
+- `__algorithm` : **str** [un élément de ALGORITHMS]
 
 - `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
 
@@ -254,8 +264,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - OAUTH2_CLASS: **type**
 
-
-
 - `get_session` : retourne une session
 
   - **sortie** : `Session`
@@ -270,7 +278,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **bool**
 
-- `authenticate_user`
+- `authenticate_user` : authentifie un utilisateur
 
   - **paramètres** :
 
@@ -282,7 +290,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **User**
 
-- `create_access_token`
+- `create_access_token` : créer un token d'acces
 
   - **paramètres** :
 
@@ -292,7 +300,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **AccessToken**
 
-- `create_refresh_token`
+- `create_refresh_token` : créer un token de rafraichissement
 
   - **paramètres** :
 
@@ -318,7 +326,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **dict[str,any]**
 
-- `refresh_token`
+- `refresh_token` : rafraichi un token d'acces par un token de rafraichissement
 
   - **paramètres** :
 
@@ -326,11 +334,56 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **AccessToken**
 
+- `check_authorization` : vérifie des authorizations suivant des roles ou privilèges en retournant un objet **callable** qui sera utilisé comme dépendence
+
+  - **paramètres** :
+
+    - privilege_name: **Optional[List[str]]**
+
+    - roles_name :  **Optional[List[str]]**
+
+  - **sortie** : **callable**
+
+- `get_user_by_sub` : retourne un utilisateur à partir de son username ou email
+
+  - **paramètres** :
+
+    - username_or_email : **str**
+
+    - db :  **Session**
+
+  - **sortie** : **User**
+
+
 #### Module `authorization`
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
-##### Sous module `role_model`
+##### 1. Sous module `meta_model`
+Ce sous module contient des models Meta pour définir les models liés à l'authorization et pour lire partiellement des données .
+
+- `MetaAuthorization`
+
+  - id : **Column(Integer)**
+
+  - name : **Column(String)**
+
+  - normalizedName : **Column(String)**
+
+  - description : **Column(String)**
+
+- `MetaAuthorizationBaseModel`
+
+  - id : **int**
+
+  - normalizedName : **str**
+
+  -  is_active : **bool**
+
+- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)`
+
+
+##### 1. Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 

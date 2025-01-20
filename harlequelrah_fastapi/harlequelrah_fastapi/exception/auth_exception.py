@@ -7,7 +7,7 @@ INVALID_CREDENTIALS_HTTP_EXCEPTION = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 INACTIVE_USER_HTTP_EXCEPTION = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    status_code=status.HTTP_403_FORBIDDEN,
     detail="The account you are trying to access is not active",
     headers={"WWW-Authenticate": "Bearer"},
 )
