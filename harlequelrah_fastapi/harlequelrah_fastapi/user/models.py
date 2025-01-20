@@ -56,13 +56,19 @@ class UserModel:
             self.set_password(password)
             return self.check_password(password)
 
-    def has_role(self, role_name: str):
-        if role_name.upper() == self.role.normalizedName and self.role.is_active:
-            return True
+
+    def has_role(self, roles_name: List[str]):
+        for role_name in roles_name :
+            if self.role and role_name.upper() == self.role.normalizedName and self.role.is_active:
+                return True
         else:
             raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
     def has_privilege(self, privilege_name: str):
+        if self.role:
+            for privilege in self.role.privileges:
+                if (privilege.normalizedName==privilege_name.upper() and privilege.is_active):
+                    return True
         for user_privilege in self.user_privileges:
             if user_privilege.is_active:
                 privilege = user_privilege.privilege
@@ -71,9 +77,8 @@ class UserModel:
                     and privilege.is_active
                 ):
                     return True
-            else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
-        else:
-            raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+        else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+
 
 class UserPrivilegeModel:
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
@@ -112,10 +117,22 @@ class UserPydanticModel(UserBaseModel):
     role_id : Optional[int]
     user_privileges: Optional[List["MetaUserPrivilegesModel"]] = None
 
-class UserPrivilegePydanticModel(BaseModel):
-    user_id: int
-    privilege_id: int
-    is_active: bool
+
+class UserPrivilegeCreateModel(BaseModel):
+    user_id: int = Field(example=1)
+    privilege_id: int=Field(example=2)
+    is_active: bool = Field(exemple=True)
+
+
+class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
+    class Config:
+        from_orm=True
+
+class UserPrivilegeUpdateModel(BaseModel):
+    user_id: Optional[int ]= Field(example=1,default=None)
+    privilege_id: Optional[int]=Field(example=2,default=None)
+    is_active: Optional[bool] = Field(exemple=True,default=None)
+
 
 class MetaUserPrivilegesModel(BaseModel):
     privilege_id:int

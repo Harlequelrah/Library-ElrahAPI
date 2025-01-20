@@ -32,6 +32,7 @@ class UserRouterProvider(CustomRouterProvider):
         prefix: str,
         tags: List[str],
         crud: UserCrudForgery,
+        roles : List[str]=[]
     ):
         self.authentication = crud.authentication
         super().__init__(
@@ -39,6 +40,7 @@ class UserRouterProvider(CustomRouterProvider):
             tags=tags,
             PydanticModel=self.authentication.UserPydanticModel,
             crud=crud,
+            roles=roles
         )
         self.crud: UserCrudForgery = crud
 
@@ -65,26 +67,29 @@ class UserRouterProvider(CustomRouterProvider):
     ):
         self.router = super().initialize_router(init_data, exclude_routes_name)
         for config in init_data:
-            if (
-                config.route_name == "read-one-user"
-                and config.is_activated
-            ):
+            if config.route_name == DefaultRoutesName.READ_ONE_USER.value and config.is_activated:
+                dependencies=[]
+                if config.is_protected :
+                    if self.roles :
+                        for role in self.roles:
+
+                            config.roles.append(role)
+                    if config.roles :
+                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
+                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
+                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
 
                 @self.router.get(
                     path=config.route_path,
                     response_model=self.PydanticModel,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
-                    dependencies=(
-                        [Depends(self.get_access_token)]
-                        if self.get_access_token and config.is_protected
-                        else []
-                    ),
+                    dependencies = dependencies
                 )
-                async def read_one_user(username_or_email:str):
+                async def read_one_user(username_or_email: str):
                     return await self.crud.read_one_user(username_or_email)
 
-            if config.route_name == "read-current-user" and config.is_activated:
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER.value and config.is_activated:
 
                 @self.router.get(
                     path=config.route_path,
@@ -99,7 +104,7 @@ class UserRouterProvider(CustomRouterProvider):
                 ):
                     return current_user
 
-            if config.route_name == "tokenUrl" and config.is_activated:
+            if config.route_name == DefaultRoutesName.TOKEN_URL and config.is_activated:
 
                 @self.router.post(
                     response_model=Token,
@@ -111,10 +116,14 @@ class UserRouterProvider(CustomRouterProvider):
                     form_data: OAuth2PasswordRequestForm = Depends(),
                 ):
                     user = await self.authentication.authenticate_user(
-                        password=form_data.password, username_or_email= form_data.username
-                        )
+                        password=form_data.password,
+                        username_or_email=form_data.username,
+                    )
 
-                    data = {"sub": user.username}
+                    data = {
+                        "sub": form_data.username,
+                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                    }
                     access_token = self.authentication.create_access_token(data)
                     refresh_token = self.authentication.create_refresh_token(data)
                     return {
@@ -123,7 +132,7 @@ class UserRouterProvider(CustomRouterProvider):
                         "token_type": "bearer",
                     }
 
-            if config.route_name == "get-refresh-token" and config.is_activated:
+            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN.value and config.is_activated:
 
                 @self.router.post(
                     path=config.route_path,
@@ -140,7 +149,7 @@ class UserRouterProvider(CustomRouterProvider):
                     refresh_token = self.authentication.create_refresh_token(data)
                     return refresh_token
 
-            if config.route_name == "refresh-token" and config.is_activated:
+            if config.route_name == DefaultRoutesName.REFRESH_TOKEN.value and config.is_activated:
 
                 @self.router.post(
                     path=config.route_path,
@@ -153,7 +162,7 @@ class UserRouterProvider(CustomRouterProvider):
                         refresh_token_data=refresh_token
                     )
 
-            if config.route_name == "login" and config.is_activated:
+            if config.route_name == DefaultRoutesName.LOGIN.value and config.is_activated:
 
                 @self.router.post(
                     response_model=Token,
@@ -166,7 +175,10 @@ class UserRouterProvider(CustomRouterProvider):
                     user = await self.authentication.authenticate_user(
                         usermodel.password, username_or_email
                     )
-                    data = {"sub": username_or_email}
+                    data = {
+                        "sub": username_or_email,
+                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                    }
                     access_token_data = self.authentication.create_access_token(data)
                     refresh_token_data = self.authentication.create_refresh_token(data)
                     return {
@@ -175,7 +187,7 @@ class UserRouterProvider(CustomRouterProvider):
                         "token_type": "bearer",
                     }
 
-            if config.route_name == "change-password" and config.is_activated:
+            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD.value and config.is_activated:
 
                 @self.router.post(
                     status_code=204,

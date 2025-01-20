@@ -1,5 +1,8 @@
 from typing import List, Optional
 
+from fastapi import Depends
+
+from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME
 
 
@@ -25,8 +28,8 @@ class RouteConfig:
         is_activated: bool = False,
         is_protected: bool = False,
         is_unlocked: Optional[bool] = False,
-        role : Optional[str] = None,
-        privileges: Optional[List[str]] = None,
+        roles : Optional[List[str]] = [],
+        privileges: Optional[List[str]] =[],
     ):
         self.route_name = route_name
         self.is_activated = is_activated
@@ -50,7 +53,19 @@ class RouteConfig:
         self.summary = summary
         self.description = description
         self.is_unlocked = is_unlocked
-        self.role= role.strip().upper() if role else None
+        self.roles = [role.strip().upper() for role in roles if roles]
         self.privileges = [auth.strip.upper() for auth in privileges] if privileges else []
+
+    def get_authorizations(self,authentication:Authentication)-> List[callable]:
+        authorizations = []
+        role_authorization = authentication.check_authorization(roles_name=self.roles)
+        authorizations.append(role_authorization)
+        for privilege in self.privileges :
+            privilege_authorization = authentication.check_authorization(privilege_name=privilege)
+            authorizations.append(privilege_authorization)
+        return authorizations
+
+
+
 
 

@@ -23,6 +23,7 @@ class UserCrudForgery(CrudForgery):
             SQLAlchemyModel=authentication.User,
             CreatePydanticModel=authentication.UserCreateModel,
             UpdatePydanticModel=authentication.UserUpdateModel,
+            Linked_Classes=[]
         )
         self.get_current_user: callable = authentication.get_current_user
 

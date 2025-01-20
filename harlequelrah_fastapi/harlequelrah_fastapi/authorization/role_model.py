@@ -2,6 +2,8 @@ from harlequelrah_fastapi.authorization.meta_model import MetaAuthorization, Met
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from harlequelrah_fastapi.authorization.privilege_model import PrivilegeCreateModel
+
 
 
 
@@ -14,6 +16,7 @@ class RoleBaseModel(BaseModel):
 
 class RoleCreateModel(RoleBaseModel):
     description:str=Field(example='allow to manage all the system')
+    privileges:List[PrivilegeCreateModel]
 
 
 class RoleUpdateModel(BaseModel):

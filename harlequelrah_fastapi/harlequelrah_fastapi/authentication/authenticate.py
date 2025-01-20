@@ -1,6 +1,7 @@
 from typing import List, Optional
 from harlequelrah_fastapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
+    INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
 )
 from sqlalchemy.orm import Session, sessionmaker
@@ -74,24 +75,27 @@ class Authentication:
         if not db :  raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
         return db
 
-    async def is_authorized(self,privilege_name:Optional[str]=None,role_name:Optional[str]=None)->bool:
-        user= await self.get_current_user()
-        if not user : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
-        if role_name:
-            return user.has_role(role_name)
-        if privilege_name:
-            return user.has_privilege(privilege_name)
+    def check_authorization(self,privilege_name:Optional[List[str]]=None,roles_name:Optional[List[str]]=None)->callable:
+        async def is_authorized(token:str=Depends(self.get_access_token))-> bool:
+            payload= await self.validate_token(token)
+            sub= payload.get('sub')
+            db= self.get_session()
+            user = await self.get_user_by_sub(username_or_email=sub,db=db)
+            if not user : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
+            if roles_name:
+                return user.has_role(roles_name)
+            elif privilege_name:
+                return user.has_privilege(privilege_name)
+            else :raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+        return is_authorized
 
 
-    async def authenticate_user(
-        self,
-        password: str,
-        username_or_email: Optional[str] = None,
-        session: Optional[Session] = None,
-    ):
-        if username_or_email is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = session if session else self.get_session()
+
+
+
+
+
+    async def get_user_by_sub(self,username_or_email:str,db:Session):
         user = (
             db.query(self.User)
             .filter(
@@ -104,9 +108,23 @@ class Authentication:
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+        return user
+
+    async def authenticate_user(
+        self,
+        password: str,
+        username_or_email: Optional[str] = None,
+        session: Optional[Session] = None,
+    ):
+        if username_or_email is None:
+            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+        db = session if session else self.get_session()
+        user = await self.get_user_by_sub(db=db,username_or_email=username_or_email)
         if user:
             if not user.check_password(password):
                 user.try_login(False)
+                db.commit()
+                db.refresh(user)
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             if not user.is_active:
                 raise INACTIVE_USER_CUSTOM_HTTP_EXCEPTION

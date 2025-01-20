@@ -12,8 +12,8 @@ INACTIVE_USER_HTTP_EXCEPTION = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 INSUFFICIENT_PERMISSIONS_HTTP_EXCEPTION = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="User does not have the required role or privilege",
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="User does not have the required role or privileges",
     headers={"WWW-Authenticate": "Bearer"},
 )
 INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION = CustomHttpException(INVALID_CREDENTIALS_HTTP_EXCEPTION)
