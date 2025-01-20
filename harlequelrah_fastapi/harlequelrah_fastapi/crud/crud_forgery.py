@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi.responses import JSONResponse
 from harlequelrah_fastapi.authentication.authenticate import Authentication
+from harlequelrah_fastapi.crud.link_class import LinkClass, manage_linked_classes
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
@@ -10,10 +11,8 @@ from harlequelrah_fastapi.utility.utils import update_entity, validate_value_typ
 from sqlalchemy import func
 from sqlalchemy.orm import Session, sessionmaker
 
-class LinkClass :
-    def __init__(self,key:str,Model:type):
-        self.key=key
-        self.Model=Model
+
+
 class CrudForgery:
     def __init__(
         self,
@@ -33,18 +32,12 @@ class CrudForgery:
         self.Linked_Classes=Linked_Classes
 
     async def create(self, create_obj):
-
         if isinstance(create_obj, self.CreatePydanticModel):
             session = self.session_factory()
             dict_obj=create_obj.dict()
             if self.Linked_Classes:
-                for relation in self.Linked_Classes:
-                    if dict_obj[relation.key]:
-                        entities_obj=[]
-                        for entity in dict_obj[relation.key]:
-                            entity_obj= relation.Model(**entity)
-                            entities_obj.append(entity_obj)
-                        dict_obj[relation.key]=entities_obj
+                dict_obj= await manage_linked_classes(self.Linked_Classes)
+
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:
                 session.add(new_obj)

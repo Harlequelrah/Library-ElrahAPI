@@ -13,7 +13,7 @@ class TypeRoute(str, Enum):
     PROTECTED = "protected"
 
 
-DEFAULT_ROUTES_CONFIGS: dict[str, DEFAULT_ROUTE_CONFIG] = {
+DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.COUNT: DEFAULT_ROUTE_CONFIG(
         "Get count of entities", "Retrieve the total count of entities"
     ),
@@ -58,7 +58,7 @@ ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
     )
     for route_name, route_config in DEFAULT_ROUTES_CONFIGS.items()
 ]
-USER_AUTH_CONFIG: dict[str, RouteConfig] = {
+USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     DefaultRoutesName.READ_CURRENT_USER: RouteConfig(
         route_name="read-current-user",
         is_activated=True,

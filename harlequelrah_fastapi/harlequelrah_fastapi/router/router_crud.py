@@ -25,7 +25,7 @@ def exclude_route(
 def get_single_route(
     route_name: DefaultRoutesName, type_route: Optional[TypeRoute] = TypeRoute.PUBLIC
 ) -> RouteConfig:
-    config: DEFAULT_ROUTE_CONFIG = DEFAULT_ROUTES_CONFIGS.get(route_name.value)
+    config: DEFAULT_ROUTE_CONFIG = DEFAULT_ROUTES_CONFIGS.get(route_name)
     if config:
         return RouteConfig(
             route_name=route_name.value,
@@ -35,4 +35,4 @@ def get_single_route(
             is_protected=type_route == TypeRoute.PROTECTED,
         )
     else:
-        return USER_AUTH_CONFIG[route_name.value]
+        return USER_AUTH_CONFIG[route_name]

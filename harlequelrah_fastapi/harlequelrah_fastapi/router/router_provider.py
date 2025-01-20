@@ -46,8 +46,8 @@ class CustomRouterProvider:
     def get_mixed_router(
         self,
         init_data: List[RouteConfig] = [],
-        public_routes_name: Optional[List[DefaultRoutesName]] = None,
-        protected_routes_name: Optional[List[DefaultRoutesName]] = None,
+        public_routes_name: Optional[List[DefaultRoutesName]] = [],
+        protected_routes_name: Optional[List[DefaultRoutesName]] = [],
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
         for route_name in public_routes_name:
