@@ -12,31 +12,30 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, sessionmaker
 
 
-
 class CrudForgery:
     def __init__(
         self,
         entity_name: str,
-        authentication:Authentication,
+        authentication: Authentication,
         SQLAlchemyModel,
         CreatePydanticModel=None,
         UpdatePydanticModel=None,
-        Linked_Classes:List[LinkClass]=[]
+        Linked_Classes: List[LinkClass] = [],
     ):
         self.SQLAlchemyModel = SQLAlchemyModel
         self.CreatePydanticModel = CreatePydanticModel
         self.UpdatePydanticModel = UpdatePydanticModel
         self.entity_name = entity_name
-        self.authentication=authentication
-        self.session_factory=authentication.session_factory
-        self.Linked_Classes=Linked_Classes
+        self.authentication = authentication
+        self.session_factory = authentication.session_factory
+        self.Linked_Classes = Linked_Classes
 
     async def create(self, create_obj):
         if isinstance(create_obj, self.CreatePydanticModel):
             session = self.session_factory()
-            dict_obj=create_obj.dict()
+            dict_obj = create_obj.dict()
             if self.Linked_Classes:
-                dict_obj= await manage_linked_classes(self.Linked_Classes)
+                dict_obj = await manage_linked_classes(self.Linked_Classes)
 
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:

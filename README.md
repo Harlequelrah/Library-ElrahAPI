@@ -1,6 +1,6 @@
 # Description
 
-Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
+Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework  pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
 # Logo
 
@@ -67,11 +67,11 @@ Cette commande permet de créer une application dans le projet
 ```
 sqlapp/
 ├── __init__.py
-├── crud.py
-├── model.py
+├── cruds.py
+├── models.py
 ├── router.py
-├── schema.py
-├── util.py
+├── schemas.py
+├── utils.py
 ```
 
 #### 3. Commande génération d'une application utilisateur
@@ -85,9 +85,11 @@ harlequelrah_fastapi generate userapp
 ```
 userapp/
 ├── __init__.py
-├── app_user.py
-├── user_model.py
-├── user_crud.py
+├── user_cruds.py
+├── user_models.py
+├── user_router_providers.py
+├── user_routers.py
+├── user_schemas.py
 ```
 
 #### 4. Commande de génération d'une application de log
@@ -362,17 +364,17 @@ Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 ##### 1. Sous module `meta_model`
 Ce sous module contient des models Meta pour définir les models liés à l'authorization et pour lire partiellement des données .
 
-- `MetaAuthorization`
+- `MetaAuthorization` : classe pour définir les models SQLAlchemy Role et Privilege
 
   - id : **Column(Integer)**
 
   - name : **Column(String)**
 
-  - normalizedName : **Column(String)**
+  - normalizedName : **Column(String)** [automatique à l'ajout de name]
 
   - description : **Column(String)**
 
-- `MetaAuthorizationBaseModel`
+- `MetaAuthorizationBaseModel` : classe pour définir les Models Meta pour Role et Privilege .
 
   - id : **int**
 
@@ -380,100 +382,86 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   -  is_active : **bool**
 
-- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)`
+- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)` ; classe pour définir les Models Pydantic complet pour Role et Privilege.
+
+ - name : **str**
 
 
-##### 1. Sous module `role_model`
+##### 2. Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
-`Role`:
+- `RoleModel(MetaAuthorization)`
 
-- id : **Column(Integer)**
+- `RoleBaseModel` :
 
-- name : **Column(String)**
+  - name : **str**
 
-- normalized_name : **Column(String)** automatique à l'ajout de name
+- `RoleCreateModel(RoleBaseModel)` :
 
-- is_active : **Column(Boolean)**
+  - description : **str**
 
-`RoleCreateModel` :
-
-- name : **str**
+  - privileges :  **Optional[List[PrivilegeCreateModel]]**
 
 `RoleUpdateModel`
 
 - name : **Optional[str]**
 
+- description : **Optional[str]**
+
 - is_active : **Optional[bool]**
 
-`RolePydanticModel` :
+`RolePydanticModel(MetaAuthorizationPydanticModel)` :
 
-- id : **int**
+- privileges : **List[MetaAuthorizationBaseModel]**
 
-- name : **str**
-
-- normalizedName : **str**
-
-- is_active : **bool**
-
-- privileges : **List[MetaPrivilege]**
-
-##### Sous module `privilege_model`
+##### 3. Sous module `privilege_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Privilege .
 
-- sous module `privilege_model`
+- `PrivilegeModel(MetaAuthorization)`
 
-- id : **Column(Integer)**
+- `PrivilegeBaseModel`
 
-- name : **Column(String)**
+  - name : **str**
 
-- normalized_name : **Column(String)** automatique à l'ajout de name
+- `PrivilegeCreateModel`:
 
-- is_active : **Column(Boolean)**
+  - description : **str**
 
-- description : **Column(String)**
 
-`PrivilegeCreateModel`:
+- `PrivilegeUpdateModel` :
 
-- name : **str**
+  - name : **Optional[str]**
 
-- description : **str**
+  - description : **Optional[str]**
 
-- role_id : **int**
+  - is_active : **Optional[bool]**
 
-`PrivilegeUpdateModel` :
+- `PrivilegePydanticModel(MetaAuthorizationPydanticModel)` :
 
-- name : **Optional[str]**
+  - roles : **Optional[List["MetaAuthorizationBaseModel"]]**
 
-- description : **Optional[str]**
+  - privilege_users : **Optional[List["MetaPrivilegeUsers"]]**
 
-- role_id : **Optional[int]**
+##### Sous module `role_privilege_model`
 
-`PrivilegePydanticModel` :
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité RolePrivilege .
 
-- id : **int**
+- `RolePrivilegeModel`
 
-- name : **str**
+  - id : **Column(Integer)**
 
-- normalizedName : **str**
+  - role_id : **Column(Integer)**
 
-- description : **str**
+ - privilege_id : **Column(Integer)**
 
-- is_active : **str**
+- `RolePrivilegeCreateModel`
 
-- role_id : **int**
-
-`MetaPrivilege` :
-
-- id : **int**
-
-- normalizedName : **str**
-
-- description : **str**
-
-- is_active : **str**
+  - role_id : **int**
+  
+  - privilege : **int**
+  
 
 #### Module `middleware`
 

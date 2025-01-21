@@ -1,1 +1,1 @@
-from .model import Entity , metadata
+from .models import Entity , metadata

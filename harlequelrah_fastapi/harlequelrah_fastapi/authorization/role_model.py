@@ -16,12 +16,13 @@ class RoleBaseModel(BaseModel):
 
 class RoleCreateModel(RoleBaseModel):
     description:str=Field(example='allow to manage all the system')
-    privileges:List[PrivilegeCreateModel]
+    privileges:Optional[List[PrivilegeCreateModel]]
 
 
 class RoleUpdateModel(BaseModel):
     name: Optional[str] = Field(example="Admin", default=None)
     is_active : Optional[bool] = Field(example=True, default=None)
+    description:str=Field(example='allow to manage all the system')
 
 
 

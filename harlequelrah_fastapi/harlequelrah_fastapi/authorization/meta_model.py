@@ -1,8 +1,8 @@
 
 from pydantic import BaseModel
 from pydantic import BaseModel, Field
-from sqlalchemy import Boolean, Column, ForeignKey, Integer,String
-from sqlalchemy.orm import validates,Session,relationship
+from sqlalchemy import Boolean, Column,Integer,String
+from sqlalchemy.orm import validates
 
 class MetaAuthorization:
     id=Column(Integer,primary_key=True,index=True)

@@ -81,8 +81,9 @@ class UserModel:
 
 
 class UserPrivilegeModel:
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    privilege_id = Column(Integer, ForeignKey("privileges.id"), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    privilege_id = Column(Integer, ForeignKey("privileges.id"))
     is_active = Column(Boolean, default=True)
 
 class UserBaseModel(BaseModel):

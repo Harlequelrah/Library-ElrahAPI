@@ -1,5 +1,5 @@
 from harlequelrah_fastapi.user import models
-from my_project.settings import authentication
+from myproject.settings import authentication
 class UserBaseModel(models.UserBaseModel):
     pass
 

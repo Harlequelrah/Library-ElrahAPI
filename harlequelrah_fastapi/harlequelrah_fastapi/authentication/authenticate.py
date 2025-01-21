@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 import secrets
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import HTTPException as HE, status
+from fastapi import status
 from jose import ExpiredSignatureError, jwt, JWTError
 from harlequelrah_fastapi.user.models import (
     UserPydanticModel,

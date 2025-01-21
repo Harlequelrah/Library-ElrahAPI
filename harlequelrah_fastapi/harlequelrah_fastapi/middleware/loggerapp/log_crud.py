@@ -1,5 +1,5 @@
 from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
-from my_project.settings.secret import authentication
+from myproject.settings.database import authentication
 from .log_model import Logger
 
 logCrud = CrudForgery(
