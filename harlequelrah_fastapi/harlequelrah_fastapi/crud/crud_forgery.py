@@ -1,15 +1,14 @@
 from typing import List, Optional
-from fastapi.responses import JSONResponse
 from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.crud.link_class import LinkClass, manage_linked_classes
 from harlequelrah_fastapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
-from fastapi import HTTPException as HE, Response, status
+from fastapi import status
 from harlequelrah_fastapi.exception.exceptions_utils import raise_custom_http_exception
 from harlequelrah_fastapi.utility.utils import update_entity, validate_value_type
 from sqlalchemy import func
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 
 class CrudForgery:

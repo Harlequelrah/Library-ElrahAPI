@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
-from harlequelrah_fastapi.authentication.authenticate import Authentication
+from fastapi import APIRouter
+
 from typing import List, Optional
 from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
 from harlequelrah_fastapi.router.route_config import RouteConfig
-from harlequelrah_fastapi.router.router_crud import exclude_route, get_single_route
+from harlequelrah_fastapi.router.router_crud import exclude_route, get_single_route, initialize_dependecies
 from harlequelrah_fastapi.router.router_namespace import (
     DefaultRoutesName,
     ROUTES_PROTECTED_CONFIG,
@@ -20,7 +20,8 @@ class CustomRouterProvider:
         tags: List[str],
         PydanticModel,
         crud: CrudForgery,
-        roles : Optional[List[str]]= []
+        roles : Optional[List[str]]= [],
+        privileges : Optional[List[str]]=[]
     ):
         self.crud = crud
         self.get_access_token: callable = crud.authentication.get_access_token
@@ -29,6 +30,7 @@ class CustomRouterProvider:
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
         self.roles= roles
+        self.privileges = privileges
         self.router = APIRouter(
             prefix=prefix,
             tags=tags,
@@ -72,16 +74,12 @@ class CustomRouterProvider:
         init_data = exclude_route(init_data, exclude_routes_name)
         for config in init_data:
             if config.route_name == DefaultRoutesName.COUNT.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
-
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
@@ -96,16 +94,12 @@ class CustomRouterProvider:
                 config.route_name == DefaultRoutesName.READ_ONE.value
                 and config.is_activated
             ):
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.get(
                     path=config.route_path,
@@ -120,16 +114,12 @@ class CustomRouterProvider:
                     return await self.crud.read_one(id)
 
             if config.route_name == DefaultRoutesName.READ_ALL and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.get(
                     path=config.route_path,
@@ -142,16 +132,12 @@ class CustomRouterProvider:
                     return await self.crud.read_all(skip=skip, limit=limit)
 
             if config.route_name == DefaultRoutesName.READ_ALL_BY_FILTER.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.get(
                     path=config.route_path,
@@ -171,16 +157,12 @@ class CustomRouterProvider:
                     )
 
             if config.route_name == DefaultRoutesName.CREATE.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.post(
                     path=config.route_path,
@@ -195,16 +177,12 @@ class CustomRouterProvider:
                     return await self.crud.create(create_obj)
 
             if config.route_name == DefaultRoutesName.UPDATE.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.put(
                     path=config.route_path,
@@ -220,16 +198,12 @@ class CustomRouterProvider:
                     return await self.crud.update(id, update_obj)
 
             if config.route_name == DefaultRoutesName.DELETE.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.delete(
                     path=config.route_path,

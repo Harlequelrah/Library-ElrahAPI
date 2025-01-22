@@ -1,15 +1,11 @@
-from typing import Annotated, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.authentication.token import AccessToken, RefreshToken, Token
-from harlequelrah_fastapi.exception.auth_exception import (
-    INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
-)
+
 from harlequelrah_fastapi.router.route_config import RouteConfig
-from harlequelrah_fastapi.router.router_crud import exclude_route
+from harlequelrah_fastapi.router.router_crud import exclude_route, initialize_dependecies
 from harlequelrah_fastapi.router.router_namespace import (
     DefaultRoutesName,
     ROUTES_PROTECTED_CONFIG,
@@ -22,7 +18,7 @@ from harlequelrah_fastapi.user.models import (
     UserLoginRequestModel,
 )
 from harlequelrah_fastapi.crud.user_crud_forgery import UserCrudForgery
-from sqlalchemy.orm import Session
+
 
 
 class UserRouterProvider(CustomRouterProvider):
@@ -32,7 +28,8 @@ class UserRouterProvider(CustomRouterProvider):
         prefix: str,
         tags: List[str],
         crud: UserCrudForgery,
-        roles : List[str]=[]
+        roles : List[str]=[],
+        privileges : List[str]=[],
     ):
         self.authentication = crud.authentication
         super().__init__(
@@ -40,7 +37,8 @@ class UserRouterProvider(CustomRouterProvider):
             tags=tags,
             PydanticModel=self.authentication.UserPydanticModel,
             crud=crud,
-            roles=roles
+            roles=roles,
+            privileges=privileges
         )
         self.crud: UserCrudForgery = crud
 
@@ -68,16 +66,12 @@ class UserRouterProvider(CustomRouterProvider):
         self.router = super().initialize_router(init_data, exclude_routes_name)
         for config in init_data:
             if config.route_name == DefaultRoutesName.READ_ONE_USER.value and config.is_activated:
-                dependencies=[]
-                if config.is_protected :
-                    if self.roles :
-                        for role in self.roles:
-
-                            config.roles.append(role)
-                    if config.roles :
-                        authorizations : List[callable]= config.get_authorizations(authentication=self.crud.authentication)
-                        dependencies : List[Depends] = [Depends(authorization) for authorization in authorizations]
-                    else : dependencies =[Depends(self.crud.authentication.get_access_token)]
+                dependencies= initialize_dependecies(
+                    config=config,
+                    authentication= self.crud.authentication,
+                    roles=self.roles,
+                    privileges = self.privileges
+                )
 
                 @self.router.get(
                     path=config.route_path,

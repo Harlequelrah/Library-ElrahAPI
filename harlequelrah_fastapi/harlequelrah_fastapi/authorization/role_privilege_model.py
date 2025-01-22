@@ -2,8 +2,7 @@
 from typing import Optional
 from pydantic import BaseModel
 from pydantic import BaseModel, Field
-from sqlalchemy import Boolean, Column,Integer,String,ForeignKey
-from sqlalchemy.orm import validates
+from sqlalchemy import Column,Integer,ForeignKey
 
 
 class RolePrivilegeModel:
@@ -21,6 +20,7 @@ class RolePrivilegeUpdateModel(BaseModel):
     privilege :Optional[int] = Field(example=2,default=None)
 
 class RolePrivilegePydanticModel(RolePrivilegeCreateModel):
+    id : int
     class Config :
         from_orm = True
 

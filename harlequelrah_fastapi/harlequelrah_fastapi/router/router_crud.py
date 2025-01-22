@@ -1,4 +1,7 @@
 from typing import List, Optional
+
+from fastapi import Depends
+from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.router.route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
 from harlequelrah_fastapi.router.router_namespace import (
     DEFAULT_ROUTES_CONFIGS,
@@ -36,3 +39,29 @@ def get_single_route(
         )
     else:
         return USER_AUTH_CONFIG[route_name]
+
+
+def initialize_dependecies(
+    config: RouteConfig,
+    authentication: Authentication,
+    roles: Optional[List[str]],
+    privileges: Optional[List[str]],
+):
+    dependencies = []
+    if config.is_protected:
+        if roles:
+            for role in roles:
+                config.roles.append(role)
+        if privileges:
+            for privilege in privileges:
+                config.privileges.append(privilege)
+        if config.roles:
+            authorizations: List[callable] = config.get_authorizations(
+                authentication=authentication
+            )
+            dependencies: List[Depends] = [
+                Depends(authorization) for authorization in authorizations
+            ]
+        else:
+            dependencies = [Depends(authentication.get_access_token)]
+    return dependencies

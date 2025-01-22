@@ -1,12 +1,12 @@
-# Description
+# I - **`Description`**
 
-Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework  pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
+Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
-# Logo
+# II - **`Logo`**
 
 ![Logo](harlequelrah.png)
 
-## Installation
+# III -  **`Installation`**
 
 - **Avec Github :**
   ```bash
@@ -18,13 +18,13 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install harlequelrah_fastapi
   ```
 
-## Utilisation
+# IV - **`Utilisation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
-### `Commandes`
+## 1. `Commandes`
 
-#### 1. Commande de création du projet
+#### 1.1. **Commande de création du projet**
 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
@@ -54,7 +54,7 @@ nomduprojet/
 │       └── models_metadata.py
 ```
 
-#### 2. Commande de génération d'une application
+#### 1.2. **Commande de génération d'une application**
 
 Cette commande permet de créer une application dans le projet
 
@@ -74,12 +74,14 @@ sqlapp/
 ├── utils.py
 ```
 
-#### 3. Commande génération d'une application utilisateur
+#### 1.3. **Commande génération d'une application utilisateur**
 
 Cette commande permet de créer une application utilisateur
+
 ```bash
 harlequelrah_fastapi generate userapp
 ```
+
 **`architecture`:**
 
 ```
@@ -92,7 +94,7 @@ userapp/
 ├── user_schemas.py
 ```
 
-#### 4. Commande de génération d'une application de log
+#### 1.4. **Commande de génération d'une application de log**
 
 Cette commande permet de créer une application de log
 
@@ -108,13 +110,13 @@ loggerapp/
 ├── log_schema.py
 ```
 
-### `Modules`
+## 2. `Modules`
 
-#### Module `exception`
+### 2.1. **Module `exception`**
 
 Ce module contient des exceptions personnalisées utilisés dans cette bibliothèque
 
-##### 1. Sous module auth_exception
+#### 2.1.1. Sous module `auth_exception`
 
 ce sous module dispose de quelques variables d'exceptions prédéfinies liés à l'authentification
 
@@ -124,7 +126,7 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 
 - `INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION` : exception personnalisée lorsqu'un utilisateur n'a pas les permissions suffisantes pour acceder à une ressource .
 
-##### 2. Sous module exceptions_utils
+#### 2.1.2. Sous module `exceptions_utils`
 
 ce sous module contient des fonction utilitaires pour les exceptions
 
@@ -136,18 +138,17 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
     - `detail` : **str**
 
-##### 3. Sous module custom_http_exception
+#### 2.1.3. Sous module custom_http_exception
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 
-#### Module `utility`
+### 2.2. **Module `utility`**
 
 Ce module contient des utilitaires .
 
-##### 1. Sous module utils
+#### 2.2.1. Sous module `utils`
 
 Ce sous module contient des quelques fonctions utiles .
-
 
 - `update_entity` : mets à jour les champs d'une entité objet .
 
@@ -177,15 +178,15 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **paramètres** :
 
-    - database_url  : **str** [l'url de la base de donnée dans le nom de la base de donnée] .
+    - database_url : **str** [l'url de la base de donnée dans le nom de la base de donnée] .
 
-    -  database_name : **str** [le nom de la base de donnée]
+    - database_name : **str** [le nom de la base de donnée]
 
-#### Module `authentication`
+### 2.3. **Module `authentication`**
 
 Ce module contient des classes et des fonctions utilisées pour l'authentification.
 
-##### 1. Sous module `token`
+#### 2.3.1. Sous module `token`
 
 Ce sous module définit des classes pydantics pour la gestions des tokens :
 
@@ -209,7 +210,7 @@ Ce sous module définit des classes pydantics pour la gestions des tokens :
 
   - token_type : **str**
 
-##### 2. Sous module `authenticate`
+#### 2.3.2 Sous module `authenticate`
 
 ce sous module définit les classes et fonctions utilisées pour l'authentification
 
@@ -232,7 +233,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
 
 - `__secret_key` : **str** [une clé secrète générer par défaut]
-
 
 - `ALGORITHMS` : **List[str]** [un tableau d'algorithm [par défaut **[`HS256`]**]
 
@@ -342,7 +342,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - privilege_name: **Optional[List[str]]**
 
-    - roles_name :  **Optional[List[str]]**
+    - roles_name : **Optional[List[str]]**
 
   - **sortie** : **callable**
 
@@ -352,16 +352,16 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - username_or_email : **str**
 
-    - db :  **Session**
+    - db : **Session**
 
   - **sortie** : **User**
 
-
-#### Module `authorization`
+### 2.4. **Module `authorization`**
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
-##### 1. Sous module `meta_model`
+#### 2.4.1. Sous module `meta_model`
+
 Ce sous module contient des models Meta pour définir les models liés à l'authorization et pour lire partiellement des données .
 
 - `MetaAuthorization` : classe pour définir les models SQLAlchemy Role et Privilege
@@ -380,14 +380,13 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - normalizedName : **str**
 
-  -  is_active : **bool**
+  - is_active : **bool**
 
 - `MetaAuthorizationPydanticModel(MetaAuthorizationModel)` ; classe pour définir les Models Pydantic complet pour Role et Privilege.
 
- - name : **str**
+- name : **str**
 
-
-##### 2. Sous module `role_model`
+#### 2.4.2 Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
@@ -401,21 +400,21 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - description : **str**
 
-  - privileges :  **Optional[List[PrivilegeCreateModel]]**
+  - privileges : **Optional[List[PrivilegeCreateModel]]**
 
-`RoleUpdateModel`
+- `RoleUpdateModel`
 
-- name : **Optional[str]**
+  - name : **Optional[str]**
 
-- description : **Optional[str]**
+  - description : **Optional[str]**
 
-- is_active : **Optional[bool]**
+  - is_active : **Optional[bool]**
 
-`RolePydanticModel(MetaAuthorizationPydanticModel)` :
+- `RolePydanticModel(MetaAuthorizationPydanticModel)` :
 
-- privileges : **List[MetaAuthorizationBaseModel]**
+  - privileges : **List[MetaAuthorizationBaseModel]**
 
-##### 3. Sous module `privilege_model`
+#### 2.4.3. Sous module `privilege_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Privilege .
 
@@ -429,7 +428,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - description : **str**
 
-
 - `PrivilegeUpdateModel` :
 
   - name : **Optional[str]**
@@ -440,11 +438,11 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `PrivilegePydanticModel(MetaAuthorizationPydanticModel)` :
 
-  - roles : **Optional[List["MetaAuthorizationBaseModel"]]**
+  - roles : **Optional[List[MetaAuthorizationBaseModel]]**
 
-  - privilege_users : **Optional[List["MetaPrivilegeUsers"]]**
+  - privilege_users : **Optional[List[MetaPrivilegeUsers]]**
 
-##### Sous module `role_privilege_model`
+#### 2.4.4. Sous module `role_privilege_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité RolePrivilege .
 
@@ -454,20 +452,29 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - role_id : **Column(Integer)**
 
- - privilege_id : **Column(Integer)**
+  - privilege_id : **Column(Integer)**
 
 - `RolePrivilegeCreateModel`
 
   - role_id : **int**
-  
-  - privilege : **int**
-  
 
-#### Module `middleware`
+  - privilege : **int**
+
+- `RolePrivilegeUpdateModel`
+
+  - role_id : **Optional[int]**
+
+  - privilege : **Optional[int]**
+
+- `RolePrivilegePydanticModel(RolePrivilegeCreateModel)`
+  - id : **int**
+
+
+### 2.5. **Module `middleware`**
 
 Ce module regroupe toute la gestion des middelwares
 
-##### Sous module `models`
+##### 2.5.1. Sous module `models`
 
 Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
 
@@ -511,7 +518,7 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 - remote_adress: **str**
 
-##### Sous module `log_middleware`
+##### 2.5.2 Sous module `log_middleware`
 
 Ce sous module définit les middelwares de loggins
 
@@ -525,7 +532,7 @@ Ce sous module définit les middelwares de loggins
 
     - manager : **ConnectionManager**
 
-##### Sous module `error_middleware`
+##### 2.5.3. Sous module `error_middleware`
 
 Ce sous module définit les middelwares d'erreurs
 
@@ -539,7 +546,7 @@ Ce sous module définit les middelwares d'erreurs
 
     - manager : **ConnectionManager**
 
-##### Sous module crud_middelware
+##### 2.5.4. Sous module crud_middelware
 
 ce sous module définit les methodes pour sauvegarder les logs .
 
@@ -591,11 +598,11 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
     - **body** : bytes
 
-#### Module `user`
+### 2.6. **Module `user`**
 
 Ce module comporte toute la gestion des utilisateurs
 
-##### Sous module `models`
+##### 2.6.1. Sous module `models`
 
 Ce sous module comporte tous les models pour l'entité utilisateur .
 
@@ -621,7 +628,13 @@ class **`User`**
 
 - attempt_login : **Column(Integer)**
 
-`Methodes` :
+- role_id : **Column(Integer)**
+
+- MAX_ATTEMPT_LOGIN = 3
+
+- PasswordHasher
+
+**`Methodes`** :
 
 - `try_login` :
   tente de connecter un utilisateur et mets à jour attempt_login en fonction .
@@ -648,9 +661,35 @@ class **`User`**
 
   - **sortie** : **bool**
 
-Models pydantics pour la validations :
+- `has_role` : permet de vérifier si l'utilisateur a un role
 
-- `UserCreateModel`
+  - **paramètres** :
+
+    - roles_name : **List[str]**
+
+  - **sortie** : **bool**
+
+- `has_privilege` : permet de vérifier si l'utilisateur a un privilege
+
+  - **paramètres** :
+
+    - privilege_name : **str**
+
+  - **sortie** : **bool**
+
+- `UserPrivilegeModel`
+
+  - id : **Column(Integer)**
+
+  - user_id : **Column(Integer)**
+
+  - privilege_id : **Column(Integer)**
+
+  - is_active : **Column(Integer)**
+
+**`Models pydantics pour la validations`** :
+
+- `UserBaseModel`
 
   - email : **str**
 
@@ -660,7 +699,11 @@ Models pydantics pour la validations :
 
   - firstname : **str**
 
+- `UserCreateModel(UserBaseModel)`
+
   - password : **str**
+
+  - role_id : **Optional[int]**
 
 - `UserUpdateModel`
 
@@ -676,53 +719,83 @@ Models pydantics pour la validations :
 
   - password: **Optional[str]**
 
-class **`UserPydanticModel`**
+  - role_id : **Optional[int]**
 
-`Attributs`:
+- **`UserPydanticModel(UserBaseModel)`**
 
-- id : **int**
+  - id : **int**
 
-- email : **str**
+  - date_created : **datetime**
 
-- username : **str**
+  - date_updated : **Optional[datetime]**
 
-- password : **str**
+  - is_active : **bool**
 
-- lastname : **str**
+  - attempt_login : **int**
 
-- date_created : **datetime**
+  - role : **Optional[MetaAuthorizationBaseModel]**
 
-- is_active : **bool**
+  - user_privileges : **Optional[List[MetaUserPrivilegeModel]]**
 
-- attempt_login : **int**
+- `UserPrivilegeCreateModel` :
 
-- `UserLoginRequestModel` :
+  - user_id : **int**
+
+  - privilege_id : **int**
+
+  - is_active : **bool**
+
+- `UserPrivilegeUpdateModel` :
+
+  - user_id : **Optional[int]**
+
+  - privilege_id : **Optional[int]**
+
+  - is_active : **Optional[bool]**
+
+- `UserPrivilegePydanticModel` :
+
+  - id : **int**
+
+  - user_id : **int**
+
+  - privilege_id : **int**
+
+  - is_active : **bool**
+
+- `MetaUserPrivilegeModel` :
+
+  - privilege_id : **int**
+
+  - is_active : **bool**
+
+- `UserRequestModel` :
 
   - username : **Optional[str]**
 
-  - password : **str**
-
   - email : **Optional[str]**
 
-- **property** : username_or_email
+  - username_or_email : @property **str|None**
 
-- `UserChangePasswordRequestModel` :
+
+- `UserLoginRequestModel(UserRequestModel)` :
+
+  - password : **str**
+
+
+- `UserChangePasswordRequestModel(UserRequestModel)` :
 
   - current_password : **str**
 
   - new_password : **str**
 
-  - username : **Optional[str]**
 
-  - password : **str**
 
-  - email : **Optional[str]**
-
-#### Module `websocket`
+### 2.7. **Module `websocket`**
 
 Ce module comporte certaines classes et methodes pour interagir avec des websockets
 
-##### Sous module `connectionManager`
+##### 2.7.1. Sous module `connectionManager`
 
 Contient la classe ConnectionManager pour gérer une connextion avec un websocket .
 
@@ -746,11 +819,11 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
 
     - message : **str**
 
-#### Module `crud`
+### 2.8. **Module `crud`**
 
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des cruds.
 
-##### Sous module `crud_forgery`
+##### 2.8.1. Sous module `crud_forgery`
 
 Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
@@ -762,13 +835,16 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `entity_name`: **str**
 
-    - `session_factory`: **sessionmaker**
+    - `authentication`: **Authentication**
 
     - `SQLAlchemyModel` : Le model SQLAlchemy
 
-    - `CreatePydanticModel` : Le model Pydantic pour la création .
+    - `CreatePydanticModel` : Le model Pydantic pour la création . **Optional**
 
-    - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour .
+    - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour . **Optional**
+
+    - `Linked_Classes` : **List[LinkClass]**
+
 
 - **`create`** :
 
@@ -834,7 +910,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **sortie** : **Reponse avec status code 204**
 
-##### Sous module user_crud_forgery
+##### 2.8.2 Sous module `user_crud_forgery`
 
 Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour offire un crud personnalisé pour l'utilisateur .
 
@@ -875,31 +951,51 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
 
   - **sortie** : **bool**
 
-#### Module `router`
+##### 2.8.3. `Sous module link_class`
+
+Ce sous module définit une classe LinkClass
+pour définir un attribut et un model à lié pour la creation d'une entité
+
+- `LinkClass`
+
+  - `__init__` :
+
+    - **paramètres** :
+
+      - key : **str**
+
+      - Model : **type**
+
+- `manage_linked_classes` : retourne un dictionnaire en créant les objets liés et en les ajoutant au modèle principal.
+
+  - **paramètres** :
+
+    - Linked_Classes : **List[LinkClass]**
+
+    - dict_obj : **dict**
+
+  - **sortie** : **dict**
+
+### 2.9. **Module `router`**
 
 Ce module comporte des classes methodes et autres utilitaires pour automatiser la création des router.
 
-##### Sous module `route_config`
+##### 2.9.1. Sous module `route_config`
 
 Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterProvider et une classe utilitaire `DEFAULT_ROUTE_CONFIG`.
 
-`DEFAULT_ROUTE_CONFIG`
+- `DEFAULT_ROUTE_CONFIG`
 
-`__init__` :
+  - `__init__` :
 
-- **paramètres**
+    - **paramètres**
 
-  - summary : **str**
+      - summary : **str**
 
-  - description : **str**
+      - description : **str**
 
-`RouteConfig`
+- `RouteConfig`
 
-**Constantes**
-
-```python
-  DEFAULT_DETAIL_ROUTES_NAME = ["delete", "update", "read-one"]
-```
 
 - `__init__` :
 
@@ -907,7 +1003,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `route_name`: **str**
 
-    - `route_path`: **str**
+    - `route_path`: **Optional[str]**
 
     - `summary`: **Optional[str]**
 
@@ -919,25 +1015,45 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `is_unlocked`: **Optional[bool]** , default : `False`
 
-##### Sous module `route_namespace`
+    - roles : **Optional[List[str]]**
+
+    - privileges : **Optional[List[str]]**
+
+- `get_authorization` : retourne une liste de callable utilisable comme dépendance pour l'authorization
+
+  - **paramètres** :
+
+    - authentication : **Authentication**
+
+  - **sortie** : **List[callable]**
+
+
+
+##### 2.9.2 Sous module `route_namespace`
 
 Ce sous module comporte des Constantes et classes réutilisables dans le contexte du routage .
 
-- **class `DefaultRoutesName` (str,Enum)** : contient les définitions des noms des routes définies par le routage .
+- `class TypeRoute ` : **(str,Enum)** , définit les types de routes
 
-- **class `TypeRoute` (str,Enum)** : contient les définitions des types de routes .
+- `DEFAULT_ROUTES_CONFIGS` : **dict[DefaultRoutesName,DEFAULT,ROUTE_CONFIG]** , contient une configuration de base pour définir les routes par défaut .
 
-- **`DEFAULT_ROUTES_CONFIGS` : dict[str,DEFAULT,ROUTE_CONFIG]** : contient une configuration de base pour définir les routes par défaut .
+- `ROUTES_PUBLIC_CONFIG` : **List[RouteConfig]** ,contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
 
-- **`ROUTES_PUBLIC_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
+- `ROUTES_PROTECTED_CONFIG` : **List[RouteConfig]** , contient une liste de RouteConfig pour les routes par défaut protégés .
 
-- **`ROUTES_PROTECTED_CONFIG` : List[RouteConfig]** : contient une liste de RouteConfig pour les routes par défaut protégés .
+- **`USER_AUTH_CONFIG` : dict[DefaultRoutesName,RouteConfig]** , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
 
-- **`USER_AUTH_CONFIG` : dict[str,RouteConfig]** : contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
+- **`USER_AUTH_CONFIG_ROUTES` : List[RouteConfig]** , contient toutes les RouteConfig définit par
 
-- **`USER_AUTH_CONFIG_ROUTES` : List[RouteConfig]** : contient toutes les RouteConfig définit par `USER_AUTH_CONFIG`
+##### 2.9.3. Sous module `router_default_routes_name`
+Ce sous module définit notament des classes contenant les définitions des noms des routes
 
-##### Sous module `route_provider`
+
+- `DefaultRoutesName` : **(str,Enum)** , contient les définitions des noms des routes définies par le routage .
+
+- `DEFAULT_DETAIL_ROUTES_NAME` : **list** , définit les routes de detail
+
+##### 2.9.4. Sous module `route_provider`
 
 Ce sous module comporte la classe CustomRouterProvider pour configurer un CustomRouterProvider .
 `CustomRouterProvider`
@@ -952,13 +1068,13 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un Custom
 
     - `tags`: **List[str]**
 
-    - `PydanticModel`: **Model de reponse Pydantic**
+    - `PydanticModel`: **type** , Model de reponse Pydantic
 
     - `crud` : **CrudForgery**
 
-    - `get_access_token` : **Option[callable]**
+    - `roles` : **Optional[List[str]]**
 
-    - `get_session` : **callable**
+    - `privileges `: **Optional[List[str]]**
 
   - `utilisation` :
 
@@ -968,8 +1084,6 @@ router_provider = CustomRouterProvider(
     tags=["item"],
     PydanticModel=model.PydanticModel,
     crud=myapp_crud,
-    get_session=authentication.get_session,
-    get_access_token=authentication.get_access_token,
 )
 ```
 
@@ -1017,7 +1131,7 @@ init_data: List[RouteConfig] = [
 app_myapp = router_provider.initialize_router(init_data=init_data)
 ```
 
-##### Sous module `router_crud`
+##### 2.9.5. Sous module `router_crud`
 
 Ce sous module comporte certaines fonctions utilisées dans le cadre du routage .
 
@@ -1043,8 +1157,26 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
   - **sortie** : **RouteConfig**
 
-##### Sous module `user_router_provider`
-ce sous module continent  UserRouterProvider qui hérite de CustomRouterProvider , personnalisé pour l'utilisateur .
+
+- `initialize_dependencies` : permet d'initialiser les dépendances à passer à une route .
+
+  - **paramètres:**
+
+    - config : **RouteConfig**
+
+    - authentication : **Authentication**
+
+    - roles : **Optional[List[str]]**
+
+    - privileges : **Optional[List[str]]**
+
+  - **sortie** : **List[Depends]**
+
+
+
+##### 2.9.6. Sous module `user_router_provider`
+
+ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider , personnalisé pour l'utilisateur .
 
 - `__init__` :
 
@@ -1056,8 +1188,10 @@ ce sous module continent  UserRouterProvider qui hérite de CustomRouterProvider
 
     - tags : **List[str]**
 
+    - roles : List[str] = []
 
+    - privileges : List[str] = []
 
-# Contact ou Support
+# V - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

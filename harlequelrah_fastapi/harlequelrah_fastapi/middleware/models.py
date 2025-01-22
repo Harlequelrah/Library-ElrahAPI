@@ -7,7 +7,7 @@ from sqlalchemy import (
     Numeric,
     Text
 )
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
 
 from sqlalchemy.sql import func

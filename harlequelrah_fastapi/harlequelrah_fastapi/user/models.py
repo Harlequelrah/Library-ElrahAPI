@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
+from harlequelrah_fastapi.authorization.meta_model import MetaAuthorizationBaseModel
 from harlequelrah_fastapi.exception.auth_exception import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
@@ -107,16 +108,16 @@ class UserUpdateModel(BaseModel):
     is_active: Optional[bool] = None
     password: Optional[str] = None
     role_id : Optional[int] = None
-    user_privileges: Optional[List["MetaUserPrivilegesUpdateModel"]] = None
 
 
 class UserPydanticModel(UserBaseModel):
     id: int
     is_active: bool
+    attempt_login:int
     date_created: datetime
     date_updated: Optional[datetime]
-    role_id : Optional[int]
-    user_privileges: Optional[List["MetaUserPrivilegesModel"]] = None
+    role : Optional[MetaAuthorizationBaseModel]
+    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
 
 
 class UserPrivilegeCreateModel(BaseModel):
@@ -126,6 +127,7 @@ class UserPrivilegeCreateModel(BaseModel):
 
 
 class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
+    id : int
     class Config:
         from_orm=True
 
@@ -135,13 +137,11 @@ class UserPrivilegeUpdateModel(BaseModel):
     is_active: Optional[bool] = Field(exemple=True,default=None)
 
 
-class MetaUserPrivilegesModel(BaseModel):
+class MetaUserPrivilegeModel(BaseModel):
     privilege_id:int
     is_active:bool
 
-class MetaUserPrivilegesUpdateModel(BaseModel):
-    privilege_id:Optional[int]
-    is_active:Optional[bool]
+
 
 class UserRequestModel(BaseModel):
     username: Optional[str] = None

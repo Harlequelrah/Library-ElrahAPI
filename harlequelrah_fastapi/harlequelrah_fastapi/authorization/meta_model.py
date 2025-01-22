@@ -1,6 +1,6 @@
 
 from pydantic import BaseModel
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import Boolean, Column,Integer,String
 from sqlalchemy.orm import validates
 

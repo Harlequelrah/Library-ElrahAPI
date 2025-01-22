@@ -1,17 +1,8 @@
-from typing import Optional
-from fastapi.responses import JSONResponse
 from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.crud.crud_forgery import CrudForgery
-from harlequelrah_fastapi.exception.custom_http_exception import (
-    CustomHttpException as CHE,
-)
+
 from harlequelrah_fastapi.exception.exceptions_utils import raise_custom_http_exception
-from harlequelrah_fastapi.utility.utils import update_entity
 from sqlalchemy import or_
-from sqlalchemy.sql import func
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from fastapi import HTTPException as HE
 from fastapi import status
 
 

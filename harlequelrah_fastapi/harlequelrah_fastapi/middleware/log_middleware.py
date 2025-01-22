@@ -1,6 +1,4 @@
-import time
 from fastapi import Request
-from sqlalchemy.orm import  Session
 from starlette.middleware.base import BaseHTTPMiddleware
 from harlequelrah_fastapi.middleware.crud_middleware import save_log
 from harlequelrah_fastapi.websocket.connectionManager import ConnectionManager

@@ -1,7 +1,4 @@
 from typing import List, Optional
-
-from fastapi import Depends
-
 from harlequelrah_fastapi.authentication.authenticate import Authentication
 from harlequelrah_fastapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME
 

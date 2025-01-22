@@ -38,14 +38,14 @@ privilege_router_provider = CustomRouterProvider(
 
 user_privilege_router_provider=CustomRouterProvider(
     prefix='/users/privileges',
-    tags=["users","privileges"],
+    tags=["users_privileges"],
     PydanticModel=UserPrivilegePydanticModel,
     crud=userPrivilegeCrud
 )
 
 role_privilege_router_provider=CustomRouterProvider(
     prefix='/roles/privileges',
-    tags=["roles","privileges"],
+    tags=["roles_privileges"],
     PydanticModel=RolePrivilegePydanticModel,
     crud=userPrivilegeCrud
 )
