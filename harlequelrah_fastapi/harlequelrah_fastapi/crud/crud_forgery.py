@@ -34,7 +34,7 @@ class CrudForgery:
             session = self.session_factory()
             dict_obj = create_obj.dict()
             if self.Linked_Classes:
-                dict_obj = await manage_linked_classes(self.Linked_Classes)
+                dict_obj = await manage_linked_classes(dict_obj=dict_obj,Linked_Classes=self.Linked_Classes)
 
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:

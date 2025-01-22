@@ -8,7 +8,7 @@ class LinkClass :
 
 async def manage_linked_classes(Linked_Classes:List[LinkClass],dict_obj:dict):
     for relation in Linked_Classes:
-                    if dict_obj[relation.key]:
+                    if dict_obj.get(relation.key):
                         entities_obj=[]
                         for entity in dict_obj[relation.key]:
                             entity_obj= relation.Model(**entity)
