@@ -2,11 +2,9 @@
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework pour m'ameliorer , devenir plus productif et partager mon expertise avec `FASTAPI`
 
-# II - **`Logo`**
 
-![Logo](harlequelrah.png)
 
-# III -  **`Installation`**
+# II -  **`Installation`**
 
 - **Avec Github :**
   ```bash
@@ -18,7 +16,7 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install harlequelrah_fastapi
   ```
 
-# IV - **`Utilisation`**
+# III - **`Utilisation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
@@ -1192,6 +1190,6 @@ ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider 
 
     - privileges : List[str] = []
 
-# V - **`Contact ou Support`**
+# IV - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.
