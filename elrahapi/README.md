@@ -55,7 +55,7 @@ nomduprojet/
 Cette commande permet de créer une application dans le projet
 
 ```bash
-  elrahapi startapp nomappli
+  elrahapi startapp sqlapp
 ```
 
 **`architecture`:**
@@ -93,6 +93,10 @@ userapp/
 #### 1.4. **Commande de génération d'une application de log**
 
 Cette commande permet de créer une application de log
+
+```bash
+elrahapi generate app loggerapp
+```
 
 **`architecture`:**
 

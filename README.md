@@ -29,7 +29,7 @@ Ce package contient plusieurs modules utiles pour accélérer et modulariser le 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
 ```bash
-elrahapit nomduprojet
+elrahapi startproject nomduprojet
 ```
 
 **`architecture`:**
@@ -59,7 +59,7 @@ nomduprojet/
 Cette commande permet de créer une application dans le projet
 
 ```bash
-  elrahapimappli
+  elrahapi startapp sqlapp
 ```
 
 **`architecture`:**
@@ -79,7 +79,7 @@ sqlapp/
 Cette commande permet de créer une application utilisateur
 
 ```bash
-elrahapierapp
+elrahapi generate app userapp
 ```
 
 **`architecture`:**
@@ -97,6 +97,10 @@ userapp/
 #### 1.4. **Commande de génération d'une application de log**
 
 Cette commande permet de créer une application de log
+
+```bash
+elrahapi generate app loggerapp
+```
 
 **`architecture`:**
 
