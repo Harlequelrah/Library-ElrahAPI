@@ -2,11 +2,7 @@
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
 
-# II - **`Logo`**
-
-![Logo](Elrah.png)
-
-# III - **`Installation`**
+# II - **`Installation`**
 
 - **Avec Github :**
   ```bash
@@ -18,7 +14,7 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install elrahapi
   ```
 
-# IV - **`Utilisation`**
+# III - **`Utilisation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
@@ -29,7 +25,7 @@ Ce package contient plusieurs modules utiles pour accélérer et modulariser le 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
 ```bash
-elrahapit nomduprojet
+elrahapi startproject nomduprojet
 ```
 
 **`architecture`:**
@@ -59,7 +55,7 @@ nomduprojet/
 Cette commande permet de créer une application dans le projet
 
 ```bash
-  elrahapimappli
+  elrahapi startapp nomappli
 ```
 
 **`architecture`:**
@@ -79,7 +75,7 @@ sqlapp/
 Cette commande permet de créer une application utilisateur
 
 ```bash
-elrahapierapp
+elrahapi generate userapp
 ```
 
 **`architecture`:**
@@ -1180,6 +1176,6 @@ ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider 
 
     - privileges : List[str] = []
 
-# V - **`Contact ou Support`**
+# IV - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.
