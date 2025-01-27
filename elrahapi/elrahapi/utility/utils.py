@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine, text
 
 def update_entity(existing_entity, update_entity):
-    for key, value in update_entity.dict().items():
+    validate_update_entity=update_entity.dict(exclude_unset=True)
+    for key, value in validate_update_entity.items():
         if value is not None and hasattr(existing_entity, key):
             setattr(existing_entity, key, value)
     return existing_entity
