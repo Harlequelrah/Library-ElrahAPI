@@ -30,7 +30,7 @@ class PrivilegePydanticModel(MetaAuthorizationPydanticModel):
     roles:Optional[List["MetaAuthorizationBaseModel"]] = []
     privilege_users : Optional[List["MetaPrivilegeUsers"]] = []
     class Config :
-        from_orm=True
+        from_attributes=True
 class MetaPrivilegeUsers(BaseModel):
     user_id:int
     is_active:bool

@@ -12,7 +12,7 @@ class UserUpdateModel(models.UserUpdateModel):
 
 class UserPydanticModel(UserBaseModel):
     class Config :
-        from_orm=True
+        from_attributes=True
 
 authentication.UserPydanticModel = UserPydanticModel
 authentication.UserCreateModel = UserCreateModel

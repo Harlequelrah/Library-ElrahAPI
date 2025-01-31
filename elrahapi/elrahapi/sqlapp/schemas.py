@@ -8,10 +8,10 @@
 # class EntityPydanticBaseModel(BaseModel):
 #     pass
 
-# class EntityCreateBaseModel(BaseModel):
+# class EntityCreateModel(BaseModel):
 #     pass
 
-# class EntityUpdateBaseModel(BaseModel):
+# class EntityUpdateModel(BaseModel):
 #     pass
 
 # class EntityPydanticModel(BaseModel):

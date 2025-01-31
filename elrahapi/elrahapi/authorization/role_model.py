@@ -31,4 +31,4 @@ class RolePydanticModel(MetaAuthorizationPydanticModel):
     role_privileges: List["MetaAuthorizationBaseModel"] = []
 
     class Config:
-        from_orm = True
+        from_attributes = True

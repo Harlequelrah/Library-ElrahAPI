@@ -22,7 +22,7 @@ class RolePrivilegeUpdateModel(BaseModel):
 class RolePrivilegePydanticModel(RolePrivilegeCreateModel):
     id : int
     class Config :
-        from_orm = True
+        from_attributes = True
 
 
 

@@ -129,7 +129,7 @@ class UserPrivilegeCreateModel(BaseModel):
 class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
     id : int
     class Config:
-        from_orm=True
+        from_attributes=True
 
 class UserPrivilegeUpdateModel(BaseModel):
     user_id: Optional[int ]= Field(example=1,default=None)

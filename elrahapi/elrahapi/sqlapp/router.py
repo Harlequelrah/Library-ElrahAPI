@@ -8,7 +8,7 @@ from elrahapi.router.router_provider import CustomRouterProvider
 router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
-    PydanticModel=PydanticModel,
+    PydanticModel=EntityPydanticModel,
     crud=myapp_crud
 )
 

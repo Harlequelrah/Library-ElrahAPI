@@ -7,6 +7,6 @@ myapp_crud = CrudForgery(
     entity_name="myapp",
     authentication=authentication,
     SQLAlchemyModel=SQLAlchemyModel,
-    CreatePydanticModel=CreatePydanticModel,
-    UpdatePydanticModel=UpdatePydanticModel,
+    CreatePydanticModel=EntityCreatePydanticModel,
+    UpdatePydanticModel=EntityUpdatePydanticModel,
 )
