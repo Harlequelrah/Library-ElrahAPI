@@ -1,7 +1,7 @@
 from elrahapi.router.route_config import  RouteConfig
 from myproject.settings.database import authentication
 from myproject.myapp.cruds import myapp_crud
-from myproject.myapp.models.schema import PydanticModel
+from myproject.myapp.schemas import PydanticModel
 from typing import List
 from elrahapi.router.router_provider import CustomRouterProvider
 
