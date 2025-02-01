@@ -2,8 +2,8 @@ from fastapi import APIRouter
 
 from typing import List, Optional
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.router.route_config import RouteConfig
-from elrahapi.router.router_crud import exclude_route, get_single_route, initialize_dependecies
+from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
+from elrahapi.router.router_crud import add_authorizations, exclude_route, format_init_data, get_single_route, initialize_dependecies
 from elrahapi.router.router_namespace import (
     DefaultRoutesName,
     ROUTES_PROTECTED_CONFIG,
@@ -20,8 +20,8 @@ class CustomRouterProvider:
         tags: List[str],
         PydanticModel,
         crud: CrudForgery,
-        roles : Optional[List[str]]= [],
-        privileges : Optional[List[str]]=[]
+        roles : Optional[List[str]]= None,
+        privileges : Optional[List[str]]=None
     ):
         self.crud = crud
         self.get_access_token: callable = crud.authentication.get_access_token
@@ -45,35 +45,45 @@ class CustomRouterProvider:
     ) -> APIRouter:
         return self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
 
+
+
     def get_mixed_router(
         self,
-        init_data: List[RouteConfig] = [],
-        public_routes_name: Optional[List[DefaultRoutesName]] = [],
-        protected_routes_name: Optional[List[DefaultRoutesName]] = [],
+        init_data: Optional[List[RouteConfig]] = None,
+        public_routes_name: Optional[List[DefaultRoutesName]] =None,
+        protected_routes_name: Optional[List[DefaultRoutesName]] =None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
-        for route_name in public_routes_name:
-            route = get_single_route(route_name)
-            init_data.append(route)
-        for route_name in protected_routes_name:
-            route = get_single_route(route_name, TypeRoute.PROTECTED)
-            init_data.append(route)
+        if init_data is None: init_data=[]
+        if public_routes_name :
+            for route_name in public_routes_name:
+                route = get_single_route(route_name)
+                init_data.append(route)
+        if protected_routes_name:
+            for route_name in protected_routes_name:
+                route = get_single_route(route_name, TypeRoute.PROTECTED)
+                init_data.append(route)
         custom_init_data = exclude_route(init_data, exclude_routes_name)
         return self.initialize_router(custom_init_data)
 
     def get_protected_router(
-        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
+        self, authorizations:Optional[List[AuthorizationConfig]]=None, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
-        return self.initialize_router(ROUTES_PROTECTED_CONFIG, exclude_routes_name)
+        return self.initialize_router(
+            init_data=ROUTES_PROTECTED_CONFIG,
+            exclude_routes_name=exclude_routes_name,
+            authorizations=authorizations
+            )
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
+        authorizations:Optional[List[AuthorizationConfig]]=None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
-        init_data = exclude_route(init_data, exclude_routes_name)
+        init_data = format_init_data(init_data=init_data, authorizations=authorizations,exclude_routes_name=exclude_routes_name)
         for config in init_data:
-            if config.route_name == DefaultRoutesName.COUNT.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.COUNT and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
                     authentication= self.crud.authentication,
@@ -91,7 +101,7 @@ class CustomRouterProvider:
                     return {"count": count}
 
             if (
-                config.route_name == DefaultRoutesName.READ_ONE.value
+                config.route_name == DefaultRoutesName.READ_ONE
                 and config.is_activated
             ):
                 dependencies= initialize_dependecies(
@@ -131,7 +141,7 @@ class CustomRouterProvider:
                 async def read_all(skip: int = 0, limit: int = None):
                     return await self.crud.read_all(skip=skip, limit=limit)
 
-            if config.route_name == DefaultRoutesName.READ_ALL_BY_FILTER.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.READ_ALL_BY_FILTER and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
                     authentication= self.crud.authentication,
@@ -156,7 +166,7 @@ class CustomRouterProvider:
                         skip=skip, limit=limit, filter=filter, value=value
                     )
 
-            if config.route_name == DefaultRoutesName.CREATE.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.CREATE and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
                     authentication= self.crud.authentication,
@@ -176,7 +186,7 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.create(create_obj)
 
-            if config.route_name == DefaultRoutesName.UPDATE.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.UPDATE and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
                     authentication= self.crud.authentication,

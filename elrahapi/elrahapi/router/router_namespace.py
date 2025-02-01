@@ -40,7 +40,7 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
 
 ROUTES_PUBLIC_CONFIG: List[RouteConfig] = [
     RouteConfig(
-        route_name=route_name.value,
+        route_name=route_name,
         is_activated=True,
         is_protected=False,
         summary=route_config.summary,
@@ -50,7 +50,7 @@ ROUTES_PUBLIC_CONFIG: List[RouteConfig] = [
 ]
 ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
     RouteConfig(
-        route_name=route_name.value,
+        route_name=route_name,
         is_activated=True,
         is_protected=True,
         summary=route_config.summary,

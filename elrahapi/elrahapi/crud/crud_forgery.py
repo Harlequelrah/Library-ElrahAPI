@@ -19,7 +19,7 @@ class CrudForgery:
         SQLAlchemyModel,
         CreatePydanticModel=None,
         UpdatePydanticModel=None,
-        Linked_Classes: List[LinkClass] = [],
+        Linked_Classes: Optional[List[LinkClass]] = None,
     ):
         self.SQLAlchemyModel = SQLAlchemyModel
         self.CreatePydanticModel = CreatePydanticModel

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 
-from elrahapi.router.route_config import RouteConfig
+from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from elrahapi.router.router_crud import exclude_route, initialize_dependecies
 from elrahapi.router.router_namespace import (
     DefaultRoutesName,
@@ -28,8 +28,8 @@ class UserRouterProvider(CustomRouterProvider):
         prefix: str,
         tags: List[str],
         crud: UserCrudForgery,
-        roles : List[str]=[],
-        privileges : List[str]=[],
+        roles : Optional[List[str]]=None,
+        privileges : Optional[List[str]]=None,
     ):
         self.authentication = crud.authentication
         super().__init__(
@@ -51,21 +51,29 @@ class UserRouterProvider(CustomRouterProvider):
         return self.initialize_router(routes, exclude_routes_name)
 
     def get_protected_router(
-        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
+        self,authorizations:Optional[List[AuthorizationConfig]]=None,  exclude_routes_name: Optional[List[DefaultRoutesName]] = None
     ) -> APIRouter:
         routes = USER_AUTH_CONFIG_ROUTES + exclude_route(
             ROUTES_PROTECTED_CONFIG, [DefaultRoutesName.READ_ONE]
         )
-        return self.initialize_router(routes, exclude_routes_name)
+        return self.initialize_router(
+            init_data=routes,
+            authorizations=authorizations,
+            exclude_routes_name=exclude_routes_name)
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
+        authorizations:Optional[List[AuthorizationConfig]]=None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ):
-        self.router = super().initialize_router(init_data, exclude_routes_name)
+        self.router = super().initialize_router(
+            init_data=init_data,
+            authorizations=authorizations,
+            exclude_routes_name=exclude_routes_name
+            )
         for config in init_data:
-            if config.route_name == DefaultRoutesName.READ_ONE_USER.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
                     authentication= self.crud.authentication,
@@ -83,7 +91,7 @@ class UserRouterProvider(CustomRouterProvider):
                 async def read_one_user(username_or_email: str):
                     return await self.crud.read_one_user(username_or_email)
 
-            if config.route_name == DefaultRoutesName.READ_CURRENT_USER.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER and config.is_activated:
 
                 @self.router.get(
                     path=config.route_path,
@@ -126,7 +134,7 @@ class UserRouterProvider(CustomRouterProvider):
                         "token_type": "bearer",
                     }
 
-            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN and config.is_activated:
 
                 @self.router.post(
                     path=config.route_path,
@@ -143,7 +151,7 @@ class UserRouterProvider(CustomRouterProvider):
                     refresh_token = self.authentication.create_refresh_token(data)
                     return refresh_token
 
-            if config.route_name == DefaultRoutesName.REFRESH_TOKEN.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.REFRESH_TOKEN and config.is_activated:
 
                 @self.router.post(
                     path=config.route_path,
@@ -156,7 +164,7 @@ class UserRouterProvider(CustomRouterProvider):
                         refresh_token_data=refresh_token
                     )
 
-            if config.route_name == DefaultRoutesName.LOGIN.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.LOGIN and config.is_activated:
 
                 @self.router.post(
                     response_model=Token,
@@ -181,7 +189,7 @@ class UserRouterProvider(CustomRouterProvider):
                         "token_type": "bearer",
                     }
 
-            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD.value and config.is_activated:
+            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD and config.is_activated:
 
                 @self.router.post(
                     status_code=204,
@@ -191,10 +199,10 @@ class UserRouterProvider(CustomRouterProvider):
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
                     username_or_email = form_data.username_or_email
-                    old_password = form_data.current_password
+                    current_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.crud.change_password(
-                        username_or_email, old_password, new_password
+                        username_or_email, current_password, new_password
                     )
 
         return self.router

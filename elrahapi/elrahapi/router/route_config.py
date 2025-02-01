@@ -1,6 +1,6 @@
 from typing import List, Optional
 from elrahapi.authentication.authenticate import Authentication
-from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME
+from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DefaultRoutesName
 
 
 class DEFAULT_ROUTE_CONFIG:
@@ -14,7 +14,7 @@ class RouteConfig:
 
     def __init__(
         self,
-        route_name: str,
+        route_name: DefaultRoutesName,
         route_path: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -31,16 +31,16 @@ class RouteConfig:
             route_path
             if route_path
             else (
-                f"/{route_name}/{{id}}"
+                f"/{route_name.value}/{{id}}"
                 if next(
                     (
                         True
                         for default_detail_route_name in DEFAULT_DETAIL_ROUTES_NAME
-                        if route_name == default_detail_route_name.value
+                        if route_name == default_detail_route_name
                     ),
                     False,
                 )
-                else f"/{route_name}"
+                else f"/{route_name.value}"
             )
         )
         self.summary = summary
@@ -60,6 +60,10 @@ class RouteConfig:
         return authorizations
 
 
-
+class AuthorizationConfig:
+    def __init__(self, route_name:DefaultRoutesName, roles: Optional[List[str]] = None, privileges: Optional[List[str]] = None):
+        self.route_name = route_name
+        self.roles = roles if roles else []
+        self.privileges = privileges if privileges else []
 
 
