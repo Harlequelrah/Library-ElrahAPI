@@ -10,5 +10,5 @@ router_provider = CustomRouterProvider(
     crud=logCrud,
 )
 app_logger = router_provider.get_public_router(
-    [DefaultRoutesName.UPDATE, DefaultRoutesName.DELETE, DefaultRoutesName.CREATE]
+    exclude_routes_name=[DefaultRoutesName.UPDATE, DefaultRoutesName.DELETE, DefaultRoutesName.CREATE]
 )

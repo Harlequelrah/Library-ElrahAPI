@@ -60,46 +60,46 @@ ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
 ]
 USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     DefaultRoutesName.READ_CURRENT_USER: RouteConfig(
-        route_name="read-current-user",
+        route_name=DefaultRoutesName.READ_CURRENT_USER,
         is_activated=True,
         is_protected=True,
         summary="read current user",
         description=" read current user informations",
     ),
     DefaultRoutesName.TOKEN_URL: RouteConfig(
-        route_name="tokenUrl",
+        route_name=DefaultRoutesName.TOKEN_URL,
         is_activated=True,
         summary="Swagger UI's scopes",
         description="provide scopes for Swagger UI operations",
     ),
     DefaultRoutesName.GET_REFRESH_TOKEN: RouteConfig(
-        route_name="get-refresh-token",
+        route_name=DefaultRoutesName.GET_REFRESH_TOKEN,
         is_activated=True,
         is_protected=True,
         summary="get refresh token",
         description="allow you to retrieve refresh token",
     ),
     DefaultRoutesName.REFRESH_TOKEN: RouteConfig(
-        route_name="refresh-token",
+        route_name=DefaultRoutesName.REFRESH_TOKEN,
         is_activated=True,
         summary="refresh token",
         description="refresh your access token with refresh token",
     ),
     DefaultRoutesName.LOGIN: RouteConfig(
-        route_name="login",
+        route_name=DefaultRoutesName.LOGIN,
         is_activated=True,
         summary="login",
         description="allow you to login",
     ),
     DefaultRoutesName.CHANGE_PASSWORD: RouteConfig(
-        route_name="change-password",
+        route_name=DefaultRoutesName.CHANGE_PASSWORD,
         is_activated=True,
         is_protected=True,
         summary="change password",
         description="allow you to change your password",
     ),
     DefaultRoutesName.READ_ONE_USER: RouteConfig(
-        route_name="read-one-user",
+        route_name=DefaultRoutesName.READ_ONE_USER,
         route_path="/read-one-user/{username_or_email}",
         is_activated=True,
         is_protected=True,
