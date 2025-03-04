@@ -30,3 +30,9 @@ def create_database_if_not_exists(database_url:str, database_name:str):
         conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {database_name}"))
     finally:
         conn.close()
+
+import random
+import string
+def generate_code(length=5):
+    caracteres = string.ascii_letters + string.digits
+    return ''.join(random.choices(caracteres, k=length))

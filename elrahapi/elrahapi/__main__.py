@@ -1,12 +1,12 @@
 import os
+import re
 import shutil
 import sys
 import subprocess
-from dotenv import load_dotenv
 
 
-load_dotenv()
-PROJECT_NAME = os.getenv('PROJECT_NAME')
+
+
 def startproject(project_name):
     project_path = os.path.join(os.getcwd(), project_name)
     os.makedirs(project_path, exist_ok=True)
@@ -146,50 +146,9 @@ def generate_userapp():
         print(f"L'application 'userapp' a été copiée dans {target_userapp_path}.")
     else:
         print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
-def replace_in_file(file_path, search_word, replace_word):
-    """Remplace un mot dans un fichier donné si présent."""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
 
-    new_content = re.sub(re.escape(search_word), replace_word, content)
 
-    if new_content != content:  # Vérifie si des modifications ont été faites
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(new_content)
-        print(f"✅ Modifié : {file_path}")
 
-def search_and_replace(directory, search_word, replace_word):
-    """Parcourt récursivement un dossier et remplace un mot dans les fichiers .py."""
-    if not os.path.exists(directory):
-        print(f"⚠️ Dossier introuvable : {directory}")
-        return
-
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".py"):  # Ne traiter que les fichiers Python
-                file_path = os.path.join(root, file)
-                try:
-                    replace_in_file(file_path, search_word, replace_word)
-                except Exception as e:
-                    print(f"❌ Erreur avec {file_path}: {e}")
-
-def cleanproject():
-    """Nettoie le projet en remplaçant 'myproject' par PROJECT_NAME dans le dossier du projet."""
-    project_path = os.path.join(os.getcwd(), PROJECT_NAME)  # Chemin du projet
-    print(f"🔍 Nettoyage du projet {PROJECT_NAME} dans {project_path}")
-    search_and_replace(project_path, "myproject", PROJECT_NAME)
-
-def cleanapp(app_name):
-    """Nettoie une application spécifique en remplaçant 'myapp' par app_name dans ses fichiers."""
-    app_path = os.path.join(os.getcwd(), PROJECT_NAME, app_name)  # Chemin de l'application
-    print(f"🔍 Nettoyage de l'application {app_name} dans {app_path}")
-    search_and_replace(app_path, "myapp", app_name)
-
-def cleanapp(app_name):
-    pass
-
-def cleanproject():
-    pass
 def main():
     if len(sys.argv) < 2:
         print("Usage: elrahapi <commande> <nom>")
@@ -206,10 +165,6 @@ def main():
         generate_userapp()
     elif command=="generate" and name=="loggerapp":
         generate_loggerapp()
-    elif command=="clean-project":
-        cleanproject()
-    elif command=="clean-app":
-        cleanapp(name)
     else:
         print(f"Commande inconnue: {command}")
 
