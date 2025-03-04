@@ -1,5 +1,9 @@
 from sqlalchemy import create_engine, text
 
+
+def map_list_to(obj_list: list, obj_class: type):
+    return [obj_class(**obj) for obj in obj_list if isinstance(obj,obj_class)]
+
 def update_entity(existing_entity, update_entity):
     validate_update_entity=update_entity.dict(exclude_unset=True)
     for key, value in validate_update_entity.items():

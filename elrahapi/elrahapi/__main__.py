@@ -2,8 +2,11 @@ import os
 import shutil
 import sys
 import subprocess
+from dotenv import load_dotenv
 
 
+load_dotenv()
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 def startproject(project_name):
     project_path = os.path.join(os.getcwd(), project_name)
     os.makedirs(project_path, exist_ok=True)
@@ -11,8 +14,12 @@ def startproject(project_name):
     os.makedirs(sub_project_path, exist_ok=True)
 
     # Initialise le dépôt Git
-    subprocess.run(["git", "init", project_path])
-    print(f"Git repo initialized in {project_path}")
+    try :
+        subprocess.run(["git", "init", project_path])
+        print(f"Git repo initialized in {project_path}")
+    except Exception as e :
+        print(f"Erreur lors de l'initialisation du dépôt Git: {e}")
+
     subprocess.run(["alembic", "init","alembic"], cwd=project_path)
     print(f"Alembic a été initialisé dans {project_path}")
 
@@ -45,31 +52,8 @@ def startproject(project_name):
         print("Le dossier settings a été copié avec succès.")
     else:
         print("Le dossier source 'settings' est introuvable.")
-
-    # Créer l'environnement virtuel directement dans le dossier du projet (pas dans 'settings')
-    env_path = os.path.join(project_path, "env")
-    subprocess.run(["virtualenv", env_path])
-    print(f"Environnement virtuel créé dans {env_path}")
-    requirements_src_path = os.path.join(settings_path, "requirements.txt")
-    requirements_dest_path = os.path.join(project_path, "requirements.txt")
-    shutil.move(requirements_src_path, requirements_dest_path)
-    print(f"Le ficher 'requirements.txt' a été déplacé vers {requirements_dest_path}")
-
-    # Installation des dépendances avec pip
-    requirements_file = os.path.join(project_path, "requirements.txt")
-    if os.path.exists(requirements_file):
-        print(f"Installation des dépendances à partir de {requirements_file}...")
-        subprocess.run(
-            [
-                os.path.join(env_path, "Scripts", "pip"),
-                "install",
-                "-r",
-                requirements_file,
-            ]
-        )
-    else:
-        print("Le fichier requirements.txt n'a pas été trouvé.")
-
+    with open(os.path.join(project_path, "requirements.txt"), "w") as f:
+        subprocess.run(["pip", "freeze"], stdout=f)
     print(f"Le projet {project_name} a été créé avec succès.")
 
 def generate_loggerapp():
@@ -93,7 +77,6 @@ def generate_loggerapp():
     target_loggerapp_path = os.path.join(project_folder, "loggerapp")
     os.makedirs(target_loggerapp_path, exist_ok=True)
 
-    # Path vers le dossier source 'userapp' dans la bibliothèque
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_loggerapp_path = os.path.join(script_dir, "middleware/loggerapp")
 
@@ -163,8 +146,50 @@ def generate_userapp():
         print(f"L'application 'userapp' a été copiée dans {target_userapp_path}.")
     else:
         print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
+def replace_in_file(file_path, search_word, replace_word):
+    """Remplace un mot dans un fichier donné si présent."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
 
+    new_content = re.sub(re.escape(search_word), replace_word, content)
 
+    if new_content != content:  # Vérifie si des modifications ont été faites
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(new_content)
+        print(f"✅ Modifié : {file_path}")
+
+def search_and_replace(directory, search_word, replace_word):
+    """Parcourt récursivement un dossier et remplace un mot dans les fichiers .py."""
+    if not os.path.exists(directory):
+        print(f"⚠️ Dossier introuvable : {directory}")
+        return
+
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".py"):  # Ne traiter que les fichiers Python
+                file_path = os.path.join(root, file)
+                try:
+                    replace_in_file(file_path, search_word, replace_word)
+                except Exception as e:
+                    print(f"❌ Erreur avec {file_path}: {e}")
+
+def cleanproject():
+    """Nettoie le projet en remplaçant 'myproject' par PROJECT_NAME dans le dossier du projet."""
+    project_path = os.path.join(os.getcwd(), PROJECT_NAME)  # Chemin du projet
+    print(f"🔍 Nettoyage du projet {PROJECT_NAME} dans {project_path}")
+    search_and_replace(project_path, "myproject", PROJECT_NAME)
+
+def cleanapp(app_name):
+    """Nettoie une application spécifique en remplaçant 'myapp' par app_name dans ses fichiers."""
+    app_path = os.path.join(os.getcwd(), PROJECT_NAME, app_name)  # Chemin de l'application
+    print(f"🔍 Nettoyage de l'application {app_name} dans {app_path}")
+    search_and_replace(app_path, "myapp", app_name)
+
+def cleanapp(app_name):
+    pass
+
+def cleanproject():
+    pass
 def main():
     if len(sys.argv) < 2:
         print("Usage: elrahapi <commande> <nom>")
@@ -181,6 +206,10 @@ def main():
         generate_userapp()
     elif command=="generate" and name=="loggerapp":
         generate_loggerapp()
+    elif command=="clean-project":
+        cleanproject()
+    elif command=="clean-app":
+        cleanapp(name)
     else:
         print(f"Commande inconnue: {command}")
 

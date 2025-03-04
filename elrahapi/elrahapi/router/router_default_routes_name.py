@@ -2,12 +2,14 @@ from enum import Enum
 
 class DefaultRoutesName(str, Enum):
     COUNT = "count"
-    READ_ALL_BY_FILTER = "read-all-by-filter"
     READ_ALL = "read-all"
     READ_ONE = "read-one"
     READ_ONE_USER = "read-one-user"
     CREATE = "create"
+    BULK_CREATE = "bulk-create"
+    BULK_DELETE = "bulk-delete"
     UPDATE = "update"
+    PATCH = "patch"
     DELETE = "delete"
     READ_CURRENT_USER = "read-current-user"
     TOKEN_URL = "tokenUrl"
@@ -21,4 +23,5 @@ DEFAULT_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.UPDATE,
     DefaultRoutesName.READ_ONE,
     DefaultRoutesName.READ_ONE_USER,
+    DefaultRoutesName.PATCH
 ]

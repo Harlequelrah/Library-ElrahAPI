@@ -6,7 +6,7 @@ from elrahapi.exception.auth_exception import (
 )
 from sqlalchemy.orm import Session, sessionmaker
 from fastapi import Depends
-
+from random import choice
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from .token import AccessToken, RefreshToken
 from datetime import datetime, timedelta
@@ -19,6 +19,7 @@ from elrahapi.user.models import (
     UserPydanticModel,
     UserCreateModel,
     UserUpdateModel,
+    UserPatchModel,
     UserModel as User,
 )
 
@@ -30,9 +31,17 @@ class Authentication:
     User = User
     UserCreateModel = UserCreateModel
     UserUpdateModel = UserUpdateModel
-    ALGORITHMS = ["HS256"]
-    REFRESH_TOKEN_EXPIRE_DAYS = 7
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+    UserPatchModel = UserPatchModel
+    ALGORITHMS = [
+    "HS256", "HS384", "HS512",
+    "RS256", "RS384", "RS512",
+    "ES256", "ES384", "ES512",
+    "PS256", "PS384", "PS512",
+    "EdDSA"
+]
+
+    REFRESH_TOKEN_EXPIRATION = 86400000
+    ACCESS_TOKEN_EXPIRATION = 3600000
 
     def __init__(
         self,
@@ -41,15 +50,61 @@ class Authentication:
         connector: str,
         database_name: str,
         server: str,
+        secret_key:Optional[str]=None,
+        algorith:Optional[str]=None,
+        refresh_token_expiration: Optional[int] = None,
+        access_token_expiration: Optional[int] = None
     ):
-        self.database_username = database_username
-        self.database_password = database_password
-        self.connector = connector
-        self.database_name = database_name
-        self.server = server
-        self.__secret_key = str(secrets.token_hex(32))
-        self.__algorithm= self.ALGORITHMS[0]
+        self.__database_username = database_username
+        self.__database_password = database_password
+        self.__connector = connector
+        self.__database_name = database_name
+        self.__server = server
+        self.__refresh_token_expiration = refresh_token_expiration if refresh_token_expiration else self.REFRESH_TOKEN_EXPIRATION
+        self.__access_token_expiration = access_token_expiration if access_token_expiration else self.ACCESS_TOKEN_EXPIRATION
+        self.__secret_key = secret_key if secret_key else str(secrets.token_hex(32))
+        self.__algorithm= algorith if algorith else choice(self.ALGORITHMS)
         self.__session_factory:sessionmaker[Session]  = None
+
+    @property
+    def database_username(self):
+        return self.__database_username
+
+    @database_username.setter
+    def database_username(self, database_username:str):
+        self.__database_username=database_username
+
+    @property
+    def database_password(self):
+        return self.__database_password
+
+    @database_password.setter
+    def database_password(self, database_password:str):
+        self.__database_password=database_password
+
+    @property
+    def connector(self):
+        return self.__connector
+
+    @connector.setter
+    def connector(self, connector:str):
+        self.__connector=connector
+
+    @property
+    def database_name(self):
+        return self.__database_name
+
+    @database_name.setter
+    def database_name(self, database_name:str):
+        self.__database_name=database_name
+
+    @property
+    def server(self):
+        return self.__server
+
+    @server.setter
+    def server(self,server:str):
+        self.__server=server
 
     @property
     def algorithm(self):
@@ -58,6 +113,22 @@ class Authentication:
     @algorithm.setter
     def algorithms(self,algorithm:str):
         self.__algorithm=algorithm
+
+    @property
+    def access_token_expiration(self):
+        return self.__access_token_expiration
+
+    @access_token_expiration.setter
+    def access_token_expiration(self, access_token_expiration:int):
+        self.__access_token_expiration=access_token_expiration
+
+    @property
+    def refresh_token_expiration(self):
+        return self.__refresh_token_expiration
+
+    @refresh_token_expiration.setter
+    def refresh_token_expiration(self,refresh_token_expiration:int):
+        self.__refresh_token_expiration=refresh_token_expiration
 
     def set_oauth2_scheme(self,OAUTH2_CLASS:type):
         self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
@@ -141,7 +212,7 @@ class Authentication:
             expire = datetime.utcnow() + expires_delta
         else:
             expire = datetime.utcnow() + timedelta(
-                minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES
+                milliseconds=self.ACCESS_TOKEN_EXPIRATION
             )
         to_encode.update({"exp": expire})
         encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
@@ -154,7 +225,7 @@ class Authentication:
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(days=self.REFRESH_TOKEN_EXPIRE_DAYS)
+            expire = datetime.utcnow() + timedelta(milliseconds=self.REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire})
         encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
         return {"refresh_token": encode_jwt, "token_type": "bearer"}

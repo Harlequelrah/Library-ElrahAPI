@@ -9,6 +9,8 @@ class UserCreateModel(models.UserCreateModel):
 class UserUpdateModel(models.UserUpdateModel):
     pass
 
+class UserPatchModel(models.UserPatchModel):
+    pass
 
 class UserPydanticModel(UserBaseModel):
     class Config :
@@ -17,5 +19,6 @@ class UserPydanticModel(UserBaseModel):
 authentication.UserPydanticModel = UserPydanticModel
 authentication.UserCreateModel = UserCreateModel
 authentication.UserUpdateModel = UserUpdateModel
+authentication.UserPatchModel = UserPatchModel
 
 

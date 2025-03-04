@@ -23,10 +23,6 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.READ_ALL: DEFAULT_ROUTE_CONFIG(
         "Get all entities", "Retrieve all entities"
     ),
-    DefaultRoutesName.READ_ALL_BY_FILTER: DEFAULT_ROUTE_CONFIG(
-        "Get all entities by filter",
-        "Retrieve entities by filter",
-    ),
     DefaultRoutesName.CREATE: DEFAULT_ROUTE_CONFIG(
         "Create an entity", "Allow to create an entity"
     ),
@@ -35,6 +31,9 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     ),
     DefaultRoutesName.DELETE: DEFAULT_ROUTE_CONFIG(
         "Delete an entity", "Allow to delete an entity"
+    ),
+    DefaultRoutesName.PATCH: DEFAULT_ROUTE_CONFIG(
+        "Patch an entity", "Allow to patch an entity"
     ),
 }
 

@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="elrahapi",
-    version="1.0.3",
+    version="1.0.4",
     packages=find_packages(),
     description="Package personnalisé pour faciliter  le développement avec python avec fastapi",
     long_description=long_description,
@@ -20,6 +20,15 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.10",
-    install_requires=["fastapi[standard]>=0.112.0", "alembic>=1.13.3","virtualenv>=20.26.6","mysql-connector-python>=9.0.0"],
+    install_requires=[
+        "fastapi[standard]>=0.112.0",
+        "alembic>=1.13.3",
+        "argon2-cffi>=23.1.0",
+        "python-dotenv>=1.0.1",
+        "python-jose>=3.3.0",
+        "black>=24.10.0",
+        "sqlalchemy>=2.0.38",
+        "sqlalchemy-utils>=0.41.2"
+    ],
     entry_points={"console_scripts": ["elrahapi=elrahapi.__main__:main"]},
 )

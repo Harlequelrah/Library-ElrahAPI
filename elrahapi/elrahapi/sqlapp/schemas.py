@@ -14,5 +14,8 @@
 # class EntityUpdateModel(BaseModel):
 #     pass
 
+# class EntityPatchModel(BaseModel):
+#     pass
+
 # class EntityPydanticModel(BaseModel):
 #     pass

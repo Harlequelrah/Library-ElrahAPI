@@ -5,8 +5,10 @@ from myproject.settings.database import authentication
 
 myapp_crud = CrudForgery(
     entity_name="myapp",
+    primary_key_name="id",
     authentication=authentication,
     SQLAlchemyModel=SQLAlchemyModel,
     CreatePydanticModel=EntityCreatePydanticModel,
     UpdatePydanticModel=EntityUpdatePydanticModel,
+    PatchPydanticModel=EntityPatchPydanticModel
 )

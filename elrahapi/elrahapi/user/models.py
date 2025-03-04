@@ -100,7 +100,7 @@ class UserCreateModel(UserBaseModel):
 
 
 
-class UserUpdateModel(BaseModel):
+class UserPatchModel(BaseModel):
     email: Optional[str] = None
     username: Optional[str] = None
     lastname: Optional[str] = None
@@ -109,6 +109,14 @@ class UserUpdateModel(BaseModel):
     password: Optional[str] = None
     role_id : Optional[int] = None
 
+class UserUpdateModel(BaseModel):
+    email: str
+    username: str
+    lastname: str
+    firstname: str
+    is_active: bool
+    password: str
+    role_id : int
 
 class UserPydanticModel(UserBaseModel):
     id: int
@@ -131,10 +139,16 @@ class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
     class Config:
         from_attributes=True
 
-class UserPrivilegeUpdateModel(BaseModel):
+class UserPrivilegePatchModel(BaseModel):
     user_id: Optional[int ]= Field(example=1,default=None)
     privilege_id: Optional[int]=Field(example=2,default=None)
     is_active: Optional[bool] = Field(exemple=True,default=None)
+
+
+class UserPrivilegeUpdateModel(BaseModel):
+    user_id: int = Field(example=1)
+    privilege_id: int=Field(example=2)
+    is_active: bool = Field(exemple=True)
 
 
 class MetaUserPrivilegeModel(BaseModel):

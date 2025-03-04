@@ -31,7 +31,7 @@ class RouteConfig:
             route_path
             if route_path
             else (
-                f"/{route_name.value}/{{id}}"
+                f"/{{id}}"
                 if next(
                     (
                         True

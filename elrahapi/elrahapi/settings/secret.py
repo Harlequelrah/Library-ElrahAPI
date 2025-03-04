@@ -10,6 +10,7 @@ database_password = os.getenv("DATABASE_PASSWORD")
 connector = os.getenv("DATABASE_CONNECTOR")
 database_name = os.getenv("DATABASE_NAME")
 server = os.getenv("DATABASE_SERVER")
+
 authentication = Authentication(
     database_username=database_username,
     database_password=database_password,
