@@ -1,6 +1,6 @@
-# alembic/
-# env/
-# ./µ*
-# __pycache__/
-# .env
-# alembic.ini
+alembic/
+env/
+./µ*
+__pycache__/
+.env
+alembic.ini

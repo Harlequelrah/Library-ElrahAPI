@@ -5,7 +5,7 @@
 # from fastapi import Form
 
 
-# class EntityPydanticBaseModel(BaseModel):
+# class EntityBaseModel(BaseModel):
 #     pass
 
 # class EntityCreateModel(BaseModel):
@@ -18,4 +18,7 @@
 #     pass
 
 # class EntityPydanticModel(BaseModel):
+#     pass
+
+# class MetaEntityModel(BaseModel):
 #     pass
