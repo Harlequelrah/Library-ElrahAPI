@@ -24,7 +24,7 @@ class CustomRouterProvider:
         self,
         prefix: str,
         tags: List[str],
-        PydanticModel,
+        PydanticModel:type,
         crud: CrudForgery,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
@@ -140,7 +140,6 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
@@ -150,7 +149,7 @@ class CustomRouterProvider:
                 )
                 async def read_all(
                     filter : Optional[str]=None,
-                    value:Optional[any]=None,
+                    value=None,
                     skip: int = 0,
                     limit: int = None,
                 ):
@@ -158,7 +157,7 @@ class CustomRouterProvider:
                         skip=skip, limit=limit, filter=filter, value=value
                     )
 
-            if config.route_name == DefaultRoutesName.CREATE and config.is_activated:
+            if config.route_name == DefaultRoutesName.CREATE and self.CreatePydanticModel and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
                     authentication=self.crud.authentication,
@@ -178,14 +177,13 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.create(create_obj)
 
-            if config.route_name == DefaultRoutesName.UPDATE and config.is_activated:
+            if config.route_name == DefaultRoutesName.UPDATE and self.UpdatePydanticModel and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
                     authentication=self.crud.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
                 @self.router.put(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
@@ -194,12 +192,12 @@ class CustomRouterProvider:
                     dependencies=dependencies,
                 )
                 async def update(
-                    pk: any,
+                    pk,
                     update_obj: self.UpdatePydanticModel,
                 ):
                     return await self.crud.update(pk, update_obj,True)
 
-            if config.route_name == DefaultRoutesName.PATCH and config.is_activated:
+            if config.route_name == DefaultRoutesName.PATCH and self.PatchPydanticModel and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
                     authentication=self.crud.authentication,
@@ -215,7 +213,7 @@ class CustomRouterProvider:
                     dependencies=dependencies,
                 )
                 async def patch(
-                    pk: any,
+                    pk,
                     update_obj: self.PatchPydanticModel,
                 ):
                     return await self.crud.update(pk, update_obj,False)
@@ -239,7 +237,7 @@ class CustomRouterProvider:
                     status_code=204,
                 )
                 async def delete(
-                    pk: any,
+                    pk,
                 ):
                     return await self.crud.delete(pk)
             if (

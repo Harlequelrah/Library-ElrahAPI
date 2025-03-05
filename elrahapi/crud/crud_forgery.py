@@ -93,7 +93,7 @@ class CrudForgery:
             )
 
 
-    async def read_all(self, filter :Optional[str]=None,value:Optional[any]=None, skip: int = 0, limit: int = None):
+    async def read_all(self, filter :Optional[str]=None,value=None, skip: int = 0, limit: int = None):
         session = self.session_factory()
         if not filter or not value :  session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
         exist_filter = getattr(self.SQLAlchemyModel, filter, None)
@@ -112,7 +112,7 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def read_one(self, pk: any, db: Optional[Session] = None):
+    async def read_one(self, pk, db: Optional[Session] = None):
         if db:
             session = db
         else:
@@ -134,7 +134,7 @@ class CrudForgery:
 
 
 
-    async def update(self, pk : any, update_obj , is_full_updated: bool):
+    async def update(self, pk , update_obj , is_full_updated: bool):
         session = self.session_factory()
         if isinstance(update_obj, self.UpdatePydanticModel) and is_full_updated or isinstance(update_obj, self.PatchPydanticModel) and not is_full_updated   :
             try:
@@ -178,7 +178,7 @@ class CrudForgery:
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
 
-    async def delete(self, pk:any):
+    async def delete(self, pk):
         session = self.session_factory()
         try:
             existing_obj = await self.read_one(id=id, db=session)
