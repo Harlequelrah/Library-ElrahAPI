@@ -19,6 +19,9 @@
 
 # class EntityPydanticModel(BaseModel):
 #     pass
+    # class Config:
+    #     from_attributes=True
+
 
 # class MetaEntityModel(BaseModel):
 #     pass
