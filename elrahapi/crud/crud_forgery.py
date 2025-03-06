@@ -32,7 +32,14 @@ class CrudForgery:
 
     async def get_pk(self):
         try :
-            return getattr(self.SQLAlchemyModel,self.primary_key_name,None)
+            # return getattr(self.SQLAlchemyModel,self.primary_key_name,None)
+            if self.primary_key_name == "id":
+                print("it is id primary key")
+                return self.SQLAlchemyModel.id
+            else:
+                print("it is not id primary key")
+                pk = getattr(self.SQLAlchemyModel,self.primary_key_name,None)
+            return pk
         except Exception as e :
             detail = f"Error occurred while getting primary key for entity {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
@@ -95,42 +102,42 @@ class CrudForgery:
 
     async def read_all(self, filter :Optional[str]=None,value=None, skip: int = 0, limit: int = None):
         session = self.session_factory()
-        if not filter or not value :  session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
-        exist_filter = getattr(self.SQLAlchemyModel, filter, None)
-        if exist_filter:
-            value = await validate_value_type(value)
-            return (
-                session.query(self.SQLAlchemyModel)
-                .filter(exist_filter == value)
-                .offset(skip)
-                .limit(limit)
-                .all()
-            )
+        if filter and value:
+            exist_filter = getattr(self.SQLAlchemyModel, filter)
+            if exist_filter:
+                value = await validate_value_type(value)
+                return (
+                    session.query(self.SQLAlchemyModel)
+                    .filter(exist_filter == value)
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                )
+            else:
+                detail = f"Invalid filter {filter} for entity {self.entity_name}"
+                raise_custom_http_exception(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=detail
+                )
         else:
-            detail = f"Invalid filter {filter} for entity {self.entity_name}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=detail
-            )
+            return session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
 
     async def read_one(self, pk, db: Optional[Session] = None):
         if db:
             session = db
         else:
             session = self.session_factory()
-
-        pk =  await self.get_pk()
-        if pk :
-            read_obj = (
+        pk_attr =  await self.get_pk()
+        read_obj = (
                 session.query(self.SQLAlchemyModel)
-                .filter(self.SQLAlchemyModel.pk == id)
+                .filter(pk_attr== pk)
                 .first()
             )
-            if read_obj is None:
+        if read_obj is None:
                 detail = f"{self.entity_name} with {self.primary_key_name} {id} not found"
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail=detail
                 )
-            return read_obj
+        return read_obj
 
 
 

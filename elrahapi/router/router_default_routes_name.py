@@ -25,3 +25,8 @@ DEFAULT_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.READ_ONE_USER,
     DefaultRoutesName.PATCH
 ]
+
+DEFAULT_NO_DETAIL_ROUTES_NAME = [
+    DefaultRoutesName.READ_ALL,
+    DefaultRoutesName.CREATE,
+    ]

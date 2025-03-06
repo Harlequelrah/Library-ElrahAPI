@@ -1,6 +1,6 @@
 from typing import List, Optional
 from elrahapi.authentication.authenticate import Authentication
-from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DefaultRoutesName
+from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DEFAULT_NO_DETAIL_ROUTES_NAME, DefaultRoutesName
 
 
 class DEFAULT_ROUTE_CONFIG:
@@ -27,27 +27,20 @@ class RouteConfig:
         self.route_name = route_name
         self.is_activated = is_activated
         self.is_protected = is_protected
-        self.route_path = (
-            route_path
-            if route_path
-            else (
-                f"/{{id}}"
-                if next(
-                    (
-                        True
-                        for default_detail_route_name in DEFAULT_DETAIL_ROUTES_NAME
-                        if route_name == default_detail_route_name
-                    ),
-                    False,
-                )
-                else f"/{route_name.value}"
-            )
-        )
+        self.route_path = self.validate_route_path(route_name,route_path)
         self.summary = summary
         self.description = description
         self.is_unlocked = is_unlocked
         self.roles = [role.strip().upper() for role in roles if roles] if roles else []
         self.privileges = [auth.strip.upper() for auth in privileges] if privileges else []
+
+    def validate_route_path(self,route_name:str,route_path:Optional[str]=None):
+        if route_path : return route_path
+        else:
+            if route_name in  DEFAULT_DETAIL_ROUTES_NAME or route_name in DEFAULT_NO_DETAIL_ROUTES_NAME:
+                return ""
+            else : return f"/{route_name.value}"
+
 
     def get_authorizations(self,authentication:Authentication)-> List[callable]:
         authorizations = []

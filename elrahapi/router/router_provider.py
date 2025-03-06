@@ -32,6 +32,7 @@ class CustomRouterProvider:
         self.crud = crud
         self.get_access_token: callable = crud.authentication.get_access_token
         self.session_factory: callable = crud.authentication.session_factory
+        self.pk=self.crud.primary_key_name
         self.PydanticModel = PydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
@@ -116,16 +117,16 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
+                path= f"{config.route_path}/{{pk}}"
                 @self.router.get(
-                    path=config.route_path,
+                    path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
                 )
                 async def read_one(
-                    id: int,
+                    pk,
                 ):
                     return await self.crud.read_one(id)
 
@@ -184,8 +185,9 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
+                path= f"{config.route_path}/{{pk}}"
                 @self.router.put(
-                    path=config.route_path,
+                    path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=self.PydanticModel,
@@ -204,9 +206,9 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
+                path= f"{config.route_path}/{{pk}}"
                 @self.router.patch(
-                    path=config.route_path,
+                    path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=self.PydanticModel,
@@ -228,9 +230,9 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
+                path= f"{config.route_path}/{{pk}}"
                 @self.router.delete(
-                    path=config.route_path,
+                    path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,
@@ -250,9 +252,9 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-
+                path= f"{config.route_path}/{{pk}}"
                 @self.router.delete(
-                    path=config.route_path,
+                    path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,

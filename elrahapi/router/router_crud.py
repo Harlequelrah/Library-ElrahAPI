@@ -102,3 +102,5 @@ def format_init_data(
         else add_authorizations(init_data, authorizations)
     )
     return init_data
+
+
