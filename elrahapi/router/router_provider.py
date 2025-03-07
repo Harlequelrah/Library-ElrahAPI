@@ -260,7 +260,7 @@ class CustomRouterProvider:
                     status_code=204,
                 )
                 async def bulk_delete(
-                    pk_list: list,
+                    pk_list:list,
                 ):
                     return await self.crud.bulk_delete(pk_list)
             if (

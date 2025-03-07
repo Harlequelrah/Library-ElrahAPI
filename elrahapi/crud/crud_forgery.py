@@ -180,15 +180,16 @@ class CrudForgery:
 
     async  def bulk_delete(self , pk_list:list):
         session = self.session_factory()
-        pk_attr= await self.get_pk_attr()
+        # pk_attr= await self.get_pk_attr()
         try:
-            print("hello")
-            print(f"{pk_list=}")
+            for i in pk_list:print(i)
+            # print("hello")
+            # print(f"{pk_list=}")
             # for pk in pk_list:
-            #     await self.delete_pk(pk)
+            #     await self.delete(pk,session)
             # self.delete(pk) for pk in pk_list
-            session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(pk_list)))
-            session.commit()
+            # session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(pk_list)))
+            # session.commit()
         except Exception as e:
             print("hi")
             print(f"{e=}")
@@ -197,8 +198,8 @@ class CrudForgery:
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
 
-    async def delete(self, pk):
-        session = self.session_factory()
+    async def delete(self, pk , db:Optional[Session]=None):
+        session = db if db else self.session_factory()
         try:
             existing_obj = await self.read_one(pk=pk, db=session)
             session.delete(existing_obj)
