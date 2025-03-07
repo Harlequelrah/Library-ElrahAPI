@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, text
 
 
-def map_list_to(obj_list: list, obj_class: type):
-    return [obj_class(**obj) for obj in obj_list if isinstance(obj,obj_class)]
+def map_list_to(obj_list: list,obj_sqlalchemy_class:type, obj_pydantic_class: type):
+    return [obj_sqlalchemy_class(**obj.dict()) for obj in obj_list if isinstance(obj,obj_pydantic_class)]
 
 def update_entity(existing_entity, update_entity):
     validate_update_entity=update_entity.dict(exclude_unset=True)

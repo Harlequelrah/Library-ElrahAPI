@@ -16,7 +16,7 @@ class CrudForgery:
         entity_name: str,
         primary_key_name:str,
         authentication: Authentication,
-        SQLAlchemyModel:type,
+        SQLAlchemyModel,
         CreatePydanticModel:Optional[type]=None,
         UpdatePydanticModel:Optional[type]=None,
         PatchPydanticModel:Optional[type]=None
@@ -33,13 +33,14 @@ class CrudForgery:
     async def get_pk(self):
         try :
             # return getattr(self.SQLAlchemyModel,self.primary_key_name,None)
-            if self.primary_key_name == "id":
-                print("it is id primary key")
-                return self.SQLAlchemyModel.id
-            else:
-                print("it is not id primary key")
-                pk = getattr(self.SQLAlchemyModel,self.primary_key_name,None)
-            return pk
+            # if self.primary_key_name == "id":
+            #     print("it is id primary key")
+            #     return self.SQLAlchemyModel.id
+            # else:
+            #     print("it is not id primary key")
+            #     pk = getattr(self.SQLAlchemyModel,self.primary_key_name,None)
+            # return pk
+            return  getattr(self.SQLAlchemyModel,self.primary_key_name,None)
         except Exception as e :
             detail = f"Error occurred while getting primary key for entity {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
@@ -49,13 +50,17 @@ class CrudForgery:
     async def bulk_create(self,create_obj_list:list):
         session = self.session_factory()
         try:
-            create_list = map_list_to(create_obj_list, self.CreatePydanticModel)
-            if len(create_list)!= len(self.CreatePydanticModel):
+            create_list = map_list_to(create_obj_list,self.SQLAlchemyModel, self.CreatePydanticModel)
+            if len(create_list)!= len(create_obj_list):
                 detail = f"Invalid {self.entity_name}s  object for bulk creation"
                 raise_custom_http_exception(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
             session.add_all(create_list)
             session.commit()
+            return {
+                "message":f'Successfully created  {self.entity_name}s' ,
+                "count":len(create_list)
+                    }
         except Exception as e:
                 session.rollback()
                 detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
@@ -91,7 +96,7 @@ class CrudForgery:
         session = self.session_factory()
         try:
             pk = await self.get_pk()
-            count = session.query(func.count(self.SQLAlchemyModel.pk)).scalar()
+            count = session.query(func.count(pk)).scalar()
             return count
         except Exception as e:
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
@@ -177,9 +182,16 @@ class CrudForgery:
         session = self.session_factory()
         pk_attr= await self.get_pk_attr()
         try:
-            session.execute(delete(self.SQLAlchemyModel).where(self.SQLAlchemyModel.pk_attr.in_(pk_list)))
+            print("hello")
+            print(f"{pk_list=}")
+            # for pk in pk_list:
+            #     await self.delete_pk(pk)
+            # self.delete(pk) for pk in pk_list
+            session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(pk_list)))
             session.commit()
         except Exception as e:
+            print("hi")
+            print(f"{e=}")
             session.rollback()
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
@@ -188,7 +200,7 @@ class CrudForgery:
     async def delete(self, pk):
         session = self.session_factory()
         try:
-            existing_obj = await self.read_one(id=id, db=session)
+            existing_obj = await self.read_one(pk=pk, db=session)
             session.delete(existing_obj)
             session.commit()
         except CHE as che:

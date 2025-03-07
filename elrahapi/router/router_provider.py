@@ -128,7 +128,7 @@ class CustomRouterProvider:
                 async def read_one(
                     pk,
                 ):
-                    return await self.crud.read_one(id)
+                    return await self.crud.read_one(pk)
 
 
             if (
@@ -174,7 +174,7 @@ class CustomRouterProvider:
                     dependencies=dependencies,
                 )
                 async def create(
-                    create_obj: self.CreatePydanticModel,
+                    create_obj:self.CreatePydanticModel,
                 ):
                     return await self.crud.create(create_obj)
 
@@ -252,9 +252,8 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path= f"{config.route_path}/{{pk}}"
                 @self.router.delete(
-                    path=path,
+                    path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,
@@ -272,7 +271,8 @@ class CustomRouterProvider:
                     config=config,
                     authentication=self.crud.authentication,
                     roles=self.roles,
-                    privileges=self.privileges,
+                    privileges=self.privileges
+
                 )
 
                 @self.router.post(
@@ -280,7 +280,6 @@ class CustomRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,
-                    status_code=204,
                 )
                 async def bulk_create(
                     create_obj_list: List[self.CreatePydanticModel],
