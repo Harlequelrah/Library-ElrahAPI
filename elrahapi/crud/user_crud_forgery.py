@@ -10,11 +10,11 @@ class UserCrudForgery(CrudForgery):
     def __init__(self, authentication: Authentication):
         super().__init__(
             entity_name="user",
+            primary_key_name="id",
             authentication=authentication,
             SQLAlchemyModel=authentication.User,
             CreatePydanticModel=authentication.UserCreateModel,
             UpdatePydanticModel=authentication.UserUpdateModel,
-            Linked_Classes=[]
         )
         self.get_current_user: callable = authentication.get_current_user
 

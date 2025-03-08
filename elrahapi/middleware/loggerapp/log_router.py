@@ -9,6 +9,6 @@ router_provider = CustomRouterProvider(
     PydanticModel=LMPD,
     crud=logCrud,
 )
-app_logger = router_provider.get_public_router(
-    exclude_routes_name=[DefaultRoutesName.UPDATE, DefaultRoutesName.DELETE, DefaultRoutesName.CREATE]
+app_logger = router_provider.get_custom_public_router(
+    public_routes_name=[DefaultRoutesName.READ_ONE, DefaultRoutesName.READ_ALL]
 )

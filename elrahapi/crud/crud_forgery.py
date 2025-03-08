@@ -33,7 +33,7 @@ class CrudForgery:
 
     async def get_pk(self):
         try :
-            return  getattr(self.SQLAlchemyModel,self.primary_key_name,None)
+            return  getattr(self.SQLAlchemyModel,self.primary_key_name)
         except Exception as e :
             detail = f"Error occurred while getting primary key for entity {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
@@ -131,7 +131,7 @@ class CrudForgery:
                 .first()
             )
         if read_obj is None:
-                detail = f"{self.entity_name} with {self.primary_key_name} {id} not found"
+                detail = f"{self.entity_name} with {self.primary_key_name} {pk} not found"
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail=detail
                 )

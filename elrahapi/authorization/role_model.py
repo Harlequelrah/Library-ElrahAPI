@@ -15,16 +15,20 @@ class RoleModel(MetaAuthorization):
 
 class RoleBaseModel(BaseModel):
     name: str = Field(example="Admin")
+    description: str = Field(example="allow to manage all the system")
 
 
 class RoleCreateModel(RoleBaseModel):
-    description: str = Field(example="allow to manage all the system")
+    is_active: Optional[bool] = Field(example=True, default=True)
 
 
-class RoleUpdateModel(BaseModel):
+class RoleUpdateModel(RoleBaseModel):
+    is_active: bool = Field(example=True)
+
+class RolePatchModel(BaseModel):
     name: Optional[str] = Field(example="Admin", default=None)
     is_active: Optional[bool] = Field(example=True, default=None)
-    description: str = Field(example="allow to manage all the system")
+    description: Optional[str] = Field(example="allow to manage all the system", default=None)
 
 
 class RolePydanticModel(MetaAuthorizationPydanticModel):

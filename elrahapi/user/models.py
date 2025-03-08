@@ -14,6 +14,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+from elrahapi.authorization.user_privilege_model import MetaUserPrivilegeModel
 from elrahapi.exception.auth_exception  import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
@@ -81,11 +82,6 @@ class UserModel:
         else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
-class UserPrivilegeModel:
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    privilege_id = Column(Integer, ForeignKey("privileges.id"))
-    is_active = Column(Boolean, default=True)
 
 class UserBaseModel(BaseModel):
     email: str = Field(example="user@example.com")
@@ -128,32 +124,6 @@ class UserPydanticModel(UserBaseModel):
     user_privileges: Optional[List["MetaUserPrivilegeModel"]]
 
 
-class UserPrivilegeCreateModel(BaseModel):
-    user_id: int = Field(example=1)
-    privilege_id: int=Field(example=2)
-    is_active: bool = Field(exemple=True)
-
-
-class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
-    id : int
-    class Config:
-        from_attributes=True
-
-class UserPrivilegePatchModel(BaseModel):
-    user_id: Optional[int ]= Field(example=1,default=None)
-    privilege_id: Optional[int]=Field(example=2,default=None)
-    is_active: Optional[bool] = Field(exemple=True,default=None)
-
-
-class UserPrivilegeUpdateModel(BaseModel):
-    user_id: int = Field(example=1)
-    privilege_id: int=Field(example=2)
-    is_active: bool = Field(exemple=True)
-
-
-class MetaUserPrivilegeModel(BaseModel):
-    privilege_id:int
-    is_active:bool
 
 
 
