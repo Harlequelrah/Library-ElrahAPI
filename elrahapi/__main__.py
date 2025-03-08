@@ -129,7 +129,7 @@ def generate_userapp():
         print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
 
 def run():
-    project_folder=get_project_folder()
+    project_folder=os.getcwd()
     main_entry=os.path.join(project_folder,"__main__.py")
     subprocess.run(["python",main_entry])
 

@@ -1,6 +1,6 @@
 # Description
 
-Ceci est un projet backend .
+Ceci est un projet backend d'API .
 
 ## Installation
 
@@ -11,14 +11,29 @@ Ceci est un projet backend .
 
 ## Utilisation
 
+- **Se rendre dans le repertoire du projet** :
+```bash
+cd monprojet
+```
+-  **Installation des dépéendances :**
+```bash
+  pip install -r requirements.txt
+```
+
+- **Lancement du serveur :**
 ```python
-  python __main__.py
+  elrahapi run
 ```
 
 ## `Technologies et bibliothèques`
 
-- Framework FASTAPI
-- Bibliothèque ou Framework elrahapi
+- Framework ElrahAPI
+- Python
+- Pydantic
+- FASTAPI
+- SQLAlchemy
+
+
 
 # Contact ou Support
 

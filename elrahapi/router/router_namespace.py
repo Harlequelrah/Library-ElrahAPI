@@ -5,9 +5,6 @@ from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from .route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
 
 
-
-
-
 class TypeRoute(str, Enum):
     PUBLIC = "public"
     PROTECTED = "protected"
@@ -17,23 +14,29 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.COUNT: DEFAULT_ROUTE_CONFIG(
         "Get count of entities", "Retrieve the total count of entities"
     ),
+        DefaultRoutesName.READ_ALL: DEFAULT_ROUTE_CONFIG(
+        "Get all entities", "Retrieve all entities"
+    ),
     DefaultRoutesName.READ_ONE: DEFAULT_ROUTE_CONFIG(
         "Get one entity", "Retrieve one entity by id"
-    ),
-    DefaultRoutesName.READ_ALL: DEFAULT_ROUTE_CONFIG(
-        "Get all entities", "Retrieve all entities"
     ),
     DefaultRoutesName.CREATE: DEFAULT_ROUTE_CONFIG(
         "Create an entity", "Allow to create an entity"
     ),
+    DefaultRoutesName.BULK_CREATE: DEFAULT_ROUTE_CONFIG(
+        "Create entities", "Allow to create many entities"
+    ),
     DefaultRoutesName.UPDATE: DEFAULT_ROUTE_CONFIG(
         "Update an entity", "Allow to update an entity"
+    ),
+    DefaultRoutesName.PATCH: DEFAULT_ROUTE_CONFIG(
+        "Patch an entity", "Allow to patch an entity"
     ),
     DefaultRoutesName.DELETE: DEFAULT_ROUTE_CONFIG(
         "Delete an entity", "Allow to delete an entity"
     ),
-    DefaultRoutesName.PATCH: DEFAULT_ROUTE_CONFIG(
-        "Patch an entity", "Allow to patch an entity"
+    DefaultRoutesName.BULK_DELETE: DEFAULT_ROUTE_CONFIG(
+        "Delete entities", "Allow to delete many entities"
     ),
 }
 
