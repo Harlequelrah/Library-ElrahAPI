@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from elrahapi.router.router_crud import (
@@ -260,7 +261,7 @@ class CustomRouterProvider:
                     status_code=204,
                 )
                 async def bulk_delete(
-                    pk_list:list,
+                    pk_list:BulkDeleteModel,
                 ):
                     return await self.crud.bulk_delete(pk_list)
             if (

@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from elrahapi.authentication.authenticate import Authentication
+from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
@@ -32,14 +33,6 @@ class CrudForgery:
 
     async def get_pk(self):
         try :
-            # return getattr(self.SQLAlchemyModel,self.primary_key_name,None)
-            # if self.primary_key_name == "id":
-            #     print("it is id primary key")
-            #     return self.SQLAlchemyModel.id
-            # else:
-            #     print("it is not id primary key")
-            #     pk = getattr(self.SQLAlchemyModel,self.primary_key_name,None)
-            # return pk
             return  getattr(self.SQLAlchemyModel,self.primary_key_name,None)
         except Exception as e :
             detail = f"Error occurred while getting primary key for entity {self.entity_name} , details : {str(e)}"
@@ -178,21 +171,14 @@ class CrudForgery:
             )
 
 
-    async  def bulk_delete(self , pk_list:list):
+    async  def bulk_delete(self , pk_list:BulkDeleteModel):
         session = self.session_factory()
-        # pk_attr= await self.get_pk_attr()
+        pk_attr= await self.get_pk()
+        delete_list= pk_list.delete_liste
         try:
-            for i in pk_list:print(i)
-            # print("hello")
-            # print(f"{pk_list=}")
-            # for pk in pk_list:
-            #     await self.delete(pk,session)
-            # self.delete(pk) for pk in pk_list
-            # session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(pk_list)))
-            # session.commit()
+            session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list)))
+            session.commit()
         except Exception as e:
-            print("hi")
-            print(f"{e=}")
             session.rollback()
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
