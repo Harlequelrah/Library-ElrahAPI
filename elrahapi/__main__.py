@@ -39,10 +39,15 @@ def startproject(project_name):
     shutil.copyfile(main_script_src_path, main_script_dest_path)
     print(f"Le ficher 'main.py' a été copié vers {main_script_dest_path}")
 
-    main_project_files_path = os.path.join(main_path_dir,"project_files")
+    env_src_path = os.path.join(main_path_dir, ".env")
+    env_dest_path = os.path.join(project_path, ".env")
+    shutil.copyfile(env_src_path, env_dest_path)
+    print(f"Le ficher '.env' a été copié vers {env_dest_path}")
+
+    main_project_files_path = os.path.join(main_path_dir,"main_project_files")
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
-        print("Les fichiers .env .gitignore __main__.py ont été copiés avec succès.")
+        print("Les fichiers .gitignore __main__.py et README.md ont été copiés avec succès.")
     else:
         print("Le dossier source 'main_project_files' est introuvable.")
 
