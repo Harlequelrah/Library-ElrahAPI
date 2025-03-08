@@ -63,6 +63,7 @@ ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
 USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     DefaultRoutesName.READ_CURRENT_USER: RouteConfig(
         route_name=DefaultRoutesName.READ_CURRENT_USER,
+        route_path="/read/current-user",
         is_activated=True,
         is_protected=True,
         summary="read current user",

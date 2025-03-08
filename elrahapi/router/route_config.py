@@ -32,7 +32,7 @@ class RouteConfig:
         self.description = description
         self.is_unlocked = is_unlocked
         self.roles = [role.strip().upper() for role in roles if roles] if roles else []
-        self.privileges = [auth.strip.upper() for auth in privileges] if privileges else []
+        self.privileges = [auth.strip().upper() for auth in privileges] if privileges else []
 
     def validate_route_path(self,route_name:str,route_path:Optional[str]=None):
         if route_path : return route_path

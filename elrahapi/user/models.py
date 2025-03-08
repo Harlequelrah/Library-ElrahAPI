@@ -68,7 +68,9 @@ class UserModel:
 
     def has_privilege(self, privilege_name: str):
         if self.role:
-            for privilege in self.role.role_privileges:
+            role_privileges=self.role.role_privileges
+            for role_privilege in role_privileges :
+                privilege=role_privilege.privilege
                 if (privilege.normalizedName==privilege_name.upper() and privilege.is_active):
                     return True
         for user_privilege in self.user_privileges:

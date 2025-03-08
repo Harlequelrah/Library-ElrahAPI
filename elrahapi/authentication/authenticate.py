@@ -26,20 +26,17 @@ from elrahapi.user.models import (
 
 class Authentication:
     TOKEN_URL = "users/tokenUrl"
-    OAUTH2_SCHEME=OAuth2PasswordBearer(TOKEN_URL)
+    OAUTH2_SCHEME = OAuth2PasswordBearer(TOKEN_URL)
     UserPydanticModel = UserPydanticModel
     User = User
     UserCreateModel = UserCreateModel
     UserUpdateModel = UserUpdateModel
     UserPatchModel = UserPatchModel
-    ALGORITHMS = [
-    "HS256", "HS384", "HS512",
-    "RS256", "RS384", "RS512",
-    "ES256", "ES384", "ES512",
-    "PS256", "PS384", "PS512",
-    "EdDSA"
-]
-
+    ALGORITHMS_KEY_SIZES = {
+    "HS256": 32,         # 256 bits
+    "HS384": 48,         # 384 bits
+    "HS512": 64,         # 512 bits
+}
     REFRESH_TOKEN_EXPIRATION = 86400000
     ACCESS_TOKEN_EXPIRATION = 3600000
 
@@ -50,87 +47,111 @@ class Authentication:
         connector: str,
         database_name: str,
         server: str,
-        secret_key:Optional[str]=None,
-        algorith:Optional[str]=None,
+        secret_key: Optional[str] = None,
+        algorithm: Optional[str] = None,
         refresh_token_expiration: Optional[int] = None,
-        access_token_expiration: Optional[int] = None
+        access_token_expiration: Optional[int] = None,
     ):
         self.__database_username = database_username
         self.__database_password = database_password
         self.__connector = connector
         self.__database_name = database_name
         self.__server = server
-        self.__refresh_token_expiration = refresh_token_expiration if refresh_token_expiration else self.REFRESH_TOKEN_EXPIRATION
-        self.__access_token_expiration = access_token_expiration if access_token_expiration else self.ACCESS_TOKEN_EXPIRATION
-        self.__secret_key = secret_key if secret_key else str(secrets.token_hex(32))
-        self.__algorithm= algorith if algorith else choice(self.ALGORITHMS)
-        self.__session_factory:sessionmaker[Session]  = None
+        self.__refresh_token_expiration = (
+            refresh_token_expiration
+            if refresh_token_expiration
+            else self.REFRESH_TOKEN_EXPIRATION
+        )
+        self.__access_token_expiration = (
+            access_token_expiration
+            if access_token_expiration
+            else self.ACCESS_TOKEN_EXPIRATION
+        )
+        self.__algorithm, self.__secret_key = self.define_algorithm_and_key(
+            secret_key,
+            algorithm,
+        )
+        self.__session_factory: sessionmaker[Session] = None
+
+    def define_algorithm_and_key(
+        self, secret_key: Optional[str] = None, algorithm: Optional[str] = None
+    ):
+        if algorithm:
+            if secret_key:
+                return algorithm, secret_key
+            else:
+                key_length = self.ALGORITHMS_KEY_SIZES.get(algorithm.upper())
+                return algorithm, secrets.token_hex(key_length)
+        else:
+            algo = choice(list(self.ALGORITHMS_KEY_SIZES.keys()))
+            key_length = self.ALGORITHMS_KEY_SIZES.get(algo.upper())
+            return algo, secrets.token_hex(key_length)
 
     @property
     def database_username(self):
         return self.__database_username
 
     @database_username.setter
-    def database_username(self, database_username:str):
-        self.__database_username=database_username
+    def database_username(self, database_username: str):
+        self.__database_username = database_username
 
     @property
     def database_password(self):
         return self.__database_password
 
     @database_password.setter
-    def database_password(self, database_password:str):
-        self.__database_password=database_password
+    def database_password(self, database_password: str):
+        self.__database_password = database_password
 
     @property
     def connector(self):
         return self.__connector
 
     @connector.setter
-    def connector(self, connector:str):
-        self.__connector=connector
+    def connector(self, connector: str):
+        self.__connector = connector
 
     @property
     def database_name(self):
         return self.__database_name
 
     @database_name.setter
-    def database_name(self, database_name:str):
-        self.__database_name=database_name
+    def database_name(self, database_name: str):
+        self.__database_name = database_name
 
     @property
     def server(self):
         return self.__server
 
     @server.setter
-    def server(self,server:str):
-        self.__server=server
+    def server(self, server: str):
+        self.__server = server
 
     @property
     def algorithm(self):
         return self.__algorithm
 
     @algorithm.setter
-    def algorithms(self,algorithm:str):
-        self.__algorithm=algorithm
+    def algorithms(self, algorithm: str):
+        self.__algorithm = algorithm
 
     @property
     def access_token_expiration(self):
         return self.__access_token_expiration
 
     @access_token_expiration.setter
-    def access_token_expiration(self, access_token_expiration:int):
-        self.__access_token_expiration=access_token_expiration
+    def access_token_expiration(self, access_token_expiration: int):
+        self.__access_token_expiration = access_token_expiration
 
     @property
     def refresh_token_expiration(self):
         return self.__refresh_token_expiration
 
     @refresh_token_expiration.setter
-    def refresh_token_expiration(self,refresh_token_expiration:int):
-        self.__refresh_token_expiration=refresh_token_expiration
+    def refresh_token_expiration(self, refresh_token_expiration: int):
+        self.__refresh_token_expiration = refresh_token_expiration
 
-    def set_oauth2_scheme(self,OAUTH2_CLASS:type):
+    def set_oauth2_scheme(self, OAUTH2_CLASS: type):
         self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
 
     @property
@@ -142,31 +163,38 @@ class Authentication:
         self.__session_factory = session_factory
 
     def get_session(self):
-        db= self.__session_factory()
-        if not db :  raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="Session Factory Not Found")
+        db = self.__session_factory()
+        if not db:
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Session Factory Not Found",
+            )
         return db
 
-    def check_authorization(self,privilege_name:Optional[List[str]]=None,roles_name:Optional[List[str]]=None)->callable:
-        async def is_authorized(token:str=Depends(self.get_access_token))-> bool:
-            payload= await self.validate_token(token)
-            sub= payload.get('sub')
-            db= self.get_session()
-            user = await self.get_user_by_sub(username_or_email=sub,db=db)
-            if not user : raise_custom_http_exception(status_code=status.HTTP_404_NOT_FOUND,detail="User Not Found")
+    def check_authorization(
+        self,
+        privilege_name: Optional[List[str]] = None,
+        roles_name: Optional[List[str]] = None,
+    ) -> callable:
+        async def is_authorized(token: str = Depends(self.get_access_token)) -> bool:
+            payload = await self.validate_token(token)
+            sub = payload.get("sub")
+            db = self.get_session()
+            user = await self.get_user_by_sub(username_or_email=sub, db=db)
+            if not user:
+                raise_custom_http_exception(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
+                )
             if roles_name:
                 return user.has_role(roles_name)
             elif privilege_name:
                 return user.has_privilege(privilege_name)
-            else :raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+            else:
+                raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+
         return is_authorized
 
-
-
-
-
-
-
-    async def get_user_by_sub(self,username_or_email:str,db:Session):
+    async def get_user_by_sub(self, username_or_email: str, db: Session):
         user = (
             db.query(self.User)
             .filter(
@@ -190,7 +218,7 @@ class Authentication:
         if username_or_email is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         db = session if session else self.get_session()
-        user = await self.get_user_by_sub(db=db,username_or_email=username_or_email)
+        user = await self.get_user_by_sub(db=db, username_or_email=username_or_email)
         if user:
             if not user.check_password(password):
                 user.try_login(False)
@@ -215,7 +243,9 @@ class Authentication:
                 milliseconds=self.ACCESS_TOKEN_EXPIRATION
             )
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
+        encode_jwt = jwt.encode(
+            to_encode, self.__secret_key, algorithm=self.__algorithm
+        )
         return {"access_token": encode_jwt, "token_type": "bearer"}
 
     def create_refresh_token(
@@ -225,12 +255,16 @@ class Authentication:
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(milliseconds=self.REFRESH_TOKEN_EXPIRE_DAYS)
+            expire = datetime.utcnow() + timedelta(
+                milliseconds=self.REFRESH_TOKEN_EXPIRATION
+            )
         to_encode.update({"exp": expire})
-        encode_jwt = jwt.encode(to_encode, self.__secret_key, algorithm=self.__algorithm)
+        encode_jwt = jwt.encode(
+            to_encode, self.__secret_key, algorithm=self.__algorithm
+        )
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
-    async def get_access_token(self, token= Depends(OAUTH2_SCHEME)):
+    async def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
         await self.validate_token(token)
         return token
 
@@ -278,8 +312,8 @@ class Authentication:
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        ACCESS_TOKEN_EXPIRE_MINUTES = timedelta(self.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token_expiration = timedelta(milliseconds=self.ACCESS_TOKEN_EXPIRATION)
         access_token = self.create_access_token(
-            data={"sub": sub}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+            data={"sub": sub}, expires_delta=access_token_expiration
         )
         return access_token

@@ -94,6 +94,7 @@ class UserRouterProvider(CustomRouterProvider):
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER and config.is_activated:
 
                 @self.router.get(
+                    # name=config.route_name.value,
                     path=config.route_path,
                     response_model=self.PydanticModel,
                     summary=config.summary if config.summary else None,
