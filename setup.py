@@ -7,7 +7,7 @@ setup(
     name="elrahapi",
     version="1.0.4",
     packages=find_packages(),
-    description="Package personnalisé pour faciliter  le développement avec python avec fastapi",
+    description="Framework de développement d'API basé FastAPI",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Harlequelrah",

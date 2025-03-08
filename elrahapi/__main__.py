@@ -64,20 +64,8 @@ def generate_loggerapp():
     """
     Copie le contenu du dossier loggerapp (source) dans le dossier 'loggerapp' du projet.
     """
-    parent_dir = os.getcwd()
-    project_folders = [
-        f
-        for f in os.listdir(parent_dir)
-        if os.path.isdir(os.path.join(parent_dir, f))
-        and not (f.startswith("env") or f.startswith("alembic"))
-        and not f.startswith(".")
-    ]
 
-    if not project_folders:
-        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
-        return
-
-    project_folder = os.path.join(parent_dir, project_folders[0])
+    project_folder = get_project_folder()
     target_loggerapp_path = os.path.join(project_folder, "loggerapp")
     os.makedirs(target_loggerapp_path, exist_ok=True)
 
@@ -92,20 +80,7 @@ def generate_loggerapp():
 
 
 def startapp(app_name):
-    parent_dir = os.getcwd()
-    project_folders = [
-        f
-        for f in os.listdir(parent_dir)
-        if os.path.isdir(os.path.join(parent_dir, f))
-        and not (f.startswith("env") or f.startswith("alembic"))
-        and not f.startswith(".")
-    ]
-
-    if not project_folders:
-        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
-        return
-
-    project_folder = os.path.join(parent_dir, project_folders[0])
+    project_folder = get_project_folder()
     app_path = os.path.join(project_folder, app_name)
     os.makedirs(app_path, exist_ok=True)
 
@@ -119,11 +94,7 @@ def startapp(app_name):
         print("Le dossier 'sqlapp' est introuvable.")
 
 
-
-def generate_userapp():
-    """
-    Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
-    """
+def get_project_folder():
     parent_dir = os.getcwd()
     project_folders = [
         f
@@ -137,7 +108,13 @@ def generate_userapp():
         print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
         return
 
-    project_folder = os.path.join(parent_dir, project_folders[0])
+    return os.path.join(parent_dir, project_folders[0])
+
+def generate_userapp():
+    """
+    Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
+    """
+    project_folder=get_project_folder()
     target_userapp_path = os.path.join(project_folder, "userapp")
     os.makedirs(target_userapp_path, exist_ok=True)
 
@@ -151,7 +128,10 @@ def generate_userapp():
     else:
         print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
 
-
+def run():
+    project_folder=get_project_folder()
+    main_entry=os.path.join(project_folder,"__main__.py")
+    subprocess.run(["python",main_entry])
 
 def main():
     if len(sys.argv) < 2:
@@ -169,6 +149,8 @@ def main():
         generate_userapp()
     elif command=="generate" and name=="loggerapp":
         generate_loggerapp()
+    elif command == "run":
+        run()
     else:
         print(f"Commande inconnue: {command}")
 
