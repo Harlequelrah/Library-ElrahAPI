@@ -1,12 +1,10 @@
 # I - **`Description`**
 
-Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
-
-# II - **`Logo`**
-
 ![Logo](Elrah.png)
 
-# III - **`Installation`**
+Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
+
+# II - **`Installation`**
 
 - **Avec Github :**
   ```bash
@@ -18,11 +16,18 @@ Passioné par la programmation et le développement avec python je me lance dans
   pip install elrahapi
   ```
 
-# IV - **`Utilisation`**
+# III - **`Lancez vous ! `**
+
+
+
+
+# IV - **`Documentation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
 ## 1. `Commandes`
+
+
 
 #### 1.1. **Commande de création du projet**
 
@@ -39,9 +44,10 @@ nomduprojet/
 ├── __init__.py
 ├── .gitignore
 ├── alembic/
+├── README.md
+├── .env
 ├── alembic.ini
 ├── requirements.txt
-├── env/
 ├── __main__.py
 ├── nomduprojet/
 │   ├── __init__.py
@@ -53,8 +59,12 @@ nomduprojet/
 │       ├── secret.py
 │       └── models_metadata.py
 ```
+#### 1.2. **Commande de lancement de l'application**
+```python
+  elrahapi run
+```
 
-#### 1.2. **Commande de génération d'une application**
+#### 1.3. **Commande de génération d'une application**
 
 Cette commande permet de créer une application dans le projet
 
@@ -72,9 +82,10 @@ sqlapp/
 ├── router.py
 ├── schemas.py
 ├── utils.py
+├── meta_models.py
 ```
 
-#### 1.3. **Commande génération d'une application utilisateur**
+#### 1.4. **Commande génération d'une application utilisateur**
 
 Cette commande permet de créer une application utilisateur
 
@@ -94,7 +105,7 @@ userapp/
 ├── user_schemas.py
 ```
 
-#### 1.4. **Commande de génération d'une application de log**
+#### 1.**5**. **Commande de génération d'une application de log**
 
 Cette commande permet de créer une application de log
 
@@ -164,7 +175,7 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **sortie** : **existing_entity**
 
-- `validate_value_type` : permet valider une valeur pour s'assurer qu'il est conforme à son type
+- `validate_value_type` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
 
   - **paramètres** :
 
@@ -182,9 +193,19 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **paramètres** :
 
-    - database_url : **str** [l'url de la base de donnée dans le nom de la base de donnée] .
+    - database_url : **str** , l'url de la base de donnée dans le nom de la base de donnée .
 
-    - database_name : **str** [le nom de la base de donnée]
+    - database_name : **str** , le nom de la base de donnée
+
+- **map_list_to** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe  sqlalchemy .
+
+  - **paramètres** :
+
+    - obj_list : **list** , la liste d'objet à mapper
+
+    - obj_sqlalchemy_class : **type** , la classe sqlalchemy
+
+    - obj_pydantic_class : **type** , la classe pydantic
 
 ### 2.3. **Module `authentication`**
 
@@ -230,23 +251,20 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
 
-- `UserUpdateModel` : le modèle pydantic pour la mise à jour d'utilisateur
+- `UserUpdateModel` : le modèle pydantic pour la mise à jour  totale d'utilisateur
+
+- `UserPatchModel` : le modèle pydantic pour la mise à jour partielle un utilisateur
 
 - `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
 
-- `UserLoginRequestModel` : le modèle pydantic la connexion d'utilisateur
 
-- `__secret_key` : **str** [une clé secrète générer par défaut]
+- `ALGORITHMS_KEY_SIZE` : **dict[str,int]** , un dictionnaire d'algorithmes et de longueur de clé pour définir aléatoirement ces paramètres si ils ne sont pas fournis
 
-- `ALGORITHMS` : **List[str]** [un tableau d'algorithm [par défaut **[`HS256`]**]
 
-- `__algorithm` : **str** [un élément de ALGORITHMS]
+- `REFRESH_TOKEN_EXPIRATION` : **int** , l'expiration du token de rafraichissement en millsecondes .
 
-- `REFRESH_TOKEN_EXPIRE_DAYS` : **int**
+- `ACCESS_TOKEN_EXPIRATION` : **int** , l'expiration du token d'accès en millsecondes .
 
-- `ACCESS_TOKEN_EXPIRE_MINUTES` : **int**
-
-- `__session_factory` : **sessionmaker[Session]**
 
 **methodes**
 
@@ -260,29 +278,25 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - connector : **str**
 
-    - database_name : **str**
-
     - server : **str**
 
-- `set_oauth2_scheme` : modifie le schéma d'authentification
+    - database_name : **str**
 
-  - **paramètres** :
+    - secret_key : **Optional[str]**
 
-    - OAUTH2_CLASS: **type**
+    - algorithm : **Optional[str]**
+
+    - access_token_expiration : **Optional[int]**
+
+    - refresh_token_expiration : **Optional[int]**
+
+    - session_factory : sessionmaker[Session]
 
 - `get_session` : retourne une session
 
   - **sortie** : `Session`
 
-- `is_authorized` : verifie si un utilisateur a un privilège
 
-  - **paramètres** :
-
-    - user_id : **int**
-
-    - privilege_id : **int**
-
-  - **sortie** : **bool**
 
 - `authenticate_user` : authentifie un utilisateur
 

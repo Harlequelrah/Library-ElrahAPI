@@ -151,8 +151,6 @@ class Authentication:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def set_oauth2_scheme(self, OAUTH2_CLASS: type):
-        self.OAUTH2_SCHEME = OAUTH2_CLASS(self.TOKEN_URL)
 
     @property
     def session_factory(self):
