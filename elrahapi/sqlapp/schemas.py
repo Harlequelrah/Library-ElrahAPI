@@ -23,5 +23,3 @@
     #     from_attributes=True
 
 
-# class MetaEntityModel(BaseModel):
-#     pass

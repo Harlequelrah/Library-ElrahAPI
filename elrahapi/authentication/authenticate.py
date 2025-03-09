@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from fastapi import Depends
 from random import choice
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.security.secret import define_algorithm_and_key
 from .token import AccessToken, RefreshToken
 from datetime import datetime, timedelta
 from sqlalchemy import or_
@@ -32,11 +33,7 @@ class Authentication:
     UserCreateModel = UserCreateModel
     UserUpdateModel = UserUpdateModel
     UserPatchModel = UserPatchModel
-    ALGORITHMS_KEY_SIZES = {
-    "HS256": 32,         # 256 bits
-    "HS384": 48,         # 384 bits
-    "HS512": 64,         # 512 bits
-}
+
     REFRESH_TOKEN_EXPIRATION = 86400000
     ACCESS_TOKEN_EXPIRATION = 3600000
 
@@ -67,25 +64,13 @@ class Authentication:
             if access_token_expiration
             else self.ACCESS_TOKEN_EXPIRATION
         )
-        self.__algorithm, self.__secret_key = self.define_algorithm_and_key(
+        self.__algorithm, self.__secret_key = define_algorithm_and_key(
             secret_key,
             algorithm,
         )
         self.__session_factory: sessionmaker[Session] = None
 
-    def define_algorithm_and_key(
-        self, secret_key: Optional[str] = None, algorithm: Optional[str] = None
-    ):
-        if algorithm:
-            if secret_key:
-                return algorithm, secret_key
-            else:
-                key_length = self.ALGORITHMS_KEY_SIZES.get(algorithm.upper())
-                return algorithm, secrets.token_hex(key_length)
-        else:
-            algo = choice(list(self.ALGORITHMS_KEY_SIZES.keys()))
-            key_length = self.ALGORITHMS_KEY_SIZES.get(algo.upper())
-            return algo, secrets.token_hex(key_length)
+
 
     @property
     def database_username(self):

@@ -50,10 +50,9 @@ class CrudForgery:
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
             session.add_all(create_list)
             session.commit()
-            return {
-                "message":f'Successfully created  {self.entity_name}s' ,
-                "count":len(create_list)
-                    }
+            for create_obj in create_list:
+                session.refresh(create_obj)
+            return create_list
         except Exception as e:
                 session.rollback()
                 detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
@@ -184,8 +183,8 @@ class CrudForgery:
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
 
-    async def delete(self, pk , db:Optional[Session]=None):
-        session = db if db else self.session_factory()
+    async def delete(self, pk):
+        session = self.session_factory()
         try:
             existing_obj = await self.read_one(pk=pk, db=session)
             session.delete(existing_obj)

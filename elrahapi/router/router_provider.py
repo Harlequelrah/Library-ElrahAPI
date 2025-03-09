@@ -3,8 +3,8 @@ from typing import List, Optional
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
+from fastapi import status
 from elrahapi.router.router_crud import (
-    exclude_route,
     format_init_data,
     get_single_route,
     initialize_dependecies,
@@ -50,6 +50,17 @@ class CustomRouterProvider:
     ) -> APIRouter:
         return self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
 
+    def get_protected_router(
+        self,
+        authorizations: Optional[List[AuthorizationConfig]] = None,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+    ) -> APIRouter:
+        return self.initialize_router(
+            init_data=ROUTES_PROTECTED_CONFIG,
+            exclude_routes_name=exclude_routes_name,
+            authorizations=authorizations,
+        )
+
 
     def get_custom_router_init_data(self, init_data: Optional[List[RouteConfig]] = None,route_names: Optional[List[DefaultRoutesName]] = None,is_protected: bool=False):
         custom_init_data = init_data if init_data else []
@@ -73,10 +84,12 @@ class CustomRouterProvider:
         self,
         init_data: Optional[List[RouteConfig]] = None,
         protected_routes_name: Optional[List[DefaultRoutesName]] = None,
+        authorizations: Optional[List[AuthorizationConfig]] =None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ):
         custom_init_data=self.get_custom_router_init_data(init_data,protected_routes_name,is_protected=True)
-        return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name)
+        return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name,authorizations=authorizations)
+
     def get_mixed_router(
         self,
         init_data: Optional[List[RouteConfig]] = None,
@@ -91,16 +104,7 @@ class CustomRouterProvider:
         custom_init_data=public_routes_data+protected_routes_data
         return self.initialize_router(custom_init_data,exclude_routes_name)
 
-    def get_protected_router(
-        self,
-        authorizations: Optional[List[AuthorizationConfig]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-    ) -> APIRouter:
-        return self.initialize_router(
-            init_data=ROUTES_PROTECTED_CONFIG,
-            exclude_routes_name=exclude_routes_name,
-            authorizations=authorizations,
-        )
+
 
     def initialize_router(
         self,
@@ -139,7 +143,7 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}"
+                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
 
                 @self.router.get(
                     path=path,
@@ -167,6 +171,7 @@ class CustomRouterProvider:
                     description=config.description if config.description else None,
                     response_model=List[self.PydanticModel],
                     dependencies=dependencies,
+                    status_code = status.HTTP_201_CREATED
                 )
                 async def read_all(
                     filter: Optional[str] = None,
@@ -196,6 +201,7 @@ class CustomRouterProvider:
                     description=config.description if config.description else None,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
+                    status_code = status.HTTP_201_CREATED
                 )
                 async def create(
                     create_obj: self.CreatePydanticModel,
@@ -213,7 +219,7 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}"
+                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
 
                 @self.router.put(
                     path=path,
@@ -239,7 +245,7 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}"
+                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
 
                 @self.router.patch(
                     path=path,
@@ -261,14 +267,14 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}"
+                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
 
                 @self.router.delete(
                     path=path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,
-                    status_code=204,
+                    status_code=status.HTTP_204_NO_CONTENT,
                 )
                 async def delete(
                     pk,
@@ -291,7 +297,7 @@ class CustomRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies,
-                    status_code=204,
+                    status_code=status.HTTP_204_NO_CONTENT,
                 )
                 async def bulk_delete(
                     pk_list: BulkDeleteModel,
