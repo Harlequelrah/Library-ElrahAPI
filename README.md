@@ -9,6 +9,10 @@ Passioné par la programmation et le développement avec python je me lance dans
 - **Avec Github :**
   ```bash
   git clone https://github.com/Harlequelrah/Library-ElrahAPI
+
+  cd Library-ElrahAPI
+
+  pip install -e ./elrahapi
   ```
 - **Avec pip :**
 
@@ -392,7 +396,7 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - description : **Column(String)**
 
-- `MetaAuthorizationBaseModel` : classe pour définir les Models Meta pour Role et Privilege .
+- `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
 
   - id : **int**
 
@@ -404,23 +408,35 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
 - name : **str**
 
+- `MetaUserPrivilegeModel(BaseModel)` :
+
+  - privilege_id : **int**
+
+  - is_active : **bool**
+
+
 #### 2.4.2 Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
 - `RoleModel(MetaAuthorization)`
 
-- `RoleBaseModel` :
+- `RoleBaseModel(BaseModel)` :
 
   - name : **str**
 
-- `RoleCreateModel(RoleBaseModel)` :
-
   - description : **str**
 
-  - privileges : **Optional[List[PrivilegeCreateModel]]**
+- `RoleCreateModel(RoleBaseModel)` :
 
-- `RoleUpdateModel`
+  - is_active : **Optional[bool]** , default: True
+
+
+- `RoleUpdateModel(RoleBaseModel)` :
+
+  - is_active : **bool**
+
+- `RolePatchModel(BaseModel)`
 
   - name : **Optional[str]**
 
@@ -428,9 +444,10 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
+
 - `RolePydanticModel(MetaAuthorizationPydanticModel)` :
 
-  - privileges : **List[MetaAuthorizationBaseModel]**
+  - role_privileges : **List[MetaAuthorizationBaseModel]**
 
 #### 2.4.3. Sous module `privilege_model`
 
@@ -438,15 +455,22 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `PrivilegeModel(MetaAuthorization)`
 
-- `PrivilegeBaseModel`
+- `PrivilegeBaseModel(BaseModel)`
 
   - name : **str**
 
-- `PrivilegeCreateModel`:
-
   - description : **str**
 
-- `PrivilegeUpdateModel` :
+
+- `PrivilegeCreateModel(PrivilegeBaseModel)`:
+
+  - is_active : Optional[bool] , default : True
+
+- `PrivilegeUpdateModel(RoleBaseModel)` :
+
+  - is_active : **bool**
+
+- `PrivilegePatchModel(BaseModel)` :
 
   - name : **Optional[str]**
 
@@ -456,7 +480,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `PrivilegePydanticModel(MetaAuthorizationPydanticModel)` :
 
-  - roles : **Optional[List[MetaAuthorizationBaseModel]]**
+  - privilege_roles : **Optional[List[MetaAuthorizationBaseModel]]**
 
   - privilege_users : **Optional[List[MetaPrivilegeUsers]]**
 
@@ -472,20 +496,68 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - privilege_id : **Column(Integer)**
 
-- `RolePrivilegeCreateModel`
+- `RolePrivilegeCreateModel(BaseModel)`
 
   - role_id : **int**
 
-  - privilege : **int**
+  - privilege_id : **int**
 
-- `RolePrivilegeUpdateModel`
+- `RolePrivilegeUpdateModel(BaseModel)`
+
+  - role_id : **int**
+
+  - privilege_id : **int**
+
+
+- `RolePrivilegePatchModel(BaseModel)`
 
   - role_id : **Optional[int]**
 
-  - privilege : **Optional[int]**
+  - privilege_id : **Optional[int]**
 
 - `RolePrivilegePydanticModel(RolePrivilegeCreateModel)`
   - id : **int**
+
+#### 2.4.5. Sous module `user_privilege_model`
+
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserPrivilege .
+
+- `UserPrivilegeModel`
+
+  - id : **Column(Integer)**
+
+  - role_id : **Column(Integer)**
+
+  - privilege_id : **Column(Integer)**
+
+- `UserPrivilegeCreateModel(BaseModel)`
+
+  - user_id : **int**
+
+  - privilege_id : **int**
+
+  - is_active : **Optional[bool]** , default : True
+
+- `UserPrivilegeUpdateModel(BaseModel)`
+
+  - role_id : **int**
+
+  - privilege_id : **int**
+
+  - is_active : **bool**
+
+- `UserPrivilegePatchModel(BaseModel)`
+
+  - role_id : **Optional[int]**
+
+  - privilege_id : **Optional[int]**
+
+  - is_active : **Optional[bool]**
+
+- `UserPrivilegePydanticModel(UserPrivilegeCreateModel)`
+  - id : **int**
+
+
 
 ### 2.5. **Module `middleware`**
 
@@ -780,11 +852,7 @@ class **`User`**
 
   - is_active : **bool**
 
-- `MetaUserPrivilegeModel` :
 
-  - privilege_id : **int**
-
-  - is_active : **bool**
 
 - `UserRequestModel` :
 

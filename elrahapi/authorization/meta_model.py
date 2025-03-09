@@ -1,5 +1,3 @@
-
-from pydantic import BaseModel
 from pydantic import BaseModel
 from sqlalchemy import Boolean, Column,Integer,String
 from sqlalchemy.orm import validates
@@ -25,6 +23,9 @@ class MetaAuthorizationBaseModel(BaseModel):
 class MetaAuthorizationPydanticModel(MetaAuthorizationBaseModel):
     name: str
 
+class MetaUserPrivilegeModel(BaseModel):
+    privilege_id:int
+    is_active:bool
 
 
 

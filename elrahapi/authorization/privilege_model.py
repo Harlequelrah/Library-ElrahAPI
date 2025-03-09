@@ -27,7 +27,7 @@ class PrivilegePatchModel(BaseModel):
 
 
 class PrivilegePydanticModel(MetaAuthorizationPydanticModel):
-    roles:Optional[List["MetaAuthorizationBaseModel"]] = []
+    privilege_roles:Optional[List["MetaAuthorizationBaseModel"]] = []
     privilege_users : Optional[List["MetaPrivilegeUsers"]] = []
     class Config :
         from_attributes=True

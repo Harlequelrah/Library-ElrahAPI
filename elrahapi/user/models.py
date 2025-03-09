@@ -14,7 +14,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
-from elrahapi.authorization.user_privilege_model import MetaUserPrivilegeModel
+from elrahapi.authorization.meta_model import MetaUserPrivilegeModel
 from elrahapi.exception.auth_exception  import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 

@@ -11,11 +11,11 @@ class UserPrivilegeModel:
     user_id = Column(Integer, ForeignKey("users.id"))
     privilege_id = Column(Integer, ForeignKey("privileges.id"))
     is_active = Column(Boolean, default=True)
-    
+
 class UserPrivilegeCreateModel(BaseModel):
     user_id: int = Field(example=1)
     privilege_id: int=Field(example=2)
-    is_active: bool = Field(exemple=True)
+    is_active: Optional[bool] = Field(exemple=True,default=True)
 
 
 class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
@@ -35,6 +35,4 @@ class UserPrivilegeUpdateModel(BaseModel):
     is_active: bool = Field(exemple=True)
 
 
-class MetaUserPrivilegeModel(BaseModel):
-    privilege_id:int
-    is_active:bool
+
