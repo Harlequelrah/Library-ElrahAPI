@@ -77,7 +77,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Modifier les lignes commentées au besoin
 
-## 6. `Configurer l'application`
+## 6. `Configurer une application`
 
 - Ouvrer le dossier myproject/myapp
 
@@ -102,14 +102,14 @@ Passioné par la programmation et le développement avec python je me lance dans
 comme suite :
 
 ```python
-  router_provider = CustomRouterProvider(
+   router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
     PydanticModel=EntityPydanticModel,
     crud=myapp_crud
 )
 ```
-**Note** : `des roles et des privileges peuvent lui etre ajoutés directement .`
+**Note** : `Des roles et des privileges peuvent lui etre ajoutés directement .`
 
 ### 6.4 `Configurer un router`
 
@@ -182,6 +182,78 @@ comme suite :
 
 **Note** : `Ajouter le router au main.py`
 
+## 6. `Configurer générale d'une application utilisateur ou de logs`
+
+- Générer l'application  :
+
+  - Utilisateur :
+```bash
+  elrahapi generate appuser
+```
+
+  - Log :
+```bash
+  elrahapi generate loggerapp
+```
+
+- Modifier correctement les imports dans l'application
+
+- Personnalisés au besoin les configurations de routes , cruds , models et schemas  les models
+
+- Ajouter les metadata depuis user_models ou log_model  à settings/models_metadata
+
+- Ajouter le router à myproject/main.py
+
+## 7. `Configurer des logs`
+
+Dans le fichier myproject/main.py du projet :
+
+- Ajouter et configurer le middleware de logs :
+
+```python
+from elrahapi.middleware.log_middleware import LoggerMiddleware
+from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
+from myproject.loggerapp.log_model import Logger
+from myproject.settings.database import  authentication
+app = FastAPI()
+app.include_router(app_logger)
+app.add_middleware(
+    ErrorHandlingMiddleware,
+    LoggerMiddlewareModel=Logger,
+    session_factory=authentication.session_factory
+)
+app.add_middleware(
+    LoggerMiddleware,
+    LoggerMiddlewareModel=Logger,
+    session_factory=authentication.session_factory
+)
+```
+**Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
+
+## 8. `Utilisation de  ConnectionManager`
+
+```python
+from elrahapi.websocket.connectionManager import ConnectionManager
+from fastapi import (
+    FastAPI,
+    WebSocketDisconnect,
+    WebSocket,
+)
+app = FastAPI()
+manager = ConnectionManager()
+
+@app.websocket("/ws/notifications")
+async def websocket_notification(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_message(data)
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
+```
+
+**Note**: `Il est aussi possible d'ajouter un objet de type ConnectionManager aux middlewares pour notifier les erreurs dans le projet`
 
 # IV - **`Documentation`**
 
@@ -250,7 +322,7 @@ sqlapp/
 Cette commande permet de créer une application utilisateur
 
 ```bash
-elrahapi generate app userapp
+elrahapi generate  userapp
 ```
 
 **`architecture`:**
@@ -270,7 +342,7 @@ userapp/
 Cette commande permet de créer une application de log
 
 ```bash
-elrahapi generate app loggerapp
+elrahapi generate loggerapp
 ```
 
 **`architecture`:**

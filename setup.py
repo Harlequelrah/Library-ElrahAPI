@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="elrahapi",
-    version="1.0.4",
+    version="1.0.5",
     packages=find_packages(),
     description="Framework de développement d'API basé FastAPI",
     long_description=long_description,
