@@ -7,6 +7,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 # II - **`Installation`**
 
 - **Avec Github :**
+
   ```bash
   git clone https://github.com/Harlequelrah/Library-ElrahAPI
 
@@ -14,6 +15,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 
   pip install -e ./elrahapi
   ```
+
 - **Avec pip :**
 
   ```bash
@@ -32,7 +34,6 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Après chaque creation d'application faire les changements appropriés dans chaque fichier de l'application .
 
-
 ## 2. `créer un projet`
 
 ```bash
@@ -45,9 +46,9 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Configurer alembic au besoin :
 
-  - Configurer le alembic.ini  par son paramètre `sqlalchemy.url`
+  - Configurer le alembic.ini par son paramètre `sqlalchemy.url`
 
-  - Configurer le alembic/env.py  :
+  - Configurer le alembic/env.py :
 
     - Ajouter l'import : from myproject.settings.models_metadata import target_metadata
 
@@ -58,11 +59,12 @@ Passioné par la programmation et le développement avec python je me lance dans
 ## 4. `Demarrer le projet `
 
 - Accéder au repertoire du projet :
+
 ```bash
   cd myproject
 ```
 
-- Démarrer le serveur  :
+- Démarrer le serveur :
 
 ```bash
   elrahapi run
@@ -71,6 +73,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 ## 5. `Créer une application`
 
 - Génerer l'application
+
 ```bash
   elrahapi startapp myapp
 ```
@@ -81,7 +84,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Ouvrer le dossier myproject/myapp
 
-### 6.1.  `Définir les models de l'application`
+### 6.1. `Définir les models de l'application`
 
 - Créer les models SQLAlchemy dans models.py
 
@@ -91,7 +94,6 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Importer la variable metadata de l'application dans le settings/models_metadata.py
 
-
 ### 6.2 `Créer les cruds`
 
 - Configurer le CrudForgery dans cruds.py
@@ -99,7 +101,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 ### 6.3 `Configurer le fournisseur de routage de l'application`
 
 - Configurer le CustomRouterProvider dans router.py
-comme suite :
+  comme suite :
 
 ```python
    router_provider = CustomRouterProvider(
@@ -109,6 +111,7 @@ comme suite :
     crud=myapp_crud
 )
 ```
+
 **Note** : `Des roles et des privileges peuvent lui etre ajoutés directement .`
 
 ### 6.4 `Configurer un router`
@@ -131,7 +134,6 @@ comme suite :
 ]
 ```
 
-
 - Création des configurations d'authorizations de routes
 
 ```python
@@ -140,6 +142,7 @@ comme suite :
   AuthorizationConfig(route_name=DefaultRoutesName.UPDATE,privileges=["CAN_UPDATE_ENTITY"]
   ]
 ```
+
 - Créér un router préconfiguré sans authentification
 
 ```python
@@ -155,6 +158,7 @@ comme suite :
 ```
 
 - Créer un router avec configuration et des routes publiques
+
 ```python
   app_myapp = router_provider.get_custom_public_router(
     init_data= custom_init_data ,
@@ -164,6 +168,7 @@ comme suite :
 ```
 
 - Créer un router avec configuration et des routes protégées
+
 ```python
   app_myapp = router_provider.get_custom_protected_router(
     init_data= custom_init_data ,
@@ -171,7 +176,7 @@ comme suite :
   )
 ```
 
-- Créer un router avec éventuellement une configuration et  avec des routes publics et protégés
+- Créer un router avec éventuellement une configuration et avec des routes publics et protégés
 
 ```python
   app_myapp = router_provider.get_mixed_router(
@@ -184,23 +189,25 @@ comme suite :
 
 ## 6. `Configurer générale d'une application utilisateur ou de logs`
 
-- Générer l'application  :
+- Générer l'application :
 
   - Utilisateur :
+
 ```bash
   elrahapi generate appuser
 ```
 
-  - Log :
+- Log :
+
 ```bash
   elrahapi generate loggerapp
 ```
 
 - Modifier correctement les imports dans l'application
 
-- Personnalisés au besoin les configurations de routes , cruds , models et schemas  les models
+- Personnalisés au besoin les configurations de routes , cruds , models et schemas les models
 
-- Ajouter les metadata depuis user_models ou log_model  à settings/models_metadata
+- Ajouter les metadata depuis user_models ou log_model à settings/models_metadata
 
 - Ajouter le router à myproject/main.py
 
@@ -228,6 +235,7 @@ app.add_middleware(
     session_factory=authentication.session_factory
 )
 ```
+
 **Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
 
 ## 8. `Utilisation de  ConnectionManager`
@@ -248,7 +256,7 @@ async def websocket_notification(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_message(data)
+            await manager.broadcast(data)
     except WebSocketDisconnect:
         await manager.disconnect(websocket)
 ```
@@ -291,7 +299,9 @@ nomduprojet/
 │       ├── secret.py
 │       └── models_metadata.py
 ```
+
 ### 1.2. **Commande de lancement de l'application**
+
 ```bash
   elrahapi run
 ```
@@ -429,7 +439,7 @@ Ce sous module contient des quelques fonctions utiles .
 
     - database_name : **str** , le nom de la base de donnée
 
-- **map_list_to** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe  sqlalchemy .
+- **map_list_to** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe sqlalchemy .
 
   - **paramètres** :
 
@@ -483,19 +493,15 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
 
-- `UserUpdateModel` : le modèle pydantic pour la mise à jour  totale d'utilisateur
+- `UserUpdateModel` : le modèle pydantic pour la mise à jour totale d'utilisateur
 
 - `UserPatchModel` : le modèle pydantic pour la mise à jour partielle un utilisateur
 
 - `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
 
-
-
-
 - `REFRESH_TOKEN_EXPIRATION` : **int** , l'expiration du token de rafraichissement en millsecondes .
 
 - `ACCESS_TOKEN_EXPIRATION` : **int** , l'expiration du token d'accès en millsecondes .
-
 
 **methodes**
 
@@ -526,8 +532,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 - `get_session` : retourne une session
 
   - **sortie** : `Session`
-
-
 
 - `authenticate_user` : authentifie un utilisateur
 
@@ -641,7 +645,6 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - is_active : **bool**
 
-
 #### 2.4.2 Sous module `role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
@@ -658,7 +661,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]** , default: True
 
-
 - `RoleUpdateModel(RoleBaseModel)` :
 
   - is_active : **bool**
@@ -670,7 +672,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - description : **Optional[str]**
 
   - is_active : **Optional[bool]**
-
 
 - `RolePydanticModel(MetaAuthorizationPydanticModel)` :
 
@@ -687,7 +688,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - name : **str**
 
   - description : **str**
-
 
 - `PrivilegeCreateModel(PrivilegeBaseModel)`:
 
@@ -734,7 +734,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - role_id : **int**
 
   - privilege_id : **int**
-
 
 - `RolePrivilegePatchModel(BaseModel)`
 
@@ -783,8 +782,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserPrivilegePydanticModel(UserPrivilegeCreateModel)`
   - id : **int**
-
-
 
 ### 2.5. **Module `middleware`**
 
@@ -1053,9 +1050,6 @@ class **`User`**
 
   - user_privileges : **Optional[List[MetaUserPrivilegeModel]]**
 
-
-
-
 - `UserRequestModel` :
 
   - username : **Optional[str]**
@@ -1096,9 +1090,17 @@ Contient la classe ConnectionManager pour gérer une connextion avec un websocke
 
     - websocket : WebSocket
 
+- **broadcast** : permet de diffuser un message
+
+  - **paramètres:**
+
+    - message : **str**
+
 - **send_message** : permet d'envoyer un message
 
   - **paramètres:**
+
+    - sender_websocket : WebSocket
 
     - message : **str**
 
@@ -1130,8 +1132,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `PatchPydanticModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
 
-- **``get_pk``** : retourne la colonne de clé primaire .
-
+- **`get_pk`** : retourne la colonne de clé primaire .
 
 - **`create`** :
 
@@ -1149,11 +1150,9 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **sortie** : **List[SQLAlchemyModel]**
 
-
 - **`count`** :
 
   - **sortie** : **int**
-
 
 - **`read_all`** :
 
@@ -1168,7 +1167,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
     - `limit`: **Optional[int]**
 
   - **sortie** : **List[SQLAlchemyModel]**
-
 
 - **`read_one`** :
 
@@ -1207,7 +1205,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
     - `pk_list`: **BulkDeleteModel**
 
   - **sortie** : **Reponse avec status code 204**
-
 
 ##### 2.8.2 Sous module `user_crud_forgery`
 
@@ -1256,8 +1253,7 @@ Ce sous module définit des classes pour les opérations en masse .
 
 - **`BulkDeleteModel`** : pour la suppression multiple
 
-    - delete_liste : **list**
-
+  - delete_liste : **list**
 
 ### 2.9. **Module `router`**
 
@@ -1343,9 +1339,9 @@ Ce sous module comporte des Constantes et classes réutilisables dans le context
 
 - **`ROUTES_PROTECTED_CONFIG`**: **List[RouteConfig]** , contient une liste de RouteConfig pour les routes par défaut protégés .
 
-- **`USER_AUTH_CONFIG`** : dict[DefaultRoutesName,RouteConfig]** , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
+- **`USER_AUTH_CONFIG`** : dict[DefaultRoutesName,RouteConfig]\*\* , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
 
-- **`USER_AUTH_CONFIG_ROUTES`** : List[RouteConfig]** , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
+- **`USER_AUTH_CONFIG_ROUTES`** : List[RouteConfig]\*\* , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
 
 ##### 2.9.3. Sous module `router_default_routes_name`
 
@@ -1361,7 +1357,6 @@ Ce sous module définit notament des classes contenant les définitions des noms
 
 Ce sous module comporte la classe CustomRouterProvider pour configurer un routeur .
 `CustomRouterProvider`
-
 
 - `__init__` :
 
@@ -1379,8 +1374,6 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `privileges `: **Optional[List[str]]**
 
-
-
 - **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
 
   - **paramètres**:
@@ -1395,8 +1388,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
-
-- **`get_custom_router_init_data`** :  renvoie une liste de configurations de routes personnalisés
+- **`get_custom_router_init_data`** : renvoie une liste de configurations de routes personnalisés
 
   - **paramètres** :
 
@@ -1406,7 +1398,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - is_protected : **bool** , default: False
 
-  - **sortie** :  List[RouteConfig]
+  - **sortie** : List[RouteConfig]
 
 - **`get_custom_public_router`** : retourne un routeur public personnalisée
 
@@ -1418,8 +1410,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
-  - **sortie** :  **APIRouter**
-
+  - **sortie** : **APIRouter**
 
 - **`get_custom_protected_router`** : retourne un routeur protégé personnalisée
 
@@ -1433,8 +1424,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
-  - **sortie** :  **APIRouter**
-
+  - **sortie** : **APIRouter**
 
 - **`get_mixed_router`** : renvoie un routeur avec une configuration personnalisée entre routes publiques et protégées .
 
@@ -1457,7 +1447,6 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
-
 
 ##### 2.9.5. Sous module `router_crud`
 
@@ -1499,7 +1488,6 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
   - **sortie** : **List[Depends]**
 
-
 - `add_authorizations` : permet d'ajouter des authorizations à des configurations de routes.
 
   - **paramètres:**
@@ -1522,7 +1510,6 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
   - **sortie** : **List[RouteConfig]**
 
-
 ##### 2.9.6. Sous module `user_router_provider`
 
 ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider , personnalisé pour l'utilisateur .
@@ -1542,9 +1529,11 @@ ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider 
     - privileges : **Optional[List[str]]**
 
 #### 2.10. Module `security`
+
 Ce module définit la gestion de la sécurité .
 
 ##### 2.10.1 Sous module `secret`
+
 Ce sous module définit des utilitaires pour la sécurité
 
 - `ALGORITHMS_KEY_SIZES` : **dict[str,int]** , un dictionnaire d'algorithmes et de longueur de clé pour définir aléatoirement ces paramètres si ils ne sont pas fournis
