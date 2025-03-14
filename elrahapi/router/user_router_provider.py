@@ -28,6 +28,7 @@ class UserRouterProvider(CustomRouterProvider):
         prefix: str,
         tags: List[str],
         crud: UserCrudForgery,
+        PydanticModel:Optional[type]=None,
         roles : Optional[List[str]]=None,
         privileges : Optional[List[str]]=None,
     ):
@@ -35,7 +36,7 @@ class UserRouterProvider(CustomRouterProvider):
         super().__init__(
             prefix=prefix,
             tags=tags,
-            PydanticModel=self.authentication.UserPydanticModel,
+            PydanticModel= PydanticModel if PydanticModel else self.authentication.UserPydanticModel,
             crud=crud,
             roles=roles,
             privileges=privileges

@@ -110,12 +110,13 @@ def get_project_folder():
 
     return os.path.join(parent_dir, project_folders[0])
 
-def generate_userapp():
+def generate_userapp(ending):
     """
     Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
     """
     project_folder=get_project_folder()
-    target_userapp_path = os.path.join(project_folder, "userapp")
+    user_app_name= f"userapp_{ending}"
+    target_userapp_path = os.path.join(project_folder,user_app_name)
     os.makedirs(target_userapp_path, exist_ok=True)
 
     # Path vers le dossier source 'userapp' dans la bibliothèque
@@ -139,14 +140,15 @@ def main():
         sys.exit(1)
     if len(sys.argv) > 2:
         name = sys.argv[2]
-    command = sys.argv[1]
+        command = sys.argv[1]
+        ending=sys.argv[3]
 
     if command == "startproject":
         startproject(name)
     elif command == "startapp":
         startapp(name)
-    elif command == "generate" and name == "userapp":
-        generate_userapp()
+    elif command == "generate" and name == "userapp" and ending:
+        generate_userapp(ending)
     elif command=="generate" and name=="loggerapp":
         generate_loggerapp()
     elif command == "run":

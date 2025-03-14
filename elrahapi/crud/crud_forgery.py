@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from elrahapi.authentication.authenticate import Authentication
+from elrahapi.authentication.authentication_provider import Authentication
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception

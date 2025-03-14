@@ -1,5 +1,5 @@
 from typing import List, Optional
-from elrahapi.authentication.authenticate import Authentication
+from elrahapi.authentication.authentication_provider import Authentication
 from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DEFAULT_NO_DETAIL_ROUTES_NAME, DefaultRoutesName
 
 

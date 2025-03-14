@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import Depends
-from elrahapi.authentication.authenticate import Authentication
+from elrahapi.authentication.authentication_provider import Authentication
 from elrahapi.router.route_config import (
     DEFAULT_ROUTE_CONFIG,
     AuthorizationConfig,

@@ -1,4 +1,5 @@
-from elrahapi.authentication.authenticate import Authentication
+from typing import Optional
+from elrahapi.authentication.authentication_manager import Authentication
 from elrahapi.crud.crud_forgery import CrudForgery
 
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
@@ -7,22 +8,25 @@ from fastapi import status
 
 
 class UserCrudForgery(CrudForgery):
-    def __init__(self, authentication: Authentication):
+    def __init__(self,
+                authentication: Authentication,
+                user_entity_name:str
+                ):
         super().__init__(
-            entity_name="user",
+            entity_name=user_entity_name,
             primary_key_name="id",
             authentication=authentication,
-            SQLAlchemyModel=authentication.User,
-            CreatePydanticModel=authentication.UserCreateModel,
-            UpdatePydanticModel=authentication.UserUpdateModel,
-            PatchPydanticModel=authentication.UserPatchModel
+            SQLAlchemyModel= authentication.sqlalchemy_model,
+            CreatePydanticModel=authentication.create_pydantic_model,
+            UpdatePydanticModel=authentication.update_pydantic_model,
+            PatchPydanticModel=authentication.patch_pydantic_model
         )
         self.get_current_user: callable = authentication.get_current_user
 
     async def change_password(
         self, username_or_email: str, current_password: str, new_password: str
     ):
-        session = self.authentication.get_session()
+        session = self.authentication.authentication_provider.get_session()
         current_user = await self.authentication.authenticate_user(
             password=current_password,
             username_or_email=username_or_email,
@@ -39,7 +43,7 @@ class UserCrudForgery(CrudForgery):
             )
 
     async def is_unique(self, sub: str):
-        db = self.session_factory()
+        db = self.authentication.authentication_provider.get_session()
         user = (
             db.query(self.SQLAlchemyModel)
             .filter(
@@ -53,7 +57,7 @@ class UserCrudForgery(CrudForgery):
         return user is None
 
     async def read_one_user(self,username_or_email:str):
-        session = self.session_factory()
+        session = self.authentication.authentication_provider.get_session()
         user = (
             session.query(self.SQLAlchemyModel)
             .filter(

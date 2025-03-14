@@ -3,7 +3,7 @@ import time
 from fastapi import Request
 from sqlalchemy.orm import Session
 from starlette.responses import Response
-from  elrahapi.websocket.connectionManager import ConnectionManager
+from  elrahapi.websocket.connection_manager import ConnectionManager
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (

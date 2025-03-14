@@ -1,7 +1,7 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from elrahapi.middleware.crud_middleware import save_log
-from elrahapi.websocket.connectionManager import ConnectionManager
+from elrahapi.websocket.connection_manager import ConnectionManager
 class LoggerMiddleware(BaseHTTPMiddleware):
     def __init__(self, app,LoggerMiddlewareModel, session_factory,manager:ConnectionManager=None ):
         super().__init__(app)

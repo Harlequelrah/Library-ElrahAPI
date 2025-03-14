@@ -194,7 +194,7 @@ Passioné par la programmation et le développement avec python je me lance dans
   - Utilisateur :
 
 ```bash
-  elrahapi generate appuser
+  elrahapi generate userapp
 ```
 
 - Log :

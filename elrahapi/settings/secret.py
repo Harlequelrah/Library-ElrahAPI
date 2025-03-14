@@ -1,4 +1,4 @@
-from elrahapi.authentication.authenticate import Authentication
+from elrahapi.authentication.authentication_provider import Authentication
 from dotenv import load_dotenv
 import os
 

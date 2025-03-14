@@ -7,7 +7,7 @@ from elrahapi.middleware.crud_middleware import save_log
 from elrahapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
-from elrahapi.websocket.connectionManager import ConnectionManager
+from elrahapi.websocket.connection_manager import ConnectionManager
 
 
 class ErrorHandlingMiddleware:
