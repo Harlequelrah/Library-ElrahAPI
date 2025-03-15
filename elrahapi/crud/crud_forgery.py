@@ -1,7 +1,6 @@
-from typing import List, Optional
-
-from elrahapi.authentication.authentication_provider import Authentication
+from typing import Optional
 from elrahapi.crud.bulk_models import BulkDeleteModel
+from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
@@ -9,27 +8,22 @@ from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
 
 from fastapi import status
-
+from sqlalchemy.orm import sessionmaker
 
 class CrudForgery:
     def __init__(
         self,
-        entity_name: str,
-        primary_key_name:str,
-        authentication: Authentication,
-        SQLAlchemyModel,
-        CreatePydanticModel:Optional[type]=None,
-        UpdatePydanticModel:Optional[type]=None,
-        PatchPydanticModel:Optional[type]=None
+        session_factory: sessionmaker[Session],
+        crud_models: CrudModels
     ):
-        self.SQLAlchemyModel = SQLAlchemyModel
-        self.CreatePydanticModel = CreatePydanticModel
-        self.UpdatePydanticModel = UpdatePydanticModel
-        self.PatchPydanticModel = PatchPydanticModel
-        self.entity_name = entity_name
-        self.primary_key_name = primary_key_name
-        self.authentication = authentication
-        self.session_factory = authentication.session_factory
+        self.entity_name=crud_models.entity_name
+        self.PydanticModel=crud_models.pydantic_model
+        self.SQLAlchemyModel = crud_models.sqlalchemy_model
+        self.CreatePydanticModel = crud_models.create_pydantic_model
+        self.UpdatePydanticModel = crud_models.update_pydantic_model
+        self.PatchPydanticModel = crud_models.patch_pydantic_model
+        self.primary_key_name = crud_models.primary_key_name
+        self.session_factory = session_factory
 
     async def get_pk(self):
         try :

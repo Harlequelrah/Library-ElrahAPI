@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
@@ -28,20 +29,21 @@ class UserRouterProvider(CustomRouterProvider):
         prefix: str,
         tags: List[str],
         crud: UserCrudForgery,
-        PydanticModel:Optional[type]=None,
+        authentication:Optional[AuthenticationManager]=None,
         roles : Optional[List[str]]=None,
         privileges : Optional[List[str]]=None,
     ):
-        self.authentication = crud.authentication
         super().__init__(
+            authentication=authentication,
             prefix=prefix,
             tags=tags,
-            PydanticModel= PydanticModel if PydanticModel else self.authentication.UserPydanticModel,
             crud=crud,
             roles=roles,
-            privileges=privileges
+            privileges=privileges,
         )
         self.crud: UserCrudForgery = crud
+        self.authentication_provider = self.authentication.authentication_provider
+        self.PydanticModel = crud.PydanticModel
 
     def get_public_router(
         self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
@@ -77,7 +79,7 @@ class UserRouterProvider(CustomRouterProvider):
             if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:
                 dependencies= initialize_dependecies(
                     config=config,
-                    authentication= self.crud.authentication,
+                    authentication= self.authentication,
                     roles=self.roles,
                     privileges = self.privileges
                 )
@@ -103,7 +105,7 @@ class UserRouterProvider(CustomRouterProvider):
                 )
                 async def read_current_user(
                     current_user: self.PydanticModel = Depends(
-                        self.crud.get_current_user
+                        self.authentication.get_current_user
                     ),
                 ):
                     return current_user
@@ -128,8 +130,8 @@ class UserRouterProvider(CustomRouterProvider):
                         "sub": form_data.username,
                         "role": user.role.normalizedName if user.role else "NO ROLE",
                     }
-                    access_token = self.authentication.create_access_token(data)
-                    refresh_token = self.authentication.create_refresh_token(data)
+                    access_token = self.authentication_provider.create_access_token(data)
+                    refresh_token = self.authentication_provider.create_refresh_token(data)
                     return {
                         "access_token": access_token["access_token"],
                         "refresh_token": refresh_token["refresh_token"],
@@ -146,11 +148,11 @@ class UserRouterProvider(CustomRouterProvider):
                 )
                 async def refresh_token(
                     current_user: self.PydanticModel = Depends(
-                        self.crud.get_current_user
+                        self.authentication.get_current_user
                     ),
                 ):
                     data = {"sub": current_user.username}
-                    refresh_token = self.authentication.create_refresh_token(data)
+                    refresh_token = self.authentication_provider.create_refresh_token(data)
                     return refresh_token
 
             if config.route_name == DefaultRoutesName.REFRESH_TOKEN and config.is_activated:
@@ -162,7 +164,7 @@ class UserRouterProvider(CustomRouterProvider):
                     response_model=AccessToken,
                 )
                 async def refresh_access_token(refresh_token: RefreshToken):
-                    return await self.authentication.refresh_token(
+                    return await self.authentication_provider.refresh_token(
                         refresh_token_data=refresh_token
                     )
 
@@ -183,8 +185,8 @@ class UserRouterProvider(CustomRouterProvider):
                         "sub": username_or_email,
                         "role": user.role.normalizedName if user.role else "NO ROLE",
                     }
-                    access_token_data = self.authentication.create_access_token(data)
-                    refresh_token_data = self.authentication.create_refresh_token(data)
+                    access_token_data = self.authentication_provider.create_access_token(data)
+                    refresh_token_data = self.authentication_provider.create_refresh_token(data)
                     return {
                         "access_token": access_token_data.get("access_token"),
                         "refresh_token": refresh_token_data.get("refresh_token"),

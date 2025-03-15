@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
@@ -25,16 +26,17 @@ class CustomRouterProvider:
         self,
         prefix: str,
         tags: List[str],
-        PydanticModel: type,
         crud: CrudForgery,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
+        authentication:Optional[AuthenticationManager]=None,
     ):
-        self.crud = crud
-        self.get_access_token: callable = crud.authentication.get_access_token
-        self.session_factory: callable = crud.authentication.session_factory
-        self.pk = self.crud.primary_key_name
-        self.PydanticModel = PydanticModel
+        if authentication :
+            self.authentication = authentication
+            self.get_access_token:callable= crud.authentication.authentication_provider.get_access_token
+        self.session_factory: callable = crud.session_factory
+        self.pk = crud.crud_models.primary_key_name
+        self.PydanticModel = crud.PydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
         self.PatchPydanticModel = crud.PatchPydanticModel
@@ -121,7 +123,7 @@ class CustomRouterProvider:
             if config.route_name == DefaultRoutesName.COUNT and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -139,7 +141,7 @@ class CustomRouterProvider:
             if config.route_name == DefaultRoutesName.READ_ONE and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -160,7 +162,7 @@ class CustomRouterProvider:
             if config.route_name == DefaultRoutesName.READ_ALL and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -190,7 +192,7 @@ class CustomRouterProvider:
             ):
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -215,7 +217,7 @@ class CustomRouterProvider:
             ):
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -241,7 +243,7 @@ class CustomRouterProvider:
             ):
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -263,7 +265,7 @@ class CustomRouterProvider:
             if config.route_name == DefaultRoutesName.DELETE and config.is_activated:
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -287,7 +289,7 @@ class CustomRouterProvider:
             ):
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )
@@ -310,7 +312,7 @@ class CustomRouterProvider:
             ):
                 dependencies = initialize_dependecies(
                     config=config,
-                    authentication=self.crud.authentication,
+                    authentication=self.authentication,
                     roles=self.roles,
                     privileges=self.privileges,
                 )

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import Depends
-from elrahapi.authentication.authentication_provider import Authentication
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     DEFAULT_ROUTE_CONFIG,
     AuthorizationConfig,
@@ -47,10 +47,11 @@ def get_single_route(
 
 def initialize_dependecies(
     config: RouteConfig,
-    authentication: Authentication,
+    authentication: Optional[AuthenticationManager]=None,
     roles: Optional[List[str]] = None,
     privileges: Optional[List[str]] = None,
 ):
+    if not authentication : return []
     dependencies = []
     if config.is_protected:
         if roles:

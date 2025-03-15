@@ -1,5 +1,5 @@
 from typing import List, Optional
-from elrahapi.authentication.authentication_provider import Authentication
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DEFAULT_NO_DETAIL_ROUTES_NAME, DefaultRoutesName
 
 
@@ -42,7 +42,7 @@ class RouteConfig:
             else : return f"/{route_name.value}"
 
 
-    def get_authorizations(self,authentication:Authentication)-> List[callable]:
+    def get_authorizations(self,authentication:AuthenticationManager)-> List[callable]:
         authorizations = []
         if self.roles:
             role_authorization = authentication.check_authorization(roles_name=self.roles)

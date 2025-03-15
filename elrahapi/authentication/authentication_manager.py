@@ -1,9 +1,9 @@
 
 
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import  timedelta
 from fastapi import Depends,status
-from elrahapi.authentication.authentication_provider import OAUTH2_SCHEME, Authentication, AuthenticationProvider
+from elrahapi.authentication.authentication_provider import OAUTH2_SCHEME, AuthenticationProvider
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from elrahapi.authentication.token import RefreshToken
@@ -24,7 +24,7 @@ USER_AUTH_MODELS = CrudModels(
         UserUpdateModel=UserUpdateModel,
         UserPatchModel=UserPatchModel,
 )
-class Authentication:
+class AuthenticationManager:
     def __init__(self, authentication_provider:AuthenticationProvider,crud_model:Optional[CrudModels]=USER_AUTH_MODELS):
         self.crud_model = crud_model
         self.authentication_provider = authentication_provider

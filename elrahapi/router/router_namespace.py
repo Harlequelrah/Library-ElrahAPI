@@ -6,8 +6,8 @@ from .route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
 
 
 class TypeRoute(str, Enum):
-    PUBLIC = "public"
-    PROTECTED = "protected"
+    PUBLIC = "PUBLIC"
+    PROTECTED = "PROTECTED"
 
 
 DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
