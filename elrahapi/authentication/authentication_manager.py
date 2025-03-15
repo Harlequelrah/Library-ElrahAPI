@@ -1,46 +1,208 @@
-
-
+from sqlalchemy.orm import Session, sessionmaker
+from elrahapi.authentication.authentication_namespace import ACCESS_TOKEN_EXPIRATION, OAUTH2_SCHEME, REFRESH_TOKEN_EXPIRATION
+from elrahapi.security.secret import define_algorithm_and_key
+from .token import AccessToken, RefreshToken
+from datetime import datetime, timedelta
+from jose import ExpiredSignatureError, jwt, JWTError
 from typing import List, Optional
-from datetime import  timedelta
 from fastapi import Depends,status
-from elrahapi.authentication.authentication_provider import OAUTH2_SCHEME, AuthenticationProvider
-from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from elrahapi.authentication.token import RefreshToken
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import INACTIVE_USER_CUSTOM_HTTP_EXCEPTION, INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION, INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.user.models import (
-    UserPydanticModel,
-    UserCreateModel,
-    UserUpdateModel,
-    UserPatchModel,
-    UserModel as User,
-)
-USER_AUTH_MODELS = CrudModels(
-        UserPydanticModel=UserPydanticModel,
-        UserSQLAlchemyModel=User,
-        UserCreateModel=UserCreateModel,
-        UserUpdateModel=UserUpdateModel,
-        UserPatchModel=UserPatchModel,
-)
+
+
+
 class AuthenticationManager:
-    def __init__(self, authentication_provider:AuthenticationProvider,crud_model:Optional[CrudModels]=USER_AUTH_MODELS):
-        self.crud_model = crud_model
-        self.authentication_provider = authentication_provider
-        self.sqlalchemy_model = self.crud_model.sqlalchemy_model
+
+    def __init__(
+        self,
+        database_username: str,
+        database_password: str,
+        connector: str,
+        database_name: str,
+        server: str,
+        secret_key: Optional[str] = None,
+        algorithm: Optional[str] = None,
+        refresh_token_expiration: Optional[int] = None,
+        access_token_expiration: Optional[int] = None,
+    ):
+        self.__database_username = database_username
+        self.__database_password = database_password
+        self.__connector = connector
+        self.__database_name = database_name
+        self.__server = server
+        self.__authentication_crud_models:List[CrudModels]=[]
+        self.__refresh_token_expiration = (
+            refresh_token_expiration
+            if refresh_token_expiration
+            else REFRESH_TOKEN_EXPIRATION
+        )
+        self.__access_token_expiration = (
+            access_token_expiration
+            if access_token_expiration
+            else ACCESS_TOKEN_EXPIRATION
+        )
+        self.__algorithm, self.__secret_key = define_algorithm_and_key(
+            secret_key,
+            algorithm,
+        )
+        self.__session_factory: sessionmaker[Session] = None
+
+    def add_crud_models(self, crud_models:CrudModels):
+        self.__authentication_crud_models.append(crud_models)
+
+    @property
+    def authentication_crud_models(self):
+        return self.__authentication_crud_models
+
+    @authentication_crud_models.setter
+    def authentication_crud_models(self, crud_models: List[CrudModels]):
+        self.__authentication_crud_models = crud_models
+
+    @property
+    def database_username(self):
+        return self.__database_username
+
+    @database_username.setter
+    def database_username(self, database_username: str):
+        self.__database_username = database_username
+
+    @property
+    def database_password(self):
+        return self.__database_password
+
+    @database_password.setter
+    def database_password(self, database_password: str):
+        self.__database_password = database_password
+
+    @property
+    def connector(self):
+        return self.__connector
+
+    @connector.setter
+    def connector(self, connector: str):
+        self.__connector = connector
+
+    @property
+    def database_name(self):
+        return self.__database_name
+
+    @database_name.setter
+    def database_name(self, database_name: str):
+        self.__database_name = database_name
+
+    @property
+    def server(self):
+        return self.__server
+
+    @server.setter
+    def server(self, server: str):
+        self.__server = server
+
+    @property
+    def algorithm(self):
+        return self.__algorithm
+
+    @algorithm.setter
+    def algorithms(self, algorithm: str):
+        self.__algorithm = algorithm
+
+    @property
+    def access_token_expiration(self):
+        return self.__access_token_expiration
+
+    @access_token_expiration.setter
+    def access_token_expiration(self, access_token_expiration: int):
+        self.__access_token_expiration = access_token_expiration
+
+    @property
+    def refresh_token_expiration(self):
+        return self.__refresh_token_expiration
+
+    @refresh_token_expiration.setter
+    def refresh_token_expiration(self, refresh_token_expiration: int):
+        self.__refresh_token_expiration = refresh_token_expiration
+
+
+    @property
+    def session_factory(self):
+        return self.__session_factory
+
+    @session_factory.setter
+    def session_factory(self, session_factory: sessionmaker[Session]):
+        self.__session_factory = session_factory
+
+    def get_session(self):
+        db = self.__session_factory()
+        if not db:
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Session Factory Not Found",
+            )
+        return db
+
+    def create_access_token(
+        self, data: dict, expires_delta: timedelta = None
+    ) -> AccessToken:
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(
+                milliseconds=self.__access_token_expiration
+            )
+        to_encode.update({"exp": expire})
+        encode_jwt = jwt.encode(
+            to_encode, self.__secret_key, algorithm=self.__algorithm
+        )
+        return {"access_token": encode_jwt, "token_type": "bearer"}
+
+    def create_refresh_token(
+        self, data: dict, expires_delta: timedelta = None
+    ) -> RefreshToken:
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(
+                milliseconds=self.__refresh_token_expiration
+            )
+        to_encode.update({"exp": expire})
+        encode_jwt = jwt.encode(
+            to_encode, self.__secret_key, algorithm=self.__algorithm
+        )
+        return {"refresh_token": encode_jwt, "token_type": "bearer"}
+
+    async def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
+        await self.validate_token(token)
+        return token
+
+
+
+    async def validate_token(self, token: str):
+        try:
+            payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
+            return payload
+        except ExpiredSignatureError:
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
+            )
+        except JWTError:
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
 
     async def get_user_by_sub(self, username_or_email: str, db: Session):
-
-        user = (
-            db.query(self.sqlalchemy_model)
+        user = next((
+            db.query(crud_models.sqlalchemy_model)
             .filter(
                 or_(
-                    self.sqlalchemy.username == username_or_email,
-                    self.sqlalchemy.email == username_or_email,
+                    crud_models.sqlalchemy_model.username == username_or_email,
+                    crud_models.sqlalchemy_model.email == username_or_email,
                 )
             )
-            .first()
+            .first() for crud_models in self.__authentication_crud_models),None
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -51,10 +213,10 @@ class AuthenticationManager:
         privilege_name: Optional[List[str]] = None,
         roles_name: Optional[List[str]] = None,
     ) -> callable:
-        async def is_authorized(token: str = Depends(self.authentication_provider.get_access_token)) -> bool:
-            payload = await self.authentication_provider.validate_token(token)
+        async def is_authorized(token: str = Depends(self.get_access_token)) -> bool:
+            payload = await self.validate_token(token)
             sub = payload.get("sub")
-            db = self.authentication_provider.get_session()
+            db = self.get_session()
             user = await self.get_user_by_sub(username_or_email=sub, db=db)
             if not user:
                 raise_custom_http_exception(
@@ -69,6 +231,7 @@ class AuthenticationManager:
 
         return is_authorized
 
+
     async def authenticate_user(
         self,
         password: str,
@@ -77,7 +240,7 @@ class AuthenticationManager:
     ):
         if username_or_email is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = session if session else self.authentication_provider.get_session()
+        db = session if session else self.get_session()
         user = await self.get_user_by_sub(db=db, username_or_email=username_or_email)
         if user:
             if not user.check_password(password):
@@ -98,14 +261,18 @@ class AuthenticationManager:
         token: str = Depends(OAUTH2_SCHEME),
     ):
         db = self.get_session()
-        payload = await self.authentication_provider.validate_token(token)
+        payload = await self.validate_token(token)
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user = (
-            db.query(self.sqlalchemy_model)
-            .filter(or_(self.sqlalchemy_model.username == sub, self.sqlalchemy_model.email == sub))
-            .first()
+        user = next (
+            (
+                db.query(crud_models.sqlalchemy_model)
+                .filter(or_(
+                    crud_models.sqlalchemy_model.username == sub, crud_models.sqlalchemy_model.email == sub))
+                .first() for crud_models in self.__authentication_crud_models
+            )
+        ,None
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -113,15 +280,18 @@ class AuthenticationManager:
 
 
     async def refresh_token(self, refresh_token_data: RefreshToken):
-        db = self.authentication_provider.get_session()
-        payload = await self.authentication_provider.validate_token(refresh_token_data.refresh_token)
+        db = self.get_session()
+        payload = await self.validate_token(refresh_token_data.refresh_token)
         sub = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user = (
-            db.query(self.sqlalchemy_model)
-            .filter(or_(self.sqlalchemy_model.username == sub, self.sqlalchemy_model.email == sub))
+        user = next(
+            (
+            db.query(crud_models.sqlalchemy_model)
+            .filter(or_(crud_models.sqlalchemy_model.username == sub, crud_models.sqlalchemy_model.email == sub))
             .first()
+            for crud_models in self.__authentication_crud_models),
+            None
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -130,3 +300,4 @@ class AuthenticationManager:
             data={"sub": sub}, expires_delta=access_token_expiration
         )
         return access_token
+

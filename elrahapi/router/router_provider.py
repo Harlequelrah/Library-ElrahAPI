@@ -3,6 +3,7 @@ from typing import List, Optional
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
+from elrahapi.exception.auth_exception import NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from fastapi import status
 from elrahapi.router.router_crud import (
@@ -57,6 +58,7 @@ class CustomRouterProvider:
         authorizations: Optional[List[AuthorizationConfig]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
+        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         return self.initialize_router(
             init_data=ROUTES_PROTECTED_CONFIG,
             exclude_routes_name=exclude_routes_name,
@@ -68,6 +70,7 @@ class CustomRouterProvider:
         custom_init_data = init_data if init_data else []
         if route_names:
             for route_name in route_names:
+                if TypeRoute.PROTECTED and not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
                 route = get_single_route(route_name, TypeRoute.PROTECTED if is_protected else TypeRoute.PUBLIC)
                 custom_init_data.append(route)
         return custom_init_data
@@ -89,6 +92,7 @@ class CustomRouterProvider:
         authorizations: Optional[List[AuthorizationConfig]] =None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ):
+        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         custom_init_data=self.get_custom_router_init_data(init_data,protected_routes_name,is_protected=True)
         return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name,authorizations=authorizations)
 
@@ -99,6 +103,7 @@ class CustomRouterProvider:
         protected_routes_name: Optional[List[DefaultRoutesName]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
+        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         if init_data is None:
             init_data = []
         public_routes_data = self.get_custom_router_init_data(init_data, public_routes_name)

@@ -1,8 +1,7 @@
-from myproject.settings.database import authentication
+
 from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegeUpdateModel,RolePrivilegePatchModel
 from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from myproject.settings.database import authentication
 from elrahapi.authorization.privilege_model import (
     PrivilegeCreateModel,
     PrivilegeUpdateModel,
