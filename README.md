@@ -26,6 +26,8 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 ## 1. `Quelques recommandations` :
 
+- Il est recommandé de créer un environnement virtuel pour chaque projet
+
 - **myproject** designe le nom de votre projet .
 
 - **myapp** designe le nom d'une application .
