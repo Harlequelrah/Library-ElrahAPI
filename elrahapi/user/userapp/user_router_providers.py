@@ -21,21 +21,6 @@ user_router_provider = UserRouterProvider(
     crud=userCrud,
 )
 
-
-role_router_provider = CustomRouterProvider(
-    prefix="/roles",
-    tags=["roles"],
-    PydanticModel=RolePydanticModel,
-    crud=roleCrud,
-)
-
-privilege_router_provider = CustomRouterProvider(
-    prefix="/privileges",
-    tags=["privileges"],
-    PydanticModel=PrivilegePydanticModel,
-    crud=privilegeCrud,
-)
-
 user_privilege_router_provider=CustomRouterProvider(
     prefix='/users/privileges',
     tags=["users_privileges"],
@@ -43,9 +28,3 @@ user_privilege_router_provider=CustomRouterProvider(
     crud=userPrivilegeCrud
 )
 
-role_privilege_router_provider=CustomRouterProvider(
-    prefix='/roles/privileges',
-    tags=["roles_privileges"],
-    PydanticModel=RolePrivilegePydanticModel,
-    crud=rolePrivilegeCrud
-)

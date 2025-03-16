@@ -34,7 +34,7 @@ class CustomRouterProvider:
     ):
         if authentication :
             self.authentication = authentication
-            self.get_access_token:callable= crud.authentication.authentication_provider.get_access_token
+            self.get_access_token:callable= authentication.get_access_token
         self.session_factory: callable = crud.session_factory
         self.pk = crud.crud_models.primary_key_name
         self.PydanticModel = crud.PydanticModel

@@ -1,17 +1,20 @@
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, sessionmaker
 from elrahapi.authentication.authentication_namespace import ACCESS_TOKEN_EXPIRATION, OAUTH2_SCHEME, REFRESH_TOKEN_EXPIRATION
+from elrahapi.router.route_config import RouteConfig
+from elrahapi.router.router_crud import format_init_data
+from elrahapi.router.router_default_routes_name import DefaultRoutesName
+from elrahapi.router.router_namespace import USER_AUTH_CONFIG
 from elrahapi.security.secret import define_algorithm_and_key
-from .token import AccessToken, RefreshToken
+from elrahapi.authentication.token import AccessToken, RefreshToken , Token
 from datetime import datetime, timedelta
 from jose import ExpiredSignatureError, jwt, JWTError
 from typing import List, Optional
-from fastapi import Depends,status
+from fastapi import APIRouter, Depends,status
 from sqlalchemy import or_
-from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import INACTIVE_USER_CUSTOM_HTTP_EXCEPTION, INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION, INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-
-
+from elrahapi.user.models import UserChangePasswordRequestModel, UserLoginRequestModel
 
 class AuthenticationManager:
 
@@ -32,7 +35,7 @@ class AuthenticationManager:
         self.__connector = connector
         self.__database_name = database_name
         self.__server = server
-        self.__authentication_crud_models:List[CrudModels]=[]
+        self.__authentication_models:dict[str,type]
         self.__refresh_token_expiration = (
             refresh_token_expiration
             if refresh_token_expiration
@@ -49,16 +52,13 @@ class AuthenticationManager:
         )
         self.__session_factory: sessionmaker[Session] = None
 
-    def add_crud_models(self, crud_models:CrudModels):
-        self.__authentication_crud_models.append(crud_models)
-
     @property
-    def authentication_crud_models(self):
-        return self.__authentication_crud_models
+    def authentication_models(self):
+        return self.__authentication_models
 
-    @authentication_crud_models.setter
-    def authentication_crud_models(self, crud_models: List[CrudModels]):
-        self.__authentication_crud_models = crud_models
+    @authentication_models.setter
+    def authentication_models(self,authentication_models:dict[str,type]):
+        self.__authentication_models = authentication_models
 
     @property
     def database_username(self):
@@ -195,14 +195,14 @@ class AuthenticationManager:
 
     async def get_user_by_sub(self, username_or_email: str, db: Session):
         user = next((
-            db.query(crud_models.sqlalchemy_model)
+            db.query(auth_model)
             .filter(
                 or_(
-                    crud_models.sqlalchemy_model.username == username_or_email,
-                    crud_models.sqlalchemy_model.email == username_or_email,
+                    auth_model.username == username_or_email,
+                    auth_model.email == username_or_email,
                 )
             )
-            .first() for crud_models in self.__authentication_crud_models),None
+            .first() for auth_model in self.__authentication_models.values().values()),None
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -267,10 +267,10 @@ class AuthenticationManager:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         user = next (
             (
-                db.query(crud_models.sqlalchemy_model)
+                db.query(auth_model)
                 .filter(or_(
-                    crud_models.sqlalchemy_model.username == sub, crud_models.sqlalchemy_model.email == sub))
-                .first() for crud_models in self.__authentication_crud_models
+                    auth_model.username == sub, auth_model.email == sub))
+                .first() for auth_model in self.__authentication_models.values()
             )
         ,None
         )
@@ -287,17 +287,217 @@ class AuthenticationManager:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         user = next(
             (
-            db.query(crud_models.sqlalchemy_model)
-            .filter(or_(crud_models.sqlalchemy_model.username == sub, crud_models.sqlalchemy_model.email == sub))
+            db.query(auth_model)
+            .filter(or_(auth_model.username == sub, auth_model.email == sub))
             .first()
-            for crud_models in self.__authentication_crud_models),
+            for auth_model in self.__authentication_models.values()),
             None
         )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        access_token_expiration = timedelta(milliseconds=self.authentication_provider.access_token_expiration)
+        access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
         access_token = self.create_access_token(
             data={"sub": sub}, expires_delta=access_token_expiration
         )
         return access_token
+
+    async def is_unique(self, sub: str):
+        db = self.get_session()
+        user = next(
+            (
+                db.query(auth_model.sqlalchemy_model)
+                .filter(
+                    or_(
+                        auth_model.sqlalchemy_model.email == sub,
+                        auth_model.sqlalchemy_model.username == sub,
+                    )
+                )
+                .first()
+                for auth_model in self.__authentication_models.values()
+            ),
+            None,
+        )
+        return user is None
+
+    async def read_one_user(self, username_or_email: str):
+        session = self.session_factory()
+        user = next(
+            (
+                session.query(auth_model)
+                .filter(
+                    or_(
+                        auth_model.username == username_or_email,
+                        auth_model.email == username_or_email,
+                    )
+                )
+                .first() for auth_model in self.__auth_models
+            ),
+            None,
+        )
+        if not user:
+            detail = f"User with username or email {username_or_email} not found"
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+            )
+        return user
+
+    async def change_password(
+        self, username_or_email: str, current_password: str, new_password: str
+    ):
+        session = self.session_factory()
+        current_user = await self.authenticate_user(
+            password=current_password,
+            username_or_email=username_or_email,
+            session=session,
+        )
+        if current_user.check_password(current_password):
+            current_user.set_password(new_password)
+            session.commit()
+            session.refresh(current_user)
+        else:
+            raise_custom_http_exception(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your current password you enter  is incorrect",
+            )
+
+    async def get_auth_router(
+        self,
+        init_data: List[RouteConfig]=USER_AUTH_CONFIG,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        )->APIRouter:
+        router=APIRouter(
+            prefix="/auth",
+            tags=["auth"]
+        )
+        formatted_init_data = format_init_data(
+            init_data=init_data, exclude_routes_name=exclude_routes_name
+        )
+        for config in formatted_init_data:
+            if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:
+                @self.router.get(
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                )
+                async def read_one_user(username_or_email: str):
+                    return await self.read_one_user(username_or_email)
+
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER and config.is_activated:
+
+                @self.router.get(
+                    path=config.route_path,
+                    response_model=self.PydanticModel,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                )
+                async def read_current_user(
+                    current_user = Depends(
+                        self.get_current_user
+                    ),
+                ):
+                    return current_user
+
+            if config.route_name == DefaultRoutesName.TOKEN_URL and config.is_activated:
+
+                @self.router.post(
+                    response_model=Token,
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                )
+                async def login_swagger(
+                    form_data: OAuth2PasswordRequestForm = Depends(),
+                ):
+                    user = await self.authenticate_user(
+                        password=form_data.password,
+                        username_or_email=form_data.username,
+                    )
+
+                    data = {
+                        "sub": form_data.username,
+                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                    }
+                    access_token = self.create_access_token(data)
+                    refresh_token = self.create_refresh_token(data)
+                    return {
+                        "access_token": access_token["access_token"],
+                        "refresh_token": refresh_token["refresh_token"],
+                        "token_type": "bearer",
+                    }
+
+            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN and config.is_activated:
+
+                @self.router.post(
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                    response_model=RefreshToken,
+                )
+                async def refresh_token(
+                    current_user = Depends(
+                        self.get_current_user
+                    ),
+                ):
+                    data = {"sub": current_user.username}
+                    refresh_token = self.create_refresh_token(data)
+                    return refresh_token
+
+            if config.route_name == DefaultRoutesName.REFRESH_TOKEN and config.is_activated:
+
+                @self.router.post(
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                    response_model=AccessToken,
+                )
+                async def refresh_access_token(refresh_token: RefreshToken):
+                    return await self.refresh_token(
+                        refresh_token_data=refresh_token
+                    )
+
+            if config.route_name == DefaultRoutesName.LOGIN and config.is_activated:
+
+                @self.router.post(
+                    response_model=Token,
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                )
+                async def login(usermodel: UserLoginRequestModel):
+                    username_or_email = usermodel.username_or_email
+                    user = await self.authenticate_user(
+                        usermodel.password, username_or_email
+                    )
+                    data = {
+                        "sub": username_or_email,
+                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                    }
+                    access_token_data = self.create_access_token(data)
+                    refresh_token_data = self.create_refresh_token(data)
+                    return {
+                        "access_token": access_token_data.get("access_token"),
+                        "refresh_token": refresh_token_data.get("refresh_token"),
+                        "token_type": "bearer",
+                    }
+
+            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD and config.is_activated:
+
+                @self.router.post(
+                    status_code=204,
+                    path=config.route_path,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                )
+                async def change_password(form_data: UserChangePasswordRequestModel):
+                    username_or_email = form_data.username_or_email
+                    current_password = form_data.current_password
+                    new_password = form_data.new_password
+                    return await self.change_password(
+                        username_or_email, current_password, new_password
+                    )
+
+        return router
+
+
+
 

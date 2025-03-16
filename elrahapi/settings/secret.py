@@ -1,4 +1,4 @@
-from elrahapi.authentication.authentication_provider import AuthenticationProvider
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from dotenv import load_dotenv
 import os
 
@@ -11,7 +11,7 @@ connector = os.getenv("DATABASE_CONNECTOR")
 database_name = os.getenv("DATABASE_NAME")
 server = os.getenv("DATABASE_SERVER")
 
-authentication_provider = AuthenticationProvider(
+authentication = AuthenticationManager(
     database_username=database_username,
     database_password=database_password,
     connector=connector,
