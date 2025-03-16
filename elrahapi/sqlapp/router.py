@@ -2,7 +2,7 @@ from elrahapi.router.route_config import  RouteConfig
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from myproject.myapp.cruds import myapp_crud
 from myproject.myapp.schemas import EntityPydanticModel
-# from myproject.userapp_user.authentication import user_authentication
+# from myproject.settings.auth_configs import authentication
 from typing import List
 from elrahapi.router.router_provider import CustomRouterProvider
 
@@ -11,7 +11,7 @@ router_provider = CustomRouterProvider(
     tags=["item"],
     PydanticModel=EntityPydanticModel,
     crud=myapp_crud,
-    # authentication= user_authentication
+    # authentication= authentication
 )
 
 # app_myapp = router_provider.get_public_router()

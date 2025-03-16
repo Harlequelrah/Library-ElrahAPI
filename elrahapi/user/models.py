@@ -6,7 +6,6 @@ from sqlalchemy import (
     Column,
     ForeignKey,
 )
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from argon2 import PasswordHasher, exceptions as Ex
 from pydantic import BaseModel, Field
@@ -14,7 +13,6 @@ from typing import List, Optional
 from datetime import datetime
 
 from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
-from elrahapi.authorization.meta_model import MetaUserPrivilegeModel
 from elrahapi.exception.auth_exception  import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
@@ -123,7 +121,7 @@ class UserPydanticModel(UserBaseModel):
     date_created: datetime
     date_updated: Optional[datetime]
     role : Optional[MetaAuthorizationBaseModel]
-    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
+
 
 
 

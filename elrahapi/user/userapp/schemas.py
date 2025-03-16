@@ -1,5 +1,7 @@
+from typing import List, Optional
+from elrahapi.authorization.meta_model import MetaUserPrivilegeModel
 from elrahapi.user import  models
-from myproject.settings import authentication
+
 class UserBaseModel(models.UserBaseModel):
     pass
 
@@ -13,12 +15,9 @@ class UserPatchModel(models.UserPatchModel):
     pass
 
 class UserPydanticModel(UserBaseModel):
+    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
     class Config :
         from_attributes=True
 
-authentication.UserPydanticModel = UserPydanticModel
-authentication.UserCreateModel = UserCreateModel
-authentication.UserUpdateModel = UserUpdateModel
-authentication.UserPatchModel = UserPatchModel
 
 
