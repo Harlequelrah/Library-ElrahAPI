@@ -32,15 +32,15 @@ class CustomRouterProvider:
         privileges: Optional[List[str]] = None,
         authentication:Optional[AuthenticationManager]=None,
     ):
-        if authentication :
-            self.authentication = authentication
-            self.get_access_token:callable= authentication.get_access_token
+        self.authentication:AuthenticationManager = authentication if authentication else None
+        self.get_access_token:Optional[callable]= authentication.get_access_token if authentication else None
         self.session_factory: callable = crud.session_factory
         self.pk = crud.crud_models.primary_key_name
         self.PydanticModel = crud.PydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
         self.PatchPydanticModel = crud.PatchPydanticModel
+        self.crud=crud
         self.roles = roles
         self.privileges = privileges
         self.router = APIRouter(

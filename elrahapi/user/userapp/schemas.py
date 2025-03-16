@@ -14,8 +14,7 @@ class UserUpdateModel(models.UserUpdateModel):
 class UserPatchModel(models.UserPatchModel):
     pass
 
-class UserPydanticModel(UserBaseModel):
-    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
+class UserPydanticModel(models.UserPydanticModel):
     class Config :
         from_attributes=True
 

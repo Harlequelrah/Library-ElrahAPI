@@ -115,8 +115,7 @@ def generate_userapp(ending):
     Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
     """
     project_folder=get_project_folder()
-    user_app_name= f"userapp_{ending}"
-    target_userapp_path = os.path.join(project_folder,user_app_name)
+    target_userapp_path = os.path.join(project_folder,"userapp")
     os.makedirs(target_userapp_path, exist_ok=True)
 
     # Path vers le dossier source 'userapp' dans la bibliothèque
@@ -138,21 +137,20 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: elrahapi <commande> <nom>")
         sys.exit(1)
-    if len(sys.argv) > 2:
-        name = sys.argv[2]
+    if len(sys.argv)>=2:
         command = sys.argv[1]
-        ending=sys.argv[3]
-
+    if len(sys.argv)>=3:
+        name = sys.argv[2]
+    if command == "run":
+        run()
     if command == "startproject":
         startproject(name)
     elif command == "startapp":
         startapp(name)
-    elif command == "generate" and name == "userapp" and ending:
-        generate_userapp(ending)
+    elif command == "generate" and name == "userapp":
+        generate_userapp()
     elif command=="generate" and name=="loggerapp":
         generate_loggerapp()
-    elif command == "run":
-        run()
     else:
         print(f"Commande inconnue: {command}")
 

@@ -1,6 +1,6 @@
 
 from elrahapi.router.router_provider import CustomRouterProvider
-from .cruds import user_crud,user_privilege_crud
+from .cruds import user_crud,user_privilege_crud,role_crud,privilege_crud,role_privilege_crud
 from myproject.settings.auth_configs import authentication
 
 
@@ -18,6 +18,32 @@ user_privilege_router_provider=CustomRouterProvider(
     authentication=authentication,
 )
 
+role_router_provider = CustomRouterProvider(
+    prefix="/roles",
+    tags=["roles"],
+    crud=role_crud,
+)
+
+privilege_router_provider = CustomRouterProvider(
+    prefix="/privileges",
+    tags=["privileges"],
+    crud=privilege_crud,
+)
+
+
+
+role_privilege_router_provider=CustomRouterProvider(
+    prefix='/roles/privileges',
+    tags=["roles_privileges"],
+    crud=role_privilege_crud)
+
+
 user_router = user_router_provider.get_protected_router()
 
 user_privilege_router=user_privilege_router_provider.get_protected_router()
+
+role_router=role_router_provider.get_protected_router()
+
+privilege_router=privilege_router_provider.get_protected_router()
+
+role_privilege_router=role_privilege_router_provider.get_protected_router()

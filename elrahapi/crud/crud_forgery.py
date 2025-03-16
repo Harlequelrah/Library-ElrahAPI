@@ -16,6 +16,7 @@ class CrudForgery:
         session_factory: sessionmaker[Session],
         crud_models: CrudModels
     ):
+        self.crud_models= crud_models
         self.entity_name=crud_models.entity_name
         self.PydanticModel=crud_models.pydantic_model
         self.SQLAlchemyModel = crud_models.sqlalchemy_model

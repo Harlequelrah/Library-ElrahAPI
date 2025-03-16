@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 
-from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel, MetaUserPrivilegeModel
 from elrahapi.exception.auth_exception  import INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
@@ -121,6 +121,7 @@ class UserPydanticModel(UserBaseModel):
     date_created: datetime
     date_updated: Optional[datetime]
     role : Optional[MetaAuthorizationBaseModel]
+    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
 
 
 
