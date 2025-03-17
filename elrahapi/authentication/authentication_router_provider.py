@@ -9,7 +9,7 @@ from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_crud import format_init_data
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
-from elrahapi.router.router_namespace import USER_AUTH_CONFIG
+from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
 from elrahapi.user.models import UserChangePasswordRequestModel, UserLoginRequestModel
 
 
@@ -25,9 +25,9 @@ class AuthenticationRouterProvider:
             tags=["auth"]
         )
 
-    async def get_auth_router(
+    def get_auth_router(
         self,
-        init_data: List[RouteConfig]=USER_AUTH_CONFIG,
+        init_data: List[RouteConfig]=USER_AUTH_CONFIG_ROUTES,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         )->APIRouter:
         formatted_init_data = format_init_data(

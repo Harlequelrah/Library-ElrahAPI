@@ -22,12 +22,14 @@ role_router_provider = CustomRouterProvider(
     prefix="/roles",
     tags=["roles"],
     crud=role_crud,
+    authentication=authentication,
 )
 
 privilege_router_provider = CustomRouterProvider(
     prefix="/privileges",
     tags=["privileges"],
     crud=privilege_crud,
+    authentication=authentication,
 )
 
 
@@ -35,7 +37,9 @@ privilege_router_provider = CustomRouterProvider(
 role_privilege_router_provider=CustomRouterProvider(
     prefix='/roles/privileges',
     tags=["roles_privileges"],
-    crud=role_privilege_crud)
+    crud=role_privilege_crud,
+    authentication=authentication,
+    )
 
 
 user_router = user_router_provider.get_protected_router()

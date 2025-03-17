@@ -24,7 +24,7 @@ class MetaAuthorizationPydanticModel(MetaAuthorizationBaseModel):
     name: str
 
 class MetaUserPrivilegeModel(BaseModel):
-    privilege_id:int
+    privilege:MetaAuthorizationBaseModel
     is_active:bool
 
 

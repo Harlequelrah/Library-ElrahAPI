@@ -20,11 +20,12 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.READ_ONE: DEFAULT_ROUTE_CONFIG(
         "Get one entity", "Retrieve one entity by id"
     ),
-    DefaultRoutesName.CREATE: DEFAULT_ROUTE_CONFIG(
-        "Create an entity", "Allow to create an entity"
-    ),
+
     DefaultRoutesName.BULK_CREATE: DEFAULT_ROUTE_CONFIG(
         "Create entities", "Allow to create many entities"
+    ),
+    DefaultRoutesName.BULK_DELETE: DEFAULT_ROUTE_CONFIG(
+        "Delete entities", "Allow to delete many entities"
     ),
     DefaultRoutesName.UPDATE: DEFAULT_ROUTE_CONFIG(
         "Update an entity", "Allow to update an entity"
@@ -32,12 +33,13 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.PATCH: DEFAULT_ROUTE_CONFIG(
         "Patch an entity", "Allow to patch an entity"
     ),
+    DefaultRoutesName.CREATE: DEFAULT_ROUTE_CONFIG(
+        "Create an entity", "Allow to create an entity"
+    ),
     DefaultRoutesName.DELETE: DEFAULT_ROUTE_CONFIG(
         "Delete an entity", "Allow to delete an entity"
     ),
-    DefaultRoutesName.BULK_DELETE: DEFAULT_ROUTE_CONFIG(
-        "Delete entities", "Allow to delete many entities"
-    ),
+
 }
 
 ROUTES_PUBLIC_CONFIG: List[RouteConfig] = [

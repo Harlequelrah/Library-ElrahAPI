@@ -20,9 +20,9 @@ class PrivilegeUpdateModel(PrivilegeBaseModel):
     is_active:bool=Field(example=True)
 
 class PrivilegePatchModel(BaseModel):
-    name: Optional[str] = Field(example="can_add_privilege")
-    is_active:Optional[bool]=Field(default=True,example=True)
-    description:Optional[str]=Field(example='allow privilege creation for privilege')
+    name: Optional[str] = Field(example="can_add_privilege",default=None)
+    is_active:Optional[bool]=Field(default=None,example=True)
+    description:Optional[str]=Field(example='allow privilege creation for privilege',default=None)
 
 
 

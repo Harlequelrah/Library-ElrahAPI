@@ -110,7 +110,7 @@ def get_project_folder():
 
     return os.path.join(parent_dir, project_folders[0])
 
-def generate_userapp(ending):
+def generate_userapp():
     """
     Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
     """
