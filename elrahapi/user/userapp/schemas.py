@@ -1,5 +1,4 @@
 from typing import List, Optional
-from elrahapi.authorization.meta_model import MetaUserPrivilegeModel
 from elrahapi.user import  models
 
 class UserBaseModel(models.UserBaseModel):

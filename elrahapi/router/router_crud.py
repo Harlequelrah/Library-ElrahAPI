@@ -75,7 +75,7 @@ def initialize_dependecies(
 def add_authorizations(
     routes_config: List[RouteConfig], authorizations: List[AuthorizationConfig]
 ):
-    authorized_routes_config = []
+    authorized_routes_config:List[RouteConfig] = []
     for route_config in routes_config:
         authorization = next(
             (
@@ -86,7 +86,7 @@ def add_authorizations(
             None,
         )
         route_config.roles.extend(authorization.roles)
-        route_config.roles.extend(authorization.privileges)
+        route_config.privileges.extend(authorization.privileges)
         authorized_routes_config.append(route_config)
     return authorized_routes_config
 

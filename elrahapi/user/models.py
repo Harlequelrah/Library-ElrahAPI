@@ -63,14 +63,12 @@ class UserModel:
                 return True
         else:
             raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
-    def is_forbidden(self,privilege_name:str):
+    def has_permission(self,privilege_name:str):
         for user_privilege in self.user_privileges:
-            if not user_privilege.is_active:
-                privilege = user_privilege.privilege
-                if (
-                    privilege.normalizedName == privilege_name.upper()
-                ):
+            privilege = user_privilege.privilege
+            if user_privilege.is_active and privilege.is_active and privilege.normalizedName == privilege_name.upper():
                     return True
+        else : return False
 
 
     def has_privilege(self, privilege_name: str):
@@ -78,17 +76,10 @@ class UserModel:
             role_privileges=self.role.role_privileges
             for role_privilege in role_privileges :
                 privilege=role_privilege.privilege
-                if (privilege.normalizedName==privilege_name.upper() and privilege.is_active and not self.is_forbidden(privilege_name)):
+                if (privilege.normalizedName==privilege_name.upper() and privilege.is_active and self.has_permission(privilege_name)):
                     return True
-        for user_privilege in self.user_privileges:
-            if user_privilege.is_active:
-                privilege = user_privilege.privilege
-                if (
-                    privilege.normalizedName == privilege_name.upper()
-                    and privilege.is_active
-                ):
-                    return True
-        else : raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+        if self.has_permission(privilege_name=privilege_name):return True
+        raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
 
 

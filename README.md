@@ -92,11 +92,13 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Créer les models Pydantic dans schemas.py
 
-- Créer les meta models dans meta_models.py
+- Créer les meta models dans meta_models.py si nécessaire
 
 - Importer la variable metadata de l'application dans le settings/models_metadata.py
 
 ### 6.2 `Créer les cruds`
+
+- Configurer un objet de type CrudModels
 
 - Configurer le CrudForgery dans cruds.py
 
@@ -109,12 +111,16 @@ Passioné par la programmation et le développement avec python je me lance dans
    router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
-    PydanticModel=EntityPydanticModel,
-    crud=myapp_crud
+    crud=myapp_crud,
 )
 ```
 
-**Note** : `Des roles et des privileges peuvent lui etre ajoutés directement .`
+**Note** :
+- `Des roles et des privileges peuvent lui etre ajoutés directement .`
+
+- `Pour utiliser les methodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter authentication en l'important comme suite  `:
+
+  - **`from myproject.settings.auth_configs import authentication`**
 
 ### 6.4 `Configurer un router`
 
@@ -144,6 +150,15 @@ Passioné par la programmation et le développement avec python je me lance dans
   AuthorizationConfig(route_name=DefaultRoutesName.UPDATE,privileges=["CAN_UPDATE_ENTITY"]
   ]
 ```
+
+- Créer un router en initialisant totalement une configuration
+
+```python
+app_myapp = router_provider.initialize_router(
+init_data=custom_init_data,
+)
+```
+**Note** : `Il est possible d'ajouter authorizations et exclude_routes_name comme paramètres`
 
 - Créér un router préconfiguré sans authentification
 
@@ -240,7 +255,11 @@ app.add_middleware(
 
 **Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
 
-## 8. `Utilisation de  ConnectionManager`
+## 8. `Configurer l'authentification`:
+
+Dans myproject/settings/auth_configs décommenter et configurer au besoin l'authentification
+
+## 9. `Utilisation de  ConnectionManager`
 
 ```python
 from elrahapi.websocket.connectionManager import ConnectionManager
@@ -299,6 +318,7 @@ nomduprojet/
 │       ├── __init__.py
 │       ├── database.py
 │       ├── secret.py
+│       ├── auth_configs.py
 │       └── models_metadata.py
 ```
 
@@ -342,11 +362,10 @@ elrahapi generate  userapp
 ```
 userapp/
 ├── __init__.py
-├── user_cruds.py
-├── user_models.py
-├── user_router_providers.py
-├── user_routers.py
-├── user_schemas.py
+├── cruds.py
+├── models.py
+├── routers.py
+├── schemas.py
 ```
 
 ### 1.5. **Commande de génération d'une application de log**
@@ -362,7 +381,6 @@ elrahapi generate loggerapp
 ```
 loggerapp/
 ├── __init__.py
-├── log_user.py
 ├── log_model.py
 ├── log_crud.py
 ├── log_router.py
@@ -479,31 +497,48 @@ Ce sous module définit des classes pydantics pour la gestions des tokens :
 
   - token_type : **str**
 
-#### 2.3.2 Sous module `authenticate`
+#### 2.3.2 Sous module `authentication_namespace
+Ce sous module comporte des variables , constantes et éléments réutilisable dans l'authentifiation
+
+- `TOKEN_URL` : L'url d'authentification
+
+- `OAUTH2_SCHEME` : Le schéma d'authentification définit sur `TOKEN_URL`
+
+- `REFRESH_TOKEN_EXPIRATION`
+
+- `ACCESS_TOKEN_EXPIRATION`
+
+
+
+#### 2.3.3 Sous module `authentication_manager`
 
 ce sous module définit les classes et fonctions utilisées pour l'authentification
 
-**`Classe Authentication`**: classe principale pour gérer l'authentification
+**`Classe AuthenticationManager`**: classe principale pour gérer l'authentification
 
 **Attributs**
 
-- `TOKEN_URL` : définit l'url du schéma d'authentication
+- `authentication_models` : **CrudModels** , definit les classes et attributs pour l'authentification
 
-- `OAUTH2_SCHEME` : définit le schéma d'authentication
+- `refresh_token_expiration` : **int** , l'expiration du token de rafraichissement en millsecondes .
 
-- `User` : le modèle d'utilisateur SQLAlchemy
+- `access_token_expiration` : **int** , l'expiration du token d'accès en millsecondes .
 
-- `UserCreateModel` : le modèle pydantic pour la création d'utilisateur
+- `algorithm` : **str** , l'algorithm utilisé pour le cryptage des tokens
 
-- `UserUpdateModel` : le modèle pydantic pour la mise à jour totale d'utilisateur
+- `secret_key` : **str** , la clé secrète
 
-- `UserPatchModel` : le modèle pydantic pour la mise à jour partielle un utilisateur
+- `session_factory` : **sessionmaker[Session]** , le générateur de session
 
-- `UserPydanticModel` : le modèle pydantic pour lire un utilisateur
+- `database_username` : **str** , le nom d'utilisateur de base de donnée
 
-- `REFRESH_TOKEN_EXPIRATION` : **int** , l'expiration du token de rafraichissement en millsecondes .
+- `database_password` : **str** , le mot de passe lié à `database_username`
 
-- `ACCESS_TOKEN_EXPIRATION` : **int** , l'expiration du token d'accès en millsecondes .
+- `connector` : **str** , le connecteur de base de donnée
+
+- `server` : **str** , le serveur de base de donnée
+
+- `database_name` : **str** , le nom de la base de donnée
 
 **methodes**
 
@@ -529,7 +564,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - refresh_token_expiration : **Optional[int]**
 
-    - session_factory : sessionmaker[Session]
 
 - `get_session` : retourne une session
 
@@ -545,7 +579,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - session : **Optional[Session]**
 
-  - **sortie** : **User**
+  - **sortie** : **authentication_models.sqlalchemy_model**
 
 - `create_access_token` : créer un token d'acces
 
@@ -609,7 +643,68 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
     - db : **Session**
 
-  - **sortie** : **User**
+  - **sortie** : **authentication_models.sqlalchemy_model**
+
+- `is_unique` : méthode pour vérifier si l'email ou le username est unique .
+
+  - **paramètres** :
+
+    - sub : **str**
+
+  - **sortie** : **bool**
+
+- `read_one_user` : méthode lire un utilisateur à partir de son id , son email ou de son username .
+
+  - **paramètres** :
+
+    - credential : **str|int**
+    - db : Optional[Session] = None
+
+  - **sortie** : **authentication_models.sqlalchemy_model**
+
+- `change_password` : méthode pour changer le mot de passe d'un utilisateur
+
+  - **paramètres** :
+
+    - username_or_email : **str**
+
+    - current_password : **str**
+
+    - new_passowrd : **str**
+
+  - **sortie** : **Reponse avec status code 204**
+
+#### 2.3.4 Sous module `authentication_router_provider`
+Ce sous module définit la classe AuthenticationRouterProvider pour gérer le routage de l'authentification
+
+- **`Attributs`** :
+
+  - authentication : **AuthenticationManager**
+
+  - pydantic_model : **type**
+
+  - router : **APIRouter**
+
+
+- **`Methodes`**
+
+  - `__init__`
+
+    -  **parametres** :
+
+      - authentication : **AuthenticationManager**
+
+  - `get_auth_router ` : renvoie un router configurable pour l'authentification
+
+    - **paramètres** :
+
+      - init_data : **List[RouteConfig]** = `USER_AUTH_CONFIG_ROUTES`
+
+      - authorizations : **Optional[List[AuthorizationConfig]]**
+
+      - exclude_routes_name: **Optional[List[DefaultRoutesName]]**
+
+    - **sortie** : APIRouter
 
 ### 2.4. **Module `authorization`**
 
@@ -625,9 +720,11 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - name : **Column(String)**
 
-  - normalizedName : **Column(String)** [automatique à l'ajout de name]
+  - normalizedName : **Column(String)** , dépend de name
 
   - description : **Column(String)**
+
+  - is_active : **Column(Boolean)**
 
 - `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
 
@@ -637,13 +734,13 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - is_active : **bool**
 
-- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)` ; classe pour définir les Models Pydantic complet pour Role et Privilege.
+- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)` , classe pour définir les Models Pydantic complet pour Role et Privilege.
 
 - name : **str**
 
 - `MetaUserPrivilegeModel(BaseModel)` :
 
-  - privilege_id : **int**
+  - privilege : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
 
@@ -712,6 +809,12 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - privilege_roles : **Optional[List[MetaAuthorizationBaseModel]]**
 
   - privilege_users : **Optional[List[MetaPrivilegeUsers]]**
+
+- `MetaPrivilegeUsers` :
+
+  - `user_id`:int
+
+  - `is_active` : **bool**
 
 #### 2.4.4. Sous module `role_privilege_model`
 
@@ -1220,34 +1323,9 @@ Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour 
 
     - authentication : Authentication
 
-- `change_password` : méthode pour changer le mot de passe d'un utilisateur
 
-  - **paramètres** :
 
-    - username_or_email : **str**
 
-    - current_password : **str**
-
-    - new_passowrd : **str**
-
-  - **sortie** : **Reponse avec status code 204**
-
-- `is_unique` : méthode pour vérifier si l'email ou le username est unique .
-
-  - **paramètres** :
-
-    - sub : **str**
-
-  - **sortie** : **bool**
-
-- `read_one_user` : méthode lire un utilisateur à partir de son id , son email ou de son username .
-
-  - **paramètres** :
-
-    - credential : **str|int**
-    - db : Optional[Session] = None
-
-  - **sortie** : **bool**
 
 ##### 2.8.3. `Sous module bulk_models`
 

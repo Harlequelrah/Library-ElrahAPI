@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
-from elrahapi.router.route_config import RouteConfig
+from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from elrahapi.router.router_crud import format_init_data
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
@@ -28,10 +28,13 @@ class AuthenticationRouterProvider:
     def get_auth_router(
         self,
         init_data: List[RouteConfig]=USER_AUTH_CONFIG_ROUTES,
+        authorizations : Optional[List[AuthorizationConfig]]=None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         )->APIRouter:
         formatted_init_data = format_init_data(
-            init_data=init_data, exclude_routes_name=exclude_routes_name
+            init_data=init_data,
+            authorizations=authorizations,
+            exclude_routes_name=exclude_routes_name
         )
         for config in formatted_init_data:
             if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:

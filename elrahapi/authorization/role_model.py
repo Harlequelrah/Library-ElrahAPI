@@ -6,7 +6,6 @@ from elrahapi.authorization.meta_model import (
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from elrahapi.authorization.privilege_model import PrivilegeCreateModel
 
 
 class RoleModel(MetaAuthorization):
