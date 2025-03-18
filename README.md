@@ -116,11 +116,12 @@ Passioné par la programmation et le développement avec python je me lance dans
 ```
 
 **Note** :
+
 - `Des roles et des privileges peuvent lui etre ajoutés directement .`
 
 - `Pour utiliser les methodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter authentication en l'important comme suite  `:
 
-  - **`from myproject.settings.auth_configs import authentication`**
+  - **`from myproject.settings.database import authentication`**
 
 ### 6.4 `Configurer un router`
 
@@ -158,6 +159,7 @@ app_myapp = router_provider.initialize_router(
 init_data=custom_init_data,
 )
 ```
+
 **Note** : `Il est possible d'ajouter authorizations et exclude_routes_name comme paramètres`
 
 - Créér un router préconfiguré sans authentification
@@ -498,6 +500,7 @@ Ce sous module définit des classes pydantics pour la gestions des tokens :
   - token_type : **str**
 
 #### 2.3.2 Sous module `authentication_namespace
+
 Ce sous module comporte des variables , constantes et éléments réutilisable dans l'authentifiation
 
 - `TOKEN_URL` : L'url d'authentification
@@ -507,8 +510,6 @@ Ce sous module comporte des variables , constantes et éléments réutilisable d
 - `REFRESH_TOKEN_EXPIRATION`
 
 - `ACCESS_TOKEN_EXPIRATION`
-
-
 
 #### 2.3.3 Sous module `authentication_manager`
 
@@ -563,7 +564,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
     - access_token_expiration : **Optional[int]**
 
     - refresh_token_expiration : **Optional[int]**
-
 
 - `get_session` : retourne une session
 
@@ -675,6 +675,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **Reponse avec status code 204**
 
 #### 2.3.4 Sous module `authentication_router_provider`
+
 Ce sous module définit la classe AuthenticationRouterProvider pour gérer le routage de l'authentification
 
 - **`Attributs`** :
@@ -685,14 +686,13 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
   - router : **APIRouter**
 
-
 - **`Methodes`**
 
   - `__init__`
 
-    -  **parametres** :
+    - **parametres** :
 
-      - authentication : **AuthenticationManager**
+    - authentication : **AuthenticationManager**
 
   - `get_auth_router ` : renvoie un router configurable pour l'authentification
 
@@ -857,9 +857,11 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - id : **Column(Integer)**
 
-  - role_id : **Column(Integer)**
+  - user_id : **Column(Integer)**
 
   - privilege_id : **Column(Integer)**
+
+  - is_active : **Column(Boolean)**
 
 - `UserPrivilegeCreateModel(BaseModel)`
 
@@ -871,7 +873,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserPrivilegeUpdateModel(BaseModel)`
 
-  - role_id : **int**
+  - user_id : **int**
 
   - privilege_id : **int**
 
@@ -879,7 +881,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserPrivilegePatchModel(BaseModel)`
 
-  - role_id : **Optional[int]**
+  - user_id : **Optional[int]**
 
   - privilege_id : **Optional[int]**
 
@@ -1048,7 +1050,7 @@ class **`User`**
 
 - role_id : **Column(Integer)**
 
-- MAX_ATTEMPT_LOGIN = 3
+- MAX_ATTEMPT_LOGIN = None ou definit dans le fichier .env
 
 - PasswordHasher
 
@@ -1087,7 +1089,7 @@ class **`User`**
 
   - **sortie** : **bool**
 
-- `has_privilege` : permet de vérifier si l'utilisateur a un privilege
+- `has_permission`: permet de vérifier si l'utilisateur a un privilege dans ses privileges personnels
 
   - **paramètres** :
 
@@ -1095,15 +1097,15 @@ class **`User`**
 
   - **sortie** : **bool**
 
-- `UserPrivilegeModel`
+- `has_privilege` : permet de vérifier si l'utilisateur a un privilege que ce soit par son role ou ses privileges personnels
 
-  - id : **Column(Integer)**
+  - **paramètres** :
 
-  - user_id : **Column(Integer)**
+    - privilege_name : **str**
 
-  - privilege_id : **Column(Integer)**
+  - **sortie** : **bool**
 
-  - is_active : **Column(Integer)**
+
 
 **`Models pydantics pour la validations`** :
 
@@ -1223,19 +1225,10 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **paramètres** :
 
-    - `entity_name`: **str**
+  - session_factory : **sessionmaker[Session]**
 
-    - `primary_key_name`: **str**
+  - crud_models : **CrudModels**
 
-    - `authentication`: **Authentication**
-
-    - `SQLAlchemyModel` : Le model SQLAlchemy
-
-    - `CreatePydanticModel` : Le model Pydantic pour la création . **Optional**
-
-    - `UpdatePydanticModel` : Le model Pydantic pour la mise à jour totale. **Optional**
-
-    - `PatchPydanticModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
 
 - **`get_pk`** : retourne la colonne de clé primaire .
 
@@ -1311,20 +1304,23 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **sortie** : **Reponse avec status code 204**
 
-##### 2.8.2 Sous module `user_crud_forgery`
+##### 2.8.2 Sous module `crud_models`
 
-Ce sous module définit une classe UserCrudForgery hérité de CrudForgery pour offire un crud personnalisé pour l'utilisateur .
+Ce sous module definit CrudModels qui définit l'ensemble des classes et informations sur une entité
 
-**Méthodes** :
+- `__init__`:
 
-- `__init__`
+    - `entity_name`: **str**
 
-  - **paramètres** :
+    - `primary_key_name`: **str**
 
-    - authentication : Authentication
+    - `SQLAlchemyModel` : Le model SQLAlchemy de l'entité
 
+    - `CreateModel` : Le model Pydantic pour la création . **Optional**
 
+    - `UpdateModel` : Le model Pydantic pour la mise à jour totale. **Optional**
 
+    - `PatchModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
 
 
 ##### 2.8.3. `Sous module bulk_models`
@@ -1419,9 +1415,9 @@ Ce sous module comporte des Constantes et classes réutilisables dans le context
 
 - **`ROUTES_PROTECTED_CONFIG`**: **List[RouteConfig]** , contient une liste de RouteConfig pour les routes par défaut protégés .
 
-- **`USER_AUTH_CONFIG`** : dict[DefaultRoutesName,RouteConfig]\*\* , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
+- **`USER_AUTH_CONFIG`** : **dict[DefaultRoutesName,RouteConfig]** , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
 
-- **`USER_AUTH_CONFIG_ROUTES`** : List[RouteConfig]\*\* , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
+- **`USER_AUTH_CONFIG_ROUTES`** : **List[RouteConfig]** , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
 
 ##### 2.9.3. Sous module `router_default_routes_name`
 
@@ -1446,7 +1442,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `tags`: **List[str]**
 
-    - `PydanticModel`: **type** , Model de reponse Pydantic
+   - `authentication` : **Optional[AuthenticationManager]**
 
     - `crud` : **CrudForgery**
 
@@ -1589,24 +1585,6 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
   - **sortie** : **List[RouteConfig]**
-
-##### 2.9.6. Sous module `user_router_provider`
-
-ce sous module continent UserRouterProvider qui hérite de CustomRouterProvider , personnalisé pour l'utilisateur .
-
-- `__init__` :
-
-  - **paramètres** :
-
-    - crud: **UserCrudForgery**
-
-    - prefix : **str**
-
-    - tags : **List[str]**
-
-    - roles : **Optional[List[str]]**
-
-    - privileges : **Optional[List[str]]**
 
 #### 2.10. Module `security`
 

@@ -32,7 +32,7 @@ class UserModel:
 
 
 
-    MAX_ATTEMPT_LOGIN = 3
+    MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
     def try_login(self, is_success: bool):
@@ -40,7 +40,7 @@ class UserModel:
             self.attempt_login = 0
         else:
             self.attempt_login += 1
-        if self.attempt_login >= self.MAX_ATTEMPT_LOGIN:
+        if  self.MAX_ATTEMPT_LOGIN and self.attempt_login >= self.MAX_ATTEMPT_LOGIN:
             self.is_active = False
 
     def set_password(self, password: str):
