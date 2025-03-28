@@ -4,10 +4,10 @@ from elrahapi.authorization.role_model import RoleCreateModel, RolePydanticModel
 from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegePatchModel, RolePrivilegePydanticModel, RolePrivilegeUpdateModel
 from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel, UserPrivilegePydanticModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from myproject.settings.auth_configs import authentication
+from .database import authentication
 from elrahapi.crud.crud_models import CrudModels
-from .models import User, UserPrivilege,Role,Privilege,RolePrivilege
-from .schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserPydanticModel
+from .auth_models import User, UserPrivilege,Role,Privilege,RolePrivilege
+from .auth_schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserPydanticModel
 from elrahapi.authorization.user_privilege_model import UserPrivilegeCreateModel,UserPrivilegeUpdateModel
 from elrahapi.crud.crud_forgery import CrudForgery
 

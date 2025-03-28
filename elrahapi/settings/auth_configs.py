@@ -1,6 +1,6 @@
 from elrahapi.authentication.authentication_router_provider import AuthenticationRouterProvider
 from .secret import MAX_ATTEMPT_LOGIN
-from .auth.cruds import user_crud_models
+from .auth_cruds import user_crud_models
 from .database import authentication
 
 

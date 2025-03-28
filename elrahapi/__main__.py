@@ -110,23 +110,7 @@ def get_project_folder():
 
     return os.path.join(parent_dir, project_folders[0])
 
-def generate_userapp():
-    """
-    Copie le contenu du dossier userapp (source) dans le dossier 'userapp' du projet.
-    """
-    project_folder=get_project_folder()
-    target_userapp_path = os.path.join(project_folder,"userapp")
-    os.makedirs(target_userapp_path, exist_ok=True)
 
-    # Path vers le dossier source 'userapp' dans la bibliothèque
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    source_userapp_path = os.path.join(script_dir, "user/userapp")
-
-    if os.path.exists(source_userapp_path):
-        shutil.copytree(source_userapp_path, target_userapp_path, dirs_exist_ok=True)
-        print(f"L'application 'userapp' a été copiée dans {target_userapp_path}.")
-    else:
-        print("Le dossier source 'userapp' est introuvable dans la bibliothèque.")
 
 def run():
     project_folder=os.getcwd()
@@ -147,9 +131,7 @@ def main():
         startproject(name)
     elif command == "startapp":
         startapp(name)
-    elif command == "generate" and name == "userapp":
-        generate_userapp()
-    elif command=="generate" and name=="loggerapp":
+    elif command=="init" and name=="logger":
         generate_loggerapp()
     else:
         print(f"Commande inconnue: {command}")

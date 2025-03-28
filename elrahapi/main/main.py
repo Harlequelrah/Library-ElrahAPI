@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from myproject.settings.database import engine, authentication
-from myproject.settings.models_metadata import target_metadata
+from .settings.database import engine, authentication
+from .settings.models_metadata import target_metadata
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
-from myproject.myapp.router import app_myapp
+# from myproject.myapp.router import app_myapp
 
 app = FastAPI()
 

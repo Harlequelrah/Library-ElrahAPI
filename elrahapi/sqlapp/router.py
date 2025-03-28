@@ -1,6 +1,7 @@
-from myproject.myapp.cruds import myapp_crud
+from .cruds import myapp_crud
 
-
+from elrahapi.router.router_default_routes_name import DefaultRoutesName
+from typing import List
 from elrahapi.router.router_provider import CustomRouterProvider
 
 router_provider = CustomRouterProvider(
@@ -8,6 +9,7 @@ router_provider = CustomRouterProvider(
     tags=["item"],
     crud=myapp_crud,
 )
-app_myapp=router_provider.initialize_router()
+
 app_myapp = router_provider.get_public_router()
+##app_myapp = router_provider.get_protected_router()
 

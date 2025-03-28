@@ -70,7 +70,9 @@ class CustomRouterProvider:
         custom_init_data = init_data if init_data else []
         if route_names:
             for route_name in route_names:
-                if TypeRoute.PROTECTED and not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+                if is_protected  and not self.authentication :
+                    print(route_name)
+                    raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
                 route = get_single_route(route_name, TypeRoute.PROTECTED if is_protected else TypeRoute.PUBLIC)
                 custom_init_data.append(route)
         return custom_init_data
