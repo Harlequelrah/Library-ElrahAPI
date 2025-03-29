@@ -60,24 +60,6 @@ def startproject(project_name):
         subprocess.run(["pip", "freeze"], stdout=f)
     print(f"Le projet {project_name} a été créé avec succès.")
 
-def generate_loggerapp():
-    """
-    Copie le contenu du dossier loggerapp (source) dans le dossier 'loggerapp' du projet.
-    """
-
-    project_folder = get_project_folder()
-    target_loggerapp_path = os.path.join(project_folder, "loggerapp")
-    os.makedirs(target_loggerapp_path, exist_ok=True)
-
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    source_loggerapp_path = os.path.join(script_dir, "middleware/loggerapp")
-
-    if os.path.exists(source_loggerapp_path):
-        shutil.copytree(source_loggerapp_path, target_loggerapp_path, dirs_exist_ok=True)
-        print(f"L'application 'loggerapp' a été copiée dans {target_loggerapp_path}.")
-    else:
-        print("Le dossier source 'loggerapp' est introuvable dans la bibliothèque.")
-
 
 def startapp(app_name):
     project_folder = get_project_folder()
@@ -131,8 +113,6 @@ def main():
         startproject(name)
     elif command == "startapp":
         startapp(name)
-    elif command=="init" and name=="logger":
-        generate_loggerapp()
     else:
         print(f"Commande inconnue: {command}")
 

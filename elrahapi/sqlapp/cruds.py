@@ -2,7 +2,7 @@ from elrahapi.crud.crud_models import CrudModels
 from .models import Entity  #remplacer par l'entité SQLAlchemy
 from .schemas import EntityCreateModel, EntityUpdateModel,EntityPatchModel,EntityPydanticModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from ..settings.auth_configs import authentication
+from ..settings.auth.configs import authentication
 
 
 myapp_crud_models = CrudModels(

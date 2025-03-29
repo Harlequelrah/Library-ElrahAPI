@@ -66,14 +66,13 @@ class CustomRouterProvider:
         )
 
 
-    def get_custom_router_init_data(self, init_data: Optional[List[RouteConfig]] = None,route_names: Optional[List[DefaultRoutesName]] = None,is_protected: bool=False):
+    def get_custom_router_init_data(self, init_data: Optional[List[RouteConfig]] = None,route_names: Optional[List[DefaultRoutesName]] = None,is_protected:TypeRoute=TypeRoute.PUBLIC):
         custom_init_data = init_data if init_data else []
         if route_names:
             for route_name in route_names:
-                if is_protected  and not self.authentication :
-                    print(route_name)
+                if is_protected==TypeRoute.PROTECTED  and not self.authentication :
                     raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
-                route = get_single_route(route_name, TypeRoute.PROTECTED if is_protected else TypeRoute.PUBLIC)
+                route = get_single_route(route_name,is_protected)
                 custom_init_data.append(route)
         return custom_init_data
 
@@ -180,7 +179,6 @@ class CustomRouterProvider:
                     description=config.description if config.description else None,
                     response_model=List[self.PydanticModel],
                     dependencies=dependencies,
-                    status_code = status.HTTP_201_CREATED
                 )
                 async def read_all(
                     filter: Optional[str] = None,

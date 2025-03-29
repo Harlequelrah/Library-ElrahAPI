@@ -34,8 +34,6 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 - Après la creation du projet configurer l'environnement .
 
-- Après chaque creation d'application faire les changements appropriés dans chaque fichier de l'application .
-
 ## 2. `créer un projet`
 
 ```bash
@@ -80,21 +78,19 @@ Passioné par la programmation et le développement avec python je me lance dans
   elrahapi startapp myapp
 ```
 
-- Modifier les lignes commentées au besoin
-
 ## 6. `Configurer une application`
 
 - Ouvrer le dossier myproject/myapp
 
 ### 6.1. `Définir les models de l'application`
 
-- Créer les models SQLAlchemy dans models.py
+- Créer les models SQLAlchemy dans `models.py`
 
-- Créer les models Pydantic dans schemas.py
+- Créer les models Pydantic dans `schemas.py`
 
-- Créer les meta models dans meta_models.py si nécessaire
+- Créer les meta models dans` meta_models.py` si nécessaire
 
-- Importer la variable metadata de l'application dans le settings/models_metadata.py
+- Importer la variable metadata depuis `myapp/models.py` de l'application dans le settings/models_metadata.py
 
 ### 6.2 `Créer les cruds`
 
@@ -206,41 +202,18 @@ init_data=custom_init_data,
 
 **Note** : `Ajouter le router au main.py`
 
-## 6. `Configurer générale d'une application utilisateur ou de logs`
+## 7. `Configurer le logs
+- Configurer au besoin `settings/logger`
 
-- Générer l'application :
-
-  - Utilisateur :
-
-```bash
-  elrahapi generate userapp
-```
-
-- Log :
-
-```bash
-  elrahapi generate loggerapp
-```
-
-- Modifier correctement les imports dans l'application
-
-- Personnalisés au besoin les configurations de routes , cruds , models et schemas les models
-
-- Ajouter les metadata depuis user_models ou log_model à settings/models_metadata
-
-- Ajouter le router à myproject/main.py
-
-## 7. `Configurer des logs`
-
-Dans le fichier myproject/main.py du projet :
-
-- Ajouter et configurer le middleware de logs :
+- Dans le fichier `myproject/main.py` du projet , ajouter et configurer le middleware de logs et ou celui d'erreur :
 
 ```python
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
-from myproject.loggerapp.log_model import Logger
-from myproject.settings.database import  authentication
+from .settings.logger.router import app_logger
+from .settings.logger.model import Logger
+from .settings.database import engine, authentication
+
 app = FastAPI()
 app.include_router(app_logger)
 app.add_middleware(
@@ -259,7 +232,7 @@ app.add_middleware(
 
 ## 8. `Configurer l'authentification`:
 
-Dans myproject/settings/auth_configs décommenter et configurer au besoin l'authentification
+Configurer au besoin `myproject/settings/auth`
 
 ## 9. `Utilisation de  ConnectionManager`
 
@@ -316,12 +289,23 @@ nomduprojet/
 │   ├── __init__.py
 │   ├── main.py
 │   ├── settings/
-│       ├── .gitignore
 │       ├── __init__.py
 │       ├── database.py
 │       ├── secret.py
-│       ├── auth_configs.py
-│       └── models_metadata.py
+│       ├── models_metadata.py
+│       ├── auth/
+│           ├── __init__.py
+│           ├── configs.py
+│           ├── models.py
+│           ├── cruds.py
+│           ├── routers.py
+│           ├── schemas.py
+│       ├── logger/
+│           ├── __init__.py
+│           ├── crud.py
+│           ├── model.py
+│           ├── router.py
+│           ├── schema.py
 ```
 
 ### 1.2. **Commande de lancement de l'application**
@@ -349,44 +333,6 @@ sqlapp/
 ├── schemas.py
 ├── utils.py
 ├── meta_models.py
-```
-
-### 1.4. **Commande génération d'une application utilisateur**
-
-Cette commande permet de créer une application utilisateur
-
-```bash
-elrahapi generate  userapp
-```
-
-**`architecture`:**
-
-```
-userapp/
-├── __init__.py
-├── cruds.py
-├── models.py
-├── routers.py
-├── schemas.py
-```
-
-### 1.5. **Commande de génération d'une application de log**
-
-Cette commande permet de créer une application de log
-
-```bash
-elrahapi generate loggerapp
-```
-
-**`architecture`:**
-
-```
-loggerapp/
-├── __init__.py
-├── log_model.py
-├── log_crud.py
-├── log_router.py
-├── log_schema.py
 ```
 
 ## 2. `Modules`
@@ -1472,7 +1418,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - route_names : **Optional[List[DefaultRoutesName]]**
 
-    - is_protected : **bool** , default: False
+    - `is_protected`: **TypeRoute** , default : `TypeRoute.PUBLIC`
 
   - **sortie** : List[RouteConfig]
 
