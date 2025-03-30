@@ -18,7 +18,7 @@ INSUFFICIENT_PERMISSIONS_HTTP_EXCEPTION = HTTPException(
 )
 NO_AUTHENTICATION_PROVIDED_HTTP_EXCEPTION = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="No authentication provided in",
+    detail="No authentication provided in the router provider",
     headers={"WWW-Authenticate": "Bearer"},
 )
 INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION = CustomHttpException(INVALID_CREDENTIALS_HTTP_EXCEPTION)

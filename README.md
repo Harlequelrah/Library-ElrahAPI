@@ -1,6 +1,6 @@
 # I - **`Description`**
 
-![Logo](https://github.com/Harlequelrah/Library-ElrahAPI/blob/main/Elrah.png)
+![Logo](https://raw.githubusercontent.com/Harlequelrah/Library-ElrahAPI/main/Elrah.png)
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
 
@@ -232,7 +232,11 @@ app.add_middleware(
 
 ## 8. `Configurer l'authentification`:
 
-Configurer au besoin `myproject/settings/auth`
+- Configurer au besoin `myproject/settings/auth`
+
+- Ajouter au besoin les routers du  `myproject/settings/auth/routers` au `myproject/main.py`
+
+- Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
 ## 9. `Utilisation de  ConnectionManager`
 

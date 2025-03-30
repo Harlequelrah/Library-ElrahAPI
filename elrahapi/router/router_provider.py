@@ -94,7 +94,7 @@ class CustomRouterProvider:
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ):
         if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
-        custom_init_data=self.get_custom_router_init_data(init_data,protected_routes_name,is_protected=True)
+        custom_init_data=self.get_custom_router_init_data(init_data,protected_routes_name,is_protected=TypeRoute.PROTECTED)
         return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name,authorizations=authorizations)
 
     def get_mixed_router(

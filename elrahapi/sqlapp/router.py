@@ -1,5 +1,5 @@
 from .cruds import myapp_crud
-
+from ..settings.auth.configs import authentication
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from typing import List
 from elrahapi.router.router_provider import CustomRouterProvider
