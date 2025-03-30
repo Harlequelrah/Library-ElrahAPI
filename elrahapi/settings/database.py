@@ -12,8 +12,9 @@ try:
 
 finally:
     if  database == 'sqlite':
-        DATABASE_URL = f"sqlite:///"
-        SQLALCHEMY_DATABASE_URL = f"{DATABASE_URL}{authentication.database_name}.db"
+        DATABASE_URL = f"sqlite://"
+        db_name = authentication.database_name if authentification.database_name else "database"
+        SQLALCHEMY_DATABASE_URL = f"{DATABASE_URL}/{db_name}.db"
     else :
         SQLALCHEMY_DATABASE_URL = f"{DATABASE_URL}/{authentication.database_name}"
     engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
