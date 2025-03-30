@@ -5,7 +5,7 @@ from elrahapi.authentication.authentication_manager import AuthenticationManager
 
 load_dotenv()
 
-
+database= os.getenv("DATABASE")
 database_username=os.getenv("DATABASE_USERNAME")
 database_password = os.getenv("DATABASE_PASSWORD")
 connector = os.getenv("DATABASE_CONNECTOR")

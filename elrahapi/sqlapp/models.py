@@ -4,7 +4,7 @@
 #     DECIMAL,
 #     Integer,
 #     String,
-#     Text
+#     Text,
 #     DateTime,
 #     ForeignKey,
 #     Table,
