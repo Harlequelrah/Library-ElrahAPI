@@ -212,19 +212,19 @@ from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 from .settings.logger.router import app_logger
 from .settings.logger.model import Logger
-from .settings.database import engine, authentication
+from .settings.database import engine,session_manager
 
 app = FastAPI()
 app.include_router(app_logger)
 app.add_middleware(
     ErrorHandlingMiddleware,
     LoggerMiddlewareModel=Logger,
-    session_factory=authentication.session_factory
+    session_manager=session_manager
 )
 app.add_middleware(
     LoggerMiddleware,
     LoggerMiddlewareModel=Logger,
-    session_factory=authentication.session_factory
+    session_manager=session_manager
 )
 ```
 
@@ -479,7 +479,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `secret_key` : **str** , la clé secrète
 
-- `session_factory` : **sessionmaker[Session]** , le générateur de session
+- `session_manager` : **SessionManager** , le gestionnaire de session
 
 - `database_username` : **str** , le nom d'utilisateur de base de donnée
 
@@ -1175,7 +1175,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **paramètres** :
 
-  - session_factory : **sessionmaker[Session]**
+  - session_manager : **SessionManager**
 
   - crud_models : **CrudModels**
 
@@ -1556,6 +1556,22 @@ Ce sous module définit des utilitaires pour la sécurité
 
     - algorithm : **Optional[str]**
 
+#### 2.10. Module `session`
+Ce module définit des classes utilitaires pour la gestion des sessions
+
+##### 2.10.1 Sous module `session_manager`
+
+Ce sous module définit la classe SessionManager pour gérer les sessions
+
+- `attributs` :
+
+  - `session_manager` : **sessionmaker[Session]** , le générateur de session
+
+- `methodes` :
+
+  - `yield_session` : renvoie une session
+
+    - sortie : `Session`
 # V - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

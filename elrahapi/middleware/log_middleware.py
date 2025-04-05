@@ -1,16 +1,17 @@
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from elrahapi.middleware.crud_middleware import save_log
+from elrahapi.session.session_manager import SessionManager
 from elrahapi.websocket.connection_manager import ConnectionManager
 class LoggerMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app,LoggerMiddlewareModel, session_factory,manager:ConnectionManager=None ):
+    def __init__(self, app,LoggerMiddlewareModel, session_manager:SessionManager,manager:ConnectionManager=None ):
         super().__init__(app)
-        self.session_factory=session_factory
+        self.session_manager=session_manager
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
         self.manager = manager
     async def dispatch(self, request : Request, call_next):
         try:
-            db=self.session_factory()
+            db=self.session_manager.yield_session()
             return await save_log(request=request,call_next=call_next,LoggerMiddlewareModel=self.LoggerMiddlewareModel,db=db,manager=self.manager)
         except Exception as e:
             db.rollback()

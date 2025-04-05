@@ -11,6 +11,7 @@ from fastapi import Depends,status
 from sqlalchemy import or_
 from elrahapi.exception.auth_exception import INACTIVE_USER_CUSTOM_HTTP_EXCEPTION, INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION, INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.session.session_manager import SessionManager
 
 class AuthenticationManager:
 
@@ -46,7 +47,15 @@ class AuthenticationManager:
             secret_key,
             algorithm,
         )
-        self.__session_factory: sessionmaker[Session] = None
+        self.__session_manager: SessionManager = None
+
+    @property
+    def session_manager(self) -> SessionManager:
+        return self.__session_manager
+
+    @session_manager.setter
+    def session_manager(self, session_manager: SessionManager) -> None:
+        self.__session_manager = session_manager
 
     @property
     def authentication_models(self):
@@ -121,22 +130,13 @@ class AuthenticationManager:
         self.__refresh_token_expiration = refresh_token_expiration
 
 
-    @property
-    def session_factory(self):
-        return self.__session_factory
-
-    @session_factory.setter
-    def session_factory(self, session_factory: sessionmaker[Session]):
-        self.__session_factory = session_factory
-
     def get_session(self):
-        db = self.__session_factory()
-        if not db:
+        if not self.__session_manager:
             raise_custom_http_exception(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Session Factory Not Found",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Session manager is not set",
             )
-        return db
+        return self.__session_manager.yield_session()
 
     def create_access_token(
         self, data: dict, expires_delta: timedelta = None

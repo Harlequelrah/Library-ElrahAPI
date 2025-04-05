@@ -4,7 +4,7 @@ from elrahapi.authorization.role_model import RoleCreateModel, RolePydanticModel
 from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegePatchModel, RolePrivilegePydanticModel, RolePrivilegeUpdateModel
 from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel, UserPrivilegePydanticModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from ..database import authentication
+from ..database import session_manager
 from elrahapi.crud.crud_models import CrudModels
 from .models import User, UserPrivilege,Role,Privilege,RolePrivilege
 from .schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserPydanticModel
@@ -65,27 +65,27 @@ user_privilege_crud_models = CrudModels(
 
 user_privilege_crud=CrudForgery(
     crud_models=user_privilege_crud_models,
-    session_factory=authentication.session_factory
+    session_manager=session_manager
 )
 
 
 user_crud = CrudForgery(
     crud_models=user_crud_models,
-    session_factory= authentication.session_factory
+    session_manager=session_manager
 )
 
 role_crud = CrudForgery(
-session_factory=authentication.session_factory,
+session_manager=session_manager,
 crud_models=role_crud_models
 )
 
 privilege_crud = CrudForgery(
-session_factory=authentication.session_factory,
+session_manager=session_manager,
 crud_models=privilege_crud_models
 )
 
 role_privilege_crud=CrudForgery(
-session_factory=authentication.session_factory,
+session_manager=session_manager,
 crud_models=role_privilege_crud_models
 )
 

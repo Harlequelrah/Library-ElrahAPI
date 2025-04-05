@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="elrahapi",
-    version="1.0.8",
+    version="1.0.9",
     packages=find_packages(),
     description="Bibliothèque ou Framework de développement d'API basé FastAPI",
     long_description=long_description,
@@ -14,11 +14,7 @@ setup(
     author_email="maximeatsoudegbovi@example.com",
     url="https://github.com/Harlequelrah/Library-ElrahAPI",
     include_package_data=True,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
-        "Operating System :: OS Independent",
-    ],
+    license="LGPL-3.0-only",
     python_requires=">=3.10",
     install_requires=[
         "fastapi[standard]>=0.112.0",

@@ -3,6 +3,7 @@ from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.session.session_manager import SessionManager
 from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
 from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
@@ -13,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 class CrudForgery:
     def __init__(
         self,
-        session_factory: sessionmaker[Session],
+        session_manager:SessionManager,
         crud_models: CrudModels
     ):
         self.crud_models= crud_models
@@ -24,7 +25,7 @@ class CrudForgery:
         self.UpdatePydanticModel = crud_models.update_pydantic_model
         self.PatchPydanticModel = crud_models.patch_pydantic_model
         self.primary_key_name = crud_models.primary_key_name
-        self.session_factory = session_factory
+        self.session_manager = session_manager
 
     async def get_pk(self):
         try :
@@ -36,7 +37,7 @@ class CrudForgery:
             )
 
     async def bulk_create(self,create_obj_list:list):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         try:
             create_list = map_list_to(create_obj_list,self.SQLAlchemyModel, self.CreatePydanticModel)
             if len(create_list)!= len(create_obj_list):
@@ -57,7 +58,7 @@ class CrudForgery:
 
     async def create(self, create_obj):
         if isinstance(create_obj, self.CreatePydanticModel):
-            session = self.session_factory()
+            session = self.session_manager.yield_session()
             dict_obj = create_obj.dict()
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:
@@ -80,7 +81,7 @@ class CrudForgery:
 
 
     async def count(self) -> int:
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         try:
             pk = await self.get_pk()
             count = session.query(func.count(pk)).scalar()
@@ -93,7 +94,7 @@ class CrudForgery:
 
 
     async def read_all(self, filter :Optional[str]=None,value=None, skip: int = 0, limit: int = None):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         if filter and value:
             exist_filter = getattr(self.SQLAlchemyModel, filter)
             if exist_filter:
@@ -117,7 +118,7 @@ class CrudForgery:
         if db:
             session = db
         else:
-            session = self.session_factory()
+            session = self.session_manager.yield_session()
         pk_attr =  await self.get_pk()
         read_obj = (
                 session.query(self.SQLAlchemyModel)
@@ -134,7 +135,7 @@ class CrudForgery:
 
 
     async def update(self, pk , update_obj , is_full_updated: bool):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         if isinstance(update_obj, self.UpdatePydanticModel) and is_full_updated or isinstance(update_obj, self.PatchPydanticModel) and not is_full_updated   :
             try:
                 existing_obj = await self.read_one(pk, session)
@@ -166,7 +167,7 @@ class CrudForgery:
 
 
     async  def bulk_delete(self , pk_list:BulkDeleteModel):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         pk_attr= await self.get_pk()
         delete_list= pk_list.delete_liste
         try:
@@ -179,7 +180,7 @@ class CrudForgery:
 
 
     async def delete(self, pk):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         try:
             existing_obj = await self.read_one(pk=pk, db=session)
             session.delete(existing_obj)

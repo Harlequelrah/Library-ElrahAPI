@@ -2,7 +2,7 @@ from elrahapi.crud.crud_models import CrudModels
 from .models import Entity  #remplacer par l'entité SQLAlchemy
 from .schemas import EntityCreateModel, EntityUpdateModel,EntityPatchModel,EntityPydanticModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from ..settings.auth.configs import authentication
+from ..settings.database import session_manager
 
 
 myapp_crud_models = CrudModels(
@@ -16,6 +16,6 @@ myapp_crud_models = CrudModels(
 )
 myapp_crud = CrudForgery(
     crud_models=myapp_crud_models,
-    session_factory= authentication.session_factory
+    session_manager=session_manager
 
 )

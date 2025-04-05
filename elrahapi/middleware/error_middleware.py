@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 from fastapi import Request
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import JSONResponse
@@ -7,6 +8,7 @@ from elrahapi.middleware.crud_middleware import save_log
 from elrahapi.exception.custom_http_exception import (
     CustomHttpException as CHE,
 )
+from elrahapi.session.session_manager import SessionManager
 from elrahapi.websocket.connection_manager import ConnectionManager
 
 
@@ -15,14 +17,14 @@ class ErrorHandlingMiddleware:
         self,
         app,
         LoggerMiddlewareModel=None,
-        session_factory=None,
+        session_manager: Optional[SessionManager] = None,
         manager: ConnectionManager = None,
     ):
         self.app = app
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
-        self.session_factory = session_factory
+        self.session_manager = session_manager
         self.manager = manager
-        self.has_log = self.session_factory and self.LoggerMiddlewareModel
+        self.has_log = self.session_manager and self.LoggerMiddlewareModel
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] not in ("http"):
@@ -30,7 +32,7 @@ class ErrorHandlingMiddleware:
             return
 
         request = Request(scope, receive=receive)
-        db = self.session_factory() if self.has_log else None
+        db = self.session_manager.yield_session()if self.has_log else None
 
         try:
             request.state.start_time = time.time()

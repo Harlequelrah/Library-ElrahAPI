@@ -1,6 +1,6 @@
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
-from ..auth.configs import authentication
+from ..database import session_manager
 from .model import Logger
 from .schema import LogPydanticModel
 log_crud_models = CrudModels (
@@ -10,6 +10,6 @@ log_crud_models = CrudModels (
     PydanticModel=LogPydanticModel
 )
 logCrud = CrudForgery(
-    session_factory= authentication.session_factory,
+    session_manager=session_manager,
     crud_models=log_crud_models
 )
