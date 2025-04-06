@@ -9,6 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.sql import func
 from argon2 import PasswordHasher, exceptions as Ex
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import validates
 from typing import List, Optional
 from datetime import datetime
 
@@ -29,7 +30,14 @@ class UserModel:
     attempt_login = Column(Integer, default=0)
     role_id = Column(Integer, ForeignKey("roles.id"))
 
-
+    @validates('password')
+    def validate_password(self, key, password):
+        if not password or len(password) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
+        try:
+            return self.PasswordHasher.hash(password)
+        except Exception as e:
+            print(f"Error while setting password: {e}")
 
 
     MAX_ATTEMPT_LOGIN = None
@@ -43,17 +51,18 @@ class UserModel:
         if  self.MAX_ATTEMPT_LOGIN and self.attempt_login >= self.MAX_ATTEMPT_LOGIN:
             self.is_active = False
 
-    def set_password(self, password: str):
-        self.password = self.PasswordHasher.hash(password)
+
+
 
     def check_password(self, password: str) -> bool:
         try:
             self.PasswordHasher.verify(self.password, password)
             return True
         except Ex.VerifyMismatchError:
+            print("fake password")
             return False
         except Ex.InvalidHashError:
-            self.set_password(password)
+            self.password=password
             return self.check_password(password)
 
 

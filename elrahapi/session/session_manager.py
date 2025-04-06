@@ -4,7 +4,7 @@ from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 class SessionManager :
 
     def __init__(self, session_factory: sessionmaker[Session]) -> None:
-        self.__session_factory: sessionmaker[Session]
+        self.__session_factory: sessionmaker[Session]=session_factory
 
     @property
     def session_factory(self) -> sessionmaker[Session]:

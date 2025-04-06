@@ -87,6 +87,7 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     DefaultRoutesName.REFRESH_TOKEN: RouteConfig(
         route_name=DefaultRoutesName.REFRESH_TOKEN,
         is_activated=True,
+        is_protected=True,
         summary="refresh token",
         description="refresh your access token with refresh token",
     ),

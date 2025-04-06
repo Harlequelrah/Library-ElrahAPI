@@ -175,20 +175,13 @@ init_data=custom_init_data,
 - Créer un router avec configuration et des routes publiques
 
 ```python
-  app_myapp = router_provider.get_custom_public_router(
+  app_myapp = router_provider.get_custom_router(
     init_data= custom_init_data ,
-    public_routes_name=[DefaultRoutesName.PATCH],
-    exclude_routes_name=[DefaultRoutesName.READ_ONE]
+    routes_name=[DefaultRoutesName.PATCH],
+    exclude_routes_name=[DefaultRoutesName.READ_ONE],
+    type_route=TypeRoute.PUBLIC
   )
-```
 
-- Créer un router avec configuration et des routes protégées
-
-```python
-  app_myapp = router_provider.get_custom_protected_router(
-    init_data= custom_init_data ,
-    protected_routes_name=[DefaultRoutesName.COUNT],
-  )
 ```
 
 - Créer un router avec éventuellement une configuration et avec des routes publics et protégés
@@ -1015,13 +1008,6 @@ class **`User`**
 
   - **sortie** : **bool**
 
-- `set_password` : permet de modifier le mot de passe .
-
-  - **paramètres** :
-
-    - password : **str**
-
-  - **sortie** : **None**
 
 - `check_password` : permet de vérifier le mot de passe.
 
@@ -1426,31 +1412,23 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
   - **sortie** : List[RouteConfig]
 
-- **`get_custom_public_router`** : retourne un routeur public personnalisée
+- **`get_custom_public_router`** : retourne un routeur personnalisé
 
   - **paramètres** :
 
     - init_data : **Optional[List[RouteConfig]]**
 
-    - public_routes_name : **Optional[List[DefaultRoutesName]]**
+    - routes_name : **Optional[List[DefaultRoutesName]]**
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
-
-  - **sortie** : **APIRouter**
-
-- **`get_custom_protected_router`** : retourne un routeur protégé personnalisée
-
-  - **paramètres** :
-
-    - init_data : **Optional[List[RouteConfig]]**
-
-    - protected_routes_name : **Optional[List[DefaultRoutesName]]**
 
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - type_route  : **TypeRoute**
 
   - **sortie** : **APIRouter**
+
+
 
 - **`get_mixed_router`** : renvoie un routeur avec une configuration personnalisée entre routes publiques et protégées .
 

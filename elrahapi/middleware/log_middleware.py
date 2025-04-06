@@ -10,8 +10,8 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         self.LoggerMiddlewareModel = LoggerMiddlewareModel
         self.manager = manager
     async def dispatch(self, request : Request, call_next):
+        db=self.session_manager.yield_session()
         try:
-            db=self.session_manager.yield_session()
             return await save_log(request=request,call_next=call_next,LoggerMiddlewareModel=self.LoggerMiddlewareModel,db=db,manager=self.manager)
         except Exception as e:
             db.rollback()

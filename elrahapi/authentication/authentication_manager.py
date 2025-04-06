@@ -306,7 +306,7 @@ class AuthenticationManager:
         return user is None
 
     async def read_one_user(self, username_or_email: str):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         user =(
                 session.query(self.__authentication_models.sqlalchemy_model)
                 .filter(
@@ -327,14 +327,14 @@ class AuthenticationManager:
     async def change_password(
         self, username_or_email: str, current_password: str, new_password: str
     ):
-        session = self.session_factory()
+        session = self.session_manager.yield_session()
         current_user = await self.authenticate_user(
             password=current_password,
             username_or_email=username_or_email,
             session=session,
         )
         if current_user.check_password(current_password):
-            current_user.set_password(new_password)
+            current_user.password=new_password
             session.commit()
             session.refresh(current_user)
         else:

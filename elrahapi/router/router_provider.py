@@ -1,11 +1,13 @@
 from typing import List, Optional
-
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.exception.auth_exception import NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+from elrahapi.exception.auth_exception import (
+    NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION,
+)
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from fastapi import status
+from sqlalchemy.orm import Session, sessionmaker
 from elrahapi.router.router_crud import (
     format_init_data,
     get_single_route,
@@ -30,17 +32,20 @@ class CustomRouterProvider:
         crud: CrudForgery,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
-        authentication:Optional[AuthenticationManager]=None,
+        authentication: Optional[AuthenticationManager] = None,
     ):
-        self.authentication:AuthenticationManager = authentication if authentication else None
-        self.get_access_token:Optional[callable]= authentication.get_access_token if authentication else None
-        self.session_factory: callable = crud.session_factory
+        self.authentication: AuthenticationManager = (
+            authentication if authentication else None
+        )
+        self.get_access_token: Optional[callable] = (
+            authentication.get_access_token if authentication else None
+        )
         self.pk = crud.crud_models.primary_key_name
         self.PydanticModel = crud.PydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
         self.PatchPydanticModel = crud.PatchPydanticModel
-        self.crud=crud
+        self.crud = crud
         self.roles = roles
         self.privileges = privileges
         self.router = APIRouter(
@@ -58,44 +63,47 @@ class CustomRouterProvider:
         authorizations: Optional[List[AuthorizationConfig]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
-        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+        if not self.authentication:
+            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         return self.initialize_router(
             init_data=ROUTES_PROTECTED_CONFIG,
             exclude_routes_name=exclude_routes_name,
             authorizations=authorizations,
         )
 
-
-    def get_custom_router_init_data(self, init_data: Optional[List[RouteConfig]] = None,route_names: Optional[List[DefaultRoutesName]] = None,is_protected:TypeRoute=TypeRoute.PUBLIC):
+    def get_custom_router_init_data(
+        self,
+        init_data: Optional[List[RouteConfig]] = None,
+        route_names: Optional[List[DefaultRoutesName]] = None,
+        is_protected: TypeRoute = TypeRoute.PUBLIC,
+    ):
         custom_init_data = init_data if init_data else []
         if route_names:
             for route_name in route_names:
-                if is_protected==TypeRoute.PROTECTED  and not self.authentication :
+                if is_protected == TypeRoute.PROTECTED and not self.authentication:
                     raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
-                route = get_single_route(route_name,is_protected)
+                route = get_single_route(route_name, is_protected)
                 custom_init_data.append(route)
         return custom_init_data
 
-    def get_custom_public_router(
+    def get_custom_router(
         self,
         init_data: Optional[List[RouteConfig]] = None,
-        public_routes_name: Optional[List[DefaultRoutesName]] = None,
+        routes_name: Optional[List[DefaultRoutesName]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        authorizations: Optional[List[AuthorizationConfig]] = None,
+        type_route: TypeRoute = TypeRoute.PUBLIC,
     ):
-        custom_init_data=self.get_custom_router_init_data(init_data,public_routes_name)
-        return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name)
-
-
-    def get_custom_protected_router(
-        self,
-        init_data: Optional[List[RouteConfig]] = None,
-        protected_routes_name: Optional[List[DefaultRoutesName]] = None,
-        authorizations: Optional[List[AuthorizationConfig]] =None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-    ):
-        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
-        custom_init_data=self.get_custom_router_init_data(init_data,protected_routes_name,is_protected=TypeRoute.PROTECTED)
-        return self.initialize_router(custom_init_data,exclude_routes_name=exclude_routes_name,authorizations=authorizations)
+        if type_route == TypeRoute.PROTECTED and not self.authentication:
+            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+        custom_init_data = self.get_custom_router_init_data(
+            init_data, routes_name, is_protected=type_route
+        )
+        return self.initialize_router(
+            custom_init_data,
+            exclude_routes_name=exclude_routes_name,
+            authorizations=authorizations,
+        )
 
     def get_mixed_router(
         self,
@@ -104,15 +112,18 @@ class CustomRouterProvider:
         protected_routes_name: Optional[List[DefaultRoutesName]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
-        if not self.authentication : raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+        if not self.authentication:
+            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         if init_data is None:
             init_data = []
-        public_routes_data = self.get_custom_router_init_data(init_data, public_routes_name)
-        protected_routes_data=self.get_custom_router_init_data(init_data, protected_routes_name,is_protected=True)
-        custom_init_data=public_routes_data+protected_routes_data
-        return self.initialize_router(custom_init_data,exclude_routes_name)
-
-
+        public_routes_data = self.get_custom_router_init_data(
+            init_data, public_routes_name
+        )
+        protected_routes_data = self.get_custom_router_init_data(
+            init_data, protected_routes_name, is_protected=True
+        )
+        custom_init_data = public_routes_data + protected_routes_data
+        return self.initialize_router(custom_init_data, exclude_routes_name)
 
     def initialize_router(
         self,
@@ -151,7 +162,11 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
+                path = (
+                    f"{config.route_path}/{{pk}}"
+                    if "{pk}" not in config.route_path
+                    else config.route_path
+                )
 
                 @self.router.get(
                     path=path,
@@ -208,7 +223,7 @@ class CustomRouterProvider:
                     description=config.description if config.description else None,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
-                    status_code = status.HTTP_201_CREATED
+                    status_code=status.HTTP_201_CREATED,
                 )
                 async def create(
                     create_obj: self.CreatePydanticModel,
@@ -226,7 +241,11 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
+                path = (
+                    f"{config.route_path}/{{pk}}"
+                    if "{pk}" not in config.route_path
+                    else config.route_path
+                )
 
                 @self.router.put(
                     path=path,
@@ -252,7 +271,11 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
+                path = (
+                    f"{config.route_path}/{{pk}}"
+                    if "{pk}" not in config.route_path
+                    else config.route_path
+                )
 
                 @self.router.patch(
                     path=path,
@@ -274,7 +297,11 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = f"{config.route_path}/{{pk}}" if "{pk}" not in config.route_path else config.route_path
+                path = (
+                    f"{config.route_path}/{{pk}}"
+                    if "{pk}" not in config.route_path
+                    else config.route_path
+                )
 
                 @self.router.delete(
                     path=path,

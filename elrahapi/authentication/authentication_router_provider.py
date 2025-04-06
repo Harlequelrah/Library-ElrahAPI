@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
-from elrahapi.router.router_crud import format_init_data
+from elrahapi.router.router_crud import format_init_data, initialize_dependecies
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
 from elrahapi.user.models import UserChangePasswordRequestModel, UserLoginRequestModel
@@ -38,11 +38,16 @@ class AuthenticationRouterProvider:
         )
         for config in formatted_init_data:
             if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:
+                dependencies = initialize_dependecies(
+                    config=config,
+                    authentication=self.authentication,
+                )
                 @self.router.get(
                     path=config.route_path,
                     response_model=self.pydantic_model,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
+                    dependencies=dependencies
                 )
                 async def read_one_user(username_or_email: str):
                     return await self.authentication.read_one_user(username_or_email)
@@ -106,12 +111,17 @@ class AuthenticationRouterProvider:
                     return refresh_token
 
             if config.route_name == DefaultRoutesName.REFRESH_TOKEN and config.is_activated:
+                dependencies = initialize_dependecies(
+                    config=config,
+                    authentication=self.authentication,
+                )
 
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=AccessToken,
+                    dependencies=dependencies,
                 )
                 async def refresh_access_token(refresh_token: RefreshToken):
                     return await self.authentication.refresh_token(
@@ -144,12 +154,17 @@ class AuthenticationRouterProvider:
                     }
 
             if config.route_name == DefaultRoutesName.CHANGE_PASSWORD and config.is_activated:
+                dependencies = initialize_dependecies(
+                    config=config,
+                    authentication=self.authentication,
+                )
 
                 @self.router.post(
                     status_code=204,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
+                    dependencies=dependencies,
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
                     username_or_email = form_data.username_or_email
