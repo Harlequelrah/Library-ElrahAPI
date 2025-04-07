@@ -204,12 +204,8 @@ class AuthenticationManager:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
 
-    def check_authorization(
-        self,
-        privilege_name: Optional[List[str]] = None,
-        roles_name: Optional[List[str]] = None,
-    ) -> callable:
-        async def is_authorized(token: str = Depends(self.get_access_token)) -> bool:
+    async def is_authorized(self,token: str = Depends(get_access_token),role_name:Optional[str]=None,privilege_name:Optional[str]=None) -> bool:
+            if role_name and privilege_name : raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR,"Cannot check role and privilege in the same time")
             payload = await self.validate_token(token)
             sub = payload.get("sub")
             db = self.get_session()
@@ -218,14 +214,24 @@ class AuthenticationManager:
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
                 )
-            if roles_name:
-                return user.has_role(roles_name)
+            if role_name : return user.has_role(role_name=role_name)
             elif privilege_name:
                 return user.has_privilege(privilege_name)
             else:
                 raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
 
-        return is_authorized
+    def check_authorizations(
+        self,
+        privileges_name: Optional[List[str]] = None,
+        roles_name: Optional[List[str]] = None,
+    ) -> callable:
+        authorizations = []
+        for privilege_name in privileges_name:
+            authorizations.append(self.is_authorized(privilege_name=privilege_name))
+        for role_name in roles_name:
+            authorizations.append(self.is_authorized(role_name=role_name))
+        return authorizations
+
 
 
     async def authenticate_user(

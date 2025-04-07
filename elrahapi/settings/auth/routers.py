@@ -13,7 +13,7 @@ user_router_provider = CustomRouterProvider(
 
 user_privilege_router_provider=CustomRouterProvider(
     prefix='/users/privileges',
-    tags=["users_privileges"],
+    tags=["user_privileges"],
     crud=user_privilege_crud,
     authentication=authentication,
 )
@@ -32,11 +32,16 @@ privilege_router_provider = CustomRouterProvider(
     authentication=authentication,
 )
 
-
-
 role_privilege_router_provider=CustomRouterProvider(
     prefix='/roles/privileges',
-    tags=["roles_privileges"],
+    tags=["role_privileges"],
+    crud=role_privilege_crud,
+    authentication=authentication,
+    )
+
+user_role_router_provider=CustomRouterProvider(
+    prefix='/user/roles',
+    tags=["user_roles"],
     crud=role_privilege_crud,
     authentication=authentication,
     )
@@ -45,6 +50,8 @@ role_privilege_router_provider=CustomRouterProvider(
 user_router = user_router_provider.get_protected_router()
 
 user_privilege_router=user_privilege_router_provider.get_protected_router()
+
+user_role_router=user_role_router_provider.get_protected_router()
 
 role_router=role_router_provider.get_protected_router()
 

@@ -28,6 +28,8 @@ class MetaUserPrivilegeModel(BaseModel):
     is_active:bool
 
 
-
+class MetaUserRoleModel(BaseModel):
+    role:MetaAuthorizationBaseModel
+    is_active:bool
 
 

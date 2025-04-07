@@ -43,14 +43,10 @@ class RouteConfig:
 
 
     def get_authorizations(self,authentication:AuthenticationManager)-> List[callable]:
-        authorizations = []
-        if self.roles:
-            role_authorization = authentication.check_authorization(roles_name=self.roles)
-            authorizations.append(role_authorization)
-        for privilege in self.privileges :
-            privilege_authorization = authentication.check_authorization(privilege_name=privilege)
-            authorizations.append(privilege_authorization)
-        return authorizations
+        return authentication.check_authorizations(
+            roles_name = self.roles,
+            privieles_name=self.privileges
+        )
 
 
 class AuthorizationConfig:

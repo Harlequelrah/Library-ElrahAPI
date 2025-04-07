@@ -568,15 +568,27 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **AccessToken**
 
-- `check_authorization` : vérifie des authorizations suivant des roles ou privilèges en retournant un objet **callable** qui sera utilisé comme dépendence
+- `check_authorizations` : vérifie des authorizations suivant des roles ou privilèges en retournant un objet **callable** qui sera utilisé comme dépendence
 
   - **paramètres** :
 
-    - privilege_name: **Optional[List[str]]**
+    - privileges_name: **Optional[List[str]]**
 
     - roles_name : **Optional[List[str]]**
 
   - **sortie** : **callable**
+
+- `is_authorized` : renvoie un objet callable pour verifier l'authorizarion
+
+  - **paramètres** :
+
+    - token : **str = Depends(get_access_token)**
+
+    - privilege_name: **str**
+
+    - role_name : **str**
+
+  - **sortie** : **bool**
 
 - `get_user_by_sub` : retourne un utilisateur à partir de son username ou email
 
@@ -686,6 +698,13 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
   - privilege : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
+
+- `MetaUserRoleModel(BaseModel)` :
+
+  - role : **MetaAuthorizationBaseModel**
+
+  - is_active : **bool**
+
 
 #### 2.4.2 Sous module `role_model`
 
@@ -831,6 +850,87 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]**
 
 - `UserPrivilegePydanticModel(UserPrivilegeCreateModel)`
+  - id : **int**
+
+#### 2.4.6. Sous module `user_role_model`
+
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserRole .
+
+- `UserRoleModel`
+
+  - id : **Column(Integer)**
+
+  - user_id : **Column(Integer)**
+
+  - role_id : **Column(Integer)**
+
+  - is_active : **Column(Boolean)**
+
+- `UserRoleCreateModel(BaseModel)`
+
+  - user_id : **int**
+
+  - role_id : **int**
+
+  - is_active : **Optional[bool]** , default : True
+
+- `UserRoleUpdateModel(BaseModel)`
+
+  - user_id : **int**
+
+  - role_id : **int**
+
+  - is_active : **bool**
+
+- `UserRolePatchModel(BaseModel)`
+
+  - user_id : **Optional[int]**
+
+  - role_id : **Optional[int]**
+
+  - is_active : **Optional[bool]**
+
+- `UserRolePydanticModel(UserRoleCreateModel)`
+  - id : **int**
+#### 2.4.6. Sous module `user_role_model`
+
+Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserRole .
+
+- `UserRoleModel`
+
+  - id : **Column(Integer)**
+
+  - user_id : **Column(Integer)**
+
+  - role_id : **Column(Integer)**
+
+  - is_active : **Column(Boolean)**
+
+- `UserRoleCreateModel(BaseModel)`
+
+  - user_id : **int**
+
+  - role_id : **int**
+
+  - is_active : **Optional[bool]** , default : True
+
+- `UserRoleUpdateModel(BaseModel)`
+
+  - user_id : **int**
+
+  - role_id : **int**
+
+  - is_active : **bool**
+
+- `UserRolePatchModel(BaseModel)`
+
+  - user_id : **Optional[int]**
+
+  - role_id : **Optional[int]**
+
+  - is_active : **Optional[bool]**
+
+- `UserRolePydanticModel(UserRoleCreateModel)`
   - id : **int**
 
 ### 2.5. **Module `middleware`**

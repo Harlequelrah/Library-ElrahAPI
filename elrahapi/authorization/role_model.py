@@ -32,6 +32,10 @@ class RolePatchModel(BaseModel):
 
 class RolePydanticModel(MetaAuthorizationPydanticModel):
     role_privileges: List["MetaAuthorizationBaseModel"] = []
+    role_users:List["MetaRoleUsers"]=[]
 
     class Config:
         from_attributes = True
+class MetaRoleUsers(BaseModel):
+    user_id:int
+    is_active:bool

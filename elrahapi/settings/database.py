@@ -24,3 +24,4 @@ finally:
     sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
     session_manager = SessionManager(session_factory=sessionLocal)
+    authentication.session_manager=session_manager

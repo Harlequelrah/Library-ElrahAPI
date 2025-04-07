@@ -1,19 +1,19 @@
 from typing import List, Optional
-from elrahapi.user import  models
+from elrahapi.user import  schemas
 
-class UserBaseModel(models.UserBaseModel):
+class UserBaseModel(schemas.UserBaseModel):
     pass
 
-class UserCreateModel(models.UserCreateModel):
+class UserCreateModel(schemas.UserCreateModel):
     pass
 
-class UserUpdateModel(models.UserUpdateModel):
+class UserUpdateModel(schemas.UserUpdateModel):
     pass
 
-class UserPatchModel(models.UserPatchModel):
+class UserPatchModel(schemas.UserPatchModel):
     pass
 
-class UserPydanticModel(models.UserPydanticModel):
+class UserPydanticModel(schemas.UserPydanticModel):
     class Config :
         from_attributes=True
 

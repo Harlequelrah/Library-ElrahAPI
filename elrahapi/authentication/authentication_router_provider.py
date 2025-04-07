@@ -10,7 +10,7 @@ from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from elrahapi.router.router_crud import format_init_data, initialize_dependecies
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
-from elrahapi.user.models import UserChangePasswordRequestModel, UserLoginRequestModel
+from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginRequestModel
 
 
 class AuthenticationRouterProvider:
@@ -82,8 +82,8 @@ class AuthenticationRouterProvider:
                     )
 
                     data = {
-                        "sub": form_data.username,
-                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                        "sub": user.username,
+                        "roles": [user_role.role.normalizedName for user_role in user.user_roles]
                     }
                     access_token = self.authentication.create_access_token(data)
                     refresh_token = self.authentication.create_refresh_token(data)
@@ -143,7 +143,7 @@ class AuthenticationRouterProvider:
                     )
                     data = {
                         "sub": username_or_email,
-                        "role": user.role.normalizedName if user.role else "NO ROLE",
+                        "roles": [user_role.role.normalizedName for user_role in user.user_roles]
                     }
                     access_token_data = self.authentication.create_access_token(data)
                     refresh_token_data = self.authentication.create_refresh_token(data)
