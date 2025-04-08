@@ -73,9 +73,9 @@ class CustomRouterProvider:
 
     def get_custom_router_init_data(
         self,
+        is_protected: TypeRoute ,
         init_data: Optional[List[RouteConfig]] = None,
         route_names: Optional[List[DefaultRoutesName]] = None,
-        is_protected: TypeRoute = TypeRoute.PUBLIC,
     ):
         custom_init_data = init_data if init_data else []
         if route_names:
@@ -97,7 +97,7 @@ class CustomRouterProvider:
         if type_route == TypeRoute.PROTECTED and not self.authentication:
             raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
         custom_init_data = self.get_custom_router_init_data(
-            init_data, routes_name, is_protected=type_route
+            init_data=init_data, route_names=routes_name, is_protected=type_route
         )
         return self.initialize_router(
             custom_init_data,

@@ -7,7 +7,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer
 
 
 class UserRoleModel:
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True , index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     role_id = Column(Integer, ForeignKey("roles.id"))
     is_active = Column(Boolean, default=True)

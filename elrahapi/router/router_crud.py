@@ -85,8 +85,9 @@ def add_authorizations(
             ),
             None,
         )
-        route_config.roles.extend(authorization.roles)
-        route_config.privileges.extend(authorization.privileges)
+        if authorization:
+            route_config.roles.extend(authorization.roles)
+            route_config.privileges.extend(authorization.privileges)
         authorized_routes_config.append(route_config)
     return authorized_routes_config
 
@@ -100,7 +101,7 @@ def format_init_data(
     init_data = (
         init_data
         if authorizations is None
-        else add_authorizations(init_data, authorizations)
+        else add_authorizations(routes_config=init_data,authorizations=authorizations)
     )
     return init_data
 

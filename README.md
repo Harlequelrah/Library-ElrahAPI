@@ -578,17 +578,17 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **callable**
 
-- `is_authorized` : renvoie un objet callable pour verifier l'authorizarion
+
+- `check_authorization` : vérifie une autorisation suivant un role  ou un privilège en retournant un objet **callable** qui sera utilisé comme dépendence
 
   - **paramètres** :
-
-    - token : **str = Depends(get_access_token)**
 
     - privilege_name: **str**
 
     - role_name : **str**
 
-  - **sortie** : **bool**
+  - **sortie** : **callable**
+
 
 - `get_user_by_sub` : retourne un utilisateur à partir de son username ou email
 
@@ -1065,9 +1065,9 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 Ce module comporte toute la gestion des utilisateurs
 
-##### 2.6.1. Sous module `models`
+##### 2.6.1. Sous module `model`
 
-Ce sous module comporte tous les models pour l'entité utilisateur .
+Ce sous module comporte le model `User` utilisé dans le système d'authentification.
 
 class **`User`**
 
@@ -1090,8 +1090,6 @@ class **`User`**
 - is_active : **Column(Boolean)**
 
 - attempt_login : **Column(Integer)**
-
-- role_id : **Column(Integer)**
 
 - MAX_ATTEMPT_LOGIN = None ou definit dans le fichier .env
 
@@ -1141,7 +1139,9 @@ class **`User`**
 
   - **sortie** : **bool**
 
+##### 2.6.1. Sous module `schemas`
 
+Ce sous module rassemble les classes pydantics liées à `User` pour la validation
 
 **`Models pydantics pour la validations`** :
 
@@ -1159,7 +1159,6 @@ class **`User`**
 
   - password : **str**
 
-  - role_id : **Optional[int]**
 
 - `UserUpdateModel`
 
@@ -1175,7 +1174,7 @@ class **`User`**
 
   - password: **Optional[str]**
 
-  - role_id : **Optional[int]**
+
 
 - **`UserPydanticModel(UserBaseModel)`**
 

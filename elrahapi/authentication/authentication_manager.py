@@ -1,17 +1,25 @@
-
 from sqlalchemy.orm import Session, sessionmaker
-from elrahapi.authentication.authentication_namespace import ACCESS_TOKEN_EXPIRATION, OAUTH2_SCHEME, REFRESH_TOKEN_EXPIRATION
+from elrahapi.authentication.authentication_namespace import (
+    ACCESS_TOKEN_EXPIRATION,
+    OAUTH2_SCHEME,
+    REFRESH_TOKEN_EXPIRATION,
+)
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.security.secret import define_algorithm_and_key
 from elrahapi.authentication.token import AccessToken, RefreshToken
 from datetime import datetime, timedelta
 from jose import ExpiredSignatureError, jwt, JWTError
 from typing import List, Optional
-from fastapi import Depends,status
+from fastapi import Depends, status
 from sqlalchemy import or_
-from elrahapi.exception.auth_exception import INACTIVE_USER_CUSTOM_HTTP_EXCEPTION, INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION, INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+from elrahapi.exception.auth_exception import (
+    INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
+    INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
+    INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
+)
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.session.session_manager import SessionManager
+
 
 class AuthenticationManager:
 
@@ -32,7 +40,7 @@ class AuthenticationManager:
         self.__connector = connector
         self.__database_name = database_name
         self.__server = server
-        self.__authentication_models:CrudModels
+        self.__authentication_models: CrudModels
         self.__refresh_token_expiration = (
             refresh_token_expiration
             if refresh_token_expiration
@@ -62,7 +70,7 @@ class AuthenticationManager:
         return self.__authentication_models
 
     @authentication_models.setter
-    def authentication_models(self,authentication_models:CrudModels):
+    def authentication_models(self, authentication_models: CrudModels):
         self.__authentication_models = authentication_models
 
     @property
@@ -129,7 +137,6 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-
     def get_session(self):
         if not self.__session_manager:
             raise_custom_http_exception(
@@ -174,8 +181,6 @@ class AuthenticationManager:
         await self.validate_token(token)
         return token
 
-
-
     async def validate_token(self, token: str):
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
@@ -194,8 +199,10 @@ class AuthenticationManager:
             db.query(self.__authentication_models.sqlalchemy_model)
             .filter(
                 or_(
-                    self.__authentication_models.sqlalchemy_model.username == username_or_email,
-                    self.__authentication_models.sqlalchemy_model.email == username_or_email,
+                    self.__authentication_models.sqlalchemy_model.username
+                    == username_or_email,
+                    self.__authentication_models.sqlalchemy_model.email
+                    == username_or_email,
                 )
             )
             .first()
@@ -204,8 +211,19 @@ class AuthenticationManager:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
 
-    async def is_authorized(self,token: str = Depends(get_access_token),role_name:Optional[str]=None,privilege_name:Optional[str]=None) -> bool:
-            if role_name and privilege_name : raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR,"Cannot check role and privilege in the same time")
+    def check_authorization(
+        self,
+        privilege_name: Optional[List[str]] = None,
+        role_name: Optional[List[str]] = None,
+    ) -> callable:
+        async def is_authorized(
+            token: str = Depends(self.get_access_token),
+        ) -> bool:
+            if role_name and privilege_name:
+                raise_custom_http_exception(
+                    status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    "Cannot check role and privilege in the same time",
+                )
             payload = await self.validate_token(token)
             sub = payload.get("sub")
             db = self.get_session()
@@ -214,25 +232,25 @@ class AuthenticationManager:
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
                 )
-            if role_name : return user.has_role(role_name=role_name)
+            if role_name:
+                return user.has_role(role_name=role_name)
             elif privilege_name:
                 return user.has_privilege(privilege_name)
             else:
                 raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+        return is_authorized
 
     def check_authorizations(
         self,
         privileges_name: Optional[List[str]] = None,
         roles_name: Optional[List[str]] = None,
-    ) -> callable:
+    ) -> List[callable]:
         authorizations = []
         for privilege_name in privileges_name:
-            authorizations.append(self.is_authorized(privilege_name=privilege_name))
+            authorizations.append(self.check_authorization(privilege_name=privilege_name))
         for role_name in roles_name:
-            authorizations.append(self.is_authorized(role_name=role_name))
+            authorizations.append(self.check_authorization(role_name=role_name))
         return authorizations
-
-
 
     async def authenticate_user(
         self,
@@ -257,7 +275,6 @@ class AuthenticationManager:
         db.refresh(user)
         return user
 
-
     async def get_current_user(
         self,
         token: str = Depends(OAUTH2_SCHEME),
@@ -267,16 +284,19 @@ class AuthenticationManager:
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user =(
-                db.query(self.__authentication_models.sqlalchemy_model)
-                .filter(or_(
-                    self.__authentication_models.sqlalchemy_model.username == sub, self.__authentication_models.sqlalchemy_model.email == sub))
-                .first()
+        user = (
+            db.query(self.__authentication_models.sqlalchemy_model)
+            .filter(
+                or_(
+                    self.__authentication_models.sqlalchemy_model.username == sub,
+                    self.__authentication_models.sqlalchemy_model.email == sub,
+                )
             )
+            .first()
+        )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
-
 
     async def refresh_token(self, refresh_token_data: RefreshToken):
         db = self.get_session()
@@ -284,11 +304,16 @@ class AuthenticationManager:
         sub = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user =(
+        user = (
             db.query(self.__authentication_models.sqlalchemy_model)
-            .filter(or_(self.__authentication_models.sqlalchemy_model.username == sub, self.__authentication_models.sqlalchemy_model.email == sub))
-            .first()
+            .filter(
+                or_(
+                    self.__authentication_models.sqlalchemy_model.username == sub,
+                    self.__authentication_models.sqlalchemy_model.email == sub,
+                )
             )
+            .first()
+        )
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
@@ -299,29 +324,33 @@ class AuthenticationManager:
 
     async def is_unique(self, sub: str):
         db = self.get_session()
-        user =(
-                db.query(self.__authentication_models.sqlalchemy_model.sqlalchemy_model)
-                .filter(
-                    or_(
-                        self.__authentication_models.sqlalchemy_model.sqlalchemy_model.email == sub,
-                        self.__authentication_models.sqlalchemy_model.sqlalchemy_model.username == sub,
-                    )
+        user = (
+            db.query(self.__authentication_models.sqlalchemy_model.sqlalchemy_model)
+            .filter(
+                or_(
+                    self.__authentication_models.sqlalchemy_model.sqlalchemy_model.email
+                    == sub,
+                    self.__authentication_models.sqlalchemy_model.sqlalchemy_model.username
+                    == sub,
                 )
-                .first()
+            )
+            .first()
         )
         return user is None
 
     async def read_one_user(self, username_or_email: str):
         session = self.session_manager.yield_session()
-        user =(
-                session.query(self.__authentication_models.sqlalchemy_model)
-                .filter(
-                    or_(
-                        self.__authentication_models.sqlalchemy_model.username == username_or_email,
-                        self.__authentication_models.sqlalchemy_model.email == username_or_email,
-                    )
+        user = (
+            session.query(self.__authentication_models.sqlalchemy_model)
+            .filter(
+                or_(
+                    self.__authentication_models.sqlalchemy_model.username
+                    == username_or_email,
+                    self.__authentication_models.sqlalchemy_model.email
+                    == username_or_email,
                 )
-                .first()
+            )
+            .first()
         )
         if not user:
             detail = f"User with username or email {username_or_email} not found"
@@ -340,7 +369,7 @@ class AuthenticationManager:
             session=session,
         )
         if current_user.check_password(current_password):
-            current_user.password=new_password
+            current_user.password = new_password
             session.commit()
             session.refresh(current_user)
         else:
@@ -348,4 +377,3 @@ class AuthenticationManager:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Your current password you enter  is incorrect",
             )
-

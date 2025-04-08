@@ -7,7 +7,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer
 
 
 class UserPrivilegeModel:
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True,index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     privilege_id = Column(Integer, ForeignKey("privileges.id"))
     is_active = Column(Boolean, default=True)

@@ -45,7 +45,7 @@ class RouteConfig:
     def get_authorizations(self,authentication:AuthenticationManager)-> List[callable]:
         return authentication.check_authorizations(
             roles_name = self.roles,
-            privieles_name=self.privileges
+            privileges_name=self.privileges
         )
 
 
