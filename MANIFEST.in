@@ -1,2 +1,2 @@
 recursive-include elrahapi/settings *.txt *.gitignore
-recursive-include elrahapi/main *.env *.gitignore *.md
+recursive-include elrahapi/main *.env* *.gitignore *.md
