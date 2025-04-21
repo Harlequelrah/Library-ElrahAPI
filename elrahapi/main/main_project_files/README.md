@@ -23,7 +23,7 @@ Ceci est un projet backend d'API .
 
 -  **Initialisation des variables d'environnement :**
 ```bash
-  cp exemple.env .env
+  cp .env.example .env
 ```
 
 -  **Initialisation d'alembic (Optionnel) :**

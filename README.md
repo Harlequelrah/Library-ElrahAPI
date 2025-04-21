@@ -196,6 +196,7 @@ init_data=custom_init_data,
 **Note** : `Ajouter le router au main.py`
 
 ## 7. `Configurer le logs
+
 - Configurer au besoin `settings/logger`
 
 - Dans le fichier `myproject/main.py` du projet , ajouter et configurer le middleware de logs et ou celui d'erreur :
@@ -227,7 +228,7 @@ app.add_middleware(
 
 - Configurer au besoin `myproject/settings/auth`
 
-- Ajouter au besoin les routers du  `myproject/settings/auth/routers` au `myproject/main.py`
+- Ajouter au besoin les routers du `myproject/settings/auth/routers` au `myproject/main.py`
 
 - Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
@@ -279,7 +280,7 @@ nomduprojet/
 ├── alembic/
 ├── README.md
 ├── .env
-├── example.env
+├── .env.example
 ├── alembic.ini
 ├── requirements.txt
 ├── __main__.py
@@ -579,8 +580,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **callable**
 
-
-- `check_authorization` : vérifie une autorisation suivant un role  ou un privilège en retournant un objet **callable** qui sera utilisé comme dépendence
+- `check_authorization` : vérifie une autorisation suivant un role ou un privilège en retournant un objet **callable** qui sera utilisé comme dépendence
 
   - **paramètres** :
 
@@ -589,7 +589,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
     - role_name : **str**
 
   - **sortie** : **callable**
-
 
 - `get_user_by_sub` : retourne un utilisateur à partir de son username ou email
 
@@ -705,7 +704,6 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
   - role : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
-
 
 #### 2.4.2 Sous module `role_model`
 
@@ -893,6 +891,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserRolePydanticModel(UserRoleCreateModel)`
   - id : **int**
+
 #### 2.4.6. Sous module `user_role_model`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserRole .
@@ -1107,7 +1106,6 @@ class **`User`**
 
   - **sortie** : **bool**
 
-
 - `check_password` : permet de vérifier le mot de passe.
 
   - **paramètres** :
@@ -1160,7 +1158,6 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
   - password : **str**
 
-
 - `UserUpdateModel`
 
   - email: **Optional[str]**
@@ -1174,8 +1171,6 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
   - is_active: **Optional[bool]**
 
   - password: **Optional[str]**
-
-
 
 - **`UserPydanticModel(UserBaseModel)`**
 
@@ -1265,7 +1260,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - crud_models : **CrudModels**
 
-
 - **`get_pk`** : retourne la colonne de clé primaire .
 
 - **`create`** :
@@ -1346,18 +1340,17 @@ Ce sous module definit CrudModels qui définit l'ensemble des classes et informa
 
 - `__init__`:
 
-    - `entity_name`: **str**
+  - `entity_name`: **str**
 
-    - `primary_key_name`: **str**
+  - `primary_key_name`: **str**
 
-    - `SQLAlchemyModel` : Le model SQLAlchemy de l'entité
+  - `SQLAlchemyModel` : Le model SQLAlchemy de l'entité
 
-    - `CreateModel` : Le model Pydantic pour la création . **Optional**
+  - `CreateModel` : Le model Pydantic pour la création . **Optional**
 
-    - `UpdateModel` : Le model Pydantic pour la mise à jour totale. **Optional**
+  - `UpdateModel` : Le model Pydantic pour la mise à jour totale. **Optional**
 
-    - `PatchModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
-
+  - `PatchModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
 
 ##### 2.8.3. `Sous module bulk_models`
 
@@ -1478,13 +1471,13 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `tags`: **List[str]**
 
-   - `authentication` : **Optional[AuthenticationManager]**
+  - `authentication` : **Optional[AuthenticationManager]**
 
-    - `crud` : **CrudForgery**
+  - `crud` : **CrudForgery**
 
-    - `roles` : **Optional[List[str]]**
+  - `roles` : **Optional[List[str]]**
 
-    - `privileges `: **Optional[List[str]]**
+  - `privileges `: **Optional[List[str]]**
 
 - **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
 
@@ -1524,11 +1517,9 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
-    - type_route  : **TypeRoute**
+    - type_route : **TypeRoute**
 
   - **sortie** : **APIRouter**
-
-
 
 - **`get_mixed_router`** : renvoie un routeur avec une configuration personnalisée entre routes publiques et protégées .
 
@@ -1635,6 +1626,7 @@ Ce sous module définit des utilitaires pour la sécurité
     - algorithm : **Optional[str]**
 
 #### 2.10. Module `session`
+
 Ce module définit des classes utilitaires pour la gestion des sessions
 
 ##### 2.10.1 Sous module `session_manager`
@@ -1650,6 +1642,7 @@ Ce sous module définit la classe SessionManager pour gérer les sessions
   - `yield_session` : renvoie une session
 
     - sortie : `Session`
+
 # V - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à maximeatsoudegbovi@gmail.com ou au (+228) 91 36 10 29.

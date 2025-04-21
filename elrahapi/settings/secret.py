@@ -3,7 +3,7 @@ import os
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 
-load_dotenv(".env", override=False)
+load_dotenv(".env")
 
 
 database= os.getenv("DATABASE")
