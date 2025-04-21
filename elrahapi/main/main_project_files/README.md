@@ -12,13 +12,25 @@ Ceci est un projet backend d'API .
 ## Utilisation
 
 - **Se rendre dans le repertoire du projet** :
+
 ```bash
-cd monprojet
+  cd monprojet
 ```
 -  **Installation des dépéendances :**
 ```bash
   pip install -r requirements.txt
 ```
+
+-  **Initialisation des variables d'environnement :**
+```bash
+  cp exemple.env .env
+```
+
+-  **Initialisation d'alembic (Optionnel) :**
+```python
+  alembic init alembic
+```
+
 
 - **Lancement du serveur :**
 ```python
@@ -38,3 +50,7 @@ cd monprojet
 # Contact ou Support
 
 Pour des questions ou du support, contactez-moi .
+
+- **`Mail`** : **user@example.com**
+
+- **`Telephone`** : ****

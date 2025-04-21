@@ -279,6 +279,7 @@ nomduprojet/
 ├── alembic/
 ├── README.md
 ├── .env
+├── example.env
 ├── alembic.ini
 ├── requirements.txt
 ├── __main__.py
