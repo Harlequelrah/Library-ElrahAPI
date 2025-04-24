@@ -117,10 +117,10 @@ class CustomRouterProvider:
         if init_data is None:
             init_data = []
         public_routes_data = self.get_custom_router_init_data(
-            init_data, public_routes_name
+            init_data=init_data,route_names= public_routes_name,is_protected=TypeRoute.PUBLIC
         )
         protected_routes_data = self.get_custom_router_init_data(
-            init_data, protected_routes_name, is_protected=True
+            init_data=init_data,route_names=protected_routes_name, is_protected=TypeRoute.PROTECTED
         )
         custom_init_data = public_routes_data + protected_routes_data
         return self.initialize_router(custom_init_data, exclude_routes_name)

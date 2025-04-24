@@ -1,19 +1,22 @@
 from typing import List, Optional
 from elrahapi.user import  schemas
+from pydantic import Field,BaseModel
 
-class UserBaseModel(schemas.UserBaseModel):
+class UserBaseModel(BaseModel,schemas.UserBaseModel):
     pass
 
-class UserCreateModel(schemas.UserCreateModel):
+class UserCreateModel(UserBaseModel, schemas.UserCreateModel):
     pass
 
-class UserUpdateModel(schemas.UserUpdateModel):
+class UserUpdateModel(UserBaseModel,schemas.UserUpdateModel):
     pass
 
-class UserPatchModel(schemas.UserPatchModel):
+
+
+class UserPatchModel(BaseModel,schemas.UserPatchModel):
     pass
 
-class UserPydanticModel(schemas.UserPydanticModel):
+class UserPydanticModel(UserBaseModel,schemas.UserPydanticModel):
     class Config :
         from_attributes=True
 

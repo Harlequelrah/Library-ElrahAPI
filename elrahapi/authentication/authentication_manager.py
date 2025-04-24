@@ -40,7 +40,7 @@ class AuthenticationManager:
         self.__connector = connector
         self.__database_name = database_name
         self.__server = server
-        self.__authentication_models: CrudModels
+        self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
             refresh_token_expiration
             if refresh_token_expiration

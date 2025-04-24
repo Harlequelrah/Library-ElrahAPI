@@ -3,35 +3,30 @@ from typing import List, Optional
 from datetime import datetime
 from elrahapi.authorization.meta_model import  MetaUserPrivilegeModel,MetaUserRoleModel
 
-class UserBaseModel(BaseModel):
+class UserBaseModel:
     email: EmailStr = Field(example="user@example.com")
     username: str = Field(example="Harlequelrah")
     lastname: str = Field(example="SMITH")
     firstname: str = Field(example="jean-francois")
 
 
-class UserCreateModel(UserBaseModel):
+class UserCreateModel:
     password: str = Field(example="m*td*pa**e")
 
 
 
-class UserPatchModel(BaseModel):
-    email: Optional[EmailStr] = None
-    username: Optional[str] = None
-    lastname: Optional[str] = None
-    firstname: Optional[str] = None
-    is_active: Optional[bool] = None
-    password: Optional[str] = None
+class UserPatchModel:
+    email: Optional[EmailStr] = Field(example="user@example.com",default=None)
+    username: Optional[str] = Field(example="Harlequelrah",default=None)
+    lastname: Optional[str] = Field(example="SMITH",default=None)
+    firstname: Optional[str] = Field(example="jean-francois",default=None)
+    is_active: Optional[bool] = Field(example=True,default=None)
+    password: Optional[str] = Field(example="m*td*pa**e",default=None)
 
-class UserUpdateModel(BaseModel):
-    email: EmailStr
-    username: str
-    lastname: str
-    firstname: str
-    is_active: bool
-    password: str
+class UserUpdateModel(UserCreateModel):
+    is_active: bool = Field(example=True)
 
-class UserPydanticModel(UserBaseModel):
+class UserPydanticModel:
     id: int
     is_active: bool
     attempt_login:int
@@ -51,6 +46,9 @@ class UserRequestModel(BaseModel):
     @property
     def username_or_email(self):
         return self.username or self.email
+
+
+
 class UserLoginRequestModel(UserRequestModel):
     password: str
 
