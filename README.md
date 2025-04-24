@@ -72,6 +72,8 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 ## 5. `Créer une application`
 
+- Assurer vous d'être dans le dossier du projet
+
 - Génerer l'application
 
 ```bash
