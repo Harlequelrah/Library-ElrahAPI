@@ -1,8 +1,34 @@
-# I - **`Description`**
+# I - **`Présentation`**
 
 ![Logo](https://raw.githubusercontent.com/Harlequelrah/Library-ElrahAPI/main/Elrah.png)
 
+## 1. `Description` :
+
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
+
+## 2. `Objectifs` :
+
+ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI  de :
+
+- Démarrer rapidement un projet en fournissant une architecture de projet ;
+
+- Minimiser les configurations pour un projet ;
+
+- Fournir un système d'authentification configurable ;
+
+- Générer les principaux cruds d'un model ;
+
+- Fournir et configurer facilement les principales routes d'un model ;
+
+- Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log  ;
+
+- Fournir un middleware de gestion d'erreur et des utilitaires pour lancer des exceptions personnalisées ;
+
+- Permet de gérer efficement l'authentification et les routes protégées ;
+
+- Une gestion simple et efficace de l'autorisation par l'utilisation de rôles et privileges .
+
+- L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes
 
 # II - **`Installation`**
 
@@ -262,6 +288,7 @@ async def websocket_notification(websocket: WebSocket):
 # IV - **`Documentation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
+
 
 ## 1. `Commandes`
 
