@@ -32,7 +32,22 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI  de :
 
 # II - **`Installation`**
 
-- **Avec Github :**
+**Il serait judicieux de créer un environnement virtuel dans un repertoire avant de poursuivre l'installation**
+
+- **Créer un environnement virtuel :**
+
+```bash
+    python -m venv env
+```
+
+ou si virtualenv est dejà installé au préalable
+
+```bash
+    virtualenv env
+```
+
+
+- **`Avec Github :`**
 
   ```bash
   git clone https://github.com/Harlequelrah/Library-ElrahAPI
@@ -42,7 +57,7 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI  de :
   pip install -e ./elrahapi
   ```
 
-- **Avec pip :**
+- **`Avec pip :`**
 
   ```bash
   pip install elrahapi
