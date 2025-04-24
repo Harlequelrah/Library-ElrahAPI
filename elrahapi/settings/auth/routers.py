@@ -47,7 +47,17 @@ user_role_router_provider=CustomRouterProvider(
     )
 
 
-user_router = user_router_provider.get_protected_router()
+# user_router = user_router_provider.get_protected_router()
+user_router = user_router_provider.get_mixed_router(
+    public_routes_name= [DefaultRoutesName.CREATE],
+    protected_routes_name= [
+        DefaultRoutesName.DELETE,
+        DefaultRoutesName.UPDATE,
+        DefaultRoutesName.PATCH,
+        DefaultRoutesName.READ_ALL,
+        DefaultRoutesName.READ_ONE,
+        ]
+)
 
 user_privilege_router=user_privilege_router_provider.get_protected_router()
 
