@@ -299,6 +299,7 @@ nomduprojet/
 │           ├── configs.py
 │           ├── models.py
 │           ├── cruds.py
+│           ├── meta_models.py
 │           ├── routers.py
 │           ├── schemas.py
 │       ├── logger/
