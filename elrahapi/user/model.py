@@ -54,7 +54,6 @@ class UserModel:
             self.PasswordHasher.verify(self.password, password)
             return True
         except Ex.VerifyMismatchError:
-            print(self.password, password)
             return False
         except Ex.InvalidHashError:
             self.password=self.password

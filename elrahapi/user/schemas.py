@@ -23,7 +23,7 @@ class UserPatchModel:
     is_active: Optional[bool] = Field(example=True,default=None)
     password: Optional[str] = Field(example="m*td*pa**e",default=None)
 
-class UserUpdateModel(UserCreateModel):
+class UserUpdateModel:
     is_active: bool = Field(example=True)
 
 class UserPydanticModel:
