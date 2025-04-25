@@ -14,7 +14,7 @@ from elrahapi.exception.auth_exception  import INSUFICIENT_PERMISSIONS_CUSTOM_HT
 
 
 class UserModel:
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
     password = Column(String(1024), nullable=False)

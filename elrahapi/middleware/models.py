@@ -15,7 +15,7 @@ from sqlalchemy.sql import func
 
 
 class LoggerMiddlewareModel:
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     status_code = Column(Integer, index=True)
     method = Column(String(30), nullable=False)
     url = Column(String(255), nullable=False)

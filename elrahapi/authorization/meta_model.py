@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column,Integer,String
 from sqlalchemy.orm import validates
 
 class MetaAuthorization:
-    id=Column(Integer,primary_key=True,index=True)
+    id=Column(Integer,primary_key=True)
     name=Column(String(50),unique=True)
     normalizedName=Column(String(50),unique=True)
     description=Column(String(255),nullable=False)

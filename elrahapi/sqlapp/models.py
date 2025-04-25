@@ -17,6 +17,6 @@
 
 # class Entity(Base):
 #     __tablename__ = 'entities'
-#     id = Column(Integer, primary_key=True,index=True)
+#     id = Column(Integer, primary_key=True)
 
 # metadata= Base.metadata
