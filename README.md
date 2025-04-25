@@ -461,6 +461,14 @@ Ce sous module contient des quelques fonctions utiles .
 
     - obj_pydantic_class : **type** , la classe pydantic
 
+#### 2.2.2. Sous module `patterns`
+Ce sous module comporte quelques regex utilisables comme pattern dans les schemas de validations pydantic
+
+- `*TELEPHONE_PATTERN*`
+
+- `*URL_PATTERN*`
+
+
 ### 2.3. **Module `authentication`**
 
 Ce module contient des classes et des fonctions utilisées pour l'authentification.

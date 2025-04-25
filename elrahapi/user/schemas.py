@@ -32,8 +32,8 @@ class UserPydanticModel:
     attempt_login:int
     date_created: datetime
     date_updated: Optional[datetime]
-    user_roles:Optional[List["MetaUserRoleModel"]]
-    user_privileges: Optional[List["MetaUserPrivilegeModel"]]
+    user_roles:List["MetaUserRoleModel"] = []
+    user_privileges: List["MetaUserPrivilegeModel"]=[]
 
 
 
