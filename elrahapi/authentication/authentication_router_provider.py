@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
-from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
+from elrahapi.router.route_config import AuthorizationConfig, RouteConfig,ResponseModelConfig
 from elrahapi.router.router_crud import format_init_data, initialize_dependecies
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
@@ -16,12 +16,16 @@ from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginReque
 class AuthenticationRouterProvider:
     def __init__(self,
                 authentication:AuthenticationManager,
-                with_relations:Optional[bool]=False
+                with_relations:Optional[bool]=False,
+                roles: Optional[List[str]] = None,
+                privileges: Optional[List[str]] = None,
                 ):
 
         self.authentication=authentication
+        self.roles = roles
+        self.privileges = privileges
+        self.with_relations = with_relations
 
-        self.pydantic_model = authentication.authentication_models.full_read_model if with_relations else authentication.authentication_models.read_model
 
         self.router =APIRouter(
             prefix="/auth",
@@ -32,34 +36,38 @@ class AuthenticationRouterProvider:
         self,
         init_data: List[RouteConfig]=USER_AUTH_CONFIG_ROUTES,
         authorizations : Optional[List[AuthorizationConfig]]=None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,        response_model_configs: Optional[List[ResponseModelConfig]] = None,
         )->APIRouter:
-        formatted_init_data = format_init_data(
+        formatted_data = format_init_data(
             init_data=init_data,
+            with_relations=self.with_relations,
             authorizations=authorizations,
-            exclude_routes_name=exclude_routes_name
+            exclude_routes_name=exclude_routes_name,
+            authentication=self.authentication,
+            roles=self.roles,
+            privileges=self.privileges,
+            response_model_configs=response_model_configs,
+            ReadPydanticModel=self.authentication.authentication_models.read_model
+            ,FullReadPydanticModel=self.authentication.authentication_models.full_read_model
         )
-        for config in formatted_init_data:
-            if config.route_name == DefaultRoutesName.READ_ONE_USER and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                )
+        for config in formatted_data:
+            if config.route_name == DefaultRoutesName.READ_ONE_USER :
                 @self.router.get(
                     path=config.route_path,
-                    response_model= config.response_model if config.response_model else self.pydantic_model ,
+                    response_model=config.response_model ,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
-                    dependencies=dependencies
+                    dependencies=config.dependencies
                 )
                 async def read_one_user(username_or_email: str):
                     return await self.authentication.read_one_user(username_or_email)
-            if config.route_name == DefaultRoutesName.READ_CURRENT_USER and config.is_activated:
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER :
                 @self.router.get(
                     path=config.route_path,
-                    response_model= config.response_model if config.response_model else self.pydantic_model ,
+                    response_model= config.response_model ,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
+                    dependencies=config.dependencies
                 )
                 async def read_current_user(
                     current_user = Depends(
@@ -68,13 +76,14 @@ class AuthenticationRouterProvider:
                 ):
                     return current_user
 
-            if config.route_name == DefaultRoutesName.TOKEN_URL and config.is_activated:
+            if config.route_name == DefaultRoutesName.TOKEN_URL :
 
                 @self.router.post(
                     response_model=Token,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
+                    dependencies=config.dependencies
                 )
                 async def login_swagger(
                     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -96,13 +105,14 @@ class AuthenticationRouterProvider:
                         "token_type": "bearer",
                     }
 
-            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN and config.is_activated:
+            if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN :
 
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=RefreshToken,
+                    dependencies=config.dependencies,
                 )
                 async def refresh_token(
                     current_user = Depends(
@@ -113,25 +123,20 @@ class AuthenticationRouterProvider:
                     refresh_token = self.authentication.create_refresh_token(data)
                     return refresh_token
 
-            if config.route_name == DefaultRoutesName.REFRESH_TOKEN and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                )
-
+            if config.route_name == DefaultRoutesName.REFRESH_TOKEN :
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     response_model=AccessToken,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
                 )
                 async def refresh_access_token(refresh_token: RefreshToken):
                     return await self.authentication.refresh_token(
                         refresh_token_data=refresh_token
                     )
 
-            if config.route_name == DefaultRoutesName.LOGIN and config.is_activated:
+            if config.route_name == DefaultRoutesName.LOGIN :
 
                 @self.router.post(
                     response_model=Token,
@@ -156,18 +161,13 @@ class AuthenticationRouterProvider:
                         "token_type": "bearer",
                     }
 
-            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                )
-
+            if config.route_name == DefaultRoutesName.CHANGE_PASSWORD :
                 @self.router.post(
                     status_code=204,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
                     username_or_email = form_data.username_or_email

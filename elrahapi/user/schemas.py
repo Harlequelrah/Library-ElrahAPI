@@ -26,17 +26,18 @@ class UserPatchModel:
 class UserUpdateModel:
     is_active: bool = Field(example=True)
 
-class UserPydanticModel:
+class UserReadModel:
     id: int
     is_active: bool
     attempt_login:int
     date_created: datetime
     date_updated: Optional[datetime]
+
+
+
+class UserFullReadModel(UserReadModel):
     user_roles:List["MetaUserRoleModel"] = []
     user_privileges: List["MetaUserPrivilegeModel"]=[]
-
-
-
 
 
 

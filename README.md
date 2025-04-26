@@ -8,7 +8,7 @@ Passioné par la programmation et le développement avec python je me lance dans
 
 ## 2. `Objectifs` :
 
-ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI  de :
+ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Démarrer rapidement un projet en fournissant une architecture de projet ;
 
@@ -20,7 +20,7 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI  de :
 
 - Fournir et configurer facilement les principales routes d'un model ;
 
-- Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log  ;
+- Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log ;
 
 - Fournir un middleware de gestion d'erreur et des utilitaires pour lancer des exceptions personnalisées ;
 
@@ -45,7 +45,6 @@ ou si virtualenv est dejà installé au préalable
 ```bash
     virtualenv env
 ```
-
 
 - **`Avec Github :`**
 
@@ -304,7 +303,6 @@ async def websocket_notification(websocket: WebSocket):
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
-
 ## 1. `Commandes`
 
 ### 1.1. **Commande de création du projet**
@@ -462,12 +460,12 @@ Ce sous module contient des quelques fonctions utiles .
     - obj_pydantic_class : **type** , la classe pydantic
 
 #### 2.2.2. Sous module `patterns`
+
 Ce sous module comporte quelques regex utilisables comme pattern dans les schemas de validations pydantic
 
 - `*TELEPHONE_PATTERN*`
 
 - `*URL_PATTERN*`
-
 
 ### 2.3. **Module `authentication`**
 
@@ -742,7 +740,7 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - is_active : **bool**
 
-- `MetaAuthorizationPydanticModel(MetaAuthorizationModel)` , classe pour définir les Models Pydantic complet pour Role et Privilege.
+- `MetaAuthorizationReadModel(MetaAuthorizationModel)` , classe pour définir les Models Pydantic complet pour Role et Privilege.
 
 - name : **str**
 
@@ -786,7 +784,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `RolePydanticModel(MetaAuthorizationPydanticModel)` :
+- `RolePydanticModel(MetaAuthorizationReadModel)` :
 
   - role_privileges : **List[MetaAuthorizationBaseModel]**
 
@@ -818,7 +816,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `PrivilegePydanticModel(MetaAuthorizationPydanticModel)` :
+- `PrivilegePydanticModel(MetaAuthorizationReadModel)` :
 
   - privilege_roles : **Optional[List[MetaAuthorizationBaseModel]]**
 
@@ -860,7 +858,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - privilege_id : **Optional[int]**
 
-- `RolePrivilegePydanticModel(RolePrivilegeCreateModel)`
+- `RolePrivilegeReadModel(RolePrivilegeCreateModel)`
   - id : **int**
 
 #### 2.4.5. Sous module `user_privilege_model`
@@ -942,7 +940,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `UserRolePydanticModel(UserRoleCreateModel)`
+- `UserRoleReadModel(UserRoleCreateModel)`
   - id : **int**
 
 #### 2.4.6. Sous module `user_role_model`
@@ -983,7 +981,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `UserRolePydanticModel(UserRoleCreateModel)`
+- `UserRoleReadModel(UserRoleCreateModel)`
   - id : **int**
 
 ### 2.5. **Module `middleware`**
@@ -992,7 +990,7 @@ Ce module regroupe toute la gestion des middelwares
 
 ##### 2.5.1. Sous module `models`
 
-Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewarePydanticModel` pour la validation Pydantic
+Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewareReadModel` pour la validation Pydantic
 
 `LoggerMiddlewareModel`:
 
@@ -1014,7 +1012,7 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 - remote_adress: **Column(String)**
 
-`LoggerMiddlewarePydanticModel`:
+`LoggerMiddlewareReadModel`:
 
 **Attributs prédéfinis**:
 
@@ -1225,7 +1223,7 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
   - password: **Optional[str]**
 
-- **`UserPydanticModel(UserBaseModel)`**
+- **`UserReadModel(UserBaseModel)`**
 
   - id : **int**
 

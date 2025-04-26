@@ -9,6 +9,7 @@ user_router_provider = CustomRouterProvider(
     tags=["users"],
     crud=user_crud,
     authentication=authentication,
+    with_relations= True
 )
 
 user_privilege_router_provider=CustomRouterProvider(

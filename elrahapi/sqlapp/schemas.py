@@ -15,13 +15,13 @@
 # class EntityPatchModel(BaseModel):
 #     pass
 
-# class EntityPydanticModel(BaseModel):
+# class EntityReadModel(BaseModel):
 #     pass
     # class Config:
     #     from_attributes=True
 
 
-# class EntityFullPydanticModel(BaseModel):
+# class EntityFullReadModel(EntityReadModel):
 #     pass
     # class Config:
     #     from_attributes=True

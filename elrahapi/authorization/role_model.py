@@ -1,7 +1,7 @@
 from elrahapi.authorization.meta_model import (
     MetaAuthorization,
     MetaAuthorizationBaseModel,
-    MetaAuthorizationPydanticModel,
+    MetaAuthorizationReadModel,
 )
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -30,12 +30,12 @@ class RolePatchModel(BaseModel):
     description: Optional[str] = Field(example="allow to manage all the system", default=None)
 
 
-class RoleReadModel(MetaAuthorizationPydanticModel):
+class RoleReadModel(MetaAuthorizationReadModel):
     class Config:
         from_attributes = True
 
 
-class RoleFullReadModel(MetaAuthorizationPydanticModel):
+class RoleFullReadModel(MetaAuthorizationReadModel):
     role_privileges: List["MetaAuthorizationBaseModel"] = []
     role_users:List["MetaRoleUsers"]=[]
 

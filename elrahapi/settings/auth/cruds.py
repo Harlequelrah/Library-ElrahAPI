@@ -1,14 +1,14 @@
 
-from elrahapi.authorization.privilege_model import PrivilegeCreateModel, PrivilegePatchModel, PrivilegePydanticModel, PrivilegeUpdateModel
-from elrahapi.authorization.role_model import RoleCreateModel, RolePydanticModel,RoleUpdateModel,RolePatchModel
-from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegePatchModel, RolePrivilegePydanticModel, RolePrivilegeUpdateModel
-from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel, UserPrivilegePydanticModel
-from elrahapi.authorization.user_role_model import UserRoleCreateModel, UserRolePatchModel, UserRolePydanticModel, UserRoleUpdateModel
+from elrahapi.authorization.privilege_model import PrivilegeCreateModel, PrivilegePatchModel, PrivilegeReadModel, PrivilegeUpdateModel,PrivilegeFullReadModel
+from elrahapi.authorization.role_model import RoleCreateModel, RoleReadModel,RoleUpdateModel,RolePatchModel,RoleFullReadModel
+from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegePatchModel, RolePrivilegeReadModel, RolePrivilegeUpdateModel,RolePrivilegeFullReadModel
+from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel, UserPrivilegeReadModel,UserPrivilegeFullReadModel
+from elrahapi.authorization.user_role_model import UserRoleCreateModel, UserRolePatchModel, UserRoleReadModel, UserRoleUpdateModel,UserRoleFullReadModel
 from elrahapi.crud.crud_forgery import CrudForgery
 from ..database import session_manager
 from elrahapi.crud.crud_models import CrudModels
 from .models import User, UserPrivilege,Role,Privilege,RolePrivilege,UserRole
-from .schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserPydanticModel
+from .schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserReadModel,UserFullReadModel
 from elrahapi.authorization.user_privilege_model import UserPrivilegeCreateModel,UserPrivilegeUpdateModel
 from elrahapi.crud.crud_forgery import CrudForgery
 
@@ -19,7 +19,8 @@ user_crud_models = CrudModels(
     CreateModel=UserCreateModel,
     UpdateModel=UserUpdateModel,
     PatchModel=UserPatchModel,
-    PydanticModel=UserPydanticModel
+    ReadModel=UserReadModel,
+    FullReadModel=UserFullReadModel
 )
 
 role_crud_models=CrudModels(
@@ -29,7 +30,8 @@ role_crud_models=CrudModels(
     CreateModel= RoleCreateModel,
     UpdateModel=RoleUpdateModel,
     PatchModel=RolePatchModel,
-    PydanticModel=RolePydanticModel
+    ReadModel=RoleReadModel,
+    FullReadModel=RoleFullReadModel
 )
 
 privilege_crud_models=CrudModels(
@@ -39,7 +41,8 @@ privilege_crud_models=CrudModels(
     CreateModel=PrivilegeCreateModel,
     UpdateModel=PrivilegeUpdateModel,
     PatchModel=PrivilegePatchModel,
-    PydanticModel=PrivilegePydanticModel
+    ReadModel=PrivilegeReadModel,
+    FullReadModel=PrivilegeFullReadModel
 )
 
 role_privilege_crud_models=CrudModels(
@@ -49,7 +52,8 @@ role_privilege_crud_models=CrudModels(
     CreateModel=RolePrivilegeCreateModel,
     UpdateModel=RolePrivilegeUpdateModel,
     PatchModel=RolePrivilegePatchModel,
-    PydanticModel=RolePrivilegePydanticModel,
+    ReadModel=RolePrivilegeReadModel,
+    FullReadModel=RolePrivilegeFullReadModel
 )
 
 
@@ -61,7 +65,8 @@ user_privilege_crud_models = CrudModels(
     CreateModel=UserPrivilegeCreateModel,
     UpdateModel=UserPrivilegeUpdateModel,
     PatchModel=UserPrivilegePatchModel,
-    PydanticModel=UserPrivilegePydanticModel
+    ReadModel=UserPrivilegeReadModel,
+    FullReadModel=UserPrivilegeFullReadModel
 )
 
 user_role_crud_models = CrudModels(
@@ -71,7 +76,8 @@ user_role_crud_models = CrudModels(
     CreateModel=UserRoleCreateModel,
     UpdateModel=UserRoleUpdateModel,
     PatchModel=UserRolePatchModel,
-    PydanticModel=UserRolePydanticModel
+    ReadModel=UserRoleReadModel,
+    FullReadModel=UserRoleFullReadModel
 )
 
 user_privilege_crud=CrudForgery(

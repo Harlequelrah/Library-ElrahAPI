@@ -1,6 +1,8 @@
 
 
-from typing import Optional
+from typing import Optional, Type
+
+from pydantic import BaseModel
 
 
 class CrudModels:
@@ -9,11 +11,11 @@ class CrudModels:
         entity_name:str,
         primary_key_name:str,
         SQLAlchemyModel:type,
-        ReadModel:Optional[type]=None,
-        CreateModel:Optional[type]=None,
-        UpdateModel:Optional[type]=None,
-        PatchModel:Optional[type]=None,
-        FullReadModel:Optional[type]=None
+        ReadModel:Type[BaseModel],
+        CreateModel:Optional[Type[BaseModel]]=None,
+        UpdateModel:Optional[Type[BaseModel]]=None,
+        PatchModel:Optional[Type[BaseModel]]=None,
+        FullReadModel:Optional[Type[BaseModel]]=None
         ):
         self.__entity_name = entity_name
         self.__primary_key_name=primary_key_name
@@ -67,27 +69,27 @@ class CrudModels:
         self.__primary_key_name = primary_key_name
 
     @sqlalchemy_model.setter
-    def sqlalchemy_model(self, model : type):
+    def sqlalchemy_model(self, model : Type[BaseModel]):
         self.__SQLAlchemyModel = model
 
     @read_model.setter
-    def read_model(self, model : type):
+    def read_model(self, model : Type[BaseModel]):
         self.__ReadModel = model
 
     @full_read_model.setter
-    def full_read_model(self, model : type):
+    def full_read_model(self, model : Type[BaseModel]):
         self.__FullReadModel = model
 
     @create_model.setter
-    def create_model(self, model : type):
+    def create_model(self, model : Type[BaseModel]):
         self.__CreateModel = model
 
     @update_model.setter
-    def update_model(self, model : type):
+    def update_model(self, model : Type[BaseModel]):
         self.__UpdateModel = model
 
     @patch_model.setter
-    def patch_model(self, model : type):
+    def patch_model(self, model : Type[BaseModel]):
         self.__PatchModel = model
 
 

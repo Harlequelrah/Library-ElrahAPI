@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
-from elrahapi.authorization.meta_model import MetaAuthorization, MetaAuthorizationPydanticModel,MetaAuthorizationBaseModel
+from elrahapi.authorization.meta_model import MetaAuthorization, MetaAuthorizationReadModel,MetaAuthorizationBaseModel
 
 
 class PrivilegeModel(MetaAuthorization):
@@ -26,11 +26,17 @@ class PrivilegePatchModel(BaseModel):
 
 
 
-class PrivilegePydanticModel(MetaAuthorizationPydanticModel):
+class PrivilegeReadModel(MetaAuthorizationReadModel):
+    class Config :
+        from_attributes=True
+
+class PrivilegeFullReadModel(PrivilegeReadModel):
     privilege_roles:Optional[List["MetaAuthorizationBaseModel"]] = []
     privilege_users : Optional[List["MetaPrivilegeUsers"]] = []
     class Config :
         from_attributes=True
+
+
 class MetaPrivilegeUsers(BaseModel):
     user_id:int
     is_active:bool

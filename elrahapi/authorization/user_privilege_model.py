@@ -4,6 +4,10 @@ from typing import Optional
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 
+from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+
+from elrahapi.user.schemas import UserBaseModel
+
 
 
 class UserPrivilegeModel:
@@ -18,11 +22,21 @@ class UserPrivilegeCreateModel(BaseModel):
     is_active: Optional[bool] = Field(exemple=True,default=True)
 
 
-class UserPrivilegePydanticModel(UserPrivilegeCreateModel):
+class UserPrivilegeReadModel(UserPrivilegeCreateModel):
     id : int
     class Config:
         from_attributes=True
 
+
+class UserPrivilegeFullReadModel(BaseModel):
+    id:int
+    user: UserBaseModel
+    privilege:MetaAuthorizationBaseModel
+    is_active:bool
+    class Config:
+        from_attributes=True
+
+        
 class UserPrivilegePatchModel(BaseModel):
     user_id: Optional[int ]= Field(example=1,default=None)
     privilege_id: Optional[int]=Field(example=2,default=None)

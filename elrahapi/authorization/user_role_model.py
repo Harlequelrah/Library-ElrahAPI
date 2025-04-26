@@ -4,6 +4,10 @@ from typing import Optional
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 
+from elrahapi.user.schemas import UserBaseModel
+
+from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+
 
 
 class UserRoleModel:
@@ -18,10 +22,16 @@ class UserRoleCreateModel(BaseModel):
     is_active: Optional[bool] = Field(exemple=True,default=True)
 
 
-class UserRolePydanticModel(UserRoleCreateModel):
+class UserRoleReadModel(UserRoleCreateModel):
     id : int
     class Config:
         from_attributes=True
+
+class UserRoleFullReadModel(BaseModel):
+    id : int
+    user : UserBaseModel
+    role : MetaAuthorizationBaseModel
+    is_active:bool
 
 class UserRolePatchModel(BaseModel):
     user_id: Optional[int ]= Field(example=1,default=None)

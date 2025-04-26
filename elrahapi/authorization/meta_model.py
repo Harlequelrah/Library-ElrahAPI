@@ -16,11 +16,12 @@ class MetaAuthorization:
         return value
 
 class MetaAuthorizationBaseModel(BaseModel):
-    id:int
+
     normalizedName:str
     is_active: bool
 
-class MetaAuthorizationPydanticModel(MetaAuthorizationBaseModel):
+class MetaAuthorizationReadModel(MetaAuthorizationBaseModel):
+    id:int
     name: str
 
 class MetaUserPrivilegeModel(BaseModel):

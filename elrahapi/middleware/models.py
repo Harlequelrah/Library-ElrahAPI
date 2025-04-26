@@ -25,7 +25,7 @@ class LoggerMiddlewareModel:
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)
 
 
-class LoggerMiddlewarePydanticModel(BaseModel):
+class LoggerMiddlewareReadModel(BaseModel):
     id:int
     status_code:int
     method:str

@@ -2,16 +2,16 @@ from typing import List, Optional
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.exception.auth_exception import (
-    NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION,
+from elrahapi.router.route_config import (
+    AuthorizationConfig,
+    ResponseModelConfig,
+    RouteConfig,
 )
-from elrahapi.router.route_config import AuthorizationConfig, RouteConfig
 from fastapi import status
-from sqlalchemy.orm import Session, sessionmaker
 from elrahapi.router.router_crud import (
     format_init_data,
     get_single_route,
-    initialize_dependecies,
+    set_response_model,
 )
 from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,
@@ -21,11 +21,9 @@ from elrahapi.router.router_namespace import (
 )
 
 from fastapi import APIRouter
-from elrahapi.crud.crud_models import CrudModels
-class Relation:
-    def __init__(self,second_entity_name:str,second_entity_crud:CrudModels):
-        self.second_entity_name = second_entity_name
-        self.seconc_entit_crud = second_entity_crud
+
+
+
 
 class CustomRouterProvider:
 
@@ -37,7 +35,7 @@ class CustomRouterProvider:
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
-
+        with_relations: bool = False
     ):
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
@@ -45,8 +43,10 @@ class CustomRouterProvider:
         self.get_access_token: Optional[callable] = (
             authentication.get_access_token if authentication else None
         )
+        self.with_relations = with_relations
         self.pk = crud.crud_models.primary_key_name
-        self.PydanticModel = crud.PydanticModel
+        self.ReadPydanticModel = crud.ReadPydanticModel
+        self.FullReadPydanticModel = crud.FullReadPydanticModel
         self.CreatePydanticModel = crud.CreatePydanticModel
         self.UpdatePydanticModel = crud.UpdatePydanticModel
         self.PatchPydanticModel = crud.PatchPydanticModel
@@ -59,26 +59,28 @@ class CustomRouterProvider:
         )
 
     def get_public_router(
-        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None
+        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None,response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
-        return self.initialize_router(ROUTES_PUBLIC_CONFIG, exclude_routes_name)
+        return self.initialize_router(init_data=ROUTES_PUBLIC_CONFIG,exclude_routes_name= exclude_routes_name,response_model_configs=response_model_configs)
 
     def get_protected_router(
         self,
         authorizations: Optional[List[AuthorizationConfig]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
         if not self.authentication:
-            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+            raise ValueError("No authentication provided in the router provider")
         return self.initialize_router(
             init_data=ROUTES_PROTECTED_CONFIG,
             exclude_routes_name=exclude_routes_name,
             authorizations=authorizations,
+            response_model_configs=response_model_configs,
         )
 
     def get_custom_router_init_data(
         self,
-        is_protected: TypeRoute ,
+        is_protected: TypeRoute,
         init_data: Optional[List[RouteConfig]] = None,
         route_names: Optional[List[DefaultRoutesName]] = None,
     ):
@@ -86,7 +88,7 @@ class CustomRouterProvider:
         if route_names:
             for route_name in route_names:
                 if is_protected == TypeRoute.PROTECTED and not self.authentication:
-                    raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+                    raise ValueError("No authentication provided in the router provider")
                 route = get_single_route(route_name, is_protected)
                 custom_init_data.append(route)
         return custom_init_data
@@ -97,10 +99,11 @@ class CustomRouterProvider:
         routes_name: Optional[List[DefaultRoutesName]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         authorizations: Optional[List[AuthorizationConfig]] = None,
+        response_model_configs: Optional[List[ResponseModelConfig]] = None,
         type_route: TypeRoute = TypeRoute.PUBLIC,
     ):
         if type_route == TypeRoute.PROTECTED and not self.authentication:
-            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+            raise ValueError("No authentication provided in the router provider")
         custom_init_data = self.get_custom_router_init_data(
             init_data=init_data, route_names=routes_name, is_protected=type_route
         )
@@ -108,6 +111,7 @@ class CustomRouterProvider:
             custom_init_data,
             exclude_routes_name=exclude_routes_name,
             authorizations=authorizations,
+            response_model_configs=response_model_configs,
         )
 
     def get_mixed_router(
@@ -116,85 +120,82 @@ class CustomRouterProvider:
         public_routes_name: Optional[List[DefaultRoutesName]] = None,
         protected_routes_name: Optional[List[DefaultRoutesName]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
         if not self.authentication:
             raise ValueError("No authentication provided in the router provider")
         if init_data is None:
             init_data = []
         public_routes_data = self.get_custom_router_init_data(
-            init_data=init_data,route_names= public_routes_name,is_protected=TypeRoute.PUBLIC
+            init_data=init_data,
+            route_names=public_routes_name,
+            is_protected=TypeRoute.PUBLIC,
         )
         protected_routes_data = self.get_custom_router_init_data(
-            init_data=init_data,route_names=protected_routes_name, is_protected=TypeRoute.PROTECTED
+            init_data=init_data,
+            route_names=protected_routes_name,
+            is_protected=TypeRoute.PROTECTED,
         )
         custom_init_data = public_routes_data + protected_routes_data
-        return self.initialize_router(custom_init_data, exclude_routes_name)
+        return self.initialize_router(init_data=custom_init_data, exclude_routes_name=exclude_routes_name, response_model_configs=response_model_configs)
+
+
+
 
     def initialize_router(
         self,
         init_data: List[RouteConfig],
         authorizations: Optional[List[AuthorizationConfig]] = None,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
-        init_data = format_init_data(
+        formatted_data = format_init_data(
             init_data=init_data,
             authorizations=authorizations,
             exclude_routes_name=exclude_routes_name,
+            authentication=self.authentication,
+            roles=self.roles,
+            privileges=self.privileges,
+            response_model_configs=response_model_configs,
+            with_relations=self.with_relations,
+            ReadPydanticModel=self.ReadPydanticModel,
+            FullReadPydanticModel=self.FullReadPydanticModel,
         )
-        for config in init_data:
-            if config.route_name == DefaultRoutesName.COUNT and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
+        for config in formatted_data:
+            if config.route_name == DefaultRoutesName.COUNT:
 
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
                 )
                 async def count():
                     count = await self.crud.count()
                     return {"count": count}
 
-            if config.route_name == DefaultRoutesName.READ_ONE and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-
+            if config.route_name == DefaultRoutesName.READ_ONE:
 
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=self.PydanticModel,
-                    dependencies=dependencies,
+                    response_model=config.response_model,
+                    dependencies=config.dependencies,
                 )
                 async def read_one(
                     pk,
                 ):
                     return await self.crud.read_one(pk)
 
-            if config.route_name == DefaultRoutesName.READ_ALL and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
+            if config.route_name == DefaultRoutesName.READ_ALL:
 
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=List[self.PydanticModel],
-                    dependencies=dependencies,
+                    response_model=List[config.response_model],
+                    dependencies=config.dependencies,
                 )
                 async def read_all(
                     filter: Optional[str] = None,
@@ -209,21 +210,13 @@ class CustomRouterProvider:
             if (
                 config.route_name == DefaultRoutesName.CREATE
                 and self.CreatePydanticModel
-                and config.is_activated
             ):
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=self.PydanticModel,
-                    dependencies=dependencies,
+                    response_model=config.response_model,
+                    dependencies=config.dependencies,
                     status_code=status.HTTP_201_CREATED,
                 )
                 async def create(
@@ -234,22 +227,14 @@ class CustomRouterProvider:
             if (
                 config.route_name == DefaultRoutesName.UPDATE
                 and self.UpdatePydanticModel
-                and config.is_activated
             ):
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-
 
                 @self.router.put(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=self.PydanticModel,
-                    dependencies=dependencies,
+                    response_model=config.response_model,
+                    dependencies=config.dependencies,
                 )
                 async def update(
                     pk,
@@ -257,25 +242,14 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.update(pk, update_obj, True)
 
-            if (
-                config.route_name == DefaultRoutesName.PATCH
-                and self.PatchPydanticModel
-                and config.is_activated
-            ):
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-
+            if config.route_name == DefaultRoutesName.PATCH and self.PatchPydanticModel:
 
                 @self.router.patch(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=self.PydanticModel,
-                    dependencies=dependencies,
+                    response_model=config.response_model,
+                    dependencies=config.dependencies,
                 )
                 async def patch(
                     pk,
@@ -283,20 +257,13 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.update(pk, update_obj, False)
 
-            if config.route_name == DefaultRoutesName.DELETE and config.is_activated:
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-
+            if config.route_name == DefaultRoutesName.DELETE:
 
                 @self.router.delete(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
                 )
                 async def delete(
@@ -304,22 +271,13 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.delete(pk)
 
-            if (
-                config.route_name == DefaultRoutesName.BULK_DELETE
-                and config.is_activated
-            ):
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
+            if config.route_name == DefaultRoutesName.BULK_DELETE:
 
                 @self.router.delete(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
                 )
                 async def bulk_delete(
@@ -327,56 +285,18 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.bulk_delete(pk_list)
 
-            if (
-                config.route_name == DefaultRoutesName.BULK_CREATE
-                and config.is_activated
-            ):
-                dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
+            if config.route_name == DefaultRoutesName.BULK_CREATE:
 
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    dependencies=dependencies,
+                    dependencies=config.dependencies,
+                    response_model=List[config.response_model],
                 )
                 async def bulk_create(
                     create_obj_list: List[self.CreatePydanticModel],
                 ):
                     return await self.crud.bulk_create(create_obj_list)
 
-            if config.route_name == DefaultRoutesName.READ_ALL_RELATIONS and config.is_activated:
-                    dependencies = initialize_dependecies(
-                    config=config,
-                    authentication=self.authentication,
-                    roles=self.roles,
-                    privileges=self.privileges,
-                )
-                    @self.router.get(
-                    path=config.route_path,
-                    summary=config.summary,
-                    description=config.description,
-                    dependencies=dependencies,
-                    response_model=config.response_model
-                )
-                    async def read_all_relations(
-                    pk,
-                    filter: Optional[str] = None,
-                    value=None,
-                    skip: int = 0,
-                    limit: int = None,
-                ):
-                        return await self.crud.read_all_relations(
-                            pk=pk,
-                            skip=skip,
-                            limit=limit,
-                            filter=filter,
-                            value=value
-                        )
         return self.router
-
-

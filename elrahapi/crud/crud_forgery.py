@@ -19,7 +19,8 @@ class CrudForgery:
     ):
         self.crud_models= crud_models
         self.entity_name=crud_models.entity_name
-        self.PydanticModel=crud_models.pydantic_model
+        self.ReadPydanticModel=crud_models.read_model
+        self.FullReadPydanticModel=crud_models.full_read_model
         self.SQLAlchemyModel = crud_models.sqlalchemy_model
         self.CreatePydanticModel = crud_models.create_pydantic_model
         self.UpdatePydanticModel = crud_models.update_pydantic_model

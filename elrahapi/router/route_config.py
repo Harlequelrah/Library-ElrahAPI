@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional,Callable,Any
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DEFAULT_NO_DETAIL_ROUTES_NAME, DefaultRoutesName
+from fastapi import Depends
 
 
 class DEFAULT_ROUTE_CONFIG:
@@ -23,16 +24,20 @@ class RouteConfig:
         is_unlocked: Optional[bool] = False,
         roles : Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
-        response_model:Optional[type]=None,
+        dependencies:Optional[List[Callable[...,Any]]]=None,
+        with_relations:Optional[bool]=None,
+        response_model:Optional[Any]=None
     ):
         self.route_name = route_name
         self.is_activated = is_activated
         self.is_protected = is_protected
         self.route_path = self.validate_route_path(route_name,route_path)
         self.summary = summary
-        self.response_model=response_model
         self.description = description
         self.is_unlocked = is_unlocked
+        self.response_model = response_model
+        self.dependencies = dependencies if dependencies else []
+        self.with_relations = with_relations
         self.roles = [role.strip().upper() for role in roles if roles] if roles else []
         self.privileges = [auth.strip().upper() for auth in privileges] if privileges else []
 
@@ -58,5 +63,10 @@ class AuthorizationConfig:
         self.route_name = route_name
         self.roles = roles if roles else []
         self.privileges = privileges if privileges else []
+
+class ResponseModelConfig:
+    def __init__(self,route_name : DefaultRoutesName,with_relations:bool):
+        self.route_name = route_name
+        self.with_relations = with_relations
 
 
