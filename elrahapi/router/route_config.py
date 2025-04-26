@@ -23,12 +23,14 @@ class RouteConfig:
         is_unlocked: Optional[bool] = False,
         roles : Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
+        response_model:Optional[type]=None,
     ):
         self.route_name = route_name
         self.is_activated = is_activated
         self.is_protected = is_protected
         self.route_path = self.validate_route_path(route_name,route_path)
         self.summary = summary
+        self.response_model=response_model
         self.description = description
         self.is_unlocked = is_unlocked
         self.roles = [role.strip().upper() for role in roles if roles] if roles else []
@@ -37,8 +39,10 @@ class RouteConfig:
     def validate_route_path(self,route_name:str,route_path:Optional[str]=None):
         if route_path : return route_path
         else:
-            if route_name in  DEFAULT_DETAIL_ROUTES_NAME or route_name in DEFAULT_NO_DETAIL_ROUTES_NAME:
-                return ""
+            if "{pk}" not in route_path and route_name in DEFAULT_DETAIL_ROUTES_NAME :
+                return f"{route_name.value}/{{pk}}"
+            # if route_name  in DEFAULT_NO_DETAIL_ROUTES_NAME:
+            #     return ""
             else : return f"/{route_name.value}"
 
 

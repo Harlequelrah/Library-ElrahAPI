@@ -2,5 +2,9 @@
 # from pydantic import BaseModel, Field
 # from typing import List, Optional
 
+# class EntityBaseModel(BaseModel):
+#     pass
+
+
 # class MetaEntityModel(BaseModel):
 #     pass

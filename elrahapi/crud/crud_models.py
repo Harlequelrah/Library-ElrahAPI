@@ -4,14 +4,25 @@ from typing import Optional
 
 
 class CrudModels:
-    def __init__(self,entity_name:str, primary_key_name:str,SQLAlchemyModel:type,PydanticModel:Optional[type]=None,CreateModel:Optional[type]=None,UpdateModel:Optional[type]=None,PatchModel:Optional[type]=None):
+    def __init__(
+        self,
+        entity_name:str,
+        primary_key_name:str,
+        SQLAlchemyModel:type,
+        ReadModel:Optional[type]=None,
+        CreateModel:Optional[type]=None,
+        UpdateModel:Optional[type]=None,
+        PatchModel:Optional[type]=None,
+        FullReadModel:Optional[type]=None
+        ):
         self.__entity_name = entity_name
         self.__primary_key_name=primary_key_name
         self.__SQLAlchemyModel = SQLAlchemyModel
-        self.__PydanticModel = PydanticModel
+        self.__ReadModel = ReadModel
         self.__CreateModel = CreateModel
         self.__UpdateModel = UpdateModel
         self.__PatchModel = PatchModel
+        self.__FullReadModel= FullReadModel
 
 
     @property
@@ -27,19 +38,23 @@ class CrudModels:
         return self.__SQLAlchemyModel
 
     @property
-    def pydantic_model(self):
-        return self.__PydanticModel
+    def read_model(self):
+        return self.__ReadModel
 
     @property
-    def create_pydantic_model(self):
+    def full_read_model(self):
+        return self.__FullReadModel
+
+    @property
+    def create_model(self):
         return self.__CreateModel
 
     @property
-    def update_pydantic_model(self):
+    def update_model(self):
         return self.__UpdateModel
 
     @property
-    def patch_pydantic_model(self):
+    def patch_model(self):
         return self.__PatchModel
 
 
@@ -52,23 +67,27 @@ class CrudModels:
         self.__primary_key_name = primary_key_name
 
     @sqlalchemy_model.setter
-    def sqlalchemy_model(self, model):
+    def sqlalchemy_model(self, model : type):
         self.__SQLAlchemyModel = model
 
-    @pydantic_model.setter
-    def pydantic_model(self, model):
-        self.__PydanticModel = model
+    @read_model.setter
+    def read_model(self, model : type):
+        self.__ReadModel = model
 
-    @create_pydantic_model.setter
-    def create_pydantic_model(self, model):
+    @full_read_model.setter
+    def full_read_model(self, model : type):
+        self.__FullReadModel = model
+
+    @create_model.setter
+    def create_model(self, model : type):
         self.__CreateModel = model
 
-    @update_pydantic_model.setter
-    def update_pydantic_model(self, model):
+    @update_model.setter
+    def update_model(self, model : type):
         self.__UpdateModel = model
 
-    @patch_pydantic_model.setter
-    def patch_pydantic_model(self, model):
+    @patch_model.setter
+    def patch_model(self, model : type):
         self.__PatchModel = model
 
 

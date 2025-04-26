@@ -14,11 +14,14 @@ from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginReque
 
 
 class AuthenticationRouterProvider:
-    def __init__(self,authentication:AuthenticationManager):
+    def __init__(self,
+                authentication:AuthenticationManager,
+                with_relations:Optional[bool]=False
+                ):
 
         self.authentication=authentication
 
-        self.pydantic_model = authentication.authentication_models.pydantic_model
+        self.pydantic_model = authentication.authentication_models.full_read_model if with_relations else authentication.authentication_models.read_model
 
         self.router =APIRouter(
             prefix="/auth",
@@ -44,7 +47,7 @@ class AuthenticationRouterProvider:
                 )
                 @self.router.get(
                     path=config.route_path,
-                    response_model=self.pydantic_model,
+                    response_model= config.response_model if config.response_model else self.pydantic_model ,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=dependencies
@@ -54,7 +57,7 @@ class AuthenticationRouterProvider:
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER and config.is_activated:
                 @self.router.get(
                     path=config.route_path,
-                    response_model=self.pydantic_model,
+                    response_model= config.response_model if config.response_model else self.pydantic_model ,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                 )

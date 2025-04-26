@@ -30,12 +30,19 @@ class RolePatchModel(BaseModel):
     description: Optional[str] = Field(example="allow to manage all the system", default=None)
 
 
-class RolePydanticModel(MetaAuthorizationPydanticModel):
+class RoleReadModel(MetaAuthorizationPydanticModel):
+    class Config:
+        from_attributes = True
+
+
+class RoleFullReadModel(MetaAuthorizationPydanticModel):
     role_privileges: List["MetaAuthorizationBaseModel"] = []
     role_users:List["MetaRoleUsers"]=[]
 
     class Config:
         from_attributes = True
+
+
 class MetaRoleUsers(BaseModel):
     user_id:int
     is_active:bool

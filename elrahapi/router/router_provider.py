@@ -21,7 +21,11 @@ from elrahapi.router.router_namespace import (
 )
 
 from fastapi import APIRouter
-
+from elrahapi.crud.crud_models import CrudModels
+class Relation:
+    def __init__(self,second_entity_name:str,second_entity_crud:CrudModels):
+        self.second_entity_name = second_entity_name
+        self.seconc_entit_crud = second_entity_crud
 
 class CustomRouterProvider:
 
@@ -33,6 +37,7 @@ class CustomRouterProvider:
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
+
     ):
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
@@ -113,7 +118,7 @@ class CustomRouterProvider:
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     ) -> APIRouter:
         if not self.authentication:
-            raise NO_AUTHENTICATION_PROVIDED_CUSTOM_HTTP_EXCEPTION
+            raise ValueError("No authentication provided in the router provider")
         if init_data is None:
             init_data = []
         public_routes_data = self.get_custom_router_init_data(
@@ -147,8 +152,8 @@ class CustomRouterProvider:
 
                 @self.router.get(
                     path=config.route_path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    summary=config.summary,
+                    description=config.description,
                     dependencies=dependencies,
                 )
                 async def count():
@@ -162,16 +167,12 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = (
-                    f"{config.route_path}/{{pk}}"
-                    if "{pk}" not in config.route_path
-                    else config.route_path
-                )
+
 
                 @self.router.get(
-                    path=path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
                 )
@@ -190,8 +191,8 @@ class CustomRouterProvider:
 
                 @self.router.get(
                     path=config.route_path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    summary=config.summary,
+                    description=config.description,
                     response_model=List[self.PydanticModel],
                     dependencies=dependencies,
                 )
@@ -219,8 +220,8 @@ class CustomRouterProvider:
 
                 @self.router.post(
                     path=config.route_path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    summary=config.summary,
+                    description=config.description,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
                     status_code=status.HTTP_201_CREATED,
@@ -241,16 +242,12 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = (
-                    f"{config.route_path}/{{pk}}"
-                    if "{pk}" not in config.route_path
-                    else config.route_path
-                )
+
 
                 @self.router.put(
-                    path=path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
                 )
@@ -271,16 +268,12 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = (
-                    f"{config.route_path}/{{pk}}"
-                    if "{pk}" not in config.route_path
-                    else config.route_path
-                )
+
 
                 @self.router.patch(
-                    path=path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
                     response_model=self.PydanticModel,
                     dependencies=dependencies,
                 )
@@ -297,16 +290,12 @@ class CustomRouterProvider:
                     roles=self.roles,
                     privileges=self.privileges,
                 )
-                path = (
-                    f"{config.route_path}/{{pk}}"
-                    if "{pk}" not in config.route_path
-                    else config.route_path
-                )
+
 
                 @self.router.delete(
-                    path=path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
                     dependencies=dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
                 )
@@ -328,8 +317,8 @@ class CustomRouterProvider:
 
                 @self.router.delete(
                     path=config.route_path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    summary=config.summary,
+                    description=config.description,
                     dependencies=dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
                 )
@@ -351,8 +340,8 @@ class CustomRouterProvider:
 
                 @self.router.post(
                     path=config.route_path,
-                    summary=config.summary if config.summary else None,
-                    description=config.description if config.description else None,
+                    summary=config.summary,
+                    description=config.description,
                     dependencies=dependencies,
                 )
                 async def bulk_create(
@@ -360,4 +349,34 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.bulk_create(create_obj_list)
 
+            if config.route_name == DefaultRoutesName.READ_ALL_RELATIONS and config.is_activated:
+                    dependencies = initialize_dependecies(
+                    config=config,
+                    authentication=self.authentication,
+                    roles=self.roles,
+                    privileges=self.privileges,
+                )
+                    @self.router.get(
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
+                    dependencies=dependencies,
+                    response_model=config.response_model
+                )
+                    async def read_all_relations(
+                    pk,
+                    filter: Optional[str] = None,
+                    value=None,
+                    skip: int = 0,
+                    limit: int = None,
+                ):
+                        return await self.crud.read_all_relations(
+                            pk=pk,
+                            skip=skip,
+                            limit=limit,
+                            filter=filter,
+                            value=value
+                        )
         return self.router
+
+

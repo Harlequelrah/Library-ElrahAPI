@@ -2,11 +2,9 @@
 # from typing import List, Optional
 # from datetime import datetime
 # from decimal import Decimal
-# from fastapi import Form
 # from datetime import datetime
 
-# class EntityBaseModel(BaseModel):
-#     pass
+# from .meta_models import EntityBaseModel
 
 # class EntityCreateModel(BaseModel):
 #     pass
@@ -23,3 +21,7 @@
     #     from_attributes=True
 
 
+# class EntityFullPydanticModel(BaseModel):
+#     pass
+    # class Config:
+    #     from_attributes=True
