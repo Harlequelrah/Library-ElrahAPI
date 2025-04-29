@@ -1,5 +1,3 @@
-
-
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends,status
@@ -7,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 from elrahapi.router.route_config import AuthorizationConfig, RouteConfig,ResponseModelConfig
-from elrahapi.router.router_crud import format_init_data, initialize_dependecies
+from elrahapi.router.router_crud import format_init_data
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
 from elrahapi.router.router_namespace import  USER_AUTH_CONFIG_ROUTES
 from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginRequestModel

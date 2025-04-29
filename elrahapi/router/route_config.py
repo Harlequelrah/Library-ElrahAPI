@@ -68,7 +68,8 @@ class AuthorizationConfig:
         self.privileges = privileges if privileges else []
 
 class ResponseModelConfig:
-    def __init__(self,route_name : DefaultRoutesName,with_relations:bool):
+    def __init__(self,route_name : DefaultRoutesName,with_relations:bool,reponse_model:Optional[Any]=None):
+        self.reponse_model = reponse_model
         self.route_name = route_name
         self.with_relations = with_relations
 

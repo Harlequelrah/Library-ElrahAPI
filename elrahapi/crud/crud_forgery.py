@@ -28,14 +28,7 @@ class CrudForgery:
         self.primary_key_name = crud_models.primary_key_name
         self.session_manager = session_manager
 
-    async def get_pk(self):
-        try :
-            return  getattr(self.SQLAlchemyModel,self.primary_key_name)
-        except Exception as e :
-            detail = f"Error occurred while getting primary key for entity {self.entity_name} , details : {str(e)}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
-            )
+
 
     async def bulk_create(self,create_obj_list:list):
         session = self.session_manager.yield_session()
@@ -84,7 +77,7 @@ class CrudForgery:
     async def count(self) -> int:
         session = self.session_manager.yield_session()
         try:
-            pk = await self.get_pk()
+            pk = await self.crud_models.get_pk(self.entity_name)
             count = session.query(func.count(pk)).scalar()
             return count
         except Exception as e:
@@ -120,7 +113,7 @@ class CrudForgery:
             session = db
         else:
             session = self.session_manager.yield_session()
-        pk_attr =  await self.get_pk()
+        pk_attr =  await self.crud_models.get_pk(self.entity_name)
         read_obj = (
                 session.query(self.SQLAlchemyModel)
                 .filter(pk_attr== pk)
@@ -169,7 +162,7 @@ class CrudForgery:
 
     async  def bulk_delete(self , pk_list:BulkDeleteModel):
         session = self.session_manager.yield_session()
-        pk_attr= await self.get_pk()
+        pk_attr= await self.crud_models.get_pk(self.entity_name)
         delete_list= pk_list.delete_liste
         try:
             session.execute(delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list)))

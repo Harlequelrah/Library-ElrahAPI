@@ -18,6 +18,8 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Générer les principaux cruds d'un model ;
 
+- Configurer facilement les routes  avec des configurations personnalisées ;
+
 - Fournir et configurer facilement les principales routes d'un model ;
 
 - Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log ;
@@ -26,9 +28,9 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Permet de gérer efficement l'authentification et les routes protégées ;
 
-- Une gestion simple et efficace de l'autorisation par l'utilisation de rôles et privileges .
+- Une gestion simple et efficace de l'autorisation par l'utilisation de rôles et privileges ;
 
-- L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes
+- L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes .
 
 # II - **`Installation`**
 
@@ -150,6 +152,7 @@ ou si virtualenv est dejà installé au préalable
     prefix="/items",
     tags=["item"],
     crud=myapp_crud,
+
 )
 ```
 
@@ -157,9 +160,7 @@ ou si virtualenv est dejà installé au préalable
 
 - `Des roles et des privileges peuvent lui etre ajoutés directement .`
 
-- `Pour utiliser les methodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter authentication en l'important comme suite  `:
-
-  - **`from myproject.settings.database import authentication`**
+- `Pour utiliser les methodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter authentication`:
 
 ### 6.4 `Configurer un router`
 
@@ -247,19 +248,19 @@ init_data=custom_init_data,
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 from .settings.logger.router import app_logger
-from .settings.logger.model import Logger
+from .settings.logger.model import Log
 from .settings.database import engine,session_manager
 
 app = FastAPI()
 app.include_router(app_logger)
 app.add_middleware(
     ErrorHandlingMiddleware,
-    LoggerMiddlewareModel=Logger,
+    LogModel=Logger,
     session_manager=session_manager
 )
 app.add_middleware(
     LoggerMiddleware,
-    LoggerMiddlewareModel=Logger,
+    LogModel=Logger,
     session_manager=session_manager
 )
 ```
@@ -680,6 +681,14 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **sortie** : **Reponse avec status code 204**
 
+- `change_user_state` : méthode pour changer le statut d'activité  d'un utilisateur
+
+  - **paramètres** :
+
+    - pk : la clé primaire
+
+  - **sortie** : **Reponse avec status code 204**
+
 #### 2.3.4 Sous module `authentication_router_provider`
 
 Ce sous module définit la classe AuthenticationRouterProvider pour gérer le routage de l'authentification
@@ -688,7 +697,11 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
   - authentication : **AuthenticationManager**
 
-  - pydantic_model : **type**
+  - with_relations : **Optional[bool]**
+
+  - roles : **Optional[List[str]]**
+
+  - privileges : **Optional[List[str]]**
 
   - router : **APIRouter**
 
@@ -698,7 +711,14 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
     - **parametres** :
 
-    - authentication : **AuthenticationManager**
+        - authentication : **AuthenticationManager**
+
+        - with_relations : **Optional[bool]**
+
+        - roles : **Optional[List[str]]**
+
+        - privileges : **Optional[List[str]]**
+
 
   - `get_auth_router ` : renvoie un router configurable pour l'authentification
 
@@ -710,13 +730,15 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
       - exclude_routes_name: **Optional[List[DefaultRoutesName]]**
 
+      - response_model_configs : **Optional[List[ResponseModelConfig]]**
+
     - **sortie** : APIRouter
 
 ### 2.4. **Module `authorization`**
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
-#### 2.4.1. Sous module `meta_model`
+#### 2.4.1. Sous module `base_meta_model`
 
 Ce sous module contient des models Meta pour définir les models liés à l'authorization et pour lire partiellement des données .
 
@@ -734,8 +756,6 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
 - `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
 
-  - id : **int**
-
   - normalizedName : **str**
 
   - is_active : **bool**
@@ -743,6 +763,10 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 - `MetaAuthorizationReadModel(MetaAuthorizationModel)` , classe pour définir les Models Pydantic complet pour Role et Privilege.
 
 - name : **str**
+
+- id : **int**
+
+
 
 - `MetaUserPrivilegeModel(BaseModel)` :
 

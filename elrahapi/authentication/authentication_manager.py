@@ -196,10 +196,10 @@ class AuthenticationManager:
 
     async def change_user_state(self,pk):
         db= self.get_session()
+        pk_attr = await self.__authentication_models.get_pk(self.__authentication_models.entity_name)
         user= (
             db.query(self.__authentication_models.sqlalchemy_model)
-                .filter(
-                    self.__authentication_models.sqlalchemy_model.id == pk
+                .filter(pk_attr == pk
                 )
                 .first()
         )

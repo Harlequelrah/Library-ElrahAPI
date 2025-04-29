@@ -110,6 +110,9 @@ def set_response_model_config(
         if response_model_config:
             route_config.with_relations = response_model_config.with_relations
             final_routes_config.append(route_config)
+
+            if response_model_config.response_model:
+                route_config.response_model = response_model_config.response_model
     return final_routes_config
 
 
@@ -162,10 +165,11 @@ def format_init_data(
         )
     )
     for route_config in formatted_data:
-        route_config.response_model = set_response_model(
-                    route_config=route_config,
-                    with_relations=with_relations,ReadPydanticModel=ReadPydanticModel,FullReadPydanticModel=FullReadPydanticModel
-                )
+        if not route_config.response_model:
+            route_config.response_model = set_response_model(
+                        route_config=route_config,
+                        with_relations=with_relations,ReadPydanticModel=ReadPydanticModel,FullReadPydanticModel=FullReadPydanticModel
+                    )
     return formatted_data
 
 

@@ -1,38 +1,36 @@
-
-
 from typing import Optional, Type
-
+from fastapi import status
 from pydantic import BaseModel
+from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 
 
 class CrudModels:
     def __init__(
         self,
-        entity_name:str,
-        primary_key_name:str,
-        SQLAlchemyModel:type,
-        ReadModel:Type[BaseModel],
-        CreateModel:Optional[Type[BaseModel]]=None,
-        UpdateModel:Optional[Type[BaseModel]]=None,
-        PatchModel:Optional[Type[BaseModel]]=None,
-        FullReadModel:Optional[Type[BaseModel]]=None
-        ):
+        entity_name: str,
+        primary_key_name: str,
+        SQLAlchemyModel: type,
+        ReadModel: Type[BaseModel],
+        CreateModel: Optional[Type[BaseModel]] = None,
+        UpdateModel: Optional[Type[BaseModel]] = None,
+        PatchModel: Optional[Type[BaseModel]] = None,
+        FullReadModel: Optional[Type[BaseModel]] = None,
+    ):
         self.__entity_name = entity_name
-        self.__primary_key_name=primary_key_name
+        self.__primary_key_name = primary_key_name
         self.__SQLAlchemyModel = SQLAlchemyModel
         self.__ReadModel = ReadModel
         self.__CreateModel = CreateModel
         self.__UpdateModel = UpdateModel
         self.__PatchModel = PatchModel
-        self.__FullReadModel= FullReadModel
-
+        self.__FullReadModel = FullReadModel
 
     @property
     def entity_name(self):
         return self.__entity_name
 
     @property
-    def primary_key_name(self)->str:
+    def primary_key_name(self) -> str:
         return self.__primary_key_name
 
     @property
@@ -59,7 +57,6 @@ class CrudModels:
     def patch_model(self):
         return self.__PatchModel
 
-
     @entity_name.setter
     def entity_name(self, entity_name: str):
         self.__entity_name = entity_name
@@ -69,30 +66,34 @@ class CrudModels:
         self.__primary_key_name = primary_key_name
 
     @sqlalchemy_model.setter
-    def sqlalchemy_model(self, model : Type[BaseModel]):
+    def sqlalchemy_model(self, model: Type[BaseModel]):
         self.__SQLAlchemyModel = model
 
     @read_model.setter
-    def read_model(self, model : Type[BaseModel]):
+    def read_model(self, model: Type[BaseModel]):
         self.__ReadModel = model
 
     @full_read_model.setter
-    def full_read_model(self, model : Type[BaseModel]):
+    def full_read_model(self, model: Type[BaseModel]):
         self.__FullReadModel = model
 
     @create_model.setter
-    def create_model(self, model : Type[BaseModel]):
+    def create_model(self, model: Type[BaseModel]):
         self.__CreateModel = model
 
     @update_model.setter
-    def update_model(self, model : Type[BaseModel]):
+    def update_model(self, model: Type[BaseModel]):
         self.__UpdateModel = model
 
     @patch_model.setter
-    def patch_model(self, model : Type[BaseModel]):
+    def patch_model(self, model: Type[BaseModel]):
         self.__PatchModel = model
 
-
-
-
-
+    async def get_pk(self, entity_name: str):
+        try:
+            return getattr(self.__SQLAlchemyModel, self.__primary_key_name)
+        except Exception as e:
+            detail = f"Error occurred while getting primary key for entity {entity_name} , details : {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
