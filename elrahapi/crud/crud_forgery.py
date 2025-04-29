@@ -22,9 +22,9 @@ class CrudForgery:
         self.ReadPydanticModel=crud_models.read_model
         self.FullReadPydanticModel=crud_models.full_read_model
         self.SQLAlchemyModel = crud_models.sqlalchemy_model
-        self.CreatePydanticModel = crud_models.create_pydantic_model
-        self.UpdatePydanticModel = crud_models.update_pydantic_model
-        self.PatchPydanticModel = crud_models.patch_pydantic_model
+        self.CreatePydanticModel = crud_models.create_model
+        self.UpdatePydanticModel = crud_models.update_model
+        self.PatchPydanticModel = crud_models.patch_model
         self.primary_key_name = crud_models.primary_key_name
         self.session_manager = session_manager
 

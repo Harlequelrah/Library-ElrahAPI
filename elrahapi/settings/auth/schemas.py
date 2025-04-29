@@ -2,7 +2,7 @@ from typing import List, Optional
 from elrahapi.user import  schemas
 from pydantic import Field,BaseModel
 
-class UserBaseModel(BaseModel,schemas.UserBaseModel):
+class UserBaseModel(schemas.UserBaseModel):
     pass
 
 class UserCreateModel(UserBaseModel, schemas.UserCreateModel):

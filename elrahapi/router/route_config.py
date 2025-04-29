@@ -42,14 +42,15 @@ class RouteConfig:
         self.privileges = [auth.strip().upper() for auth in privileges] if privileges else []
 
     def validate_route_path(self,route_name:DefaultRoutesName,route_path:Optional[str]=None):
-        if route_path : return route_path
-        else:
-            print(f"route_name : {route_name} route_path : {route_path}")
-            if route_name in DEFAULT_DETAIL_ROUTES_NAME and "{{pk]}" not in route_path :
+        if route_path :
+            if route_name in DEFAULT_DETAIL_ROUTES_NAME and "{pk}" not in route_path :
                 return f"{route_name.value}/{{pk}}"
+            return route_path
+        else:
+            return f"/{route_name.value}"
+            # print(f"route_name : {route_name} route_path : {route_path}")
             # if route_name  in DEFAULT_NO_DETAIL_ROUTES_NAME:
             #     return ""
-            else : return f"/{route_name.value}"
 
 
     def get_authorizations(self,authentication:AuthenticationManager)-> List[callable]:

@@ -156,7 +156,7 @@ def format_init_data(
     )
     formatted_data = (
         formatted_data
-        if authentication is None
+        if response_model_configs is None
         else set_response_model_config(
             routes_config=formatted_data, response_model_configs=response_model_configs
         )

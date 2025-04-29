@@ -6,7 +6,7 @@ from elrahapi.authorization.user_role.meta_models import MetaUserRoleModel
 
 from elrahapi.authorization.user_privilege.meta_models import MetaUserPrivilegeModel
 
-class UserBaseModel:
+class UserBaseModel(BaseModel):
     email: EmailStr = Field(example="user@example.com")
     username: str = Field(example="Harlequelrah")
     lastname: str = Field(example="SMITH")
