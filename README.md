@@ -780,11 +780,15 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - is_active : **bool**
 
-#### 2.4.2 Sous module `role_model`
+#### 2.4.2 Sous module `role`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
+##### 2.4.2.1 Sous module `models`
+
 - `RoleModel(MetaAuthorization)`
+
+##### 2.4.2.2 Sous module `schemas`
 
 - `RoleBaseModel(BaseModel)` :
 
@@ -808,15 +812,32 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `RolePydanticModel(MetaAuthorizationReadModel)` :
+- `RoleReadModel(MetaAuthorizationReadModel)`
+
+- `RoleFullReadModel(MetaAuthorizationReadModel)`
 
   - role_privileges : **List[MetaAuthorizationBaseModel]**
 
-#### 2.4.3. Sous module `privilege_model`
+  - role_users : **List[MetaRoleUsers]**
+
+#### 2.4.2.3. Sous module `meta_models`
+
+- `MetaRoleUsers(BaseModel)`
+
+  - user_id : int
+
+  - is_active : int
+
+#### 2.4.3 Sous module `privilege`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Privilege .
 
+##### 2.4.3 Sous module `models`
+
 - `PrivilegeModel(MetaAuthorization)`
+
+##### 2.4.3 Sous module `schemas`
+
 
 - `PrivilegeBaseModel(BaseModel)`
 
@@ -839,6 +860,10 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - description : **Optional[str]**
 
   - is_active : **Optional[bool]**
+
+
+- `PrivilegeReadModel(MetaAuthorizationReadModel)` :
+
 
 - `PrivilegePydanticModel(MetaAuthorizationReadModel)` :
 
