@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,status
 from fastapi.security import OAuth2PasswordRequestForm
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
@@ -61,6 +61,17 @@ class AuthenticationRouterProvider:
                 )
                 async def read_one_user(username_or_email: str):
                     return await self.authentication.read_one_user(username_or_email)
+            if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
+                @self.router.get(
+                    path=config.route_path,
+                    status_code=status.HTTP_204_NO_CONTENT,
+                    # response_model=config.response_model ,
+                    summary=config.summary if config.summary else None,
+                    description=config.description if config.description else None,
+                    dependencies=config.dependencies
+                )
+                async def change_user_state(pk):
+                    return await self.authentication.change_user_state(pk)
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER :
                 @self.router.get(
                     path=config.route_path,

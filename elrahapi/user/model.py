@@ -46,6 +46,9 @@ class UserModel:
         if  self.MAX_ATTEMPT_LOGIN and self.attempt_login >= self.MAX_ATTEMPT_LOGIN:
             self.is_active = False
 
+    def change_user_state(self):
+        self.is_active = not self.is_active
+
 
 
 

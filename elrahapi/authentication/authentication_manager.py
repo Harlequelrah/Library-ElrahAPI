@@ -150,9 +150,9 @@ class AuthenticationManager:
     ) -> AccessToken:
         to_encode = data.copy()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(
+            expire = datetime.now() + timedelta(
                 milliseconds=self.__access_token_expiration
             )
         to_encode.update({"exp": expire})
@@ -166,9 +166,9 @@ class AuthenticationManager:
     ) -> RefreshToken:
         to_encode = data.copy()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(
+            expire = datetime.now() + timedelta(
                 milliseconds=self.__refresh_token_expiration
             )
         to_encode.update({"exp": expire})
@@ -193,6 +193,27 @@ class AuthenticationManager:
             raise_custom_http_exception(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
+
+    async def change_user_state(self,pk):
+        db= self.get_session()
+        user= (
+            db.query(self.__authentication_models.sqlalchemy_model)
+                .filter(
+                    self.__authentication_models.sqlalchemy_model.id == pk
+                )
+                .first()
+        )
+        if user :
+            user.change_user_state()
+            db.commit()
+            db.refresh(user)
+
+        else :
+            detail = "User Not Found"
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+            )
+
 
     async def get_user_by_sub(self, username_or_email: str, db: Session):
         user = (

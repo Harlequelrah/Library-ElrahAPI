@@ -23,11 +23,9 @@ class UserPatchModel:
     username: Optional[str] = Field(example="Harlequelrah",default=None)
     lastname: Optional[str] = Field(example="SMITH",default=None)
     firstname: Optional[str] = Field(example="jean-francois",default=None)
-    is_active: Optional[bool] = Field(example=True,default=None)
-    password: Optional[str] = Field(example="m*td*pa**e",default=None)
 
 class UserUpdateModel:
-    is_active: bool = Field(example=True)
+    pass
 
 class UserReadModel:
     id: int

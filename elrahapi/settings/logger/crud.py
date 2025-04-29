@@ -1,12 +1,12 @@
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
 from ..database import session_manager
-from .model import Logger
+from .model import Log
 from .schema import LogReadModel
 log_crud_models = CrudModels (
     entity_name='log',
     primary_key_name='id',
-    SQLAlchemyModel=Logger,
+    SQLAlchemyModel=Log,
     ReadModel=LogReadModel
 )
 logCrud = CrudForgery(

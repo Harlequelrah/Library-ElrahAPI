@@ -1,6 +1,6 @@
 from ..database import Base
-from elrahapi.middleware.models import LoggerMiddlewareModel
+from elrahapi.middleware.models import LogModel
 
-class Logger(Base, LoggerMiddlewareModel):
-    __tablename__ = "loggers"
+class Log(Base, LogModel):
+    __tablename__ = "logs"
 metadata = Base.metadata

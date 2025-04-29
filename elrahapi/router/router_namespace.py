@@ -2,7 +2,7 @@ from typing import List
 from enum import Enum
 
 from elrahapi.router.router_default_routes_name import DefaultRoutesName
-from .route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
+from elrahapi.router.route_config import DEFAULT_ROUTE_CONFIG, RouteConfig
 
 
 class TypeRoute(str, Enum):
@@ -65,7 +65,7 @@ ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
 USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     DefaultRoutesName.READ_CURRENT_USER: RouteConfig(
         route_name=DefaultRoutesName.READ_CURRENT_USER,
-        route_path="/read/current-user",
+        route_path="/read-current-user",
         is_activated=True,
         is_protected=True,
         summary="read current user",
@@ -111,6 +111,14 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
         is_protected=True,
         summary="read one user ",
         description="retrieve one user from credential :  email or username",
+    ),
+    DefaultRoutesName.CHANGE_USER_STATE: RouteConfig(
+        route_name=DefaultRoutesName.CHANGE_USER_STATE,
+        route_path="/change-user-state",
+        is_activated=True,
+        is_protected=True,
+        summary="change user state ",
+        description="change user state (active or inactive)",
     ),
 }
 USER_AUTH_CONFIG_ROUTES: List[RouteConfig] = [

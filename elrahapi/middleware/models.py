@@ -14,7 +14,7 @@ from sqlalchemy.sql import func
 
 
 
-class LoggerMiddlewareModel:
+class LogModel:
     id = Column(Integer, primary_key=True)
     status_code = Column(Integer, index=True)
     method = Column(String(30), nullable=False)
@@ -25,7 +25,7 @@ class LoggerMiddlewareModel:
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)
 
 
-class LoggerMiddlewareReadModel(BaseModel):
+class LogReadModel(BaseModel):
     id:int
     status_code:int
     method:str

@@ -43,8 +43,9 @@ class RouteConfig:
 
     def validate_route_path(self,route_name:DefaultRoutesName,route_path:Optional[str]=None):
         if route_path :
+            # print(f"route_name : {route_name} route_path : {route_path}")
             if route_name in DEFAULT_DETAIL_ROUTES_NAME and "{pk}" not in route_path :
-                return f"{route_name.value}/{{pk}}"
+                return f"/{route_name.value}/{{pk}}"
             return route_path
         else:
             return f"/{route_name.value}"

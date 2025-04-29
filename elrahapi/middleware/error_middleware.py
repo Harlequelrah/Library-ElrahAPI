@@ -16,15 +16,15 @@ class ErrorHandlingMiddleware:
     def __init__(
         self,
         app,
-        LoggerMiddlewareModel=None,
+        LogModel=None,
         session_manager: Optional[SessionManager] = None,
         manager: ConnectionManager = None,
     ):
         self.app = app
-        self.LoggerMiddlewareModel = LoggerMiddlewareModel
+        self.LogModel = LogModel
         self.session_manager = session_manager
         self.manager = manager
-        self.has_log = self.session_manager and self.LoggerMiddlewareModel
+        self.has_log = self.session_manager and self.LogModel
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] not in ("http"):
@@ -69,7 +69,7 @@ class ErrorHandlingMiddleware:
         if self.has_log:
             await save_log(
                 request=request,
-                LoggerMiddlewareModel=self.LoggerMiddlewareModel,
+                LogModel=self.LogModel,
                 db=db,
                 response=response,
                 manager=self.manager,

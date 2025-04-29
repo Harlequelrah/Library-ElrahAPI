@@ -19,7 +19,7 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LoggerMiddlewareModel, db: Session,call_next=None,error=None,response:Response=None,manager:ConnectionManager=None
+    request: Request,LogModel, db: Session,call_next=None,error=None,response:Response=None,manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -28,7 +28,7 @@ async def save_log(
     response,process_time= await get_response_and_process_time(request,call_next,response)
     if error is None and (response.status_code <200 or response.status_code > 299)  :
         error = await read_response_body(response)
-    logger = LoggerMiddlewareModel(
+    logger = LogModel(
     process_time=process_time,
     status_code=response.status_code,
     url=str(request.url),

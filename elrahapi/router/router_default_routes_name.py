@@ -17,12 +17,13 @@ class DefaultRoutesName(str, Enum):
     REFRESH_TOKEN = "refresh-token"
     LOGIN = "login"
     CHANGE_PASSWORD = "change-password"
+    CHANGE_USER_STATE = "change-user-state"
 
 DEFAULT_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.DELETE,
     DefaultRoutesName.UPDATE,
     DefaultRoutesName.READ_ONE,
-    DefaultRoutesName.READ_ONE_USER,
+    DefaultRoutesName.CHANGE_USER_STATE,
     DefaultRoutesName.PATCH,
 ]
 
