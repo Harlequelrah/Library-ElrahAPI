@@ -1,20 +1,11 @@
 
+
 from pydantic import BaseModel,Field
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer
-
-from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
 
 from elrahapi.user.schemas import UserBaseModel
-
-
-
-class UserPrivilegeModel:
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"),nullable=False)
-    privilege_id = Column(Integer, ForeignKey("privileges.id"),nullable=False)
-    is_active = Column(Boolean, default=True)
 
 class UserPrivilegeCreateModel(BaseModel):
     user_id: int = Field(example=1)
@@ -36,7 +27,7 @@ class UserPrivilegeFullReadModel(BaseModel):
     class Config:
         from_attributes=True
 
-        
+
 class UserPrivilegePatchModel(BaseModel):
     user_id: Optional[int ]= Field(example=1,default=None)
     privilege_id: Optional[int]=Field(example=2,default=None)

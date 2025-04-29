@@ -1,13 +1,17 @@
-from elrahapi.authorization.user_role_model import UserRoleModel
+
+from elrahapi.authorization.role.models import RoleModel
+
+from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
+
+from elrahapi.authorization.privilege.models import PrivilegeModel
+
+from elrahapi.authorization.user_privilege.models import UserPrivilegeModel
+
+from elrahapi.authorization.user_role.models import UserRoleModel
 from ..database import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table,String
 from elrahapi.user.model import UserModel
-from  elrahapi.authorization.user_privilege_model import UserPrivilegeModel
 from sqlalchemy.orm import relationship
-from elrahapi.authorization.role_model import RoleModel
-from elrahapi.authorization.privilege_model import PrivilegeModel
-from elrahapi.authorization.role_privilege_model import RolePrivilegeModel
-from elrahapi.authorization.privilege_model import PrivilegeModel
 
 
 class User( UserModel,Base):

@@ -1,0 +1,9 @@
+from sqlalchemy import Column,Integer,ForeignKey
+
+
+
+class RolePrivilegeModel:
+    id=Column(Integer,primary_key=True)
+    role_id = Column(Integer,ForeignKey('roles.id'),nullable=False)
+    privilege_id = Column(Integer,ForeignKey('privileges.id'),nullable=False)
+

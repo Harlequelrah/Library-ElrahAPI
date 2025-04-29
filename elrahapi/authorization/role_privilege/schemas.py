@@ -1,16 +1,10 @@
 
 from typing import Optional
-from pydantic import BaseModel
 from pydantic import BaseModel, Field
-from sqlalchemy import Column,Integer,ForeignKey
 
-from elrahapi.authorization.meta_model import MetaAuthorizationBaseModel
+from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
 
 
-class RolePrivilegeModel:
-    id=Column(Integer,primary_key=True)
-    role_id = Column(Integer,ForeignKey('roles.id'),nullable=False)
-    privilege_id = Column(Integer,ForeignKey('privileges.id'),nullable=False)
 
 class RolePrivilegeCreateModel(BaseModel):
     role_id : int = Field(example=1)

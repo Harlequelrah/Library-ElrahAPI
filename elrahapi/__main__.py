@@ -44,6 +44,11 @@ def startproject(project_name):
     shutil.copyfile(env_src_path, env_dest_path)
     print(f"Le ficher '.env' a été copié vers {env_dest_path}")
 
+    example_env_src_path = os.path.join(main_path_dir, ".env.example")
+    example_env_dest_path = os.path.join(project_path, ".env.example")
+    shutil.copyfile(example_env_src_path, example_env_dest_path)
+    print(f"Le ficher '.env.example' a été copié vers {example_env_dest_path}")
+
     main_project_files_path = os.path.join(main_path_dir,"main_project_files")
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)

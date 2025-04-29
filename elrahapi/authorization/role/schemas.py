@@ -1,15 +1,13 @@
-from elrahapi.authorization.meta_model import (
-    MetaAuthorization,
+
+from elrahapi.authorization.base_meta_model import (
     MetaAuthorizationBaseModel,
     MetaAuthorizationReadModel,
 )
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+from elrahapi.authorization.role.meta_models import MetaRoleUsers
 
-
-class RoleModel(MetaAuthorization):
-    pass
 
 
 class RoleBaseModel(BaseModel):
@@ -43,6 +41,5 @@ class RoleFullReadModel(MetaAuthorizationReadModel):
         from_attributes = True
 
 
-class MetaRoleUsers(BaseModel):
-    user_id:int
-    is_active:bool
+
+

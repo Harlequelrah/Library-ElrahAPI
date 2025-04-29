@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field,EmailStr
 from typing import List, Optional
 from datetime import datetime
-from elrahapi.authorization.meta_model import  MetaUserPrivilegeModel,MetaUserRoleModel
+
+from elrahapi.authorization.user_role.meta_models import MetaUserRoleModel
+
+from elrahapi.authorization.user_privilege.meta_models import MetaUserPrivilegeModel
 
 class UserBaseModel:
     email: EmailStr = Field(example="user@example.com")

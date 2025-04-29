@@ -24,13 +24,8 @@ class MetaAuthorizationReadModel(MetaAuthorizationBaseModel):
     id:int
     name: str
 
-class MetaUserPrivilegeModel(BaseModel):
-    privilege:MetaAuthorizationBaseModel
-    is_active:bool
 
 
-class MetaUserRoleModel(BaseModel):
-    role:MetaAuthorizationBaseModel
-    is_active:bool
+
 
 

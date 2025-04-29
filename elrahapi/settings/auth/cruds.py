@@ -1,15 +1,20 @@
-
-from elrahapi.authorization.privilege_model import PrivilegeCreateModel, PrivilegePatchModel, PrivilegeReadModel, PrivilegeUpdateModel,PrivilegeFullReadModel
-from elrahapi.authorization.role_model import RoleCreateModel, RoleReadModel,RoleUpdateModel,RolePatchModel,RoleFullReadModel
-from elrahapi.authorization.role_privilege_model import RolePrivilegeCreateModel, RolePrivilegePatchModel, RolePrivilegeReadModel, RolePrivilegeUpdateModel,RolePrivilegeFullReadModel
-from elrahapi.authorization.user_privilege_model import UserPrivilegePatchModel, UserPrivilegeReadModel,UserPrivilegeFullReadModel
-from elrahapi.authorization.user_role_model import UserRoleCreateModel, UserRolePatchModel, UserRoleReadModel, UserRoleUpdateModel,UserRoleFullReadModel
 from elrahapi.crud.crud_forgery import CrudForgery
+
+from elrahapi.authorization.role.schemas import RoleCreateModel, RoleFullReadModel, RolePatchModel, RoleReadModel, RoleUpdateModel
+
+from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel, PrivilegeFullReadModel, PrivilegePatchModel, PrivilegeReadModel, PrivilegeUpdateModel
+
+from elrahapi.authorization.role_privilege.schemas import RolePrivilegeCreateModel,RolePrivilegeFullReadModel,RolePrivilegePatchModel,RolePrivilegeReadModel,RolePrivilegeUpdateModel
+
+from elrahapi.authorization.user_privilege.schemas import UserPrivilegeCreateModel, UserPrivilegeFullReadModel, UserPrivilegePatchModel, UserPrivilegeReadModel, UserPrivilegeUpdateModel
+
+from elrahapi.authorization.user_role.schemas import UserRoleCreateModel, UserRoleFullReadModel, UserRolePatchModel, UserRoleReadModel, UserRoleUpdateModel
+
 from ..database import session_manager
 from elrahapi.crud.crud_models import CrudModels
 from .models import User, UserPrivilege,Role,Privilege,RolePrivilege,UserRole
 from .schemas import UserCreateModel,UserUpdateModel,UserPatchModel,UserReadModel,UserFullReadModel
-from elrahapi.authorization.user_privilege_model import UserPrivilegeCreateModel,UserPrivilegeUpdateModel
+
 from elrahapi.crud.crud_forgery import CrudForgery
 
 user_crud_models = CrudModels(
