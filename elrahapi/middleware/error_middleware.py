@@ -18,12 +18,12 @@ class ErrorHandlingMiddleware:
         app,
         LogModel=None,
         session_manager: Optional[SessionManager] = None,
-        manager: ConnectionManager = None,
+        websocket_manager: ConnectionManager = None,
     ):
         self.app = app
         self.LogModel = LogModel
         self.session_manager = session_manager
-        self.manager = manager
+        self.websocket_manager = websocket_manager
         self.has_log = self.session_manager and self.LogModel
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
@@ -72,6 +72,6 @@ class ErrorHandlingMiddleware:
                 LogModel=self.LogModel,
                 db=db,
                 response=response,
-                manager=self.manager,
+                websocket_manager=self.websocket_manager,
                 error=error,
             )

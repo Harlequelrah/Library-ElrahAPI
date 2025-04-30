@@ -9,7 +9,6 @@ from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
 
 from fastapi import status
-from sqlalchemy.orm import sessionmaker
 
 class CrudForgery:
     def __init__(

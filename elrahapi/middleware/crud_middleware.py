@@ -4,6 +4,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 from  elrahapi.websocket.connection_manager import ConnectionManager
+
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (
@@ -19,7 +20,7 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LogModel, db: Session,call_next=None,error=None,response:Response=None,manager:ConnectionManager=None
+    request: Request,LogModel, db: Session,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -39,10 +40,10 @@ async def save_log(
         db.add(logger)
         db.commit()
         db.refresh(logger)
-        if error is not None and manager is not None:
+        if error is not None and websocket_manager is not None:
             message=f"An error occurred during the request with the status code {response.status_code}, please check the log {logger.id} for more information"
-            if manager is not None:
-                await manager.broadcast(message)
+            if websocket_manager is not None:
+                await websocket_manager.broadcast(message)
     except Exception as err:
         db.rollback()
         error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"

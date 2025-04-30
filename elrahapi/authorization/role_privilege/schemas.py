@@ -12,7 +12,7 @@ class RolePrivilegeCreateModel(BaseModel):
 
 class RolePrivilegePatchModel(BaseModel):
     role_id : Optional[int] = Field(example=1,default=None)
-    privilege :Optional[int] = Field(example=2,default=None)
+    privilege_id :Optional[int] = Field(example=2,default=None)
 class RolePrivilegeUpdateModel(BaseModel):
     role_id : int = Field(example=1)
     privilege_id :int = Field(example=2)

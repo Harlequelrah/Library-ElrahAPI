@@ -11,7 +11,6 @@ from fastapi import status
 from elrahapi.router.router_crud import (
     format_init_data,
     get_single_route,
-    set_response_model,
 )
 from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,

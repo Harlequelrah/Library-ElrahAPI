@@ -2,11 +2,11 @@
 
 ![Logo](https://raw.githubusercontent.com/Harlequelrah/Library-ElrahAPI/main/Elrah.png)
 
-## 1. `Description` :
+## **1.** `Description`
 
 Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
 
-## 2. `Objectifs` :
+## **2.** `Objectifs`
 
 ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
@@ -66,7 +66,7 @@ ou si virtualenv est dejà installé au préalable
 
 # III - **`Lancez vous ! `**
 
-## 1. `Quelques recommandations` :
+## **1.** `Quelques recommandations` :
 
 - Il est recommandé de créer un environnement virtuel pour chaque projet
 
@@ -76,13 +76,13 @@ ou si virtualenv est dejà installé au préalable
 
 - Après la creation du projet configurer l'environnement .
 
-## 2. `créer un projet`
+## **2.** `créer un projet`
 
 ```bash
    elrahapi startproject myproject
 ```
 
-## 3. `configurer l'environnement`
+## **3.** `configurer l'environnement`
 
 - Ouvrer le fichier .env et configurer le
 
@@ -98,7 +98,7 @@ ou si virtualenv est dejà installé au préalable
 
 - Configurer le main.py en decommentant les lignes commentées au besoin
 
-## 4. `Demarrer le projet `
+## **4.** `Demarrer le projet `
 
 - Accéder au repertoire du projet :
 
@@ -112,7 +112,7 @@ ou si virtualenv est dejà installé au préalable
   elrahapi run
 ```
 
-## 5. `Créer une application`
+## **5.** `Créer une application`
 
 - Assurer vous d'être dans le dossier du projet
 
@@ -122,11 +122,11 @@ ou si virtualenv est dejà installé au préalable
   elrahapi startapp myapp
 ```
 
-## 6. `Configurer une application`
+## **6.** `Configurer une application`
 
 - Ouvrer le dossier myproject/myapp
 
-### 6.1. `Définir les models de l'application`
+### **6.1.** `Définir les models de l'application`
 
 - Créer les models SQLAlchemy dans `models.py`
 
@@ -136,13 +136,13 @@ ou si virtualenv est dejà installé au préalable
 
 - Importer la variable metadata depuis `myapp/models.py` de l'application dans le settings/models_metadata.py
 
-### 6.2 `Créer les cruds`
+### **6.2.** `Créer les cruds`
 
 - Configurer un objet de type CrudModels
 
 - Configurer le CrudForgery dans cruds.py
 
-### 6.3 `Configurer le fournisseur de routage de l'application`
+### **6.3.** `Configurer le fournisseur de routage de l'application`
 
 - Configurer le CustomRouterProvider dans router.py
   comme suite :
@@ -162,13 +162,13 @@ ou si virtualenv est dejà installé au préalable
 
 - `Pour utiliser les methodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter authentication`:
 
-### 6.4 `Configurer un router`
+### **6.4.** `Configurer un router`
 
 **Notes** :
 
-- `le paramètre exclude_routes_name pourra éventuellement être passé aux méthodes suivantes pour exclure certaines routes.`
+`le paramètre exclude_routes_name pourra éventuellement être passé aux méthodes suivantes pour exclure certaines routes.`
 
-- `le paramètre authorizations pourra éventuellement être passé aux méthodes de routes protégées.`
+`le paramètre authorizations pourra éventuellement être passé aux méthodes de routes protégées.`
 
 - Créér des configurations de routes
 
@@ -191,6 +191,15 @@ ou si virtualenv est dejà installé au préalable
   ]
 ```
 
+- Création des configurations de model de reponse pour les routes
+
+```python
+  custom_response_models : List[ResponseModelConfig] = [
+  ResponseModelConfig(route_name=DefaultRoutesName.DELETE,response_model=MyModel),
+  ResponseModelConfig(route_name=DefaultRoutesName.UPDATE,with_relations=True
+  ]
+```
+
 - Créer un router en initialisant totalement une configuration
 
 ```python
@@ -199,7 +208,7 @@ init_data=custom_init_data,
 )
 ```
 
-**Note** : `Il est possible d'ajouter authorizations et exclude_routes_name comme paramètres`
+**Note** : `Il est possible d'ajouter authorizations , exclude_routes_name , response_model_configs comme paramètres`
 
 - Créér un router préconfiguré sans authentification
 
@@ -238,7 +247,7 @@ init_data=custom_init_data,
 
 **Note** : `Ajouter le router au main.py`
 
-## 7. `Configurer le logs
+## **7.** `Configurer les logs`
 
 - Configurer au besoin `settings/logger`
 
@@ -267,7 +276,7 @@ app.add_middleware(
 
 **Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
 
-## 8. `Configurer l'authentification`:
+## **8.** `Configurer l'authentification`:
 
 - Configurer au besoin `myproject/settings/auth`
 
@@ -275,7 +284,7 @@ app.add_middleware(
 
 - Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
-## 9. `Utilisation de  ConnectionManager`
+## **9.** `Utilisation de  ConnectionManager`
 
 ```python
 from elrahapi.websocket.connectionManager import ConnectionManager
@@ -285,17 +294,17 @@ from fastapi import (
     WebSocket,
 )
 app = FastAPI()
-manager = ConnectionManager()
+websocket_manager = ConnectionManager()
 
 @app.websocket("/ws/notifications")
 async def websocket_notification(websocket: WebSocket):
-    await manager.connect(websocket)
+    await websocket_manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(data)
+            await websocket_manager.broadcast(data)
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
+        await websocket_manager.disconnect(websocket)
 ```
 
 **Note**: `Il est aussi possible d'ajouter un objet de type ConnectionManager aux middlewares pour notifier les erreurs dans le projet`
@@ -304,9 +313,9 @@ async def websocket_notification(websocket: WebSocket):
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
-## 1. `Commandes`
+## **1.** `Commandes`
 
-### 1.1. **Commande de création du projet**
+### **1.1.** `Commande de création du projet`
 
 Cette commande permet de générer un projet FASTAPI avec une archictecture définie
 
@@ -351,13 +360,13 @@ nomduprojet/
 │           ├── schema.py
 ```
 
-### 1.2. **Commande de lancement de l'application**
+### **1.2.** `Commande de lancement de l'application`
 
 ```bash
   elrahapi run
 ```
 
-### 1.3. **Commande de génération d'une application**
+### **1.3.** `Commande de génération d'une application`
 
 Cette commande permet de créer une application dans le projet
 
@@ -767,28 +776,15 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 - id : **int**
 
 
-
-- `MetaUserPrivilegeModel(BaseModel)` :
-
-  - privilege : **MetaAuthorizationBaseModel**
-
-  - is_active : **bool**
-
-- `MetaUserRoleModel(BaseModel)` :
-
-  - role : **MetaAuthorizationBaseModel**
-
-  - is_active : **bool**
-
-#### 2.4.2 Sous module `role`
+#### **2.4.2.** Sous module `role`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Role .
 
-##### 2.4.2.1 Sous module `models`
+##### **2.4.2.1.** Sous module `models`
 
 - `RoleModel(MetaAuthorization)`
 
-##### 2.4.2.2 Sous module `schemas`
+##### **2.4.2.2.** Sous module `schemas`
 
 - `RoleBaseModel(BaseModel)` :
 
@@ -820,7 +816,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - role_users : **List[MetaRoleUsers]**
 
-#### 2.4.2.3. Sous module `meta_models`
+#### **2.4.2.3.** Sous module `meta_models`
 
 - `MetaRoleUsers(BaseModel)`
 
@@ -828,15 +824,15 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : int
 
-#### 2.4.3 Sous module `privilege`
+#### **2.4.3.** Sous module `privilege`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité Privilege .
 
-##### 2.4.3 Sous module `models`
+##### **2.4.3.1** Sous module `models`
 
 - `PrivilegeModel(MetaAuthorization)`
 
-##### 2.4.3 Sous module `schemas`
+##### **2.4.3.2** Sous module `schemas`
 
 
 - `PrivilegeBaseModel(BaseModel)`
@@ -865,11 +861,13 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 - `PrivilegeReadModel(MetaAuthorizationReadModel)` :
 
 
-- `PrivilegePydanticModel(MetaAuthorizationReadModel)` :
+- `PrivilegeFullReadModel(PrivilegeReadModel)` :
 
   - privilege_roles : **Optional[List[MetaAuthorizationBaseModel]]**
 
   - privilege_users : **Optional[List[MetaPrivilegeUsers]]**
+
+##### **2.4.3.3** Sous module `meta_models`
 
 - `MetaPrivilegeUsers` :
 
@@ -877,9 +875,13 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - `is_active` : **bool**
 
-#### 2.4.4. Sous module `role_privilege_model`
+
+
+#### **2.4.4.** Sous module `role_privilege`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité RolePrivilege .
+
+#### **2.4.4.1.** Sous module `models`
 
 - `RolePrivilegeModel`
 
@@ -888,6 +890,8 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - role_id : **Column(Integer)**
 
   - privilege_id : **Column(Integer)**
+
+##### **2.4.4.2.** Sous module `schemas`
 
 - `RolePrivilegeCreateModel(BaseModel)`
 
@@ -908,11 +912,25 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - privilege_id : **Optional[int]**
 
 - `RolePrivilegeReadModel(RolePrivilegeCreateModel)`
+
   - id : **int**
 
-#### 2.4.5. Sous module `user_privilege_model`
+- `RolePrivilegeFullReadModel(BaseModel)`
+
+  - id : **int**
+
+  - role : **MetaAuthorizationBaseModel**
+
+  - privilege : **MetaAuthorizationBaseModel**
+
+
+
+#### **2.4.5.** Sous module `user_privilege`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserPrivilege .
+
+
+##### **2.4.5.1** Sous module `models`
 
 - `UserPrivilegeModel`
 
@@ -923,6 +941,8 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - privilege_id : **Column(Integer)**
 
   - is_active : **Column(Boolean)**
+
+##### **2.4.5.2** Sous module `schemas`
 
 - `UserPrivilegeCreateModel(BaseModel)`
 
@@ -948,12 +968,31 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
   - is_active : **Optional[bool]**
 
-- `UserPrivilegePydanticModel(UserPrivilegeCreateModel)`
+- `UserPrivilegeReadModel(UserPrivilegeCreateModel)`
+
   - id : **int**
 
-#### 2.4.6. Sous module `user_role_model`
+- `UserPrivilegeFullReadModel(BaseModel)`
+
+  - id : **int**
+
+  - user : **UserBaseModel**
+
+  - privilege : **MetaAuthorizationBaseModel**
+
+##### **2.4.5.3.** Sous module `meta_models`
+
+- `MetaUserPrivilegeModel(BaseModel)` :
+
+  - privilege : **MetaAuthorizationBaseModel**
+
+  - is_active : **bool**
+
+#### **2.4.6.** Sous module `user_role`
 
 Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserRole .
+
+##### **2.4.6.1** Sous module `models`
 
 - `UserRoleModel`
 
@@ -964,6 +1003,8 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - role_id : **Column(Integer)**
 
   - is_active : **Column(Boolean)**
+
+##### **2.4.6.2** Sous module `schemas`
 
 - `UserRoleCreateModel(BaseModel)`
 
@@ -990,58 +1031,37 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]**
 
 - `UserRoleReadModel(UserRoleCreateModel)`
+
   - id : **int**
 
-#### 2.4.6. Sous module `user_role_model`
 
-Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité UserRole .
+- `UserRoleReadModel(BaseModel)`
 
-- `UserRoleModel`
+  - id : **int**
 
-  - id : **Column(Integer)**
+  - user : **UserBaseModel**
 
-  - user_id : **Column(Integer)**
-
-  - role_id : **Column(Integer)**
-
-  - is_active : **Column(Boolean)**
-
-- `UserRoleCreateModel(BaseModel)`
-
-  - user_id : **int**
-
-  - role_id : **int**
-
-  - is_active : **Optional[bool]** , default : True
-
-- `UserRoleUpdateModel(BaseModel)`
-
-  - user_id : **int**
-
-  - role_id : **int**
+  - role : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
 
-- `UserRolePatchModel(BaseModel)`
+##### **2.4.6.3.** Sous module `meta_models`
 
-  - user_id : **Optional[int]**
+- `MetaUserRoleModel(BaseModel)` :
 
-  - role_id : **Optional[int]**
+  - role : **MetaAuthorizationBaseModel**
 
-  - is_active : **Optional[bool]**
+  - is_active : **bool**
 
-- `UserRoleReadModel(UserRoleCreateModel)`
-  - id : **int**
-
-### 2.5. **Module `middleware`**
+### **2.5.** **Module `middleware`**
 
 Ce module regroupe toute la gestion des middelwares
 
-##### 2.5.1. Sous module `models`
+##### **2.5.1.** Sous module `models`
 
-Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `LoggerMiddlewareReadModel` pour la validation Pydantic
+Ce sous module définit les modèles de Log : `LogModel` et `LogReadModel` pour la validation Pydantic
 
-`LoggerMiddlewareModel`:
+`LogModel`:
 
 **Attributs prédéfinis**:
 
@@ -1061,7 +1081,7 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 - remote_adress: **Column(String)**
 
-`LoggerMiddlewareReadModel`:
+`LogReadModel`:
 
 **Attributs prédéfinis**:
 
@@ -1085,29 +1105,29 @@ Ce sous module définit les modèles de Log : `LoggerMiddlewareModel` et `Logger
 
 Ce sous module définit les middelwares de loggins
 
-- Class **`LoggerMiddleware`**
+- **`LoggerMiddleware`**
 
   - **paramètres** :
 
-    - LoggerMiddlewareModel : définit le modèle de Log
+    - LogModel
 
-    - session_factory : **sessionmaker[Session]**
+    - session_manager : **SessionManager**
 
-    - manager : **ConnectionManager**
+    - websocket_manager : **ConnectionManager**
 
 ##### 2.5.3. Sous module `error_middleware`
 
 Ce sous module définit les middelwares d'erreurs
 
-- Class **`ErrorMiddleware`**
+-  **`ErrorMiddleware`**
 
   - **paramètres** :
 
-    - LoggerMiddlewareModel : définit le modèle de Log
+    - LogModel
 
-    - session_factory : **sessionmaker[Session]**
+    - session_manager : **SessionManager**
 
-    - manager : **ConnectionManager**
+    - websocket_manager : **ConnectionManager**
 
 ##### 2.5.4. Sous module crud_middelware
 
@@ -1119,7 +1139,7 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
     - **request** : Request
 
-    - **LoggerMiddelewareModel**
+    - **LogModel**
 
     - **db** : Session
 
@@ -1129,7 +1149,7 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
     - **response** : Optional[Response]
 
-    - **manager**: Optional[ConnectionManager]
+    - **websocket_manager**: Optional[ConnectionManager]
 
 - **paramètres**: **Response**
 
@@ -1165,11 +1185,11 @@ ce sous module définit les methodes pour sauvegarder les logs .
 
 Ce module comporte toute la gestion des utilisateurs
 
-##### 2.6.1. Sous module `model`
+#### 2.6.1. Sous module `model`
 
 Ce sous module comporte le model `User` utilisé dans le système d'authentification.
 
-class **`User`**
+**`UserModel`**
 
 `Attributs`:
 
@@ -1214,6 +1234,8 @@ class **`User`**
 
   - **sortie** : **bool**
 
+- `change_user_state` : permet de changer le statut d'activité  .
+
 - `has_role` : permet de vérifier si l'utilisateur a un role
 
   - **paramètres** :
@@ -1238,15 +1260,15 @@ class **`User`**
 
   - **sortie** : **bool**
 
-##### 2.6.1. Sous module `schemas`
+#### 2.6.2. Sous module `schemas`
 
 Ce sous module rassemble les classes pydantics liées à `User` pour la validation
 
 **`Models pydantics pour la validations`** :
 
-- `UserBaseModel`
+- `UserBaseModel(BaseModel)`
 
-  - email : **str**
+  - email : **EmailStr**
 
   - username : **str**
 
@@ -1254,11 +1276,15 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
   - firstname : **str**
 
-- `UserCreateModel(UserBaseModel)`
+- `UserCreateModel`
 
   - password : **str**
 
 - `UserUpdateModel`
+
+  - password : **str**
+
+- `UserPatchModel`
 
   - email: **Optional[str]**
 
@@ -1268,9 +1294,6 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
   - firstname: **Optional[str]**
 
-  - is_active: **Optional[bool]**
-
-  - password: **Optional[str]**
 
 - **`UserReadModel(UserBaseModel)`**
 
@@ -1284,7 +1307,9 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
   - attempt_login : **int**
 
-  - role : **Optional[MetaAuthorizationBaseModel]**
+- **`UserFullReadModel(UserReadModel)`**
+
+  - user_roles : **Optional[List[MetaUserRoleModel]]**
 
   - user_privileges : **Optional[List[MetaUserPrivilegeModel]]**
 
@@ -1359,8 +1384,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - session_manager : **SessionManager**
 
   - crud_models : **CrudModels**
-
-- **`get_pk`** : retourne la colonne de clé primaire .
 
 - **`create`** :
 
@@ -1446,11 +1469,13 @@ Ce sous module definit CrudModels qui définit l'ensemble des classes et informa
 
   - `SQLAlchemyModel` : Le model SQLAlchemy de l'entité
 
-  - `CreateModel` : Le model Pydantic pour la création . **Optional**
+  - `CreateModel` : Le model Pydantic pour la création .  Optional[Type[BaseModel]]
 
-  - `UpdateModel` : Le model Pydantic pour la mise à jour totale. **Optional**
+  - `UpdateModel` : Le model Pydantic pour la mise à jour totale. Optional[Type[BaseModel]]
 
-  - `PatchModel` : Le model Pydantic pour la mise à jour partiel. **Optional**
+  - `PatchModel` : Le model Pydantic pour la mise à jour partielle. Optional[Type[BaseModel]]
+
+- **`get_pk`** : retourne la colonne de clé primaire .
 
 ##### 2.8.3. `Sous module bulk_models`
 
@@ -1466,7 +1491,7 @@ Ce module comporte des classes methodes et autres utilitaires pour automatiser l
 
 ##### 2.9.1. Sous module `route_config`
 
-Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterProvider et des classes utilitaires `DEFAULT_ROUTE_CONFIG` et `AuthorizationConfig` les configurations du routeur et des routes.
+Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterProvider et des classes utilitaires `DEFAULT_ROUTE_CONFIG` , `ResponseModelConfig` et `AuthorizationConfig` les configurations du routeur et des routes.
 
 - **`DEFAULT_ROUTE_CONFIG`**
 
@@ -1498,9 +1523,15 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `is_unlocked`: **Optional[bool]** , default : `False`
 
-    - roles : **Optional[List[str]]**
+    - `roles` : **Optional[List[str]]**
 
-    - privileges : **Optional[List[str]]**
+    - `privileges` : **Optional[List[str]]**
+
+    -   `dependencies` : **Optional[List[Callable[...,Any]]]**
+
+    - `with_relations` : Optional[bool]
+
+    - `response_model` : Optional[Any]
 
 - `get_authorizations` : retourne une liste de callable utilisable comme dépendance pour l'authorization
 
@@ -1514,7 +1545,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
   - **paramètres** :
 
-    - route_name : **str**
+    - route_name : **DefaultRoutesName**
 
     - route_path : **Optional[str]**
 
@@ -1531,6 +1562,18 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
     - roles : **List[str]**
 
     - privileges : **List[str]**
+
+- **`ResponseModelConfig`**
+
+  - `__init__` :
+
+    - **paramètres** :
+
+    - route_name : **DefaultRoutesName**
+
+    - with_relations : **bool**
+
+    - response_model : **Optional[Any]**
 
 ##### 2.9.2 Sous module `route_namespace`
 
@@ -1579,11 +1622,15 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
   - `privileges `: **Optional[List[str]]**
 
+  - `with_relations` : **bool**
+
 - **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
 
   - **paramètres**:
 
   - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+
+  - response_model_configs: Optional[List[ResponseModelConfig]]
 
 - **`get_protected_router`** : renvoie un routeur avec la configuration de `ROUTES_PROTECTED_AUTH_CONFIG`
 
@@ -1592,6 +1639,8 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
     - authorizations: **Optional[List[AuthorizationConfig]]**
+
+    - response_model_configs: Optional[List[ResponseModelConfig]]
 
 - **`get_custom_router_init_data`** : renvoie une liste de configurations de routes personnalisés
 
@@ -1617,6 +1666,8 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
+    - response_model_configs: Optional[List[ResponseModelConfig]]
+
     - type_route : **TypeRoute**
 
   - **sortie** : **APIRouter**
@@ -1633,6 +1684,8 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
+    - response_model_configs: Optional[List[ResponseModelConfig]]
+
 - **`initialize_router`** : initialise un routeur avec une configuration .
 
   - **paramètres**:
@@ -1642,6 +1695,9 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - authorizations: **Optional[List[AuthorizationConfig]]**
 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+
+    - response_model_configs: Optional[List[ResponseModelConfig]]
+
 
 ##### 2.9.5. Sous module `router_crud`
 
@@ -1704,6 +1760,32 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
     - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
 
   - **sortie** : **List[RouteConfig]**
+
+- `set_response_model_config` : permet de preparer les configurations de routage en ajoutant les models de reponses specifiques.
+
+  - **paramètres:**
+
+    - routes_config : **List[RouteConfig]**
+
+    - response_model_configs : **List[ResponseModelConfig]**
+
+  - **sortie** : **List[RouteConfig]**
+
+- `set_response_model` : permet d'ajouter un model de reponse à une route .
+
+  - **paramètres:**
+
+    - ReadPydanticModel: **Type[BaseModel]**
+
+    - FullReadPydanticModel:**Type[BaseModel]**
+
+    - route_config: **RouteConfig**
+
+    - with_relations:**bool**
+
+
+  - **sortie** : **Type[BaseModel]**
+
 
 #### 2.10. Module `security`
 

@@ -1,7 +1,6 @@
 from typing import List, Optional,Callable,Any
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME, DEFAULT_NO_DETAIL_ROUTES_NAME, DefaultRoutesName
-from fastapi import Depends
+from elrahapi.router.router_default_routes_name import DEFAULT_DETAIL_ROUTES_NAME,  DefaultRoutesName
 
 
 class DEFAULT_ROUTE_CONFIG:
