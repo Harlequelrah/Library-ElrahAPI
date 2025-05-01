@@ -89,11 +89,16 @@ class CrudModels:
     def patch_model(self, model: Type[BaseModel]):
         self.__PatchModel = model
 
-    async def get_pk(self, entity_name: str):
+    async def get_pk(self):
+        return await self.get_attr(self.__primary_key_name)
+
+
+    async def get_attr(self,attr_name:str):
         try:
-            return getattr(self.__SQLAlchemyModel, self.__primary_key_name)
+            return getattr(self.__SQLAlchemyModel, attr_name)
         except Exception as e:
-            detail = f"Error occurred while getting primary key for entity {entity_name} , details : {str(e)}"
+            detail = f"Error occurred while getting attribute {attr_name} for entity {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
+

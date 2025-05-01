@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-
+from typing import Any
 
 def map_list_to(obj_list: list,obj_sqlalchemy_class:type, obj_pydantic_class: type):
     return [obj_sqlalchemy_class(**obj.dict()) for obj in obj_list if isinstance(obj,obj_pydantic_class)]
@@ -12,8 +12,10 @@ def update_entity(existing_entity, update_entity):
     return existing_entity
 
 
-async def validate_value_type(value):
-    if value in ["true", "True"]:
+async def validate_value_type(value:Any):
+    if value is None:
+        return None
+    elif value in ["true", "True"]:
         value = True
     elif value in ["false", "False"]:
         value = False

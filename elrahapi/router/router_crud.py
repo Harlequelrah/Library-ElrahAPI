@@ -83,6 +83,7 @@ def add_authorizations(
                 authorization
                 for authorization in authorizations
                 if authorization.route_name == route_config.route_name
+                and route_config.is_protected
             ),
             None,
         )
@@ -109,32 +110,26 @@ def set_response_model_config(
         )
         if response_model_config:
             route_config.with_relations = response_model_config.with_relations
-            final_routes_config.append(route_config)
-
             if response_model_config.response_model:
                 route_config.response_model = response_model_config.response_model
+            final_routes_config.append(route_config)
     return final_routes_config
-
-
-
 
 
 def format_init_data(
     init_data: List[RouteConfig],
-    with_relations:bool,
+    with_relations: bool,
     authorizations: Optional[List[AuthorizationConfig]] = None,
     exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     authentication: Optional[AuthenticationManager] = None,
     response_model_configs: Optional[List[ResponseModelConfig]] = None,
     roles: Optional[List[str]] = None,
     privileges: Optional[List[str]] = None,
-    ReadPydanticModel:Optional[Type[BaseModel]]=None,FullReadPydanticModel:Optional[Type[BaseModel]] = None,
-
-
+    ReadPydanticModel: Optional[Type[BaseModel]] = None,
+    FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
     formatted_data: List[RouteConfig] = []
     formatted_data = exclude_route(init_data, exclude_routes_name)
-
     for route_config in formatted_data:
         if route_config.is_protected:
             route_config.dependencies = initialize_dependecies(
@@ -144,19 +139,16 @@ def format_init_data(
                 privileges=privileges,
             )
     formatted_data = (
-        formatted_data
-        if response_model_configs is None
-        else set_response_model_config(
-            routes_config=formatted_data, response_model_configs=response_model_configs
-        )
-    )
-    formatted_data = (
-        formatted_data
-        if authorizations is None
-        else add_authorizations(
-            routes_config=formatted_data, authorizations=authorizations
-        )
-    )
+                formatted_data
+                if authorizations is None
+                else add_authorizations(
+                    routes_config=formatted_data, authorizations=authorizations
+                )
+            )
+    # if response_model_configs:
+    #     print('i am here boy and there are response model configs')
+    # else :
+    #     print("i am here and there are no response model configs")
     formatted_data = (
         formatted_data
         if response_model_configs is None
@@ -166,24 +158,30 @@ def format_init_data(
     )
     for route_config in formatted_data:
         if not route_config.response_model:
-            route_config.response_model = set_response_model(
-                        route_config=route_config,
-                        with_relations=with_relations,ReadPydanticModel=ReadPydanticModel,FullReadPydanticModel=FullReadPydanticModel
-                    )
+            response_model = set_response_model(
+                route_config=route_config,
+                with_relations=with_relations,
+                ReadPydanticModel=ReadPydanticModel,
+                FullReadPydanticModel=FullReadPydanticModel,
+            )
+            route_config.response_model = response_model
     return formatted_data
 
 
 def set_response_model(
-    ReadPydanticModel: Type[BaseModel],
-    FullReadPydanticModel:Type[BaseModel],
     route_config: RouteConfig,
-    with_relations:bool
+    with_relations: bool,
+    ReadPydanticModel: Optional[Type[BaseModel]] = None,
+    FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
-        if route_config.with_relations or  with_relations:
-            if FullReadPydanticModel:
-                return FullReadPydanticModel
-            else : raise ValueError(
-                f"FullReadPydanticModel is not defined for {route_config.route_name.value} while charging with relations"
-            )
-        else:
-                return ReadPydanticModel
+    # print("i am there setting response model")
+    # if route_config.route_name == DefaultRoutesName.READ_ONE:
+    #     print(f"i am here 3 {FullReadPydanticModel.__fields__.keys() or 'No full read model'}")
+    #     print(f"i am here 4 {ReadPydanticModel.__fields__.keys() or 'No read model'}")
+    #     print(f"{route_config.with_relations=} {with_relations=}")
+    if FullReadPydanticModel is None :
+        return ReadPydanticModel
+    if (route_config.with_relations or with_relations) and FullReadPydanticModel:
+        return FullReadPydanticModel
+    else:
+        return ReadPydanticModel

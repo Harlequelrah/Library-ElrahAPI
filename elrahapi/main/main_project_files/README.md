@@ -16,7 +16,17 @@ Ceci est un projet backend d'API .
 ```bash
   cd monprojet
 ```
--  **Installation des dépéendances :**
+
+-  **Création d'un environnement virtuel :**
+```bash
+  python -m venv env
+```
+ou
+```bash
+  virtualenv env
+```
+
+-  **Installation des dépendances :**
 ```bash
   pip install -r requirements.txt
 ```
@@ -39,7 +49,7 @@ Ceci est un projet backend d'API .
 
 ## `Technologies et bibliothèques`
 
-- Framework ElrahAPI
+- ElrahAPI
 - Python
 - Pydantic
 - FASTAPI

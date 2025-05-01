@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
@@ -7,6 +7,7 @@ from elrahapi.router.route_config import (
     ResponseModelConfig,
     RouteConfig,
 )
+from copy import deepcopy
 from fastapi import status
 from elrahapi.router.router_crud import (
     format_init_data,
@@ -21,7 +22,7 @@ from elrahapi.router.router_namespace import (
 
 from fastapi import APIRouter
 
-
+from elrahapi.router.relation_model import ModelRelation
 
 
 class CustomRouterProvider:
@@ -34,8 +35,10 @@ class CustomRouterProvider:
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
-        with_relations: bool = False
+        with_relations: bool = False,
+        relations: Optional[List[ModelRelation]] = None,
     ):
+        self.relations = relations if relations else []
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
         )
@@ -58,9 +61,15 @@ class CustomRouterProvider:
         )
 
     def get_public_router(
-        self, exclude_routes_name: Optional[List[DefaultRoutesName]] = None,response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        self,
+        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+        response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
-        return self.initialize_router(init_data=ROUTES_PUBLIC_CONFIG,exclude_routes_name= exclude_routes_name,response_model_configs=response_model_configs)
+        return self.initialize_router(
+            init_data=ROUTES_PUBLIC_CONFIG,
+            exclude_routes_name=exclude_routes_name,
+            response_model_configs=response_model_configs,
+        )
 
     def get_protected_router(
         self,
@@ -87,7 +96,9 @@ class CustomRouterProvider:
         if route_names:
             for route_name in route_names:
                 if is_protected == TypeRoute.PROTECTED and not self.authentication:
-                    raise ValueError("No authentication provided in the router provider")
+                    raise ValueError(
+                        "No authentication provided in the router provider"
+                    )
                 route = get_single_route(route_name, is_protected)
                 custom_init_data.append(route)
         return custom_init_data
@@ -136,10 +147,11 @@ class CustomRouterProvider:
             is_protected=TypeRoute.PROTECTED,
         )
         custom_init_data = public_routes_data + protected_routes_data
-        return self.initialize_router(init_data=custom_init_data, exclude_routes_name=exclude_routes_name, response_model_configs=response_model_configs)
-
-
-
+        return self.initialize_router(
+            init_data=custom_init_data,
+            exclude_routes_name=exclude_routes_name,
+            response_model_configs=response_model_configs,
+        )
 
     def initialize_router(
         self,
@@ -148,8 +160,9 @@ class CustomRouterProvider:
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
+        copied_init_data = deepcopy(init_data)
         formatted_data = format_init_data(
-            init_data=init_data,
+            init_data=copied_init_data,
             authorizations=authorizations,
             exclude_routes_name=exclude_routes_name,
             authentication=self.authentication,
@@ -160,6 +173,7 @@ class CustomRouterProvider:
             ReadPydanticModel=self.ReadPydanticModel,
             FullReadPydanticModel=self.FullReadPydanticModel,
         )
+
         for config in formatted_data:
             if config.route_name == DefaultRoutesName.COUNT:
 
@@ -174,7 +188,6 @@ class CustomRouterProvider:
                     return {"count": count}
 
             if config.route_name == DefaultRoutesName.READ_ONE:
-
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
@@ -201,15 +214,29 @@ class CustomRouterProvider:
                     value=None,
                     skip: int = 0,
                     limit: int = None,
+                    relationship_name: Optional[str] = None,
                 ):
+                    relation = next(
+                        (
+                            relation
+                            for relation in self.relations
+                            if relation.relationship_name == relationship_name
+                        ),
+                        None,
+                    )
                     return await self.crud.read_all(
-                        skip=skip, limit=limit, filter=filter, value=value
+                        skip=skip,
+                        limit=limit,
+                        filter=filter,
+                        value=value,
+                        relation=relation
                     )
 
             if (
                 config.route_name == DefaultRoutesName.CREATE
                 and self.CreatePydanticModel
             ):
+
                 @self.router.post(
                     path=config.route_path,
                     summary=config.summary,

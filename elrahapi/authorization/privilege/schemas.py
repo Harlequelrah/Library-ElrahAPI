@@ -1,12 +1,9 @@
-
-
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from elrahapi.authorization.base_meta_model import  MetaAuthorizationReadModel,MetaAuthorizationBaseModel
 
 from elrahapi.authorization.privilege.meta_models import MetaPrivilegeUsers
-
 
 
 class PrivilegeBaseModel(BaseModel):
@@ -25,16 +22,13 @@ class PrivilegePatchModel(BaseModel):
     description:Optional[str]=Field(example='allow privilege creation for privilege',default=None)
 
 
-
 class PrivilegeReadModel(MetaAuthorizationReadModel):
     class Config :
         from_attributes=True
 
 
-class PrivilegeFullReadModel(PrivilegeReadModel):
+class PrivilegeFullReadModel(MetaAuthorizationReadModel):
     privilege_roles:Optional[List["MetaAuthorizationBaseModel"]] = []
-    privilege_users : Optional[List["MetaPrivilegeUsers"]] = []
+    privilege_users: Optional[List["MetaPrivilegeUsers"]] = []
     class Config :
         from_attributes=True
-
-
