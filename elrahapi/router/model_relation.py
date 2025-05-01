@@ -21,7 +21,7 @@ class ModelRelation:
         self.result_model_key_name = result_model_key_name
 
     async def get_relationship_key1(self):
-        return self.relationship_crud_models.get_attr(self.relationship_key1_name)
+        return await self.relationship_crud_models.get_attr(self.relationship_key1_name)
 
     async def get_relationship_key2(self):
         return await self.relationship_crud_models.get_attr(self.relationship_key2_name)

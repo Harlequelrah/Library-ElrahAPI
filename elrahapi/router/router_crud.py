@@ -16,6 +16,8 @@ from elrahapi.router.router_namespace import (
 )
 from pydantic import BaseModel
 
+from elrahapi.router.model_relation import ModelRelation
+
 
 def exclude_route(
     routes: List[RouteConfig],
@@ -145,10 +147,6 @@ def format_init_data(
                     routes_config=formatted_data, authorizations=authorizations
                 )
             )
-    # if response_model_configs:
-    #     print('i am here boy and there are response model configs')
-    # else :
-    #     print("i am here and there are no response model configs")
     formatted_data = (
         formatted_data
         if response_model_configs is None

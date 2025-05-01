@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from fastapi import status
 
-from elrahapi.router.relation_model import ModelRelation
+from elrahapi.router.model_relation import ModelRelation
 
 
 class CrudForgery:
@@ -86,69 +86,38 @@ class CrudForgery:
     async def read_all(
         self,
         filter: Optional[str] = None,
+        result_filter: Optional[str] = None,
+        result_filter_value: Optional[str] = None,
         value=None,
         skip: int = 0,
         limit: int = None,
         relation: Optional[ModelRelation] = None,
     ):
-        exist_filter = None
-        exist_join_filter = None
-
+        session = self.session_manager.yield_session()
+        query = session.query(self.SQLAlchemyModel)
+        pk = await self.crud_models.get_pk()
+        if relation :
+            relkey1 = await relation.get_relationship_key1()
+            relkey2 = await relation.get_relationship_key2()
+            reskey = await relation.get_result_model_key()
+            query=query.join(
+                relation.relationship_crud_models.sqlalchemy_model,
+                relkey1 == pk,
+            )
+            query = query.join(
+                relation.result_crud_models.sqlalchemy_model,
+                reskey == relkey2,
+            )
         if filter and value:
             exist_filter = await self.crud_models.get_attr(filter)
-            value = await validate_value_type(value)
-
-        if relation:
-            exist_join_filter = await self.crud_models.get_attr(relation.relationship_name)
-
-        session = self.session_manager.yield_session()
-
-        relkey1 = await relation.get_relationship_key1() if relation else None
-        relkey2 = await relation.get_relationship_key2() if relation else None
-        reskey = await relation.get_result_model_key() if relation else None
-        pk = await self.crud_models.get_pk()
-
-        if exist_filter and not relation:
-            return (
-                session.query(self.SQLAlchemyModel)
-                .filter(exist_filter == value)
-                .offset(skip)
-                .limit(limit)
-                .all()
-            )
-        elif not exist_filter and relation:
-            return (
-                session.query(self.SQLAlchemyModel)
-                .join(
-                    relation.relationship_crud_models.sqlalchemy_model,
-                    relkey1 == pk,
-                )
-                .join(
-                    relation.result_crud_models.sqlalchemy_model,
-                    reskey == relkey2,
-                )
-                .offset(skip)
-                .limit(limit)
-                .all()
-            )
-        elif exist_filter and exist_join_filter:
-            return (
-                session.query(self.SQLAlchemyModel)
-                .join(
-                    relation.relationship_crud_models.sqlalchemy_model,
-                    relkey1 == pk,
-                )
-                .join(
-                    relation.result_crud_models.sqlalchemy_model,
-                    reskey == relkey2,
-                )
-                .filter(exist_filter == value)
-                .offset(skip)
-                .limit(limit)
-                .all()
-            )
-        else:
-            return session.query(self.SQLAlchemyModel).offset(skip).limit(limit).all()
+            validated_value = await validate_value_type(value)
+            query = query.filter(exist_filter == validated_value)
+        if result_filter and result_filter_value:
+            exist_filter = await relation.result_crud_models.get_attr(result_filter)
+            validated_value = await validate_value_type(result_filter_value)
+            query = query.filter(exist_filter == validated_value)
+        results = query.offset(skip).limit(limit).all()
+        return results
 
     async def read_one(self, pk, db: Optional[Session] = None):
         if db:

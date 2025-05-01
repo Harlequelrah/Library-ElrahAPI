@@ -1,18 +1,16 @@
+from copy import deepcopy
 from typing import List, Optional, Type
+
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
+from elrahapi.router.model_relation import ModelRelation
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
     RouteConfig,
 )
-from copy import deepcopy
-from fastapi import status
-from elrahapi.router.router_crud import (
-    format_init_data,
-    get_single_route,
-)
+from elrahapi.router.router_crud import format_init_data, get_single_route
 from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
@@ -20,9 +18,7 @@ from elrahapi.router.router_namespace import (
     TypeRoute,
 )
 
-from fastapi import APIRouter
-
-from elrahapi.router.relation_model import ModelRelation
+from fastapi import APIRouter, status
 
 
 class CustomRouterProvider:
@@ -188,6 +184,7 @@ class CustomRouterProvider:
                     return {"count": count}
 
             if config.route_name == DefaultRoutesName.READ_ONE:
+
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
@@ -212,6 +209,8 @@ class CustomRouterProvider:
                 async def read_all(
                     filter: Optional[str] = None,
                     value=None,
+                    result_filter: Optional[str] = None,
+                    result_filter_value: Optional[str] = None,
                     skip: int = 0,
                     limit: int = None,
                     relationship_name: Optional[str] = None,
@@ -229,7 +228,9 @@ class CustomRouterProvider:
                         limit=limit,
                         filter=filter,
                         value=value,
-                        relation=relation
+                        result_filter=result_filter,
+                        result_filter_value=result_filter_value,
+                        relation=relation,
                     )
 
             if (
