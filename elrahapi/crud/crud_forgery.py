@@ -1,16 +1,16 @@
-from typing import Optional, Type
+from typing import Any, Optional, Type
+
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.router.relationship import Relationship
 from elrahapi.session.session_manager import SessionManager
 from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
 from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
 
 from fastapi import status
-
-from elrahapi.router.model_relation import ModelRelation
 
 
 class CrudForgery:
@@ -85,41 +85,43 @@ class CrudForgery:
 
     async def read_all(
         self,
-        filter: Optional[str] = None,
-        result_filter: Optional[str] = None,
-        result_filter_value: Optional[str] = None,
-        value=None,
+        filter: Optional[Any] = None,
+        joined_model_filter: Optional[str] = None,
+        joined_model_filter_value: Optional[Any] = None,
+        value: Optional[str] = None,
         skip: int = 0,
         limit: int = None,
-        relation: Optional[ModelRelation] = None,
+        relation: Optional[Relationship] = None,
     ):
         session = self.session_manager.yield_session()
         query = session.query(self.SQLAlchemyModel)
         pk = await self.crud_models.get_pk()
-        if relation :
+        if relation:
             relkey1 = await relation.get_relationship_key1()
             relkey2 = await relation.get_relationship_key2()
-            reskey = await relation.get_result_model_key()
-            query=query.join(
+            reskey = await relation.get_joined_model_key()
+            query = query.join(
                 relation.relationship_crud_models.sqlalchemy_model,
                 relkey1 == pk,
             )
             query = query.join(
-                relation.result_crud_models.sqlalchemy_model,
+                relation.joined_entity_crud_models.sqlalchemy_model,
                 reskey == relkey2,
             )
         if filter and value:
             exist_filter = await self.crud_models.get_attr(filter)
             validated_value = await validate_value_type(value)
             query = query.filter(exist_filter == validated_value)
-        if result_filter and result_filter_value:
-            exist_filter = await relation.result_crud_models.get_attr(result_filter)
-            validated_value = await validate_value_type(result_filter_value)
+        if relation and joined_model_filter and joined_model_filter_value:
+            validated_value = await validate_value_type(joined_model_filter_value)
+            exist_filter = await relation.joined_entity_crud_models.get_attr(
+                joined_model_filter
+            )
             query = query.filter(exist_filter == validated_value)
         results = query.offset(skip).limit(limit).all()
         return results
 
-    async def read_one(self, pk, db: Optional[Session] = None):
+    async def read_one(self, pk: Any, db: Optional[Session] = None):
         if db:
             session = db
         else:
@@ -133,7 +135,7 @@ class CrudForgery:
             )
         return read_obj
 
-    async def update(self, pk, update_obj, is_full_updated: bool):
+    async def update(self, pk: Any, update_obj: Any, is_full_updated: bool):
         session = self.session_manager.yield_session()
         if (
             isinstance(update_obj, self.UpdatePydanticModel)

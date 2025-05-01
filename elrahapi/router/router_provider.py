@@ -1,10 +1,10 @@
 from copy import deepcopy
-from typing import List, Optional, Type
+from typing import Any, List, Optional, Type
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.router.model_relation import ModelRelation
+from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
@@ -32,7 +32,7 @@ class CustomRouterProvider:
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
         with_relations: bool = False,
-        relations: Optional[List[ModelRelation]] = None,
+        relations: Optional[List[Relationship]] = None,
     ):
         self.relations = relations if relations else []
         self.authentication: AuthenticationManager = (
@@ -193,7 +193,7 @@ class CustomRouterProvider:
                     dependencies=config.dependencies,
                 )
                 async def read_one(
-                    pk,
+                    pk: Any,
                 ):
                     return await self.crud.read_one(pk)
 
@@ -208,9 +208,9 @@ class CustomRouterProvider:
                 )
                 async def read_all(
                     filter: Optional[str] = None,
-                    value=None,
-                    result_filter: Optional[str] = None,
-                    result_filter_value: Optional[str] = None,
+                    value: Optional[Any] = None,
+                    joined_model_filter: Optional[str] = None,
+                    joined_model_filter_value: Optional[Any] = None,
                     skip: int = 0,
                     limit: int = None,
                     relationship_name: Optional[str] = None,
@@ -228,8 +228,8 @@ class CustomRouterProvider:
                         limit=limit,
                         filter=filter,
                         value=value,
-                        result_filter=result_filter,
-                        result_filter_value=result_filter_value,
+                        joined_model_filter=joined_model_filter,
+                        joined_model_filter_value=joined_model_filter_value,
                         relation=relation,
                     )
 

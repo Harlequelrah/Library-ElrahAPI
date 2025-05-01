@@ -1,7 +1,7 @@
 from typing import List, Optional, Type
 
-from fastapi import Depends
 from elrahapi.authentication.authentication_manager import AuthenticationManager
+from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     DEFAULT_ROUTE_CONFIG,
     AuthorizationConfig,
@@ -10,13 +10,13 @@ from elrahapi.router.route_config import (
 )
 from elrahapi.router.router_namespace import (
     DEFAULT_ROUTES_CONFIGS,
-    DefaultRoutesName,
     USER_AUTH_CONFIG,
+    DefaultRoutesName,
     TypeRoute,
 )
 from pydantic import BaseModel
 
-from elrahapi.router.model_relation import ModelRelation
+from fastapi import Depends
 
 
 def exclude_route(
@@ -141,12 +141,12 @@ def format_init_data(
                 privileges=privileges,
             )
     formatted_data = (
-                formatted_data
-                if authorizations is None
-                else add_authorizations(
-                    routes_config=formatted_data, authorizations=authorizations
-                )
-            )
+        formatted_data
+        if authorizations is None
+        else add_authorizations(
+            routes_config=formatted_data, authorizations=authorizations
+        )
+    )
     formatted_data = (
         formatted_data
         if response_model_configs is None
@@ -172,14 +172,15 @@ def set_response_model(
     ReadPydanticModel: Optional[Type[BaseModel]] = None,
     FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
-    # print("i am there setting response model")
-    # if route_config.route_name == DefaultRoutesName.READ_ONE:
-    #     print(f"i am here 3 {FullReadPydanticModel.__fields__.keys() or 'No full read model'}")
-    #     print(f"i am here 4 {ReadPydanticModel.__fields__.keys() or 'No read model'}")
-    #     print(f"{route_config.with_relations=} {with_relations=}")
-    if FullReadPydanticModel is None :
+    if FullReadPydanticModel is None:
         return ReadPydanticModel
-    if (route_config.with_relations or with_relations) and FullReadPydanticModel:
+    if route_config.with_relations:
         return FullReadPydanticModel
     else:
-        return ReadPydanticModel
+        if route_config.with_relations is False:
+            return ReadPydanticModel
+        elif route_config.with_relations is None:
+            if with_relations:
+                return FullReadPydanticModel
+            else:
+                return ReadPydanticModel

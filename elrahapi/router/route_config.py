@@ -20,7 +20,6 @@ class RouteConfig:
         description: Optional[str] = None,
         is_activated: bool = False,
         is_protected: bool = False,
-        is_unlocked: Optional[bool] = False,
         roles : Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         dependencies:Optional[List[Callable[...,Any]]]=None,
@@ -33,7 +32,6 @@ class RouteConfig:
         self.route_path = self.validate_route_path(route_name,route_path)
         self.summary = summary
         self.description = description
-        self.is_unlocked = is_unlocked
         self.response_model = response_model
         self.dependencies = dependencies if dependencies else []
         self.with_relations = with_relations

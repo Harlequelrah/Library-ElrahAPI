@@ -9,7 +9,7 @@ class CrudModels:
         self,
         entity_name: str,
         primary_key_name: str,
-        SQLAlchemyModel: type,
+        SQLAlchemyModel: Type,
         ReadModel: Type[BaseModel],
         CreateModel: Optional[Type[BaseModel]] = None,
         UpdateModel: Optional[Type[BaseModel]] = None,

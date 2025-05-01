@@ -15,13 +15,17 @@ def update_entity(existing_entity, update_entity):
 async def validate_value_type(value:Any):
     if value is None:
         return None
-    elif value in ["true", "True"]:
+    elif value.lower()=="true":
         value = True
-    elif value in ["false", "False"]:
+    elif value.lower() == "false":
         value = False
     elif value.isdigit():
         value = int(value)
-    else : value = str(value)
+    else:
+        try :
+            value = float(value)
+        except ValueError:
+            value=str(value)
     return value
 
 
