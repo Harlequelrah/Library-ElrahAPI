@@ -122,7 +122,7 @@ Ce sous module contient des quelques fonctions utiles .
 
     - existing_entity : l'entité existante à mettre à jour.
 
-    - update_entity : l'entité pour mettre : l'entité pour la mise à jour .
+    - update_entity : **Type[BaseModel]** l'entité pour mettre : l'entité pour la mise à jour .
 
   - **sortie** : **existing_entity**
 
@@ -152,11 +152,11 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **paramètres** :
 
-    - obj_list : **list** , la liste d'objet à mapper
+    - obj_list : **List[BaseModel]** , la liste d'objet à mapper
 
     - obj_sqlalchemy_class : **type** , la classe sqlalchemy
 
-    - obj_pydantic_class : **type** , la classe pydantic
+    - obj_pydantic_class : **Type[BaseModel]** , la classe pydantic
 
 ### **2.2.2. Sous module `patterns`**
 
@@ -1066,7 +1066,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **paramètres** :
 
-    - `create_ob`: **CreatePydanticModel**
+    - `create_ob`: **Type[BaseModel]** mais potentiellement **CreatePydanticModel**
 
   - **sortie** : **SQLAlchemyModel**
 
@@ -1116,9 +1116,9 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **paramètres** :
 
-    - `pk`
+    - `pk`: **Any**
 
-    - `update_obj`: : **Any** mais potentiellement **UpdatePydanticModel** ou **PatchPydanticModel**
+    - `update_obj`: : **Type[BaseModel]** mais potentiellement **UpdatePydanticModel** ou **PatchPydanticModel**
 
     - `is_full_updated`: **bool** , True pour une mise à jour totale et False pour une mise à jour partielle
 

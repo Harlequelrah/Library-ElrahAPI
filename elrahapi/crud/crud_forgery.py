@@ -1,5 +1,7 @@
 from typing import Any, Optional, Type
 
+from pydantic import BaseModel
+
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
@@ -49,10 +51,10 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def create(self, create_obj):
+    async def create(self, create_obj:Type[BaseModel]):
         if isinstance(create_obj, self.CreatePydanticModel):
             session = self.session_manager.yield_session()
-            dict_obj = create_obj.dict()
+            dict_obj = create_obj.model_dump()
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:
                 session.add(new_obj)
@@ -135,7 +137,7 @@ class CrudForgery:
             )
         return read_obj
 
-    async def update(self, pk: Any, update_obj: Any, is_full_updated: bool):
+    async def update(self, pk: Any, update_obj:Type[BaseModel], is_full_updated: bool):
         session = self.session_manager.yield_session()
         if (
             isinstance(update_obj, self.UpdatePydanticModel)

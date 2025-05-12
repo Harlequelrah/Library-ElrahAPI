@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine, text
-from typing import Any
+from typing import Any,List,Type
+from pydantic import BaseModel
 
-def map_list_to(obj_list: list,obj_sqlalchemy_class:type, obj_pydantic_class: type):
-    return [obj_sqlalchemy_class(**obj.dict()) for obj in obj_list if isinstance(obj,obj_pydantic_class)]
+def map_list_to(obj_list:List[BaseModel],obj_sqlalchemy_class:type, obj_pydantic_class:Type[BaseModel]):
+    return [obj_sqlalchemy_class(**obj.model_dump()) for obj in obj_list if isinstance(obj,obj_pydantic_class)]
 
-def update_entity(existing_entity, update_entity):
-    validate_update_entity=update_entity.dict(exclude_unset=True)
+def update_entity(existing_entity, update_entity:Type[BaseModel]):
+    validate_update_entity=update_entity.model_dump(exclude_unset=True)
     for key, value in validate_update_entity.items():
         if value is not None and hasattr(existing_entity, key):
             setattr(existing_entity, key, value)
