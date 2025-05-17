@@ -90,6 +90,8 @@ ou si virtualenv est dejà installé au préalable
 
   - Configurer le alembic.ini par son paramètre `sqlalchemy.url`
 
+    - pour sqlite : `sqlite:///database.db`
+
   - Configurer le alembic/env.py :
 
     - Ajouter l'import : from myproject.settings.models_metadata import target_metadata

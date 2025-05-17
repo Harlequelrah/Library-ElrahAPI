@@ -26,7 +26,7 @@ def exclude_route(
     init_data: List[RouteConfig] = []
     if exclude_routes_name:
         for route in routes:
-            if route.route_name not in exclude_routes_name or route.is_activated:
+            if route.route_name not in exclude_routes_name and route.is_activated:
                 init_data.append(route)
     return init_data if init_data else routes
 
@@ -131,7 +131,13 @@ def format_init_data(
     FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
     formatted_data: List[RouteConfig] = []
+    # if exclude_routes_name :
+    #     print(f"exclude_routes 1 {len(exclude_routes_name)}")
+    # else : print("1 not exclude_routes")
     formatted_data = exclude_route(init_data, exclude_routes_name)
+    # if exclude_routes_name :
+    #     print(f"exclude_routes 2 {len(exclude_routes_name)}")
+    # else : print("2 not exclude_routes")
     for route_config in formatted_data:
         if route_config.is_protected:
             route_config.dependencies = initialize_dependecies(

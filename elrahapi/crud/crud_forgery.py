@@ -145,22 +145,14 @@ class CrudForgery:
             or isinstance(update_obj, self.PatchPydanticModel)
             and not is_full_updated
         ):
+            existing_obj = await self.read_one(pk, session)
             try:
-                existing_obj = await self.read_one(pk, session)
                 existing_obj = update_entity(
                     existing_entity=existing_obj, update_entity=update_obj
                 )
                 session.commit()
                 session.refresh(existing_obj)
                 return existing_obj
-            except CHE as che:
-                session.rollback()
-                http_exc = che.http_exception
-                if http_exc.status_code == status.HTTP_404_NOT_FOUND:
-                    detail = f"Error occurred while updating {self.entity_name} with {self.primary_key_name} {pk} , details : {http_exc.detail}"
-                    raise_custom_http_exception(
-                        status_code=status.HTTP_404_NOT_FOUND, detail=detail
-                    )
             except Exception as e:
                 session.rollback()
                 detail = f"Error occurred while updating {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
@@ -187,18 +179,12 @@ class CrudForgery:
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
-    async def delete(self, pk):
+    async def delete(self, pk:Any):
         session = self.session_manager.yield_session()
+        existing_obj = await self.read_one(pk=pk, db=session)
         try:
-            existing_obj = await self.read_one(pk=pk, db=session)
             session.delete(existing_obj)
             session.commit()
-        except CHE as che:
-            session.rollback()
-            http_exc = che.http_exception
-            if http_exc.status_code == status.HTTP_404_NOT_FOUND:
-                detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {http_exc.detail}"
-                raise_custom_http_exception(status.HTTP_404_NOT_FOUND, detail)
         except Exception as e:
             session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
