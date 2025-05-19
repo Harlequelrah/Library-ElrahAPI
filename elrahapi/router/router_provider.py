@@ -157,6 +157,9 @@ class CustomRouterProvider:
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
         copied_init_data = deepcopy(init_data)
+        if self.relations :
+            for relation in self.relations :
+                copied_init_data.extends(relation.routes_configs)
         formatted_data = format_init_data(
             init_data=copied_init_data,
             authorizations=authorizations,
@@ -197,6 +200,7 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.read_one(pk)
 
+
             if config.route_name == DefaultRoutesName.READ_ALL:
 
                 @self.router.get(
@@ -232,6 +236,11 @@ class CustomRouterProvider:
                         joined_model_filter_value=joined_model_filter_value,
                         relation=relation,
                     )
+        if self.relations :
+            for relation in self.relations :
+                pass
+
+
 
             if (
                 config.route_name == DefaultRoutesName.CREATE

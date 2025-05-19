@@ -1,6 +1,7 @@
 from enum import Enum
 
 class DefaultRoutesName(str, Enum):
+    RELATION="relation"
     COUNT = "count"
     READ_ALL = "read-all"
     READ_ONE = "read-one"
