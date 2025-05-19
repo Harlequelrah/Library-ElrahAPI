@@ -395,7 +395,7 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
   - authentication : **AuthenticationManager**
 
-  - with_relations : **Optional[bool]**
+  - read_with_relations : **Optional[bool]**
 
   - roles : **Optional[List[str]]**
 
@@ -411,7 +411,7 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
       - authentication : **AuthenticationManager**
 
-      - with_relations : **Optional[bool]**
+      - read_with_relations : **Optional[bool]**
 
       - roles : **Optional[List[str]]**
 
@@ -1220,7 +1220,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `dependencies` : **Optional[List[Callable[...,Any]]]**
 
-    - `with_relations` : Optional[bool]
+    - `read_with_relations` : Optional[bool]
 
     - `response_model` : Optional[Any]
 
@@ -1262,7 +1262,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - route_name : **DefaultRoutesName**
 
-    - with_relations : **bool**
+    - read_with_relations : **bool**
 
     - response_model : **Optional[Any]**
 
@@ -1313,7 +1313,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `privileges `: **Optional[List[str]]**
 
-    - `with_relations` : **bool**
+    - `read_with_relations` : **bool**
 
     - `relations` : **Optional[List[Relationship]]**
 
@@ -1447,7 +1447,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - init_data : **List[RouteConfig]**
 
-    - with_relations: **bool**
+    - read_with_relations: **bool**
 
     - authorizations : **List[AuthorizationConfig]**
 
@@ -1487,7 +1487,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - route_config: **RouteConfig**
 
-    - with_relations:**bool**
+    - read_with_relations:**bool**
 
   - **sortie** : **Type[BaseModel]**
 

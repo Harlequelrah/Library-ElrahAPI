@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.router.relationship import Relationship
+from elrahapi.router.relationship import ManyToManyClassRelationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
@@ -31,17 +31,21 @@ class CustomRouterProvider:
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
-        with_relations: bool = False,
-        relations: Optional[List[Relationship]] = None,
+        read_with_relations: bool = False,
+        many_to_many_class_relations: Optional[
+            List[ManyToManyClassRelationship]
+        ] = None,
     ):
-        self.relations = relations if relations else []
+        self.many_to_many_class_relations = (
+            many_to_many_class_relations if many_to_many_class_relations else []
+        )
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
         )
         self.get_access_token: Optional[callable] = (
             authentication.get_access_token if authentication else None
         )
-        self.with_relations = with_relations
+        self.read_with_relations = read_with_relations
         self.pk = crud.crud_models.primary_key_name
         self.ReadPydanticModel = crud.ReadPydanticModel
         self.FullReadPydanticModel = crud.FullReadPydanticModel
@@ -157,8 +161,8 @@ class CustomRouterProvider:
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
         copied_init_data = deepcopy(init_data)
-        if self.relations :
-            for relation in self.relations :
+        if self.many_to_many_class_relations:
+            for relation in self.many_to_many_class_relations:
                 copied_init_data.extends(relation.routes_configs)
         formatted_data = format_init_data(
             init_data=copied_init_data,
@@ -168,7 +172,7 @@ class CustomRouterProvider:
             roles=self.roles,
             privileges=self.privileges,
             response_model_configs=response_model_configs,
-            with_relations=self.with_relations,
+            read_with_relations=self.read_with_relations,
             ReadPydanticModel=self.ReadPydanticModel,
             FullReadPydanticModel=self.FullReadPydanticModel,
         )
@@ -200,7 +204,6 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.read_one(pk)
 
-
             if config.route_name == DefaultRoutesName.READ_ALL:
 
                 @self.router.get(
@@ -222,7 +225,7 @@ class CustomRouterProvider:
                     relation = next(
                         (
                             relation
-                            for relation in self.relations
+                            for relation in self.many_to_many_class_relations
                             if relation.relationship_name == relationship_name
                         ),
                         None,
@@ -236,11 +239,6 @@ class CustomRouterProvider:
                         joined_model_filter_value=joined_model_filter_value,
                         relation=relation,
                     )
-        if self.relations :
-            for relation in self.relations :
-                pass
-
-
 
             if (
                 config.route_name == DefaultRoutesName.CREATE
@@ -334,5 +332,64 @@ class CustomRouterProvider:
                     create_obj_list: List[self.CreatePydanticModel],
                 ):
                     return await self.crud.bulk_create(create_obj_list)
+
+        for relation in self.many_to_many_class_relations:
+            routes_configs = relation.initialize_relation_route_configs_dependencies(
+                roles=self.roles,
+                privileges=self.privileges,
+                authentication=self.authentication,
+            )
+            for route_config in routes_configs:
+                if route_config.route_name == DefaultRoutesName.CREATE_RELATION:
+
+                    @self.router.post(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        status_code=201,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def create_relation(pk1: Any, pk2: Any):
+                        return await relation.create(pk1=pk1, pk2=pk2)
+
+                if route_config.route_name == DefaultRoutesName.DELETE_RELATION:
+
+                    @self.router.delete(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        status_code=204,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def delete_relation(pk1: Any, pk2: Any):
+                        return await relation.delete(pk1=pk1, pk2=pk2)
+
+                if route_config.route_name == DefaultRoutesName.READ_ALL_RELATION:
+
+                    @self.router.get(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=List[route_config.response_model],
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def read_all_relation(
+                        pk1: Any,
+                        pk2: Any,
+                        filter: Optional[str] = None,
+                        value: Optional[Any] = None,
+                        skip: int = 0,
+                        limit: int = None,
+                    ):
+                        return await relation.read_all(
+                            pk1=pk1,
+                            pk2=pk2,
+                            filter=filter,
+                            value=value,
+                            limit=limit,
+                            skip=skip,
+                        )
+
+                pass
 
         return self.router

@@ -181,14 +181,14 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
 
 - **`Configuration avec relations entre model`** :
 
-La configuration des relations se fait par le paramètre `with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
+La configuration des relations se fait par le paramètre `read_with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
 
 ```python
    router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
     crud=myapp_crud,
-    with_relations = True
+    read_with_relations = True
 )
 ```
 
@@ -223,7 +223,7 @@ Les possibilités de configuration d'un routeur :
     RouteConfig(
       route_name=DefaultRoutesName.CREATE,
       is_activated=True,
-      with_relations = False
+      read_with_relations = False
      ),
     RouteConfig(
       route_name=DefaultRoutesName.READ_ONE,
@@ -256,7 +256,7 @@ Les possibilités de configuration d'un routeur :
 ```python
   custom_response_models : List[ResponseModelConfig] = [
   ResponseModelConfig(route_name=DefaultRoutesName.DELETE,response_model=MyModel),
-  ResponseModelConfig(route_name=DefaultRoutesName.UPDATE,with_relations=True
+  ResponseModelConfig(route_name=DefaultRoutesName.UPDATE,read_with_relations=True
   ]
 ```
 

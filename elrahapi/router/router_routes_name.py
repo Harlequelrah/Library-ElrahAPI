@@ -1,7 +1,18 @@
 from enum import Enum
 
+class RelationRoutesName(str,Enum):
+    CREATE_RELATION="create-relation"
+    CREATE_BY_RELATION="create-by-relation"
+    DELETE_BY_RELATION="delete-by-relation"
+    UPDATE_BY_RELATION="update-by-relation"
+    READ_ALL_RELATION="read-all-relation"
+    DELETE_RELATION="delete-relation"
+    UPDATE_RELATION="update-relation"
+    READ_ONE_RELATION="read-one-relation"
+
+
 class DefaultRoutesName(str, Enum):
-    RELATION="relation"
+
     COUNT = "count"
     READ_ALL = "read-all"
     READ_ONE = "read-one"

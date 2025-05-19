@@ -1,14 +1,13 @@
 from typing import Any, Optional, Type
 
-from pydantic import BaseModel
-
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.router.relationship import Relationship
+from elrahapi.router.relationship import ManyToManyClassRelationship
 from elrahapi.session.session_manager import SessionManager
 from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
+from pydantic import BaseModel
 from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
 
@@ -51,7 +50,7 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def create(self, create_obj:Type[BaseModel]):
+    async def create(self, create_obj: Type[BaseModel]):
         if isinstance(create_obj, self.CreatePydanticModel):
             session = self.session_manager.yield_session()
             dict_obj = create_obj.model_dump()
@@ -93,7 +92,7 @@ class CrudForgery:
         value: Optional[str] = None,
         skip: int = 0,
         limit: int = None,
-        relation: Optional[Relationship] = None,
+        relation: Optional[ManyToManyClassRelationship] = None,
     ):
         session = self.session_manager.yield_session()
         query = session.query(self.SQLAlchemyModel)
@@ -137,7 +136,7 @@ class CrudForgery:
             )
         return read_obj
 
-    async def update(self, pk: Any, update_obj:Type[BaseModel], is_full_updated: bool):
+    async def update(self, pk: Any, update_obj: Type[BaseModel], is_full_updated: bool):
         session = self.session_manager.yield_session()
         if (
             isinstance(update_obj, self.UpdatePydanticModel)
@@ -179,7 +178,7 @@ class CrudForgery:
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
-    async def delete(self, pk:Any):
+    async def delete(self, pk: Any):
         session = self.session_manager.yield_session()
         existing_obj = await self.read_one(pk=pk, db=session)
         try:

@@ -1,7 +1,6 @@
 from typing import List, Optional, Type
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     DEFAULT_ROUTE_CONFIG,
     AuthorizationConfig,
@@ -11,17 +10,18 @@ from elrahapi.router.route_config import (
 from elrahapi.router.router_namespace import (
     DEFAULT_ROUTES_CONFIGS,
     USER_AUTH_CONFIG,
-    DefaultRoutesName,
     TypeRoute,
 )
 from pydantic import BaseModel
 
 from fastapi import Depends
 
+from elrahapi.router.router_routes_name import RelationRoutesName    ,DefaultRoutesName
+
 
 def exclude_route(
     routes: List[RouteConfig],
-    exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
+    exclude_routes_name: Optional[List[DefaultRoutesName|RelationRoutesName]] = None,
 ):
     init_data: List[RouteConfig] = []
     if exclude_routes_name:
@@ -90,8 +90,7 @@ def add_authorizations(
             None,
         )
         if authorization:
-            route_config.roles.extend(authorization.roles)
-            route_config.privileges.extend(authorization.privileges)
+            route_config.extend_authorization_config(authorization)
         authorized_routes_config.append(route_config)
     return authorized_routes_config
 
@@ -111,8 +110,8 @@ def set_response_model_config(
             None,
         )
         if response_model_config:
-            route_config.with_relations = response_model_config.with_relations
-            if response_model_config.response_model:
+            route_config.read_with_relations = response_model_config.read_with_relations
+            if response_model_config.response_model and not route_config.response_model:
                 route_config.response_model = response_model_config.response_model
             final_routes_config.append(route_config)
     return final_routes_config
@@ -120,7 +119,7 @@ def set_response_model_config(
 
 def format_init_data(
     init_data: List[RouteConfig],
-    with_relations: bool,
+    read_with_relations: bool,
     authorizations: Optional[List[AuthorizationConfig]] = None,
     exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
     authentication: Optional[AuthenticationManager] = None,
@@ -131,13 +130,8 @@ def format_init_data(
     FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
     formatted_data: List[RouteConfig] = []
-    # if exclude_routes_name :
-    #     print(f"exclude_routes 1 {len(exclude_routes_name)}")
-    # else : print("1 not exclude_routes")
+
     formatted_data = exclude_route(init_data, exclude_routes_name)
-    # if exclude_routes_name :
-    #     print(f"exclude_routes 2 {len(exclude_routes_name)}")
-    # else : print("2 not exclude_routes")
     for route_config in formatted_data:
         if route_config.is_protected:
             route_config.dependencies = initialize_dependecies(
@@ -164,7 +158,7 @@ def format_init_data(
         if not route_config.response_model:
             response_model = set_response_model(
                 route_config=route_config,
-                with_relations=with_relations,
+                read_with_relations=read_with_relations,
                 ReadPydanticModel=ReadPydanticModel,
                 FullReadPydanticModel=FullReadPydanticModel,
             )
@@ -174,19 +168,19 @@ def format_init_data(
 
 def set_response_model(
     route_config: RouteConfig,
-    with_relations: bool,
+    read_with_relations: bool,
     ReadPydanticModel: Optional[Type[BaseModel]] = None,
     FullReadPydanticModel: Optional[Type[BaseModel]] = None,
 ):
     if FullReadPydanticModel is None:
         return ReadPydanticModel
-    if route_config.with_relations:
+    if route_config.read_with_relations:
         return FullReadPydanticModel
     else:
-        if route_config.with_relations is False:
+        if route_config.read_with_relations is False:
             return ReadPydanticModel
-        elif route_config.with_relations is None:
-            if with_relations:
+        elif route_config.read_with_relations is None:
+            if read_with_relations:
                 return FullReadPydanticModel
             else:
                 return ReadPydanticModel
