@@ -9,7 +9,9 @@ from elrahapi.router.route_config import (
 )
 from elrahapi.router.router_namespace import (
     DEFAULT_ROUTES_CONFIGS,
+    RELATION_RULES,
     USER_AUTH_CONFIG,
+    TypeRelation,
     TypeRoute,
 )
 from pydantic import BaseModel
@@ -184,3 +186,7 @@ def set_response_model(
                 return FullReadPydanticModel
             else:
                 return ReadPydanticModel
+
+
+def verify_relation_rule(type_relation:TypeRelation,relation_route_name:RelationRoutesName,):
+    return relation_route_name in RELATION_RULES[type_relation]

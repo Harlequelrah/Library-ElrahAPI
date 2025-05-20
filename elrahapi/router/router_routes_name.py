@@ -2,12 +2,11 @@ from enum import Enum
 
 class RelationRoutesName(str,Enum):
     CREATE_RELATION="create-relation"
+    DELETE_RELATION="delete-relation"
     CREATE_BY_RELATION="create-by-relation"
     DELETE_BY_RELATION="delete-by-relation"
     UPDATE_BY_RELATION="update-by-relation"
     READ_ALL_RELATION="read-all-relation"
-    DELETE_RELATION="delete-relation"
-    UPDATE_RELATION="update-relation"
     READ_ONE_RELATION="read-one-relation"
 
 

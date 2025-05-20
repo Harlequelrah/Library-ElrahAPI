@@ -20,13 +20,33 @@ class TypeRelation(str, Enum):
 
 RELATION_RULES: dict[TypeRelation, List[RelationRoutesName]] = {
     TypeRelation.ONE_TO_ONE: [
+        RelationRoutesName.READ_ONE_RELATION,
         RelationRoutesName.CREATE_RELATION,
         RelationRoutesName.DELETE_RELATION,
-        RelationRoutesName.UPDATE_RELATION,
         RelationRoutesName.CREATE_BY_RELATION,
         RelationRoutesName.DELETE_BY_RELATION,
-        RelationRoutesName.UPDATE_RELATION,
-    ]
+        RelationRoutesName.UPDATE_BY_RELATION,
+    ],
+    TypeRelation.ONE_TO_MANY: [
+        RelationRoutesName.READ_ALL_RELATION,
+        RelationRoutesName.READ_ONE_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+        RelationRoutesName.DELETE_BY_RELATION,
+        RelationRoutesName.UPDATE_BY_RELATION,
+    ],
+    TypeRelation.MANY_TO_ONE: [RelationRoutesName.READ_ONE_RELATION],
+    TypeRelation.MANY_TO_MANY_TABLE: [
+        RelationRoutesName.READ_ALL_RELATION,
+        RelationRoutesName.READ_ONE_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+    ],
+    TypeRelation.MANY_TO_MANY_CLASS: [
+        RelationRoutesName.READ_ALL_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+    ],
 }
 DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DEFAULT_ROUTE_CONFIG] = {
     DefaultRoutesName.COUNT: DEFAULT_ROUTE_CONFIG(

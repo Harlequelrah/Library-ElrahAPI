@@ -5,7 +5,7 @@ from elrahapi.router.route_config import RouteConfig,ResponseModelConfig,Authori
 from elrahapi.router.router_routes_name import DefaultRoutesName,RelationRoutesName
 from elrahapi.router.router_namespace import  TypeRelation, TypeRoute
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.router.router_crud import initialize_dependecies
+from elrahapi.router.router_crud import initialize_dependecies, verify_relation_rule
 
 
 class RelationRouteConfig:
@@ -39,6 +39,8 @@ class RelationRouteConfig:
 
 class Relationship:
 
+
+
     def __init__(
         self,
         relationship_name: str,
@@ -54,6 +56,12 @@ class Relationship:
         default_public_relation_routes_name : List[RelationRoutesName]=None,
         default_protected_relation_routes_name:List[RelationRoutesName]=None,
     ):
+        if type_relation == TypeRelation.MANY_TO_MANY_CLASS:
+            self.check_many_to_many_class_attrs(
+                relationship_crud_models=relationship_crud_models,
+                relationship_key1_name=relationship_key1_name,
+                relationship_key2_name=relationship_key2_name
+            )
         self.relationship_name = relationship_name
         self.relationship_crud_models = relationship_crud_models
         self.second_entity_crud_models = second_entity_crud_models
@@ -69,31 +77,45 @@ class Relationship:
             relations_responses_model_configs=relations_responses_model_configs
             ) if relations_routes_configs else []
 
-
     def init_default_routes(
         self,
         default_public_relation_routes_name : List[RelationRoutesName]=None,
         default_protected_relation_routes_name:List[RelationRoutesName]=None,
     ):
         routes_configs:List[RouteConfig]=[]
+        second_entity_name=self.second_entity_crud_models.entity_name
+        path = f"/{{pk1}}/{second_entity_name}"
         for route_name in default_public_relation_routes_name+default_protected_relation_routes_name:
-            if route_name==RelationRoutesName.CREATE_RELATION and self.type_relation != TypeRelation.MANY_TO_MANY_CLASS :
-        for route in default_public_relation_routes_name:
-            pass
-
+            if route_name==RelationRoutesName.READ_ALL_RELATION:
+                route_config = RouteConfig(
+                    route_name=DefaultRoutesName.READ_ALL_RELATION,
+                    route_path=path+"s",
+                    summary=f"Retrive all {second_entity_name}s",
+                    description=f"Allow to retrive all {second_entity_name}s from the relation",
+                    is_activated=True,
+                    response_model=self.second_entity_crud_models.read_model,
+                )
+                routes_configs.append(route_config)
+            if route_name == RelationRoutesName.READ_ONE_RELATION:
+                route_config = RouteConfig(
+                    route_name=DefaultRoutesName.READ_ONE_RELATION,
+                    route_path=path+f"s",
+                    summary=f"Retrive all {second_entity_name}s",
+                    description=f"Allow to retrive all {second_entity_name}s from the relation",
+                    is_activated=True,
+                    response_model=self.second_entity_crud_models.read_model,
+                )
+                routes_configs.append(route_config)
 
     def purge_relations(self,routes_configs:List[RouteConfig]):
-        
-        for route_config in routes_config:
-            if (
-                route_config.route_name==RelationRoutesName.CREATE_RELATION and
-                self.type_relation==TypeRelation.MANY_TO_MANY_CLASS
-            ):
-                    routes_configs.remove(route_config)
-            if (
-                route_con
-            )
-            if route_config
+        purged_routes_configs:List[RouteConfig]=[]
+        for route_config in routes_configs:
+            if  verify_relation_rule(
+                type_relation=self.type_relation,
+                relation_route_name=route_config.route_name
+            ) and route_config.is_activated:
+                purged_routes_configs.append(route_config)
+        return purged_routes_configs
 
     def init_routes_configs(
         self,
@@ -105,31 +127,22 @@ class Relationship:
     ):
         routes_configs:List[RouteConfig]=[]
         if default_protected_relation_routes_name or default_public_relation_routes_name:
-                default_routes_configs=self.init_default_routes(
+            default_routes_configs=self.init_default_routes(
                 default_public_relation_routes_name=default_public_relation_routes_name,
                 default_protected_relation_routes_name=default_protected_relation_routes_name,
             )
-                if relations_routes_configs is None :
-                    routes_configs=default_routes_configs
-                else :
-                    routes_configs= deepcopy(relations_routes_configs)+default_routes_configs
+            if relations_routes_configs is None :
+                routes_configs=default_routes_configs
+            else :
+                routes_configs= deepcopy(relations_routes_configs)+default_routes_configs
 
         purged_routes_configs= self.purge_relations(routes_configs)
 
-
-
-        rel_entity_name=self.second_entity_crud_models.entity_name
-        route_path=f"{{pk1}}/{rel_entity_name}s/{{pk2}}"
         if read_all_relations_route_config:
             r1=read_all_relations_route_config
         else :
             route_config=RouteConfig(
-                route_name=DefaultRoutesName.READ_ALL_RELATION,
-                route_path=route_path,
-                summary=f"Retrive all {rel_entity_name}s",
-                description=f"Allow to retrive all {rel_entity_name}s from the relation",
-                is_activated=True,
-                response_model=self.second_entity_crud_models.read_model
+
             )
             r1=RelationRouteConfig(
                 route_config=route_config,
@@ -192,3 +205,17 @@ class Relationship:
 
     async def get_second_model_key(self):
         return await self.second_entity_crud_models.get_attr(self.second_model_key_name)
+
+    def check_many_to_many_class_attrs(
+        self,
+        relationship_crud_models: Optional[CrudModels] = None,
+        relationship_key1_name: Optional[str] = None,
+        relationship_key2_name: Optional[str] = None):
+        if (
+                relationship_crud_models is None or
+                relationship_key1_name is None or
+                relationship_key2_name is None
+            ) :
+            raise ValueError(
+                "relationship_crud_models , relationship_key1_name and relationship_key2_name must be provide for relation MANY TO MANY CLASS"
+            )
