@@ -1,17 +1,19 @@
 from typing import Any, Optional, Type
-
 from elrahapi.crud.bulk_models import BulkDeleteModel
+from sqlalchemy.orm.query import Query
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.router.relationship import ManyToManyClassRelationship
+from elrahapi.router.relationship import Relationship
 from elrahapi.session.session_manager import SessionManager
-from elrahapi.utility.utils import map_list_to, update_entity, validate_value_type
+from elrahapi.utility.utils import make_filter, map_list_to, update_entity, validate_value_type
 from pydantic import BaseModel
 from sqlalchemy import delete, func
 from sqlalchemy.orm import Session
 
 from fastapi import status
+
+from elrahapi.router.router_namespace import TypeRelation
 
 
 class CrudForgery:
@@ -75,7 +77,7 @@ class CrudForgery:
     async def count(self) -> int:
         session = self.session_manager.yield_session()
         try:
-            pk = await self.crud_models.get_pk()
+            pk =  self.crud_models.get_pk()
             count = session.query(func.count(pk)).scalar()
             return count
         except Exception as e:
@@ -84,41 +86,53 @@ class CrudForgery:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
+
+
+
     async def read_all(
         self,
-        filter: Optional[Any] = None,
-        joined_model_filter: Optional[str] = None,
-        joined_model_filter_value: Optional[Any] = None,
+        filter: Optional[str] = None,
+        second_model_filter: Optional[str] = None,
+        second_model_filter_value: Optional[Any] = None,
         value: Optional[str] = None,
         skip: int = 0,
         limit: int = None,
-        relation: Optional[ManyToManyClassRelationship] = None,
+        relation: Optional[Relationship] = None,
     ):
         session = self.session_manager.yield_session()
         query = session.query(self.SQLAlchemyModel)
-        pk = await self.crud_models.get_pk()
+        pk =  self.crud_models.get_pk()
         if relation:
-            relkey1 = await relation.get_relationship_key1()
-            relkey2 = await relation.get_relationship_key2()
-            reskey = await relation.get_joined_model_key()
-            query = query.join(
-                relation.relationship_crud_models.sqlalchemy_model,
-                relkey1 == pk,
+            reskey =  relation.get_second_model_key()
+            if relation.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
+                relkey1 =  relation.get_relationship_key1()
+                relkey2 =  relation.get_relationship_key2()
+                query = query.join(
+                    relation.relationship_crud_models.sqlalchemy_model,
+                    relkey1 == pk,
+                )
+                query = query.join(
+                    relation.second_entity_crud_models.sqlalchemy_model,
+                    reskey == relkey2,
+                )
+            elif relation.type_relation in [TypeRelation.MANY_TO_MANY_TABLE,TypeRelation.ONE_TO_MANY] :
+                query=query.join(
+                    relation.second_entity_crud.crud_models.sqlalchemy_model,
+                    reskey=pk
+                )
+        query= make_filter(
+            crud_models=self.crud_models,
+            query=query,
+            filter=filter,
+            value=value
+        )
+        if relation :
+            query= make_filter(
+                crud_models=relation.second_entity_crud.crud_models,
+                query=query,
+                filter=second_model_filter,
+                value=second_model_filter_value
             )
-            query = query.join(
-                relation.joined_entity_crud_models.sqlalchemy_model,
-                reskey == relkey2,
-            )
-        if filter and value:
-            exist_filter = await self.crud_models.get_attr(filter)
-            validated_value = await validate_value_type(value)
-            query = query.filter(exist_filter == validated_value)
-        if relation and joined_model_filter and joined_model_filter_value:
-            validated_value = await validate_value_type(joined_model_filter_value)
-            exist_filter = await relation.joined_entity_crud_models.get_attr(
-                joined_model_filter
-            )
-            query = query.filter(exist_filter == validated_value)
         results = query.offset(skip).limit(limit).all()
         return results
 
@@ -127,7 +141,7 @@ class CrudForgery:
             session = db
         else:
             session = self.session_manager.yield_session()
-        pk_attr = await self.crud_models.get_pk()
+        pk_attr =  self.crud_models.get_pk()
         read_obj = session.query(self.SQLAlchemyModel).filter(pk_attr == pk).first()
         if read_obj is None:
             detail = f"{self.entity_name} with {self.primary_key_name} {pk} not found"
@@ -166,7 +180,7 @@ class CrudForgery:
 
     async def bulk_delete(self, pk_list: BulkDeleteModel):
         session = self.session_manager.yield_session()
-        pk_attr = await self.crud_models.get_pk()
+        pk_attr =  self.crud_models.get_pk()
         delete_list = pk_list.delete_liste
         try:
             session.execute(
@@ -188,3 +202,5 @@ class CrudForgery:
             session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+
+

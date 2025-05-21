@@ -1090,9 +1090,9 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `value`: **Optiona[Any]**
 
-    - `joined_model_filter`: **Optional[str]**
+    - `second_model_filter`: **Optional[str]**
 
-    - `joined_model_filter_value`: **Optional[Any]**
+    - `second_model_filter_value`: **Optional[Any]**
 
     - `skip`: **Optional[int]**
 
@@ -1515,7 +1515,7 @@ Ce sous module définit `Relationship` une classe pour permettre de retourner de
 
 - `get_relationship_key2`
 
-- `get_joined_model_key`
+- `get_second_model_key`
 
 #### 2.10. Module `security`
 

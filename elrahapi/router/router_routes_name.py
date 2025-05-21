@@ -1,13 +1,15 @@
 from enum import Enum
 
+
 class RelationRoutesName(str,Enum):
     CREATE_RELATION="create-relation"
     DELETE_RELATION="delete-relation"
     CREATE_BY_RELATION="create-by-relation"
     DELETE_BY_RELATION="delete-by-relation"
     UPDATE_BY_RELATION="update-by-relation"
-    READ_ALL_RELATION="read-all-relation"
-    READ_ONE_RELATION="read-one-relation"
+    PATCH_BY_RELATION="patch-by-relation"
+    READ_ALL_BY_RELATION="read-all-by-relation"
+    READ_ONE_BY_RELATION="read-one-by-relation"
 
 
 class DefaultRoutesName(str, Enum):
@@ -41,4 +43,5 @@ DEFAULT_DETAIL_ROUTES_NAME = [
 DEFAULT_NO_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.READ_ALL,
     DefaultRoutesName.CREATE,
+    ]
     ]

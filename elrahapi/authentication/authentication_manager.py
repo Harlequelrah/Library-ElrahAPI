@@ -18,28 +18,19 @@ from elrahapi.exception.auth_exception import (
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.session.session_manager import SessionManager
+from elrahapi.database.session_manager import SessionManager
 
 
 class AuthenticationManager:
 
     def __init__(
         self,
-        database_username: str,
-        database_password: str,
-        connector: str,
-        database_name: str,
-        server: str,
+
         secret_key: Optional[str] = None,
         algorithm: Optional[str] = None,
         refresh_token_expiration: Optional[int] = None,
         access_token_expiration: Optional[int] = None,
     ):
-        self.__database_username = database_username
-        self.__database_password = database_password
-        self.__connector = connector
-        self.__database_name = database_name
-        self.__server = server
         self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
             refresh_token_expiration
@@ -73,45 +64,7 @@ class AuthenticationManager:
     def authentication_models(self, authentication_models: CrudModels):
         self.__authentication_models = authentication_models
 
-    @property
-    def database_username(self):
-        return self.__database_username
 
-    @database_username.setter
-    def database_username(self, database_username: str):
-        self.__database_username = database_username
-
-    @property
-    def database_password(self):
-        return self.__database_password
-
-    @database_password.setter
-    def database_password(self, database_password: str):
-        self.__database_password = database_password
-
-    @property
-    def connector(self):
-        return self.__connector
-
-    @connector.setter
-    def connector(self, connector: str):
-        self.__connector = connector
-
-    @property
-    def database_name(self):
-        return self.__database_name
-
-    @database_name.setter
-    def database_name(self, database_name: str):
-        self.__database_name = database_name
-
-    @property
-    def server(self):
-        return self.__server
-
-    @server.setter
-    def server(self, server: str):
-        self.__server = server
 
     @property
     def algorithm(self):

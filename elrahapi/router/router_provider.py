@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.router.relationship import ManyToManyClassRelationship
+from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
@@ -15,6 +15,7 @@ from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
     DefaultRoutesName,
+    TypeRelation,
     TypeRoute,
 )
 
@@ -32,13 +33,9 @@ class CustomRouterProvider:
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
         read_with_relations: bool = False,
-        many_to_many_class_relations: Optional[
-            List[ManyToManyClassRelationship]
-        ] = None,
+        relations: Optional[List[Relationship]] = None,
     ):
-        self.many_to_many_class_relations = (
-            many_to_many_class_relations if many_to_many_class_relations else []
-        )
+        self.relations = relations or []
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
         )
@@ -161,9 +158,6 @@ class CustomRouterProvider:
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
         copied_init_data = deepcopy(init_data)
-        if self.many_to_many_class_relations:
-            for relation in self.many_to_many_class_relations:
-                copied_init_data.extends(relation.routes_configs)
         formatted_data = format_init_data(
             init_data=copied_init_data,
             authorizations=authorizations,
@@ -216,27 +210,36 @@ class CustomRouterProvider:
                 async def read_all(
                     filter: Optional[str] = None,
                     value: Optional[Any] = None,
-                    joined_model_filter: Optional[str] = None,
-                    joined_model_filter_value: Optional[Any] = None,
+                    second_model_filter: Optional[str] = None,
+                    second_model_filter_value: Optional[Any] = None,
                     skip: int = 0,
                     limit: int = None,
                     relationship_name: Optional[str] = None,
                 ):
-                    relation = next(
-                        (
-                            relation
-                            for relation in self.many_to_many_class_relations
-                            if relation.relationship_name == relationship_name
-                        ),
-                        None,
+                    relation: Relationship = (
+                        next(
+                            (
+                                relation
+                                for relation in self.relations
+                                if relation.relationship_name == relationship_name
+                            ),
+                            None,
+                        )
+                        if relation.type_relation
+                        in [
+                            TypeRelation.MANY_TO_MANY_CLASS,
+                            TypeRelation.MANY_TO_MANY_TABLE,
+                            TypeRelation.ONE_TO_MANY,
+                        ]
+                        else None
                     )
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
                         filter=filter,
                         value=value,
-                        joined_model_filter=joined_model_filter,
-                        joined_model_filter_value=joined_model_filter_value,
+                        second_model_filter=second_model_filter,
+                        second_model_filter_value=second_model_filter_value,
                         relation=relation,
                     )
 
@@ -271,7 +274,7 @@ class CustomRouterProvider:
                     dependencies=config.dependencies,
                 )
                 async def update(
-                    pk,
+                    pk: Any,
                     update_obj: self.UpdatePydanticModel,
                 ):
                     return await self.crud.update(pk, update_obj, True)
@@ -286,7 +289,7 @@ class CustomRouterProvider:
                     dependencies=config.dependencies,
                 )
                 async def patch(
-                    pk,
+                    pk: Any,
                     update_obj: self.PatchPydanticModel,
                 ):
                     return await self.crud.update(pk, update_obj, False)
@@ -301,7 +304,7 @@ class CustomRouterProvider:
                     status_code=status.HTTP_204_NO_CONTENT,
                 )
                 async def delete(
-                    pk,
+                    pk: Any,
                 ):
                     return await self.crud.delete(pk)
 
@@ -327,13 +330,14 @@ class CustomRouterProvider:
                     description=config.description,
                     dependencies=config.dependencies,
                     response_model=List[config.response_model],
+                    status_code=status.HTTP_201_CREATED,
                 )
                 async def bulk_create(
                     create_obj_list: List[self.CreatePydanticModel],
                 ):
                     return await self.crud.bulk_create(create_obj_list)
 
-        for relation in self.many_to_many_class_relations:
+        for relation in self.relations:
             routes_configs = relation.initialize_relation_route_configs_dependencies(
                 roles=self.roles,
                 privileges=self.privileges,
@@ -345,26 +349,30 @@ class CustomRouterProvider:
                     @self.router.post(
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
-                        status_code=201,
+                        status_code=status.HTTP_201_CREATED,
                         summary=route_config.summary,
                         description=route_config.description,
                     )
                     async def create_relation(pk1: Any, pk2: Any):
-                        return await relation.create(pk1=pk1, pk2=pk2)
+                        return await relation.create_relation(
+                            entity_crud=self.crud, pk1=pk1, pk2=pk2
+                        )
 
                 if route_config.route_name == DefaultRoutesName.DELETE_RELATION:
 
                     @self.router.delete(
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
-                        status_code=204,
+                        status_code=status.HTTP_204_NO_CONTENT,
                         summary=route_config.summary,
                         description=route_config.description,
                     )
                     async def delete_relation(pk1: Any, pk2: Any):
-                        return await relation.delete(pk1=pk1, pk2=pk2)
+                        return await relation.delete_relation(
+                            entity_crud=self.crud, pk1=pk1, pk2=pk2
+                        )
 
-                if route_config.route_name == DefaultRoutesName.READ_ALL_RELATION:
+                if route_config.route_name == DefaultRoutesName.READ_ALL_BY_RELATION:
 
                     @self.router.get(
                         path=route_config.route_path,
@@ -373,23 +381,93 @@ class CustomRouterProvider:
                         summary=route_config.summary,
                         description=route_config.description,
                     )
-                    async def read_all_relation(
+                    async def read_all_by_relation(
                         pk1: Any,
-                        pk2: Any,
                         filter: Optional[str] = None,
                         value: Optional[Any] = None,
                         skip: int = 0,
                         limit: int = None,
                     ):
-                        return await relation.read_all(
+                        return await relation.read_all_by_relation(
                             pk1=pk1,
-                            pk2=pk2,
                             filter=filter,
                             value=value,
                             limit=limit,
                             skip=skip,
                         )
 
-                pass
+                if route_config.route_name == DefaultRoutesName.READ_ONE_BY_RELATION:
+
+                    @self.router.get(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=route_config.response_model,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def read_one_by_relation(
+                        pk1: Any,
+                    ):
+                        return await relation.read_one_by_relation(pk1=pk1)
+
+                if route_config.route_name == DefaultRoutesName.CREATE_BY_RELATION:
+
+                    @self.router.post(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=route_config.response_model,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                        status_code=status.HTTP_201_CREATED,
+                    )
+                    async def create_by_relation(
+                        pk1: Any,
+                        create_obj: relation.second_entity_crud.crud_models.create_model,
+                    ):
+                        return await relation.create_by_relation(pk1=pk1)
+
+                if route_config.route_name == DefaultRoutesName.DELETE_BY_RELATION:
+
+                    @self.router.delete(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        status_code=status.HTTP_204_NO_CONTENT,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def delete_by_relation(
+                        pk1: Any,
+                    ):
+                        return await relation.delete_by_relation(pk1=pk1)
+
+                if route_config.route_name == DefaultRoutesName.UPDATE_BY_RELATION:
+
+                    @self.router.put(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=route_config.response_model,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def update_by_relation(
+                        pk1: Any,
+                        update_obj: relation.second_entity_crud.crud_models.update_model,
+                    ):
+                        return await relation.update_by_relation(pk1=pk1)
+
+                if route_config.route_name == DefaultRoutesName.PATCH_BY_RELATION:
+
+                    @self.router.patch(
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=route_config.response_model,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                    )
+                    async def patch_by_relation(
+                        pk1: Any,
+                        patch_obj: relation.second_entity_crud.crud_models.patch_model,
+                    ):
+                        return await relation.patch_by_relation(pk1=pk1)
 
         return self.router

@@ -24,7 +24,8 @@ setup(
         "python-jose[cryptography]>=3.3.0",
         "black>=24.10.0",
         "sqlalchemy>=2.0.38",
-        "sqlalchemy-utils>=0.41.2"
+        "sqlalchemy-utils>=0.41.2",
+        "aiosqlite>=0.21.0"
     ],
     entry_points={"console_scripts": ["elrahapi=elrahapi.__main__:main"]},
 )
