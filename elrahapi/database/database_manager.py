@@ -1,9 +1,10 @@
 from elrahapi.database.session_manager import SessionManager
-from sqlalchemy import create_engine, text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import Connection, create_engine, text , MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine,AsyncEngine,AsyncConnection
 from sqlalchemy.orm import sessionmaker
-
-
+from sqlalchemy.orm.decl_api import DeclarativeMeta
+from typing import Any,  Optional, AsyncGenerator
+import asyncio
 class DatabaseManager:
 
     def __init__(
@@ -23,6 +24,24 @@ class DatabaseManager:
         self.__database_async_connector = database_async_connector
         self.database_name = database_name
         self.__database_server = database_server
+        self.__base:Optional[DeclarativeMeta]=None
+        self.__target_metadata:Optional[MetaData]=None
+
+    @property
+    def target_metadata(self):
+        return self.__target_metadata
+
+    @target_metadata.setter
+    def target_metadata(self,target_metadata:MetaData):
+        self.__target_metadata=target_metadata
+
+    @property
+    def base(self):
+        return self.__base
+
+    @base.setter
+    def base(self,base:DeclarativeMeta):
+        self.__base=base
 
     @property
     def database_username(self):
@@ -70,7 +89,7 @@ class DatabaseManager:
 
     @database_name.setter
     def database_name(self, database_name: str):
-        if self.database == "sqlite" and database_name is None:
+        if self.database == "sqlite" and database_name in [None,'']:
             self.__database_name = "database"
         else:
             self.__database_name = database_name
@@ -85,7 +104,7 @@ class DatabaseManager:
 
     @property
     def is_async_env(self) -> bool:
-        return self.__database_async_connector is not None
+        return self.__database_async_connector not in [None,'']
 
     @property
     def database_url(self) -> str:
@@ -98,34 +117,70 @@ class DatabaseManager:
                 return "sqlite://"
             return f"{self.connector}://{self.database_username}:{self.database_password}@{self.server}"
 
+    def create_sync_db(self):
+        engine = create_engine(self.database_url, pool_pre_ping=True)
+        conn = engine.connect()
+        try:
+            conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
+        finally:
+            conn.close()
+
+    async def create_async_db(self):
+        engine = create_async_engine(self.database_url, pool_pre_ping=True)
+        async with engine.begin() as conn:
+            await conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
+
     def create_database_if_not_exists(self):
-        if self.database != "sqlite":
+        if self.database!="sqlite":
             if self.is_async_env:
-                engine = create_async_engine(self.database_url, pool_pre_ping=True)
+                try:
+                    loop=asyncio.get_running_loop()
+                    loop.create_task(self.create_async_db())
+                except RuntimeError:
+                    asyncio.run(self.create_async_db())
             else:
-                engine = create_engine(self.database_url, pool_pre_ping=True)
-            conn = engine.connect()
-            try:
-                conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
-            finally:
-                conn.close()
+                self.create_sync_db()
 
     @property
     def sqlalchemy_url(self):
-        return f"{self.database_url}/{self.database_name}"
+        db = f"{self.database_url}/{self.database_name}"
+        if self.database!='sqlite':
+            return db
+        else :
+            return f"{db}.db"
+
+    @property
+    def engine(self):
+        if self.is_async_env:
+            engine = create_async_engine(self.sqlalchemy_url, pool_pre_ping=True)
+        else:
+            engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
+        return engine
 
     def create_session_maker(self):
         if self.is_async_env:
-            engine = create_async_engine(self.sqlalchemy_url, pool_pre_ping=True)
-            sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine,expire_on_commit=True,class_=AsyncSession)
+            sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine,expire_on_commit=True,class_=AsyncSession)
             session_manager=SessionManager(
                 session_maker=sessionLocal,
                 is_async_env=True
             )
         else:
-            engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
-            sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
             session_manager = SessionManager(
                 session_maker=sessionLocal, is_async_env=False
             )
         return session_manager
+
+    async def create_async(self):
+        async with self.engine.begin() as conn:
+            await conn.run_sync(self.base.metadata.create_all)
+
+    def create_tables(self):
+        if self.is_async_env:
+            try:
+                loop=asyncio.get_running_loop()
+                loop.create_task(self.create_async())
+            except RuntimeError:
+                asyncio.run(self.create_async())
+        else:
+            self.__target_metadata.create_all(bind=self.engine)
