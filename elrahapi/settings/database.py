@@ -2,8 +2,6 @@ from typing import Optional
 
 from elrahapi.database.database_manager import DatabaseManager
 from elrahapi.database.session_manager import SessionManager
-from sqlalchemy.ext.declarative import declarative_base
-from .auth.configs import authentication
 from .secret import (
     DATABASE,
     DATABASE_ASYNC_CONNECTOR,
@@ -13,7 +11,7 @@ from .secret import (
     DATABASE_SERVER,
     DATABASE_USERNAME,
 )
-
+from sqlalchemy.ext.declarative import declarative_base
 database = DatabaseManager(
     database=DATABASE,
     database_username=DATABASE_USERNAME,
@@ -31,4 +29,5 @@ finally:
     Base = declarative_base()
     session_manager = database.create_session_maker()
     database.session_manager = session_manager
-    authentication.session_manager=session_manager
+    database.base=Base
+

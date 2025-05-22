@@ -9,6 +9,7 @@ from ..secret import (
     REFRESH_TOKEN_EXPIRATION,
 )
 from .cruds import user_crud_models
+from ..database import session_manager
 
 authentication = AuthenticationManager(
     secret_key=SECRET_KEY,
@@ -16,6 +17,7 @@ authentication = AuthenticationManager(
     access_token_expiration=ACCESS_TOKEN_EXPIRATION,
     refresh_token_expiration=REFRESH_TOKEN_EXPIRATION
 )
+authentication.session_manager=session_manager
 
 
 user_crud_models.sqlalchemy_model.MAX_ATTEMPT_LOGIN = USER_MAX_ATTEMPT_LOGIN
