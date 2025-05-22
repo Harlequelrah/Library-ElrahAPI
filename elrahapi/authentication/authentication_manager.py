@@ -1,24 +1,28 @@
-from sqlalchemy.orm import Session, sessionmaker
+from datetime import datetime, timedelta
+from typing import List, Optional
+
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
     OAUTH2_SCHEME,
     REFRESH_TOKEN_EXPIRATION,
 )
-from elrahapi.crud.crud_models import CrudModels
-from elrahapi.security.secret import define_algorithm_and_key
 from elrahapi.authentication.token import AccessToken, RefreshToken
-from datetime import datetime, timedelta
-from jose import ExpiredSignatureError, jwt, JWTError
-from typing import List, Optional
-from fastapi import Depends, status
-from sqlalchemy import or_
+from elrahapi.crud.crud_models import CrudModels
+from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.database.session_manager import SessionManager
+from elrahapi.security.secret import define_algorithm_and_key
+from jose import ExpiredSignatureError, JWTError, jwt
+from sqlalchemy import or_, select
+from sqlalchemy.orm import Session
+
+from fastapi import Depends, status
+
+from elrahapi.utility.utils import exec_stmt
 
 
 class AuthenticationManager:
@@ -64,8 +68,6 @@ class AuthenticationManager:
     def authentication_models(self, authentication_models: CrudModels):
         self.__authentication_models = authentication_models
 
-
-
     @property
     def algorithm(self):
         return self.__algorithm
@@ -90,7 +92,7 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def get_session(self):
+    async def get_session(self):
         if not self.__session_manager:
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -148,14 +150,24 @@ class AuthenticationManager:
             )
 
     async def change_user_state(self,pk):
-        db= self.get_session()
-        pk_attr = await self.__authentication_models.get_pk()
-        user= (
-            db.query(self.__authentication_models.sqlalchemy_model)
-                .filter(pk_attr == pk
-                )
-                .first()
+        db=  await self.get_session()
+        pk_attr =  self.__authentication_models.get_pk()
+        stmt = select(self.__authentication_models.sqlalchemy_model).where(
+            pk_attr == pk
         )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=db,
+            is_async_env=self.__session_manager.is_async_env,
+            with_scalars=False
+        )
+        user=result.scalar_one_or_none()
+        # user= (
+        #     db.query(self.__authentication_models.sqlalchemy_model)
+        #         .filter(pk_attr == pk
+        #         )
+        #         .first()
+        # )
         if user :
             user.change_user_state()
             db.commit()
@@ -167,20 +179,22 @@ class AuthenticationManager:
                 status_code=status.HTTP_404_NOT_FOUND, detail=detail
             )
 
-
     async def get_user_by_sub(self, username_or_email: str, db: Session):
-        user = (
-            db.query(self.__authentication_models.sqlalchemy_model)
-            .filter(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.username
-                    == username_or_email,
-                    self.__authentication_models.sqlalchemy_model.email
-                    == username_or_email,
-                )
+        stmt = select(self.__authentication_models.sqlalchemy_model).where(
+            or_(
+                self.__authentication_models.sqlalchemy_model.username
+                == username_or_email,
+                self.__authentication_models.sqlalchemy_model.email
+                == username_or_email,
             )
-            .first()
         )
+        result=await exec_stmt(
+                stmt=stmt,
+                session=db,
+                is_async_env=self.__session_manager.is_async_env,
+                with_scalars=False,
+            )
+        user = result.scalar_one_or_none()
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
@@ -200,7 +214,7 @@ class AuthenticationManager:
                 )
             payload = await self.validate_token(token)
             sub = payload.get("sub")
-            db = self.get_session()
+            db = await self.get_session()
             user = await self.get_user_by_sub(username_or_email=sub, db=db)
             if not user:
                 raise_custom_http_exception(
@@ -234,7 +248,7 @@ class AuthenticationManager:
     ):
         if username_or_email is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = session if session else self.get_session()
+        db = session if session else await self.get_session()
         user = await self.get_user_by_sub(db=db, username_or_email=username_or_email)
         if user:
             if not user.check_password(password):
@@ -253,41 +267,47 @@ class AuthenticationManager:
         self,
         token: str = Depends(OAUTH2_SCHEME),
     ):
-        db = self.get_session()
+        db = await self.get_session()
         payload = await self.validate_token(token)
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user = (
-            db.query(self.__authentication_models.sqlalchemy_model)
-            .filter(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.username == sub,
-                    self.__authentication_models.sqlalchemy_model.email == sub,
-                )
+        stmt = select(self.__authentication_models.sqlalchemy_model).where(
+            or_(
+                self.__authentication_models.sqlalchemy_model.username == sub,
+                self.__authentication_models.sqlalchemy_model.email == sub,
             )
-            .first()
         )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=db,
+            is_async_env=self.__session_manager.is_async_env,
+            with_scalars=False,
+        )
+        user = result.scalar_one_or_none()
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         return user
 
     async def refresh_token(self, refresh_token_data: RefreshToken):
-        db = self.get_session()
+        db = await self.get_session()
         payload = await self.validate_token(refresh_token_data.refresh_token)
         sub = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user = (
-            db.query(self.__authentication_models.sqlalchemy_model)
-            .filter(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.username == sub,
-                    self.__authentication_models.sqlalchemy_model.email == sub,
-                )
+        stmt = select(self.__authentication_models.sqlalchemy_model).where(
+            or_(
+                self.__authentication_models.sqlalchemy_model.username == sub,
+                self.__authentication_models.sqlalchemy_model.email == sub,
             )
-            .first()
         )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=db,
+            is_async_env=self.__session_manager.is_async_env,
+            with_scalars=False,
+        )
+        user = result.scalar_one_or_none()
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
@@ -297,35 +317,43 @@ class AuthenticationManager:
         return access_token
 
     async def is_unique(self, sub: str):
-        db = self.get_session()
-        user = (
-            db.query(self.__authentication_models.sqlalchemy_model.sqlalchemy_model)
-            .filter(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.sqlalchemy_model.email
-                    == sub,
-                    self.__authentication_models.sqlalchemy_model.sqlalchemy_model.username
-                    == sub,
-                )
+        db = await self.get_session()
+        stmt = select(
+            self.__authentication_models.sqlalchemy_model.sqlalchemy_model
+        ).where(
+            or_(
+                self.__authentication_models.sqlalchemy_model.sqlalchemy_model.email
+                == sub,
+                self.__authentication_models.sqlalchemy_model.sqlalchemy_model.username
+                == sub,
             )
-            .first()
         )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=db,
+            is_async_env=self.__session_manager.is_async_env,
+            with_scalars=False,
+        )
+        user = result.scalar_one_or_none()
         return user is None
 
     async def read_one_user(self, username_or_email: str):
-        session = self.session_manager.yield_session()
-        user = (
-            session.query(self.__authentication_models.sqlalchemy_model)
-            .filter(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.username
-                    == username_or_email,
-                    self.__authentication_models.sqlalchemy_model.email
-                    == username_or_email,
-                )
+        session = await self.session_manager.yield_session()
+        stmt = select(self.__authentication_models.sqlalchemy_model).where(
+            or_(
+                self.__authentication_models.sqlalchemy_model.username
+                == username_or_email,
+                self.__authentication_models.sqlalchemy_model.email
+                == username_or_email,
             )
-            .first()
         )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=session,
+            is_async_env=self.__session_manager.is_async_env,
+            with_scalars=False,
+        )
+        user = result.scalar_one_or_none()
         if not user:
             detail = f"User with username or email {username_or_email} not found"
             raise_custom_http_exception(
@@ -336,7 +364,7 @@ class AuthenticationManager:
     async def change_password(
         self, username_or_email: str, current_password: str, new_password: str
     ):
-        session = self.session_manager.yield_session()
+        session = await self.session_manager.yield_session()
         current_user = await self.authenticate_user(
             password=current_password,
             username_or_email=username_or_email,

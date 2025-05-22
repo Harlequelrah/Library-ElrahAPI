@@ -1,15 +1,15 @@
 import time
 from typing import Optional
-from fastapi import Request
-from sqlalchemy.exc import SQLAlchemyError
-from fastapi.responses import JSONResponse
-from starlette.types import Scope, Receive, Send
+
+from elrahapi.database.session_manager import SessionManager
+from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.middleware.crud_middleware import save_log
-from elrahapi.exception.custom_http_exception import (
-    CustomHttpException as CHE,
-)
-from elrahapi.session.session_manager import SessionManager
 from elrahapi.websocket.connection_manager import ConnectionManager
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
+from starlette.types import Receive, Scope, Send
+
+from fastapi import Request
 
 
 class ErrorHandlingMiddleware:
@@ -32,7 +32,7 @@ class ErrorHandlingMiddleware:
             return
 
         request = Request(scope, receive=receive)
-        db = self.session_manager.yield_session()if self.has_log else None
+        db = await self.session_manager.yield_session() if self.has_log else None
 
         try:
             request.state.start_time = time.time()
@@ -57,7 +57,7 @@ class ErrorHandlingMiddleware:
                 500, {"error": "Unexpected error", "details": str(exc)}
             )
             await self._log_error(request, db, response, f"Unexpected error: {exc}")
-            await response(scope,receive,send)
+            await response(scope, receive, send)
         finally:
             if db:
                 db.close()

@@ -1,4 +1,6 @@
+from typing import AsyncGenerator
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, sessionmaker
 
 from fastapi import status
@@ -28,35 +30,26 @@ class SessionManager:
     def session_maker(self, session_maker: sessionmaker[Session]) -> None:
         self.__session_maker = session_maker
 
-    def yield_session(self):
-        db = self.__session_maker()
-        if not db:
-            raise_custom_http_exception(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="",
-            )
-        return db
-
-    def get_sync_db(self):
-        db= self.__session_maker()
+    async def yield_session(self)->Session|AsyncSession|None:
         try :
-            yield db
+            if self.is_async_env:
+                return await self.get_async_db()
+            else :
+                return self.get_sync_db()
         except Exception as e:
             detail = f"Cannot yield session , details : {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=detail,
             )
+
+    def get_sync_db(self):
+        db= self.__session_maker()
+        try :
+            yield db
         finally:
             db.close()
 
-    async def get_async_db(self):
+    async def get_async_db(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.__session_maker() as session:
-            try :
-                yield session
-            except Exception as e:
-                detail = f"Cannot yield session , details : {str(e)}"
-                raise_custom_http_exception(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=detail,
-                )
+            yield session

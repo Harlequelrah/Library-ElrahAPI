@@ -44,4 +44,4 @@ DEFAULT_NO_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.READ_ALL,
     DefaultRoutesName.CREATE,
     ]
-    ]
+    

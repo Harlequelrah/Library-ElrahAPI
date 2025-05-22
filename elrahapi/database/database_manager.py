@@ -99,15 +99,16 @@ class DatabaseManager:
             return f"{self.connector}://{self.database_username}:{self.database_password}@{self.server}"
 
     def create_database_if_not_exists(self):
-        if self.is_async_env:
-            engine = create_async_engine(self.database_url, pool_pre_ping=True)
-        else:
-            engine = create_engine(self.database_url, pool_pre_ping=True)
-        conn = engine.connect()
-        try:
-            conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
-        finally:
-            conn.close()
+        if self.database != "sqlite":
+            if self.is_async_env:
+                engine = create_async_engine(self.database_url, pool_pre_ping=True)
+            else:
+                engine = create_engine(self.database_url, pool_pre_ping=True)
+            conn = engine.connect()
+            try:
+                conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
+            finally:
+                conn.close()
 
     @property
     def sqlalchemy_url(self):
@@ -117,6 +118,10 @@ class DatabaseManager:
         if self.is_async_env:
             engine = create_async_engine(self.sqlalchemy_url, pool_pre_ping=True)
             sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine,expire_on_commit=True,class_=AsyncSession)
+            session_manager=SessionManager(
+                session_maker=sessionLocal,
+                is_async_env=True
+            )
         else:
             engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
             sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

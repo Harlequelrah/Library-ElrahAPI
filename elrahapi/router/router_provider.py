@@ -424,7 +424,11 @@ class CustomRouterProvider:
                         pk1: Any,
                         create_obj: relation.second_entity_crud.crud_models.create_model,
                     ):
-                        return await relation.create_by_relation(pk1=pk1)
+                        return await relation.create_by_relation(
+                            pk1=pk1,
+                            create_obj=create_obj,
+                            entity_crud=self.crud
+                            )
 
                 if route_config.route_name == DefaultRoutesName.DELETE_BY_RELATION:
 
@@ -438,7 +442,7 @@ class CustomRouterProvider:
                     async def delete_by_relation(
                         pk1: Any,
                     ):
-                        return await relation.delete_by_relation(pk1=pk1)
+                        return await relation.delete_by_relation(pk1=pk1,entity_crud=self.crud)
 
                 if route_config.route_name == DefaultRoutesName.UPDATE_BY_RELATION:
 
@@ -453,7 +457,7 @@ class CustomRouterProvider:
                         pk1: Any,
                         update_obj: relation.second_entity_crud.crud_models.update_model,
                     ):
-                        return await relation.update_by_relation(pk1=pk1)
+                        return await relation.update_by_relation(pk1=pk1,update_obj=update_obj,entity_crud=self.crud)
 
                 if route_config.route_name == DefaultRoutesName.PATCH_BY_RELATION:
 
@@ -468,6 +472,8 @@ class CustomRouterProvider:
                         pk1: Any,
                         patch_obj: relation.second_entity_crud.crud_models.patch_model,
                     ):
-                        return await relation.patch_by_relation(pk1=pk1)
+                        return await relation.patch_by_relation(
+                            pk1=pk1, patch_obj=patch_obj, entity_crud=self.crud
+                        )
 
         return self.router
