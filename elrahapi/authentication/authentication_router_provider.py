@@ -60,6 +60,8 @@ class AuthenticationRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def read_one_user(username_or_email: str):
                     return await self.authentication.read_one_user(username_or_email)
@@ -73,6 +75,8 @@ class AuthenticationRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def change_user_state(pk):
                     return await self.authentication.change_user_state(pk)
@@ -85,6 +89,8 @@ class AuthenticationRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def read_current_user(
                     current_user=Depends(self.authentication.get_current_user),
@@ -99,6 +105,8 @@ class AuthenticationRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def login_swagger(
                     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -135,6 +143,8 @@ class AuthenticationRouterProvider:
                     description=config.description if config.description else None,
                     response_model=RefreshToken,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def refresh_token(
                     current_user=Depends(self.authentication.get_current_user),
@@ -151,6 +161,8 @@ class AuthenticationRouterProvider:
                     description=config.description if config.description else None,
                     response_model=AccessToken,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def refresh_access_token(refresh_token: RefreshToken):
                     return await self.authentication.refresh_token(
@@ -164,6 +176,8 @@ class AuthenticationRouterProvider:
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def login(usermodel: UserLoginRequestModel):
                     username_or_email = usermodel.username_or_email
@@ -193,6 +207,8 @@ class AuthenticationRouterProvider:
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_auth",
+                    name=f"{config.route_name}_auth",
                 )
                 async def change_password(form_data: UserChangePasswordRequestModel):
                     username_or_email = form_data.username_or_email
@@ -204,4 +220,3 @@ class AuthenticationRouterProvider:
 
         return self.router
 
-        return self.router

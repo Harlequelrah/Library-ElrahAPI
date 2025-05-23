@@ -57,8 +57,6 @@ class CustomRouterProvider:
             tags=tags,
         )
 
-
-
     def get_public_router(
         self,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
@@ -176,11 +174,14 @@ class CustomRouterProvider:
         for config in formatted_data:
             if config.route_name == DefaultRoutesName.COUNT:
 
+
                 @self.router.get(
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}"
                 )
                 async def count():
                     count = await self.crud.count()
@@ -194,6 +195,8 @@ class CustomRouterProvider:
                     description=config.description,
                     response_model=config.response_model,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def read_one(
                     pk: Any,
@@ -208,6 +211,8 @@ class CustomRouterProvider:
                     description=config.description,
                     response_model=List[config.response_model],
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def read_all(
                     filter: Optional[str] = None,
@@ -243,6 +248,8 @@ class CustomRouterProvider:
                     response_model=config.response_model,
                     dependencies=config.dependencies,
                     status_code=status.HTTP_201_CREATED,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def create(
                     create_obj: self.CreatePydanticModel,
@@ -260,6 +267,8 @@ class CustomRouterProvider:
                     description=config.description,
                     response_model=config.response_model,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def update(
                     pk: Any,
@@ -275,6 +284,8 @@ class CustomRouterProvider:
                     description=config.description,
                     response_model=config.response_model,
                     dependencies=config.dependencies,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def patch(
                     pk: Any,
@@ -290,6 +301,8 @@ class CustomRouterProvider:
                     description=config.description,
                     dependencies=config.dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def delete(
                     pk: Any,
@@ -304,6 +317,8 @@ class CustomRouterProvider:
                     description=config.description,
                     dependencies=config.dependencies,
                     status_code=status.HTTP_204_NO_CONTENT,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def bulk_delete(
                     pk_list: BulkDeleteModel,
@@ -319,6 +334,8 @@ class CustomRouterProvider:
                     dependencies=config.dependencies,
                     response_model=List[config.response_model],
                     status_code=status.HTTP_201_CREATED,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def bulk_create(
                     create_obj_list: List[self.CreatePydanticModel],
@@ -340,6 +357,8 @@ class CustomRouterProvider:
                         status_code=status.HTTP_201_CREATED,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def create_relation(pk1: Any, pk2: Any):
                         return await relation.create_relation(
@@ -354,6 +373,8 @@ class CustomRouterProvider:
                         status_code=status.HTTP_204_NO_CONTENT,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def delete_relation(pk1: Any, pk2: Any):
                         return await relation.delete_relation(
@@ -368,6 +389,8 @@ class CustomRouterProvider:
                         response_model=List[route_config.response_model],
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def read_all_by_relation(
                         pk1: Any,
@@ -392,6 +415,8 @@ class CustomRouterProvider:
                         response_model=route_config.response_model,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def read_one_by_relation(
                         pk1: Any,
@@ -407,6 +432,8 @@ class CustomRouterProvider:
                         summary=route_config.summary,
                         description=route_config.description,
                         status_code=status.HTTP_201_CREATED,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def create_by_relation(
                         pk1: Any,
@@ -426,6 +453,8 @@ class CustomRouterProvider:
                         status_code=status.HTTP_204_NO_CONTENT,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def delete_by_relation(
                         pk1: Any,
@@ -440,6 +469,8 @@ class CustomRouterProvider:
                         response_model=route_config.response_model,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def update_by_relation(
                         pk1: Any,
@@ -455,6 +486,8 @@ class CustomRouterProvider:
                         response_model=route_config.response_model,
                         summary=route_config.summary,
                         description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
                     async def patch_by_relation(
                         pk1: Any,
@@ -482,4 +515,3 @@ class CustomRouterProvider:
         ]:
             relation = None
         return relation
-
