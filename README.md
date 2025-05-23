@@ -325,20 +325,20 @@ app.include_router(app_myapp)
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 from .settings.logger.router import app_logger
-from .settings.logger.model import Log
-from .settings.database import engine,session_manager
+from .settings.logger.model import LogModel
+from .settings.models_metadata import database
 
 app = FastAPI()
 app.include_router(app_logger)
 app.add_middleware(
     ErrorHandlingMiddleware,
-    LogModel=Logger,
-    session_manager=session_manager
+    LogModel=LogModel,
+    session_manager=database.session_manager
 )
 app.add_middleware(
     LoggerMiddleware,
-    LogModel=Logger,
-    session_manager=session_manager
+    LogModel=LogModel,
+    session_manager=database.session_manager
 )
 ```
 

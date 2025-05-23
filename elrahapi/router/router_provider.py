@@ -57,6 +57,8 @@ class CustomRouterProvider:
             tags=tags,
         )
 
+
+
     def get_public_router(
         self,
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
@@ -216,23 +218,9 @@ class CustomRouterProvider:
                     limit: int = None,
                     relationship_name: Optional[str] = None,
                 ):
-                    relation: Relationship = (
-                        next(
-                            (
-                                relation
-                                for relation in self.relations
-                                if relation.relationship_name == relationship_name
-                            ),
-                            None,
+                    relation:Optional[Relationship]=self.get_relationship(
+                        relationship_name=relationship_name
                         )
-                        if relation.type_relation
-                        in [
-                            TypeRelation.MANY_TO_MANY_CLASS,
-                            TypeRelation.MANY_TO_MANY_TABLE,
-                            TypeRelation.ONE_TO_MANY,
-                        ]
-                        else None
-                    )
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
@@ -477,3 +465,21 @@ class CustomRouterProvider:
                         )
 
         return self.router
+
+    def get_relationship(self,relationship_name:str):
+        relation: Optional[Relationship] = next(
+            (
+                relation
+                for relation in self.relations
+                if relation.relationship_name == relationship_name
+            ),
+            None
+        )
+        if relation and relation.type_relation in [
+            TypeRelation.MANY_TO_MANY_CLASS,
+            TypeRelation.MANY_TO_MANY_TABLE,
+            TypeRelation.ONE_TO_MANY
+        ]:
+            relation = None
+        return relation
+

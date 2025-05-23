@@ -23,4 +23,3 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             return await save_log(request, call_next=call_next,LogModel= self.LogModel, db=db,error=f"error during saving log , detail :{str(e)}",websocket_manager=self.websocket_manager)
         finally:
             db.close()
-            return await save_log(request, call_next=call_next,LogModel= self.LogModel, db=db,error=f"error during saving log , detail :{str(e)}",websocket_manager=self.websocket_manager)

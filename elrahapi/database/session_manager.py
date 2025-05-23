@@ -33,9 +33,10 @@ class SessionManager:
     async def yield_session(self)->Session|AsyncSession|None:
         try :
             if self.is_async_env:
-                return await self.get_async_db()
+                db=  await self.get_async_db()
             else :
-                return self.get_sync_db()
+                db =  self.get_sync_db()
+            return next(db)
         except Exception as e:
             detail = f"Cannot yield session , details : {str(e)}"
             raise_custom_http_exception(
@@ -50,6 +51,6 @@ class SessionManager:
         finally:
             db.close()
 
-    async def get_async_db(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_async_db(self):
         async with self.__session_maker() as session:
             yield session

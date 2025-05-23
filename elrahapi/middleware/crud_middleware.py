@@ -4,6 +4,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 from  elrahapi.websocket.connection_manager import ConnectionManager
+from sqlalchemy.ext.asyncio import AsyncSession
 
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
@@ -20,7 +21,7 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LogModel, db: Session,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
+    request: Request,LogModel, db: Session|AsyncSession,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -29,19 +30,20 @@ async def save_log(
     response,process_time= await get_response_and_process_time(request,call_next,response)
     if error is None and (response.status_code <200 or response.status_code > 299)  :
         error = await read_response_body(response)
-    logger = LogModel(
+    log = LogModel(
     process_time=process_time,
     status_code=response.status_code,
     url=str(request.url),
     method=request.method,
     error_message=error,
-    remote_address=str(request.client.host))
+    remote_address=str(request.client.host)
+    )
     try :
-        db.add(logger)
+        db.add(log)
         db.commit()
-        db.refresh(logger)
+        db.refresh(log)
         if error is not None and websocket_manager is not None:
-            message=f"An error occurred during the request with the status code {response.status_code}, please check the log {logger.id} for more information"
+            message=f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
     except Exception as err:

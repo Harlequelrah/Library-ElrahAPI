@@ -1,5 +1,4 @@
 from typing import List, Optional, Type
-
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     DEFAULT_ROUTE_CONFIG,
@@ -190,3 +189,5 @@ def set_response_model(
 
 def verify_relation_rule(type_relation:TypeRelation,relation_route_name:RelationRoutesName,):
     return relation_route_name in RELATION_RULES[type_relation]
+
+

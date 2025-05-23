@@ -98,7 +98,7 @@ class AuthenticationManager:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Session manager is not set",
             )
-        return self.__session_manager.yield_session()
+        return await self.__session_manager.yield_session()
 
     def create_access_token(
         self, data: dict, expires_delta: timedelta = None

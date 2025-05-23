@@ -114,6 +114,10 @@ class AuthenticationRouterProvider:
                             user_role.role.normalizedName
                             for user_role in user.user_roles
                         ],
+                        "privileges":[
+                            user_privilege.privilege.normalizedName
+                            for user_privilege in user.user_privileges
+                        ]
                     }
                     access_token = self.authentication.create_access_token(data)
                     refresh_token = self.authentication.create_refresh_token(data)

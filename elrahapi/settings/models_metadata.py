@@ -13,3 +13,4 @@ target_metadata = logger_metadata
 # target_metadata = myapp_metadata
 # target_metadata = myapp2_metadata
 database.target_metadata = target_metadata
+database.create_tables()

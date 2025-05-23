@@ -4,7 +4,7 @@ from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 # from .myapp.router import app_myapp
 from .settings.models_metadata import database
 
-database.create_tables()
+
 
 app = FastAPI()
 
