@@ -22,7 +22,7 @@ from elrahapi.crud.crud_forgery import CrudForgery
 from pydantic import BaseModel
 from sqlalchemy.sql import Select
 from sqlalchemy import and_, select
-from elrahapi.utility.utils import exec_stmt, make_filter
+from elrahapi.utility.utils import exec_stmt, make_filter, validate_value
 from sqlalchemy.sql.schema import Table
 
 
@@ -33,6 +33,7 @@ class Relationship:
         relationship_name: str,
         second_entity_crud: CrudForgery,
         type_relation: TypeRelation,
+        second_entity_fk_name: Optional[str] = None,
         relationship_crud: Optional[CrudForgery] = None,
         relationship_key1_name: Optional[str] = None,
         relationship_key2_name: Optional[str] = None,
@@ -43,6 +44,7 @@ class Relationship:
         default_public_relation_routes_name: List[RelationRoutesName] = None,
         default_protected_relation_routes_name: List[RelationRoutesName] = None,
     ):
+        self.second_entity_fk_name=second_entity_fk_name
         self.relationship_name = relationship_name
         self.relationship_crud= relationship_crud
         self.second_entity_crud = second_entity_crud
@@ -151,7 +153,7 @@ class Relationship:
                     route_name=route_name,
                     route_path=path,
                     summary=f"Delete {second_entity_name}",
-                    description=f"Allow to delete {second_entity_name}by the relation",
+                    description=f"Allow to delete {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
                         True
@@ -166,7 +168,7 @@ class Relationship:
                     route_name=route_name,
                     route_path=path,
                     summary=f"Create {second_entity_name}",
-                    description=f"Allow to create {second_entity_name}by the relation",
+                    description=f"Allow to create {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
                         True
@@ -182,7 +184,7 @@ class Relationship:
                     route_name=route_name,
                     route_path=path,
                     summary=f"Update {second_entity_name}",
-                    description=f"Allow to update {second_entity_name}by the relation",
+                    description=f"Allow to update {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
                         True
@@ -198,7 +200,7 @@ class Relationship:
                     route_name=route_name,
                     route_path=path,
                     summary=f"Patch {second_entity_name}",
-                    description=f"Allow to patch {second_entity_name}by the relation",
+                    description=f"Allow to patch {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
                         True
@@ -326,10 +328,10 @@ class Relationship:
                     f"Relation Table must be provide for relation {self.type_relation}"
                 )
 
-    async def create_relation(self, entity_crud: CrudForgery, pk1: Any, pk2: Any,entity_2:Optional[Any]=None):
+    async def create_relation(self, entity_crud: CrudForgery, pk1: Any, pk2: Any):
         session = await entity_crud.session_manager.yield_session()
         entity_1 = await entity_crud.read_one(db=session, pk=pk1)
-        entity_2 = await self.second_entity_crud.read_one(db=session, pk=pk2) if entity_2 is None else entity_2
+        entity_2 = await self.second_entity_crud.read_one(db=session, pk=pk2)
 
         if self.type_relation == TypeRelation.ONE_TO_ONE:
             setattr(entity_1, self.relationship_name, entity_2)
@@ -395,13 +397,23 @@ class Relationship:
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
+    def add_fk(self,obj:Type[BaseModel],fk:Any):
+        if self.second_entity_fk_name is not None:
+            validated_fk=validate_value(value=fk)
+            new_obj= obj.model_copy(update={self.second_entity_fk_name:validated_fk})
+        return new_obj
+
 
     async def create_by_relation(
         self, pk1: Any, create_obj: Type[BaseModel], entity_crud: CrudForgery
     ):
+        create_obj= self.add_fk(obj=create_obj,fk=pk1)
+        print(f"{create_obj=}")
         new_obj = await self.second_entity_crud.create(create_obj=create_obj)
+        print(f"{new_obj=}")
         pk2 = getattr(new_obj, self.second_entity_crud.primary_key_name)
-        return await self.create_relation(entity_crud=entity_crud, pk1=pk1, pk2=pk2)
+        await self.create_relation(entity_crud=entity_crud, pk1=pk1, pk2=pk2)
+        return new_obj
 
     async def delete_by_relation(self, pk1: Any, entity_crud: CrudForgery):
         entity_1 = await entity_crud.read_one(pk=pk1)
@@ -458,7 +470,7 @@ class Relationship:
         if self.type_relation == TypeRelation.ONE_TO_MANY:
             stmt = (
                 select(e2_cm.sqlalchemy_model)
-                .join(e1_cm.sqlalchemy_model, e2_pk == e1_pk)
+                .join(e1_cm.sqlalchemy_model)
                 .where(e1_pk == pk1)
             )
             stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)

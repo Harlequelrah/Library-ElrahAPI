@@ -126,7 +126,7 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **sortie** : **existing_entity**
 
-- `validate_value_type` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
+- `validate_value` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
 
   - **paramètres** :
 
@@ -137,7 +137,7 @@ Ce sous module contient des quelques fonctions utiles .
   - **utilisation** :
 
   ```python
-  myvalue= validate_value_type("True") # retourne True
+  myvalue= validate_value("True") # retourne True
   ```
 
 - **create_database_if_not_exists** : créer la base de donnée si elle n'existe pas .

@@ -12,7 +12,7 @@ from elrahapi.utility.utils import (
     make_filter,
     map_list_to,
     update_entity,
-    validate_value_type,
+    validate_value,
 )
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select
@@ -34,7 +34,7 @@ class CrudForgery:
         self.primary_key_name = crud_models.primary_key_name
         self.session_manager = session_manager
 
-    async def bulk_create(self, create_obj_list:List[BaseModel]):
+    async def bulk_create(self, create_obj_list: List[BaseModel]):
         session = await self.session_manager.yield_session()
         try:
             create_list = map_list_to(
@@ -83,11 +83,11 @@ class CrudForgery:
         session = await self.session_manager.yield_session()
         try:
             pk = self.crud_models.get_pk()
-            stmt= select(func.count(pk))
-            result= await exec_stmt(
+            stmt = select(func.count(pk))
+            result = await exec_stmt(
                 session=session,
                 stmt=stmt,
-                is_async_env=self.session_manager.is_async_env
+                is_async_env=self.session_manager.is_async_env,
             )
             count = result.scalar_one()
             # count = session.query(func.count(pk)).scalar()
@@ -142,11 +142,11 @@ class CrudForgery:
                 value=second_model_filter_value,
             )
         stmt = stmt.offset(skip).limit(limit)
-        results= await exec_stmt(
+        results = await exec_stmt(
             stmt=stmt,
             session=session,
             with_scalars=True,
-            is_async_env=self.session_manager.is_async_env
+            is_async_env=self.session_manager.is_async_env,
         )
         # if self.session_manager.is_async_env:
         #     results= await session.scalars(stmt).all()
@@ -154,21 +154,15 @@ class CrudForgery:
         #     results= session.scalars(stmt).all()
         return results.all()
 
-
-
-
-
     async def read_one(self, pk: Any, db: Optional[Session] = None):
         if db:
             session = db
         else:
             session = await self.session_manager.yield_session()
         pk_attr = self.crud_models.get_pk()
-        stmt=select(self.SQLAlchemyModel).where(pk_attr==pk)
+        stmt = select(self.SQLAlchemyModel).where(pk_attr == pk)
         result = await exec_stmt(
-            session=session,
-            stmt=stmt,
-            is_async_env=self.session_manager.is_async_env
+            session=session, stmt=stmt, is_async_env=self.session_manager.is_async_env
         )
         read_obj = result.scalar_one_or_none()
         # read_obj = session.query(self.SQLAlchemyModel).filter(pk_attr == pk).first()
@@ -231,6 +225,3 @@ class CrudForgery:
             session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
-
-
-
