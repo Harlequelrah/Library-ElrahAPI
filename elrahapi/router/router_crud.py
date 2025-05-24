@@ -17,12 +17,12 @@ from pydantic import BaseModel
 
 from fastapi import Depends
 
-from elrahapi.router.router_routes_name import RelationRoutesName    ,DefaultRoutesName
+from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutesName
 
 
 def exclude_route(
     routes: List[RouteConfig],
-    exclude_routes_name: Optional[List[DefaultRoutesName|RelationRoutesName]] = None,
+    exclude_routes_name: Optional[List[DefaultRoutesName | RelationRoutesName]] = None,
 ):
     init_data: List[RouteConfig] = []
     if exclude_routes_name:
@@ -187,7 +187,8 @@ def set_response_model(
                 return ReadPydanticModel
 
 
-def verify_relation_rule(type_relation:TypeRelation,relation_route_name:RelationRoutesName,):
+def is_verified_relation_rule(
+    type_relation: TypeRelation,
+    relation_route_name: RelationRoutesName,
+):
     return relation_route_name in RELATION_RULES[type_relation]
-
-

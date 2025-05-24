@@ -69,3 +69,4 @@ async def exec_stmt(stmt:Select,session:Session|AsyncSession,is_async_env:bool,w
             return session.scalars(stmt)
         else:
             return session.execute(stmt)
+
