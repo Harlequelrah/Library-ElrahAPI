@@ -31,7 +31,6 @@ class Relationship:
     def __init__(
         self,
         relationship_name: str,
-        second_model_key_name: str,
         second_entity_crud: CrudForgery,
         type_relation: TypeRelation,
         relationship_crud: Optional[CrudForgery] = None,
@@ -49,7 +48,6 @@ class Relationship:
         self.second_entity_crud = second_entity_crud
         self.relationship_key1_name = relationship_key1_name
         self.relationship_key2_name = relationship_key2_name
-        self.second_model_key_name = second_model_key_name
         self.type_relation = type_relation
         self.relation_table = relation_table
         self.check_class_attrs()
@@ -90,7 +88,7 @@ class Relationship:
         for route_name in full_routes_configs:
             if route_name == RelationRoutesName.READ_ALL_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.READ_ALL_BY_RELATION,
+                    route_name=route_name,
                     route_path=path + "s",
                     summary=f"Retrive all {second_entity_name}s",
                     description=f"Allow to retrive all {second_entity_name}s from the relation",
@@ -105,7 +103,7 @@ class Relationship:
                 routes_configs.append(route_config)
             if route_name == RelationRoutesName.READ_ONE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.READ_ONE_BY_RELATION,
+                    route_name=route_name,
                     route_path=path,
                     summary=f"Retrive {second_entity_name}",
                     description=f"Allow to retrive {second_entity_name}s from the relation",
@@ -121,7 +119,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.CREATE_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.CREATE_RELATION,
+                    route_name=route_name,
                     route_path=path + f"s/{{pk2}}",
                     summary=f"Link with {second_entity_name}",
                     description=f"Allow to link entity with {second_entity_name}",
@@ -135,7 +133,7 @@ class Relationship:
                 routes_configs.append(route_config)
             if route_name == RelationRoutesName.DELETE_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.DELETE_RELATION,
+                    route_name=route_name,
                     route_path=path + f"s/{{pk2}}",
                     summary=f"Unlink with {second_entity_name}",
                     description=f"Allow to unlink entity with {second_entity_name}",
@@ -150,7 +148,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.DELETE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.DELETE_BY_RELATION,
+                    route_name=route_name,
                     route_path=path,
                     summary=f"Delete {second_entity_name}",
                     description=f"Allow to delete {second_entity_name}by the relation",
@@ -165,7 +163,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.CREATE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.CREATE_BY_RELATION,
+                    route_name=route_name,
                     route_path=path,
                     summary=f"Create {second_entity_name}",
                     description=f"Allow to create {second_entity_name}by the relation",
@@ -181,7 +179,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.UPDATE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.UPDATE_BY_RELATION,
+                    route_name=route_name,
                     route_path=path,
                     summary=f"Update {second_entity_name}",
                     description=f"Allow to update {second_entity_name}by the relation",
@@ -197,7 +195,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.PATCH_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=RelationRoutesName.PATCH_BY_RELATION,
+                    route_name=route_name,
                     route_path=path,
                     summary=f"Patch {second_entity_name}",
                     description=f"Allow to patch {second_entity_name}by the relation",
@@ -311,7 +309,7 @@ class Relationship:
             )
 
     def get_second_model_key(self):
-        return self.second_entity_crud.crud_models.get_attr(self.second_model_key_name)
+        return self.second_entity_crud.crud_models.get_pk()
 
     def check_class_attrs(self):
         if self.type_relation == TypeRelation.MANY_TO_MANY_CLASS and (
@@ -328,10 +326,10 @@ class Relationship:
                     f"Relation Table must be provide for relation {self.type_relation}"
                 )
 
-    async def create_relation(self, entity_crud: CrudForgery, pk1: Any, pk2: Any):
+    async def create_relation(self, entity_crud: CrudForgery, pk1: Any, pk2: Any,entity_2:Optional[Any]=None):
         session = await entity_crud.session_manager.yield_session()
-        entity_1 = entity_crud.read_one(db=session, pk=pk1)
-        entity_2 = self.second_entity_crud.read_one(db=session, pk=pk2)
+        entity_1 = await entity_crud.read_one(db=session, pk=pk1)
+        entity_2 = await self.second_entity_crud.read_one(db=session, pk=pk2) if entity_2 is None else entity_2
 
         if self.type_relation == TypeRelation.ONE_TO_ONE:
             setattr(entity_1, self.relationship_name, entity_2)
@@ -341,10 +339,6 @@ class Relationship:
         ]:
             entity_1_attr = getattr(entity_1, self.relationship_name)
             entity_1_attr.append(entity_2)
-        else:
-            raise ValueError(
-
-            )
         session.commit()
         session.refresh(entity_1)
 
@@ -407,10 +401,10 @@ class Relationship:
     ):
         new_obj = await self.second_entity_crud.create(create_obj=create_obj)
         pk2 = getattr(new_obj, self.second_entity_crud.primary_key_name)
-        return self.create_relation(entity_crud=entity_crud, pk1=pk1, pk2=pk2)
+        return await self.create_relation(entity_crud=entity_crud, pk1=pk1, pk2=pk2)
 
     async def delete_by_relation(self, pk1: Any, entity_crud: CrudForgery):
-        entity_1 = entity_crud.read_one(pk=pk1)
+        entity_1 = await entity_crud.read_one(pk=pk1)
         entity_2 = getattr(entity_1, self.relationship_name)
         e2_pk = getattr(entity_2, self.second_entity_crud.primary_key_name)
         entity_2 = None
@@ -419,12 +413,18 @@ class Relationship:
     async def read_one_by_relation(self, pk1: Any, entity_crud: CrudForgery):
         e1 = await entity_crud.read_one(pk=pk1)
         e2 = getattr(e1, self.relationship_name)
+        if e2 is None :
+            detail=f"{self.relationship_name} not found for {entity_crud.entity_name} with pk {pk1}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=detail
+            )
         return e2
 
     async def update_by_relation(
         self, pk1: Any, update_obj: Type[BaseModel], entity_crud: CrudForgery
     ):
-        entity = entity_crud.read_one(pk=pk1)
+        entity = await entity_crud.read_one(pk=pk1)
         entity_2 = getattr(entity, self.relationship_name)
         pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
         return await self.second_entity_crud.update(
@@ -434,7 +434,7 @@ class Relationship:
     async def patch_by_relation(
         self, pk1: Any, patch_obj: Type[BaseModel], entity_crud: CrudForgery
     ):
-        entity = entity_crud.read_one(pk=pk1)
+        entity = await entity_crud.read_one(pk=pk1)
         entity_2 = getattr(entity, self.relationship_name)
         pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
         return await self.second_entity_crud.update(

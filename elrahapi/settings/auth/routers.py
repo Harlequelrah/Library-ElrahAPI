@@ -1,6 +1,7 @@
 from elrahapi.router.router_provider import CustomRouterProvider
 from elrahapi.router.router_routes_name import DefaultRoutesName
-
+from elrahapi.router.relationship import Relationship
+from elrahapi.router.router_namespace import TypeRelation,RelationRoutesName
 from .configs import authentication
 from .cruds import (
     privilege_crud,
@@ -16,8 +17,9 @@ user_router_provider = CustomRouterProvider(
     tags=["users"],
     crud=user_crud,
     authentication=authentication,
-    read_with_relations=True,
+    read_with_relations=True
 )
+
 
 user_privilege_router_provider = CustomRouterProvider(
     prefix="/users/privileges",
@@ -38,6 +40,7 @@ privilege_router_provider = CustomRouterProvider(
     tags=["privileges"],
     crud=privilege_crud,
     authentication=authentication,
+    privileges=["CAN_ADD_PRIVILEGE"]
 )
 
 role_privilege_router_provider = CustomRouterProvider(
@@ -68,18 +71,7 @@ user_router = user_router_provider.get_mixed_router(
 )
 
 user_privilege_router = user_privilege_router_provider.get_protected_router()
-
 user_role_router = user_role_router_provider.get_protected_router()
-
 role_router = role_router_provider.get_protected_router()
-
 privilege_router = privilege_router_provider.get_protected_router()
-
-role_privilege_router = role_privilege_router_provider.get_protected_router()
-user_role_router = user_role_router_provider.get_protected_router()
-
-role_router = role_router_provider.get_protected_router()
-
-privilege_router = privilege_router_provider.get_protected_router()
-
 role_privilege_router = role_privilege_router_provider.get_protected_router()

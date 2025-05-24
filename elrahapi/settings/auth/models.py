@@ -16,8 +16,8 @@ from sqlalchemy.orm import relationship
 
 class User( UserModel,Base):
     __tablename__ = "users"
-    user_privileges = relationship("UserPrivilege", back_populates="user",lazy='joined')
-    user_roles=relationship("UserRole",back_populates="user",lazy='joined')
+    user_privileges = relationship("UserPrivilege", back_populates="user")
+    user_roles=relationship("UserRole",back_populates="user")
 
 class Role(RoleModel,Base):
     __tablename__ = "roles"

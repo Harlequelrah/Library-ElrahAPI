@@ -8,7 +8,7 @@ router_provider = CustomRouterProvider(
     crud=logCrud,
     authentication=authentication,
 )
-app_logger = router_provider.get_custom_router(
+logger_router = router_provider.get_custom_router(
     routes_name=[DefaultRoutesName.READ_ONE, DefaultRoutesName.READ_ALL],
     type_route=TypeRoute.PROTECTED
 )
