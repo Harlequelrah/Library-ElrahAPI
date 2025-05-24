@@ -38,17 +38,6 @@ class Relationship:
         default_public_relation_routes_name: List[RelationRoutesName] = None,
         default_protected_relation_routes_name: List[RelationRoutesName] = None,
     ):
-        if type_relation == TypeRelation.MANY_TO_MANY_TABLE:
-            if relation_table is None:
-                raise ValueError(f"Relation Table must be provide for relation {type_relation}")
-            else:
-                self.relation_table=relation_table
-        if type_relation == TypeRelation.MANY_TO_MANY_CLASS:
-            self.check_many_to_many_class_attrs(
-                relationship_crud_models=relationship_crud_models,
-                relationship_key1_name=relationship_key1_name,
-                relationship_key2_name=relationship_key2_name
-            )
         self.relationship_name = relationship_name
         self.relationship_crud_models = relationship_crud_models
         self.second_entity_crud=second_entity_crud
@@ -56,31 +45,36 @@ class Relationship:
         self.relationship_key2_name = relationship_key2_name
         self.second_model_key_name = second_model_key_name
         self.type_relation=type_relation
+        self.relation_table=relation_table
+        self.check_class_attrs()
         self.relations_routes_configs=self.init_routes_configs(
             default_public_relation_routes_name=default_public_relation_routes_name,
             default_protected_relation_routes_name=default_protected_relation_routes_name,
             relations_routes_configs=relations_routes_configs,
             relations_authorizations_configs=relations_authorizations_configs,
             relations_responses_model_configs=relations_responses_model_configs
-            ) if relations_routes_configs else []
+            )
 
     def init_default_routes(
         self,
         default_public_relation_routes_name : List[RelationRoutesName]=None,
         default_protected_relation_routes_name:List[RelationRoutesName]=None,
     ):
+        default_public_relation_routes_name = default_public_relation_routes_name or []
+        default_protected_relation_routes_name = default_protected_relation_routes_name or []
+        full_routes_configs = default_public_relation_routes_name+default_protected_relation_routes_name
         routes_configs:List[RouteConfig]=[]
-        second_entity_name=self.second_entity_crud.second_entity_crud_models.entity_name
+        second_entity_name=self.second_entity_crud.entity_name
         path = f"/{{pk1}}/{second_entity_name}"
-        for route_name in default_public_relation_routes_name+default_protected_relation_routes_name:
+        for route_name in full_routes_configs:
             if route_name==RelationRoutesName.READ_ALL_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.READ_ALL_BY_RELATION,
+                    route_name=RelationRoutesName.READ_ALL_BY_RELATION,
                     route_path=path+"s",
                     summary=f"Retrive all {second_entity_name}s",
                     description=f"Allow to retrive all {second_entity_name}s from the relation",
                     is_activated=True,
-                    response_model=self.second_entity_crud.second_entity_crud_models.read_model,
+                    response_model=self.second_entity_crud.crud_models.read_model,
                     is_protected= False if route_name in default_public_relation_routes_name else True
                 )
                 routes_configs.append(route_config)
@@ -91,7 +85,7 @@ class Relationship:
                     summary=f"Retrive {second_entity_name}",
                     description=f"Allow to retrive {second_entity_name}s from the relation",
                     is_activated=True,
-                    response_model=self.second_entity_crud.second_entity_crud_models.read_model,
+                    response_model=self.second_entity_crud.crud_models.read_model,
                     is_protected= False if route_name in default_public_relation_routes_name else True
                 )
                 routes_configs.append(route_config)
@@ -112,7 +106,7 @@ class Relationship:
                 routes_configs.append(route_config)
             if route_name == RelationRoutesName.DELETE_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.DELETE_RELATION,
+                    route_name=RelationRoutesName.DELETE_RELATION,
                     route_path=path + f"s/{{pk2}}",
                     summary=f"Unlink with {second_entity_name}",
                     description=f"Allow to unlink entity with {second_entity_name}",
@@ -127,7 +121,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.DELETE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.DELETE_BY_RELATION,
+                    route_name=RelationRoutesName.DELETE_BY_RELATION,
                     route_path=path,
                     summary=f"Delete {second_entity_name}",
                     description=f"Allow to delete {second_entity_name}by the relation",
@@ -142,7 +136,7 @@ class Relationship:
 
             if route_name == RelationRoutesName.CREATE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.CREATE_BY_RELATION,
+                    route_name=RelationRoutesName.CREATE_BY_RELATION,
                     route_path=path,
                     summary=f"Create {second_entity_name}",
                     description=f"Allow to create {second_entity_name}by the relation",
@@ -152,13 +146,13 @@ class Relationship:
                         if route_name in default_protected_relation_routes_name
                         else False
                     ),
-                    response_model=self.second_entity_crud.second_entity_crud_models.read_model,
+                    response_model=self.second_entity_crud.crud_models.read_model,
                 )
                 routes_configs.append(route_config)
 
             if route_name == RelationRoutesName.UPDATE_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.UPDATE_BY_RELATION,
+                    route_name=RelationRoutesName.UPDATE_BY_RELATION,
                     route_path=path,
                     summary=f"Update {second_entity_name}",
                     description=f"Allow to update {second_entity_name}by the relation",
@@ -168,13 +162,13 @@ class Relationship:
                         if route_name in default_protected_relation_routes_name
                         else False
                     ),
-                    response_model=self.second_entity_crud.second_entity_crud_models.read_model,
+                    response_model=self.second_entity_crud.crud_models.read_model,
                 )
                 routes_configs.append(route_config)
 
             if route_name == RelationRoutesName.PATCH_BY_RELATION:
                 route_config = RouteConfig(
-                    route_name=DefaultRoutesName.PATCH_BY_RELATION,
+                    route_name=RelationRoutesName.PATCH_BY_RELATION,
                     route_path=path,
                     summary=f"Patch {second_entity_name}",
                     description=f"Allow to patch {second_entity_name}by the relation",
@@ -184,7 +178,7 @@ class Relationship:
                         if route_name in default_protected_relation_routes_name
                         else False
                     ),
-                    response_model=self.second_entity_crud.second_entity_crud_models.read_model,
+                    response_model=self.second_entity_crud.crud_models.read_model,
                 )
                 routes_configs.append(route_config)
         return routes_configs
@@ -265,21 +259,23 @@ class Relationship:
             )
 
     def get_second_model_key(self):
-        return  self.second_entity_crud.second_entity_crud_models.get_attr(self.second_model_key_name)
+        return  self.second_entity_crud.crud_models.get_attr(self.second_model_key_name)
 
-    def check_many_to_many_class_attrs(
-        self,
-        relationship_crud_models: Optional[CrudModels] = None,
-        relationship_key1_name: Optional[str] = None,
-        relationship_key2_name: Optional[str] = None):
+    def check_class_attrs(self):
         if (
-                relationship_crud_models is None or
-                relationship_key1_name is None or
-                relationship_key2_name is None
+                self.type_relation == TypeRelation.MANY_TO_MANY_CLASS and
+                (
+                self.relationship_crud_models is None or
+                self.relationship_key1_name is None or
+                self.relationship_key2_name is None
+                )
             ) :
             raise ValueError(
                 "relationship_crud_models , relationship_key1_name and relationship_key2_name must be provide for relation MANY TO MANY CLASS"
             )
+        if self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
+            if self.relation_table is None:
+                raise ValueError(f"Relation Table must be provide for relation {self.type_relation}")
 
     async def create_relation(self,entity_crud:CrudForgery,pk1:Any,pk2:Any):
         session=await entity_crud.session_manager.yield_session()
@@ -379,7 +375,7 @@ class Relationship:
         if self.type_relation == TypeRelation.ONE_TO_MANY:
             stmt= (
                     select(e2_cm.sqlalchemy_model)
-                    .join(entity_crud.crud_models.sqlalchemy_model,e2_pk==e1_pk)
+                    .join(e1_cm.sqlalchemy_model,e2_pk==e1_pk)
                     .where(e1_pk==pk1)
                 )
             stmt= make_filter(

@@ -17,6 +17,7 @@ from elrahapi.router.router_namespace import (
     DefaultRoutesName,
     TypeRelation,
     TypeRoute,
+    RelationRoutesName
 )
 
 from fastapi import APIRouter, status
@@ -173,7 +174,6 @@ class CustomRouterProvider:
 
         for config in formatted_data:
             if config.route_name == DefaultRoutesName.COUNT:
-
 
                 @self.router.get(
                     path=config.route_path,
@@ -341,7 +341,6 @@ class CustomRouterProvider:
                     create_obj_list: List[self.CreatePydanticModel],
                 ):
                     return await self.crud.bulk_create(create_obj_list)
-
         for relation in self.relations:
             routes_configs = relation.initialize_relation_route_configs_dependencies(
                 roles=self.roles,
@@ -349,8 +348,8 @@ class CustomRouterProvider:
                 authentication=self.authentication,
             )
             for route_config in routes_configs:
-                if route_config.route_name == DefaultRoutesName.CREATE_RELATION:
 
+                if route_config.route_name == RelationRoutesName.CREATE_RELATION:
                     @self.router.post(
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -365,7 +364,7 @@ class CustomRouterProvider:
                             entity_crud=self.crud, pk1=pk1, pk2=pk2
                         )
 
-                if route_config.route_name == DefaultRoutesName.DELETE_RELATION:
+                if route_config.route_name == RelationRoutesName.DELETE_RELATION:
 
                     @self.router.delete(
                         path=route_config.route_path,
@@ -381,7 +380,7 @@ class CustomRouterProvider:
                             entity_crud=self.crud, pk1=pk1, pk2=pk2
                         )
 
-                if route_config.route_name == DefaultRoutesName.READ_ALL_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.READ_ALL_BY_RELATION:
 
                     @self.router.get(
                         path=route_config.route_path,
@@ -399,15 +398,17 @@ class CustomRouterProvider:
                         skip: int = 0,
                         limit: int = None,
                     ):
+
                         return await relation.read_all_by_relation(
                             pk1=pk1,
                             filter=filter,
                             value=value,
                             limit=limit,
                             skip=skip,
+                            entity_crud=self.crud
                         )
 
-                if route_config.route_name == DefaultRoutesName.READ_ONE_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.READ_ONE_BY_RELATION:
 
                     @self.router.get(
                         path=route_config.route_path,
@@ -421,9 +422,12 @@ class CustomRouterProvider:
                     async def read_one_by_relation(
                         pk1: Any,
                     ):
-                        return await relation.read_one_by_relation(pk1=pk1)
+                        return await relation.read_one_by_relation(
+                            entity_crud=self.crud,
+                            pk1=pk1
+                            )
 
-                if route_config.route_name == DefaultRoutesName.CREATE_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.CREATE_BY_RELATION:
 
                     @self.router.post(
                         path=route_config.route_path,
@@ -445,7 +449,7 @@ class CustomRouterProvider:
                             entity_crud=self.crud
                             )
 
-                if route_config.route_name == DefaultRoutesName.DELETE_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.DELETE_BY_RELATION:
 
                     @self.router.delete(
                         path=route_config.route_path,
@@ -461,7 +465,7 @@ class CustomRouterProvider:
                     ):
                         return await relation.delete_by_relation(pk1=pk1,entity_crud=self.crud)
 
-                if route_config.route_name == DefaultRoutesName.UPDATE_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.UPDATE_BY_RELATION:
 
                     @self.router.put(
                         path=route_config.route_path,
@@ -478,7 +482,7 @@ class CustomRouterProvider:
                     ):
                         return await relation.update_by_relation(pk1=pk1,update_obj=update_obj,entity_crud=self.crud)
 
-                if route_config.route_name == DefaultRoutesName.PATCH_BY_RELATION:
+                if route_config.route_name == RelationRoutesName.PATCH_BY_RELATION:
 
                     @self.router.patch(
                         path=route_config.route_path,
