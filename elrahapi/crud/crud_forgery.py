@@ -1,18 +1,14 @@
 from typing import Any, List, Optional, Type
-from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
-from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.router.router_namespace import TypeRelation
-from sqlalchemy.sql import Select
 from elrahapi.utility.utils import (
     exec_stmt,
     make_filter,
     map_list_to,
     update_entity,
-    validate_value,
 )
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select
@@ -46,12 +42,21 @@ class CrudForgery:
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail
                 )
             session.add_all(create_list)
-            session.commit()
-            for create_obj in create_list:
-                session.refresh(create_obj)
+            if self.session_manager.is_async_env:
+                await session.commit()
+                for create_obj in create_list:
+                    await session.refresh(create_obj)
+            else:
+                session.commit()
+                for create_obj in create_list:
+                    session.refresh(create_obj)
             return create_list
         except Exception as e:
-            session.rollback()
+            if self.session_manager.is_async_env:
+                await session.rollback()
+                await session.aclose()
+            else:
+                session.rollback()
             detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
@@ -64,10 +69,17 @@ class CrudForgery:
             new_obj = self.SQLAlchemyModel(**dict_obj)
             try:
                 session.add(new_obj)
-                session.commit()
-                session.refresh(new_obj)
+                if self.session_manager.is_async_env:
+                    await session.commit()
+                    await session.refresh(new_obj)
+                else:
+                    session.commit()
+                    session.refresh(new_obj)
                 return new_obj
             except Exception as e:
+                if self.session_manager.is_async_env:
+                    await session.rollback()
+                    await session.aclose()
                 session.rollback()
                 detail = f"Error occurred while creating {self.entity_name} , details : {str(e)}"
                 raise_custom_http_exception(
@@ -90,7 +102,6 @@ class CrudForgery:
                 is_async_env=self.session_manager.is_async_env,
             )
             count = result.scalar_one()
-            # count = session.query(func.count(pk)).scalar()
             return count
         except Exception as e:
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
@@ -148,10 +159,6 @@ class CrudForgery:
             with_scalars=True,
             is_async_env=self.session_manager.is_async_env,
         )
-        # if self.session_manager.is_async_env:
-        #     results= await session.scalars(stmt).all()
-        # else:
-        #     results= session.scalars(stmt).all()
         return results.all()
 
     async def read_one(self, pk: Any, db: Optional[Session] = None):
@@ -165,7 +172,6 @@ class CrudForgery:
             session=session, stmt=stmt, is_async_env=self.session_manager.is_async_env
         )
         read_obj = result.scalar_one_or_none()
-        # read_obj = session.query(self.SQLAlchemyModel).filter(pk_attr == pk).first()
         if read_obj is None:
             detail = f"{self.entity_name} with {self.primary_key_name} {pk} not found"
             raise_custom_http_exception(
@@ -186,11 +192,19 @@ class CrudForgery:
                 existing_obj = update_entity(
                     existing_entity=existing_obj, update_entity=update_obj
                 )
-                session.commit()
-                session.refresh(existing_obj)
+                if self.session_manager.is_async_env:
+                    await session.commit()
+                    await session.refresh(existing_obj)
+                else:
+                    session.commit()
+                    session.refresh(existing_obj)
                 return existing_obj
             except Exception as e:
-                session.rollback()
+                if self.session_manager.is_async_env:
+                    await session.rollback()
+                    await session.aclose()
+                else :
+                    session.rollback()
                 detail = f"Error occurred while updating {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
@@ -206,12 +220,22 @@ class CrudForgery:
         pk_attr = self.crud_models.get_pk()
         delete_list = pk_list.delete_liste
         try:
-            session.execute(
-                delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
-            )
-            session.commit()
+            if self.session_manager.is_async_env:
+                await session.execute(
+                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
+                )
+                await session.commit()
+            else:
+                session.execute(
+                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
+                )
+                session.commit()
         except Exception as e:
-            session.rollback()
+            if self.session_manager.is_async_env:
+                await session.rollback()
+                await session.aclose()
+            else:
+                session.rollback()
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
@@ -219,9 +243,17 @@ class CrudForgery:
         session = await self.session_manager.yield_session()
         existing_obj = await self.read_one(pk=pk, db=session)
         try:
-            session.delete(existing_obj)
-            session.commit()
+            if self.session_manager.is_async_env:
+                await session.delete(existing_obj)
+                await session.commit()
+            else :
+                session.delete(existing_obj)
+                session.commit()
         except Exception as e:
-            session.rollback()
+            if self.session_manager.is_async_env:
+                await session.rollback()
+                await session.aclose()
+            else:
+                session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)

@@ -71,7 +71,6 @@ class AuthenticationRouterProvider:
                 @self.router.get(
                     path=config.route_path,
                     status_code=status.HTTP_204_NO_CONTENT,
-                    # response_model=config.response_model ,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
                     dependencies=config.dependencies,

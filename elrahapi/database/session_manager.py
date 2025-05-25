@@ -1,4 +1,3 @@
-from typing import AsyncGenerator
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, sessionmaker
@@ -33,10 +32,13 @@ class SessionManager:
     async def yield_session(self)->Session|AsyncSession|None:
         try :
             if self.is_async_env:
-                db=  await self.get_async_db()
+                db=  self.get_async_db()
+                return await anext(db)
+
             else :
                 db =  self.get_sync_db()
-            return next(db)
+                return next(db)
+
         except Exception as e:
             detail = f"Cannot yield session , details : {str(e)}"
             raise_custom_http_exception(

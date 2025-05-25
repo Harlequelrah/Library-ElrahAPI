@@ -1,11 +1,11 @@
 import json
 import time
-from fastapi import Request
+from fastapi import Request,status
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 from  elrahapi.websocket.connection_manager import ConnectionManager
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (
@@ -40,16 +40,27 @@ async def save_log(
     )
     try :
         db.add(log)
-        db.commit()
-        db.refresh(log)
+        if isinstance(db,AsyncSession):
+            await db.commit()
+            await db.refresh(log)
+        else:
+            db.commit()
+            db.refresh(log)
         if error is not None and websocket_manager is not None:
             message=f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
     except Exception as err:
-        db.rollback()
+        if isinstance(db,AsyncSession):
+            await db.rollback()
+            await db.aclose()
+        else:
+            db.rollback()
         error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
-        print(error_message)
+        raise_custom_http_exception(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_message
+        )
     return response
 
 async def read_response_body(response: Response)  -> str | None:

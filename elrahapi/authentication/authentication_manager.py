@@ -162,12 +162,6 @@ class AuthenticationManager:
             with_scalars=False
         )
         user=result.scalar_one_or_none()
-        # user= (
-        #     db.query(self.__authentication_models.sqlalchemy_model)
-        #         .filter(pk_attr == pk
-        #         )
-        #         .first()
-        # )
         if user :
             user.change_user_state()
             db.commit()

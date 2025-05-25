@@ -58,9 +58,7 @@ class ErrorHandlingMiddleware:
             )
             await self._log_error(request, db, response, f"Unexpected error: {exc}")
             await response(scope, receive, send)
-        finally:
-            if db:
-                db.close()
+ 
 
     def _create_json_response(self, status_code, content):
         return JSONResponse(status_code=status_code, content=content)

@@ -19,7 +19,13 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         try:
             return await save_log(request=request,call_next=call_next,LogModel=self.LogModel,db=db,websocket_manager=self.websocket_manager)
         except Exception as e:
-            db.rollback()
+            if self.session_manager.is_async_env:
+                await db.rollback()
+            else:
+                db.rollback()
             return await save_log(request, call_next=call_next,LogModel= self.LogModel, db=db,error=f"error during saving log , detail :{str(e)}",websocket_manager=self.websocket_manager)
         finally:
-            db.close()
+            if self.session_manager.is_async_env:
+                db.aclose()
+            else:
+                db.close()

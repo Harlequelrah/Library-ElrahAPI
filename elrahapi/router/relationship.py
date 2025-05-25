@@ -15,12 +15,11 @@ from elrahapi.router.router_crud import (
     is_verified_relation_rule,
 )
 from elrahapi.router.router_namespace import TypeRelation
-from elrahapi.router.router_routes_name import DefaultRoutesName, RelationRoutesName
+from elrahapi.router.router_routes_name import  RelationRoutesName
 from fastapi import status
 
 from elrahapi.crud.crud_forgery import CrudForgery
 from pydantic import BaseModel
-from sqlalchemy.sql import Select
 from sqlalchemy import and_, select
 from elrahapi.utility.utils import exec_stmt, make_filter, validate_value
 from sqlalchemy.sql.schema import Table
@@ -297,6 +296,9 @@ class Relationship:
     def get_relationship_key1(self):
         if self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
             return self.relationship_crud.crud_models.get_attr(self.relationship_key1_name)
+        elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
+            if self.relation_table is not None:
+                return getattr(self.relation_table.c, self.relationship_key1_name)
         else:
             raise ValueError(
                 f"relationship_key1 not available for relation type {self.type_relation}"
@@ -305,6 +307,9 @@ class Relationship:
     def get_relationship_key2(self):
         if self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
             return self.relationship_crud.crud_models.get_attr(self.relationship_key2_name)
+        elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
+            if self.relation_table is not None:
+                return getattr(self.relation_table.c, self.relationship_key2_name)
         else:
             raise ValueError(
                 f"relationship_key2 not available for relation type {self.type_relation}"
@@ -401,16 +406,14 @@ class Relationship:
         if self.second_entity_fk_name is not None:
             validated_fk=validate_value(value=fk)
             new_obj= obj.model_copy(update={self.second_entity_fk_name:validated_fk})
-        return new_obj
-
+            return new_obj
+        return obj
 
     async def create_by_relation(
         self, pk1: Any, create_obj: Type[BaseModel], entity_crud: CrudForgery
     ):
         create_obj= self.add_fk(obj=create_obj,fk=pk1)
-        print(f"{create_obj=}")
         new_obj = await self.second_entity_crud.create(create_obj=create_obj)
-        print(f"{new_obj=}")
         pk2 = getattr(new_obj, self.second_entity_crud.primary_key_name)
         await self.create_relation(entity_crud=entity_crud, pk1=pk1, pk2=pk2)
         return new_obj
@@ -501,7 +504,13 @@ class Relationship:
             )
             return results.all()
         elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
-            stmt = select(e2_cm.sqlalchemy_model).join(self.relation_table)
+            relkey1 = self.get_relationship_key1()
+            relkey2 = self.get_relationship_key2()
+            stmt = (
+                    select(e2_cm.sqlalchemy_model)
+                    .join(self.relation_table,e2_pk==relkey2)
+                    .join(e1_cm.sqlalchemy_model,relkey1==e1_pk)
+                    )
             stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(

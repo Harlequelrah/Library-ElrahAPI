@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
@@ -15,9 +15,9 @@ from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
     DefaultRoutesName,
+    RelationRoutesName,
     TypeRelation,
     TypeRoute,
-    RelationRoutesName
 )
 
 from fastapi import APIRouter, status
@@ -181,7 +181,7 @@ class CustomRouterProvider:
                     description=config.description,
                     dependencies=config.dependencies,
                     operation_id=f"{config.route_name}_{self.crud.entity_name}",
-                    name=f"{config.route_name}_{self.crud.entity_name}"
+                    name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def count():
                     count = await self.crud.count()
@@ -223,9 +223,9 @@ class CustomRouterProvider:
                     limit: int = None,
                     relationship_name: Optional[str] = None,
                 ):
-                    relation:Optional[Relationship]=self.get_relationship(
+                    relation: Optional[Relationship] = self.get_relationship(
                         relationship_name=relationship_name
-                        )
+                    )
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
@@ -341,6 +341,7 @@ class CustomRouterProvider:
                     create_obj_list: List[self.CreatePydanticModel],
                 ):
                     return await self.crud.bulk_create(create_obj_list)
+
         for relation in self.relations:
             routes_configs = relation.initialize_relation_route_configs_dependencies(
                 roles=self.roles,
@@ -350,6 +351,7 @@ class CustomRouterProvider:
             for route_config in routes_configs:
 
                 if route_config.route_name == RelationRoutesName.CREATE_RELATION:
+
                     @self.router.post(
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -405,7 +407,7 @@ class CustomRouterProvider:
                             value=value,
                             limit=limit,
                             skip=skip,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
                         )
 
                 if route_config.route_name == RelationRoutesName.READ_ONE_BY_RELATION:
@@ -423,9 +425,8 @@ class CustomRouterProvider:
                         pk1: Any,
                     ):
                         return await relation.read_one_by_relation(
-                            entity_crud=self.crud,
-                            pk1=pk1
-                            )
+                            entity_crud=self.crud, pk1=pk1
+                        )
 
                 if route_config.route_name == RelationRoutesName.CREATE_BY_RELATION:
 
@@ -444,10 +445,8 @@ class CustomRouterProvider:
                         create_obj: relation.second_entity_crud.crud_models.create_model,
                     ):
                         return await relation.create_by_relation(
-                            pk1=pk1,
-                            create_obj=create_obj,
-                            entity_crud=self.crud
-                            )
+                            pk1=pk1, create_obj=create_obj, entity_crud=self.crud
+                        )
 
                 if route_config.route_name == RelationRoutesName.DELETE_BY_RELATION:
 
@@ -463,7 +462,9 @@ class CustomRouterProvider:
                     async def delete_by_relation(
                         pk1: Any,
                     ):
-                        return await relation.delete_by_relation(pk1=pk1,entity_crud=self.crud)
+                        return await relation.delete_by_relation(
+                            pk1=pk1, entity_crud=self.crud
+                        )
 
                 if route_config.route_name == RelationRoutesName.UPDATE_BY_RELATION:
 
@@ -480,7 +481,9 @@ class CustomRouterProvider:
                         pk1: Any,
                         update_obj: relation.second_entity_crud.crud_models.update_model,
                     ):
-                        return await relation.update_by_relation(pk1=pk1,update_obj=update_obj,entity_crud=self.crud)
+                        return await relation.update_by_relation(
+                            pk1=pk1, update_obj=update_obj, entity_crud=self.crud
+                        )
 
                 if route_config.route_name == RelationRoutesName.PATCH_BY_RELATION:
 
@@ -503,19 +506,19 @@ class CustomRouterProvider:
 
         return self.router
 
-    def get_relationship(self,relationship_name:str):
+    def get_relationship(self, relationship_name: str):
         relation: Optional[Relationship] = next(
             (
                 relation
                 for relation in self.relations
                 if relation.relationship_name == relationship_name
             ),
-            None
+            None,
         )
         if relation and relation.type_relation in [
             TypeRelation.MANY_TO_MANY_CLASS,
             TypeRelation.MANY_TO_MANY_TABLE,
-            TypeRelation.ONE_TO_MANY
+            TypeRelation.ONE_TO_MANY,
         ]:
             relation = None
         return relation

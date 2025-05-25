@@ -42,6 +42,7 @@ RELATION_RULES: dict[TypeRelation, List[RelationRoutesName]] = {
         RelationRoutesName.READ_ALL_BY_RELATION,
         RelationRoutesName.CREATE_RELATION,
         RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION
     ],
     TypeRelation.MANY_TO_MANY_CLASS: [
         RelationRoutesName.READ_ALL_BY_RELATION,

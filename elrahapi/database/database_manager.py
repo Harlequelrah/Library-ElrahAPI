@@ -1,9 +1,9 @@
 from elrahapi.database.session_manager import SessionManager
-from sqlalchemy import Connection, create_engine, text , MetaData
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine,AsyncEngine,AsyncConnection
+from sqlalchemy import create_engine, text , MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import Any,  Optional, AsyncGenerator
+from typing import  Optional
 import asyncio
 class DatabaseManager:
 
