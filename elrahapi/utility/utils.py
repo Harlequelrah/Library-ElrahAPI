@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.crud.crud_models import CrudModels
 import os
 from sqlalchemy.sql import Select
+from elrahapi.utility.types import ElrahSession
 
 
 def map_list_to(
@@ -65,14 +66,15 @@ def get_env_int(env_key: str):
         if number.isdigit():
             return number
 
+def is_async_session(session:ElrahSession):
+    return isinstance(session,AsyncSession)
 
 async def exec_stmt(
     stmt: Select,
-    session: Session | AsyncSession,
-    is_async_env: bool,
+    session: ElrahSession,
     with_scalars: bool = False,
 ):
-    if is_async_env:
+    if isinstance(session,AsyncSession):
         if with_scalars:
             return await session.scalars(stmt)
         else:

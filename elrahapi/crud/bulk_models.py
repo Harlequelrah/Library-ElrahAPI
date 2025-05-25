@@ -1,4 +1,4 @@
 from pydantic import BaseModel
-
+from typing import List,Any
 class BulkDeleteModel(BaseModel):
-    delete_liste:list=[]
+    delete_liste:List[Any]=[]

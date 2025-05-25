@@ -32,12 +32,12 @@ class SessionManager:
     async def yield_session(self)->Session|AsyncSession|None:
         try :
             if self.is_async_env:
-                db=  self.get_async_db()
-                return await anext(db)
+                return  self.get_async_db()
+                # return await anext(db)
 
             else :
-                db =  self.get_sync_db()
-                return next(db)
+                return  self.get_sync_db()
+                # return next(db)
 
         except Exception as e:
             detail = f"Cannot yield session , details : {str(e)}"

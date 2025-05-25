@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
-
+from typing import Any, List, Optional
+from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
     OAUTH2_SCHEME,
@@ -8,7 +8,6 @@ from elrahapi.authentication.authentication_namespace import (
 )
 from elrahapi.authentication.token import AccessToken, RefreshToken
 from elrahapi.crud.crud_models import CrudModels
-from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
@@ -16,20 +15,16 @@ from elrahapi.exception.auth_exception import (
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
+from elrahapi.utility.utils import exec_stmt, is_async_session
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session
-
 from fastapi import Depends, status
-
-from elrahapi.utility.utils import exec_stmt
 
 
 class AuthenticationManager:
 
     def __init__(
         self,
-
         secret_key: Optional[str] = None,
         algorithm: Optional[str] = None,
         refresh_token_expiration: Optional[int] = None,
@@ -50,15 +45,6 @@ class AuthenticationManager:
             secret_key,
             algorithm,
         )
-        self.__session_manager: SessionManager = None
-
-    @property
-    def session_manager(self) -> SessionManager:
-        return self.__session_manager
-
-    @session_manager.setter
-    def session_manager(self, session_manager: SessionManager) -> None:
-        self.__session_manager = session_manager
 
     @property
     def authentication_models(self):
@@ -92,14 +78,6 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    async def get_session(self):
-        if not self.__session_manager:
-            raise_custom_http_exception(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Session manager is not set",
-            )
-        return await self.__session_manager.yield_session()
-
     def create_access_token(
         self, data: dict, expires_delta: timedelta = None
     ) -> AccessToken:
@@ -132,11 +110,11 @@ class AuthenticationManager:
         )
         return {"refresh_token": encode_jwt, "token_type": "bearer"}
 
-    async def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
-        await self.validate_token(token)
+    def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
+        self.validate_token(token)
         return token
 
-    async def validate_token(self, token: str):
+    def validate_token(self, token: str):
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
             return payload
@@ -149,45 +127,41 @@ class AuthenticationManager:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
 
-    async def change_user_state(self,pk):
-        db=  await self.get_session()
-        pk_attr =  self.__authentication_models.get_pk()
+    async def change_user_state(self, session: ElrahSession, pk: Any):
+        pk_attr = self.__authentication_models.get_pk()
         stmt = select(self.__authentication_models.sqlalchemy_model).where(
             pk_attr == pk
         )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=db,
-            is_async_env=self.__session_manager.is_async_env,
-            with_scalars=False
-        )
-        user=result.scalar_one_or_none()
-        if user :
+        result = await exec_stmt(stmt=stmt, session=session, with_scalars=False)
+        user = result.scalar_one_or_none()
+        if user:
             user.change_user_state()
-            db.commit()
-            db.refresh(user)
-
-        else :
+            if is_async_session(session):
+                await session.commit()
+                await session.refresh(user)
+            else:
+                session.commit()
+                session.refresh(user)
+        else:
             detail = "User Not Found"
             raise_custom_http_exception(
                 status_code=status.HTTP_404_NOT_FOUND, detail=detail
             )
 
-    async def get_user_by_sub(self, username_or_email: str, db: Session):
+    async def get_user_by_sub(self, sub: str,session: ElrahSession):
         stmt = select(self.__authentication_models.sqlalchemy_model).where(
             or_(
                 self.__authentication_models.sqlalchemy_model.username
-                == username_or_email,
+                == sub,
                 self.__authentication_models.sqlalchemy_model.email
-                == username_or_email,
+                == sub,
             )
         )
-        result=await exec_stmt(
-                stmt=stmt,
-                session=db,
-                is_async_env=self.__session_manager.is_async_env,
-                with_scalars=False,
-            )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=session,
+            with_scalars=False,
+        )
         user = result.scalar_one_or_none()
         if user is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -195,6 +169,7 @@ class AuthenticationManager:
 
     def check_authorization(
         self,
+        session:ElrahSession,
         privilege_name: Optional[List[str]] = None,
         role_name: Optional[List[str]] = None,
     ) -> callable:
@@ -206,10 +181,9 @@ class AuthenticationManager:
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
                     "Cannot check role and privilege in the same time",
                 )
-            payload = await self.validate_token(token)
+            payload =  self.validate_token(token)
             sub = payload.get("sub")
-            db = await self.get_session()
-            user = await self.get_user_by_sub(username_or_email=sub, db=db)
+            user = await self.get_user_by_sub(sub=sub,session=session)
             if not user:
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
@@ -220,72 +194,68 @@ class AuthenticationManager:
                 return user.has_privilege(privilege_name)
             else:
                 raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+
         return is_authorized
 
     def check_authorizations(
         self,
+        session:ElrahSession,
         privileges_name: Optional[List[str]] = None,
         roles_name: Optional[List[str]] = None,
     ) -> List[callable]:
         authorizations = []
         for privilege_name in privileges_name:
-            authorizations.append(self.check_authorization(privilege_name=privilege_name))
+            authorizations.append(
+                self.check_authorization(session=session,privilege_name=privilege_name)
+            )
         for role_name in roles_name:
-            authorizations.append(self.check_authorization(role_name=role_name))
+            authorizations.append(self.check_authorization(session=session,role_name=role_name))
         return authorizations
 
     async def authenticate_user(
         self,
         password: str,
-        username_or_email: Optional[str] = None,
-        session: Optional[Session] = None,
+        session: ElrahSession,
+        sub: Optional[str] = None,
     ):
-        if username_or_email is None:
+        if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        db = session if session else await self.get_session()
-        user = await self.get_user_by_sub(db=db, username_or_email=username_or_email)
+        user = await self.get_user_by_sub(session=session, sub=sub)
         if user:
             if not user.check_password(password):
                 user.try_login(False)
-                db.commit()
-                db.refresh(user)
+                if is_async_session(session):
+                    await session.commit()
+                    await session.refresh(user)
+                else:
+                    session.commit()
+                    session.refresh(user)
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             if not user.is_active:
                 raise INACTIVE_USER_CUSTOM_HTTP_EXCEPTION
         user.try_login(True)
-        db.commit()
-        db.refresh(user)
+        if is_async_session(session):
+            await session.commit()
+            await session.refresh(user)
+        else:
+            session.commit()
+            session.refresh(user)
         return user
 
-    async def get_current_user(
+    def get_current_user_sub(
         self,
         token: str = Depends(OAUTH2_SCHEME),
     ):
-        db = await self.get_session()
-        payload = await self.validate_token(token)
+        payload =  self.validate_token(token)
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        stmt = select(self.__authentication_models.sqlalchemy_model).where(
-            or_(
-                self.__authentication_models.sqlalchemy_model.username == sub,
-                self.__authentication_models.sqlalchemy_model.email == sub,
-            )
-        )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=db,
-            is_async_env=self.__session_manager.is_async_env,
-            with_scalars=False,
-        )
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        return user
+        return sub
 
-    async def refresh_token(self, refresh_token_data: RefreshToken):
-        db = await self.get_session()
-        payload = await self.validate_token(refresh_token_data.refresh_token)
+    async def refresh_token(
+        self, session: ElrahSession, refresh_token_data: RefreshToken
+    ):
+        payload =  self.validate_token(refresh_token_data.refresh_token)
         sub = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -297,8 +267,7 @@ class AuthenticationManager:
         )
         result = await exec_stmt(
             stmt=stmt,
-            session=db,
-            is_async_env=self.__session_manager.is_async_env,
+            session=session,
             with_scalars=False,
         )
         user = result.scalar_one_or_none()
@@ -310,66 +279,31 @@ class AuthenticationManager:
         )
         return access_token
 
-    async def is_unique(self, sub: str):
-        db = await self.get_session()
-        stmt = select(
-            self.__authentication_models.sqlalchemy_model.sqlalchemy_model
-        ).where(
-            or_(
-                self.__authentication_models.sqlalchemy_model.sqlalchemy_model.email
-                == sub,
-                self.__authentication_models.sqlalchemy_model.sqlalchemy_model.username
-                == sub,
-            )
-        )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=db,
-            is_async_env=self.__session_manager.is_async_env,
-            with_scalars=False,
-        )
-        user = result.scalar_one_or_none()
-        return user is None
+    async def is_existing_user(self,session:ElrahSession, sub: str):
+        user= await self.get_user_by_sub(sub=sub,session=session)
+        return user is not None
 
-    async def read_one_user(self, username_or_email: str):
-        session = await self.session_manager.yield_session()
-        stmt = select(self.__authentication_models.sqlalchemy_model).where(
-            or_(
-                self.__authentication_models.sqlalchemy_model.username
-                == username_or_email,
-                self.__authentication_models.sqlalchemy_model.email
-                == username_or_email,
-            )
-        )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=session,
-            is_async_env=self.__session_manager.is_async_env,
-            with_scalars=False,
-        )
-        user = result.scalar_one_or_none()
+    async def read_one_user(self,session:ElrahSession,sub: str):
+        user= await self.get_user_by_sub(sub=sub,session=session)
         if not user:
-            detail = f"User with username or email {username_or_email} not found"
+            detail = f"User with username or email {sub} not found"
             raise_custom_http_exception(
                 status_code=status.HTTP_404_NOT_FOUND, detail=detail
             )
         return user
 
     async def change_password(
-        self, username_or_email: str, current_password: str, new_password: str
+        self,session:ElrahSession, sub: str, current_password: str, new_password: str
     ):
-        session = await self.session_manager.yield_session()
         current_user = await self.authenticate_user(
             password=current_password,
-            username_or_email=username_or_email,
+            sub=sub,
             session=session,
         )
-        if current_user.check_password(current_password):
-            current_user.password = new_password
+        current_user.password = new_password
+        if is_async_session(session):
+            await session.commit()
+            await session.refresh(current_user)
+        else:
             session.commit()
             session.refresh(current_user)
-        else:
-            raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Your current password you enter  is incorrect",
-            )

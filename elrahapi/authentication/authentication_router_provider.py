@@ -1,5 +1,5 @@
 from typing import List, Optional
-
+from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
 from elrahapi.router.route_config import (
@@ -15,20 +15,23 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from fastapi import APIRouter, Depends, status
 
-
+from elrahapi.database.session_manager import SessionManager
 class AuthenticationRouterProvider:
     def __init__(
         self,
         authentication: AuthenticationManager,
+        session_manager:SessionManager,
         read_with_relations: Optional[bool] = False,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
+
     ):
 
         self.authentication = authentication
         self.roles = roles
         self.privileges = privileges
         self.read_with_relations = read_with_relations
+        self.session_manager=session_manager
 
         self.router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -63,8 +66,8 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def read_one_user(username_or_email: str):
-                    return await self.authentication.read_one_user(username_or_email)
+                async def read_one_user(sub: str):
+                    return await self.authentication.read_one_user(sub=sub)
 
             if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
 
@@ -92,8 +95,13 @@ class AuthenticationRouterProvider:
                     name=f"{config.route_name}_auth",
                 )
                 async def read_current_user(
-                    current_user=Depends(self.authentication.get_current_user),
+                    current_user_sub=Depends(self.authentication.get_current_user_sub),
+                    session:ElrahSession=Depends(self.session_manager.yield_session)
                 ):
+                    current_user= await self.authentication.get_user_by_sub(
+                        sub=current_user_sub,
+                        session=session
+                        )
                     return current_user
 
             if config.route_name == DefaultRoutesName.TOKEN_URL:
@@ -112,7 +120,7 @@ class AuthenticationRouterProvider:
                 ):
                     user = await self.authentication.authenticate_user(
                         password=form_data.password,
-                        username_or_email=form_data.username,
+                        sub=form_data.username,
                     )
 
                     data = {
@@ -146,8 +154,13 @@ class AuthenticationRouterProvider:
                     name=f"{config.route_name}_auth",
                 )
                 async def refresh_token(
-                    current_user=Depends(self.authentication.get_current_user),
+                    current_user_sub:str=Depends(self.authentication.get_current_user_sub),
+                    session:ElrahSession=Depends(self.session_manager.yield_session)
                 ):
+                    current_user= await self.authentication.get_user_by_sub(
+                        sub=current_user_sub,
+                        session=session
+                        )
                     data = {"sub": current_user.username}
                     refresh_token = self.authentication.create_refresh_token(data)
                     return refresh_token
@@ -181,7 +194,7 @@ class AuthenticationRouterProvider:
                 async def login(usermodel: UserLoginRequestModel):
                     username_or_email = usermodel.username_or_email
                     user = await self.authentication.authenticate_user(
-                        usermodel.password, username_or_email
+                        password=usermodel.password,sub= username_or_email
                     )
                     data = {
                         "sub": username_or_email,
@@ -214,8 +227,7 @@ class AuthenticationRouterProvider:
                     current_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.authentication.change_password(
-                        username_or_email, current_password, new_password
+                        sub=username_or_email, current_password=current_password, new_password=new_password
                     )
 
         return self.router
-
