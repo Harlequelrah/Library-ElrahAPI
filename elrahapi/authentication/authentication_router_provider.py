@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
@@ -56,7 +56,6 @@ class AuthenticationRouterProvider:
         )
         for config in formatted_data:
             if config.route_name == DefaultRoutesName.READ_ONE_USER:
-
                 @self.router.get(
                     path=config.route_path,
                     response_model=config.response_model,
@@ -66,8 +65,11 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def read_one_user(sub: str):
-                    return await self.authentication.read_one_user(sub=sub)
+                async def read_one_user(sub: str,session:ElrahSession=Depends(self.session_manager.yield_session)):
+                    return await self.authentication.read_one_user(
+                        sub=sub,
+                        session=session
+                        )
 
             if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
 
@@ -80,8 +82,11 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def change_user_state(pk):
-                    return await self.authentication.change_user_state(pk)
+                async def change_user_state(pk:Any,session:ElrahSession=Depends(self.session_manager.yield_session)):
+                    return await self.authentication.change_user_state(
+                        pk=pk,
+                        session=session
+                        )
 
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
 
@@ -117,8 +122,10 @@ class AuthenticationRouterProvider:
                 )
                 async def login_swagger(
                     form_data: OAuth2PasswordRequestForm = Depends(),
+                    session:ElrahSession=Depends(self.session_manager.yield_session)
                 ):
                     user = await self.authentication.authenticate_user(
+                        session=session,
                         password=form_data.password,
                         sub=form_data.username,
                     )
@@ -176,8 +183,12 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def refresh_access_token(refresh_token: RefreshToken):
+                async def refresh_access_token(
+                    refresh_token: RefreshToken,
+                    session: ElrahSession = Depends(self.session_manager.yield_session),
+                ):
                     return await self.authentication.refresh_token(
+                        session=session,
                         refresh_token_data=refresh_token
                     )
 
@@ -191,13 +202,17 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def login(usermodel: UserLoginRequestModel):
-                    username_or_email = usermodel.username_or_email
+                async def login(
+                    usermodel: UserLoginRequestModel,
+                    session: ElrahSession = Depends(self.session_manager.yield_session),
+                ):
+                    sub = usermodel.sub
                     user = await self.authentication.authenticate_user(
-                        password=usermodel.password,sub= username_or_email
+                        session=session,
+                        password=usermodel.password,sub= sub
                     )
                     data = {
-                        "sub": username_or_email,
+                        "sub": sub,
                         "roles": [
                             user_role.role.normalizedName
                             for user_role in user.user_roles
@@ -222,12 +237,18 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def change_password(form_data: UserChangePasswordRequestModel):
-                    username_or_email = form_data.username_or_email
+                async def change_password(
+                    form_data: UserChangePasswordRequestModel,
+                    session: ElrahSession = Depends(self.session_manager.yield_session),
+                ):
+                    sub = form_data.sub
                     current_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.authentication.change_password(
-                        sub=username_or_email, current_password=current_password, new_password=new_password
+                        sub=sub, 
+                        current_password=current_password,
+                        new_password=new_password,
+                        session=session
                     )
 
         return self.router

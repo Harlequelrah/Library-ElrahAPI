@@ -1,11 +1,12 @@
 import json
 import time
 from fastapi import Request,status
-from sqlalchemy.orm import Session
 from starlette.responses import Response
 from  elrahapi.websocket.connection_manager import ConnectionManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.utility.types import ElrahSession
+from elrahapi.utility.utils import is_async_session
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (
@@ -21,7 +22,7 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LogModel, db: Session|AsyncSession,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
+    request: Request,LogModel, session: ElrahSession ,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -39,23 +40,22 @@ async def save_log(
     remote_address=str(request.client.host)
     )
     try :
-        db.add(log)
-        if isinstance(db,AsyncSession):
-            await db.commit()
-            await db.refresh(log)
+        session.add(log)
+        if is_async_session(session):
+            await session.commit()
+            await session.refresh(log)
         else:
-            db.commit()
-            db.refresh(log)
+            session.commit()
+            session.refresh(log)
         if error is not None and websocket_manager is not None:
             message=f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
     except Exception as err:
-        if isinstance(db,AsyncSession):
-            await db.rollback()
-            await db.aclose()
+        if is_async_session(session):
+            await session.rollback()
         else:
-            db.rollback()
+            session.rollback()
         error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
         raise_custom_http_exception(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

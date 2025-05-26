@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any, List, Optional
+from elrahapi.database.session_manager import SessionManager
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
@@ -25,10 +26,12 @@ class AuthenticationManager:
 
     def __init__(
         self,
+        session_manager:SessionManager ,
         secret_key: Optional[str] = None,
         algorithm: Optional[str] = None,
         refresh_token_expiration: Optional[int] = None,
         access_token_expiration: Optional[int] = None,
+
     ):
         self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
@@ -45,6 +48,15 @@ class AuthenticationManager:
             secret_key,
             algorithm,
         )
+        self.__session_manager: SessionManager = session_manager
+
+    @property
+    def session_manager(self) -> SessionManager:
+        return self.__session_manager
+
+    @session_manager.setter
+    def session_manager(self, session_manager: SessionManager):
+        self.__session_manager = session_manager
 
     @property
     def authentication_models(self):
@@ -169,13 +181,13 @@ class AuthenticationManager:
 
     def check_authorization(
         self,
-        session:ElrahSession,
         privilege_name: Optional[List[str]] = None,
         role_name: Optional[List[str]] = None,
     ) -> callable:
         async def is_authorized(
             token: str = Depends(self.get_access_token),
         ) -> bool:
+            session=self.session_manager.get_session(session=session)
             if role_name and privilege_name:
                 raise_custom_http_exception(
                     status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -183,7 +195,10 @@ class AuthenticationManager:
                 )
             payload =  self.validate_token(token)
             sub = payload.get("sub")
-            user = await self.get_user_by_sub(sub=sub,session=session)
+            try:
+                user = await self.get_user_by_sub(sub=sub,session=session)
+            finally:
+                await self.session_manager.close_session(session=session)
             if not user:
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
@@ -199,17 +214,16 @@ class AuthenticationManager:
 
     def check_authorizations(
         self,
-        session:ElrahSession,
         privileges_name: Optional[List[str]] = None,
         roles_name: Optional[List[str]] = None,
     ) -> List[callable]:
         authorizations = []
         for privilege_name in privileges_name:
             authorizations.append(
-                self.check_authorization(session=session,privilege_name=privilege_name)
+                self.check_authorization(privilege_name=privilege_name)
             )
         for role_name in roles_name:
-            authorizations.append(self.check_authorization(session=session,role_name=role_name))
+            authorizations.append(self.check_authorization(role_name=role_name))
         return authorizations
 
     async def authenticate_user(

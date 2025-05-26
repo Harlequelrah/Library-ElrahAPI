@@ -91,5 +91,9 @@ class RouteConfig:
         self, authentication: AuthenticationManager
     ) -> List[callable]:
         return authentication.check_authorizations(
-            roles_name=self.roles, privileges_name=self.privileges
-        )
+                roles_name=self.roles, privileges_name=self.privileges
+            )
+
+
+
+

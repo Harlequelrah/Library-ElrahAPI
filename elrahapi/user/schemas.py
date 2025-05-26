@@ -47,12 +47,12 @@ class UserRequestModel(BaseModel):
     email: Optional[str] = None
 
     @property
-    def username_or_email(self):
+    def sub(self):
         return self.username or self.email
 
-    @field_validator('username_or_email',check_fields=False)
+    @field_validator('sub',check_fields=False)
     @classmethod
-    def validate_username_or_email(cls,value):
+    def validate_sub(cls,value):
         if not value :
             raise ValueError("username or email must be provided")
         return value

@@ -7,12 +7,14 @@ from elrahapi.router.router_namespace import (
 from elrahapi.router.router_provider import CustomRouterProvider
 
 from ..settings.auth.configs import authentication
+from ..settings.database import session_manager
 from .cruds import myapp_crud
 
 router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
     crud=myapp_crud,
+    session_manager=session_manager,
     # authentication=authentication,
     read_with_relations=False,
 )

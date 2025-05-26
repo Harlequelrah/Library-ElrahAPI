@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from fastapi import status
 
+from elrahapi.utility.types import ElrahSession
+
 
 class SessionManager:
 
@@ -29,7 +31,19 @@ class SessionManager:
     def session_maker(self, session_maker: sessionmaker[Session]) -> None:
         self.__session_maker = session_maker
 
-    async def yield_session(self)->Session|AsyncSession|None:
+    async def close_session(self,session:ElrahSession):
+        if self.is_async_env:
+            await session.close()
+        else:
+            session.close()
+
+    async def get_session(self):
+        if self.is_async_env:
+            return anext(self.get_async_db())
+        else:
+            return next(self.get_sync_db())
+
+    async def yield_session(self):
         try :
             if self.is_async_env:
                 return  self.get_async_db()

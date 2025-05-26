@@ -1120,7 +1120,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `update_obj`: : **Type[BaseModel]** mais potentiellement **UpdatePydanticModel** ou **PatchPydanticModel**
 
-    - `is_full_updated`: **bool** , True pour une mise à jour totale et False pour une mise à jour partielle
+    - `is_full_update`: **bool** , True pour une mise à jour totale et False pour une mise à jour partielle
 
   - **sortie** : **SQLAlchemyModel**
 

@@ -31,3 +31,4 @@ finally:
     database.session_manager = session_manager
     database.base=Base
 
+print(f"{session_manager.is_async_env}")
