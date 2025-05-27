@@ -1,5 +1,5 @@
 from typing import Any, List, Optional, Type
-
+from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
@@ -19,104 +19,79 @@ from sqlalchemy.orm import Session
 
 from fastapi import status
 
+from elrahapi.database.session_manager import SessionManager
 
-class CrudForgery:
+from elrahapi.crud.base_crud_forgery import BaseCrudForgery
+
+
+class CrudForgery(BaseCrudForgery):
     def __init__(
         self,
-        crud_models: CrudModels
+        crud_models: CrudModels,
+        session_manager:SessionManager
     ):
-        self.crud_models = crud_models
-        self.entity_name = crud_models.entity_name
-        self.ReadPydanticModel = crud_models.read_model
-        self.FullReadPydanticModel = crud_models.full_read_model
-        self.SQLAlchemyModel = crud_models.sqlalchemy_model
-        self.CreatePydanticModel = crud_models.create_model
-        self.UpdatePydanticModel = crud_models.update_model
-        self.PatchPydanticModel = crud_models.patch_model
-        self.primary_key_name = crud_models.primary_key_name
+        super().__init__(crud_models=crud_models, session_manager=session_manager)
 
     async def bulk_create(
-        self, session: ElrahSession, create_obj_list: List[BaseModel]
+        self,  create_obj_list: List[BaseModel]
     ):
         try:
-            create_list = map_list_to(
-                create_obj_list, self.SQLAlchemyModel, self.CreatePydanticModel
-            )
-            if len(create_list) != len(create_obj_list):
-                detail = f"Invalid {self.entity_name}s  object for bulk creation"
-                raise_custom_http_exception(
-                    status_code=status.HTTP_400_BAD_REQUEST, detail=detail
+            session:ElrahSession = await self.session_manager.get_session()
+            return await super().bulk_create(
+                session=session,
+                create_obj_list=create_obj_list
                 )
-            session.add_all(create_list)
-            if is_async_session(session):
-                await session.commit()
-                for create_obj in create_list:
-                    await session.refresh(create_obj)
-            else:
-                session.commit()
-                for create_obj in create_list:
-                    session.refresh(create_obj)
-            return create_list
         except Exception as e:
-            if is_async_session(session):
-                await session.rollback()
-            else:
-                session.rollback()
+            await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
+        finally:
+            await self.session_manager.close_session(session=session)
 
-    async def create(self, session: ElrahSession, create_obj: Type[BaseModel]):
+    async def create(self,create_obj: Type[BaseModel]):
         if isinstance(create_obj, self.CreatePydanticModel):
-            dict_obj = create_obj.model_dump()
-            new_obj = self.SQLAlchemyModel(**dict_obj)
             try:
-                session.add(new_obj)
-                if is_async_session(session):
-                    await session.commit()
-                    await session.refresh(new_obj)
-                else:
-                    session.commit()
-                    session.refresh(new_obj)
-                return new_obj
+                session :ElrahSession = await self.session_manager.get_session()
+                return await super().create(
+                    session=session,
+                    create_obj=create_obj
+                )
             except Exception as e:
-                if is_async_session(session):
-                    await session.rollback()
-                else:
-                    session.rollback()
+                await self.session_manager.rollback_session(session=session)
                 detail = f"Error occurred while creating {self.entity_name} , details : {str(e)}"
                 raise_custom_http_exception(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail
                 )
+            finally :
+                await self.session_manager.close_session(session=session)
         else:
             detail = f"Invalid {self.entity_name} object for creation"
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
+
     async def count(
         self,
-        session: ElrahSession,
     ) -> int:
         try:
-            pk = self.crud_models.get_pk()
-            stmt = select(func.count(pk))
-            result = await exec_stmt(
-                session=session,
-                stmt=stmt,
-            )
-            count = result.scalar_one()
-            return count
+            session:ElrahSession = await self.session_manager.get_session()
+            return await super().count(
+                session=session
+                )
         except Exception as e:
+            await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
+        finally :
+            await self.session_manager.close_session(session=session)
 
     async def read_all(
         self,
-        session: ElrahSession,
         filter: Optional[str] = None,
         second_model_filter: Optional[str] = None,
         second_model_filter_value: Optional[Any] = None,
@@ -125,65 +100,48 @@ class CrudForgery:
         limit: int = None,
         relation: Optional["Relationship"] = None,
     ):
-        stmt = select(self.SQLAlchemyModel)
-        pk = self.crud_models.get_pk()
-        if relation:
-            reskey = relation.get_second_model_key()
-            if relation.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
-                relkey1 = relation.get_relationship_key1()
-                relkey2 = relation.get_relationship_key2()
-                stmt = stmt.join(
-                    relation.relationship_crud_models.sqlalchemy_model,
-                    relkey1 == pk,
-                )
-                stmt = stmt.join(
-                    relation.second_entity_crud_models.sqlalchemy_model,
-                    reskey == relkey2,
-                )
-            elif relation.type_relation in [
-                TypeRelation.MANY_TO_MANY_TABLE,
-                TypeRelation.ONE_TO_MANY,
-            ]:
-                stmt = stmt.join(
-                    relation.second_entity_crud.crud_models.sqlalchemy_model, reskey=pk
-                )
-        stmt = make_filter(
-            crud_models=self.crud_models, stmt=stmt, filter=filter, value=value
-        )
-        if relation:
-            stmt = make_filter(
-                crud_models=relation.second_entity_crud.crud_models,
-                stmt=stmt,
-                filter=second_model_filter,
-                value=second_model_filter_value,
+        try :
+            session: ElrahSession = await self.session_manager.get_session()
+            return await super().read_all(
+                session=session,
+                filter=filter,
+                second_model_filter=second_model_filter,
+                second_model_filter_value=second_model_filter_value,
+                value=value,
+                skip=skip,
+                limit=limit,
+                relation=relation,
             )
-        stmt = stmt.offset(skip).limit(limit)
-        results = await exec_stmt(
-            stmt=stmt,
-            session=session,
-            with_scalars=True,
-        )
-        return results.all()
-
-    async def read_one(self, session: ElrahSession, pk: Any):
-        pk_attr = self.crud_models.get_pk()
-        stmt = select(self.SQLAlchemyModel).where(pk_attr == pk)
-        result = await exec_stmt(
-            session=session,
-            stmt=stmt,
-            with_unique=True
-        )
-        read_obj = result.scalar_one_or_none()
-        if read_obj is None:
-            detail = f"{self.entity_name} with {self.primary_key_name} {pk} not found"
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while reading all {self.entity_name}s , details : {str(e)}"
             raise_custom_http_exception(
-                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
-        return read_obj
+        finally:
+            await self.session_manager.close_session(session=session)
+
+    async def read_one(self, pk: Any):
+        try:
+            session: ElrahSession = await self.session_manager.get_session()
+            return await super().read_one(
+                session=session,
+                pk=pk
+            )
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while reading {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
+        finally:
+            await self.session_manager.close_session(session=session)
 
     async def update(
         self,
-        session: ElrahSession,
         pk: Any,
         update_obj: Type[BaseModel],
         is_full_update: bool,
@@ -194,27 +152,23 @@ class CrudForgery:
             or isinstance(update_obj, self.PatchPydanticModel)
             and not is_full_update
         ):
-            existing_obj = await self.read_one(pk=pk, session=session)
             try:
-                existing_obj = update_entity(
-                    existing_entity=existing_obj, update_entity=update_obj
+                session: ElrahSession = await self.session_manager.get_session()
+                existing_obj = await super().read_one(pk=pk, session=session)
+                return await super().update(
+                    session=session,
+                    pk=pk,
+                    existing_obj=existing_obj,
+                    update_obj=update_obj,
                 )
-                if is_async_session(session):
-                    await session.commit()
-                    await session.refresh(existing_obj)
-                else:
-                    session.commit()
-                    session.refresh(existing_obj)
-                return existing_obj
             except Exception as e:
-                if is_async_session(session):
-                    await session.rollback()
-                else:
-                    session.rollback()
+                await self.session_manager.rollback_session(session=session)
                 detail = f"Error occurred while updating {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
                 )
+            finally:
+                await self.session_manager.close_session(session=session)
         else:
             detail = f"Invalid {self.entity_name}  object for update"
             raise_custom_http_exception(

@@ -1,7 +1,6 @@
 from typing import List, Optional, Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
-    DEFAULT_ROUTE_CONFIG,
     AuthorizationConfig,
     ResponseModelConfig,
     RouteConfig,
@@ -12,17 +11,18 @@ from elrahapi.router.router_namespace import (
     USER_AUTH_CONFIG,
     TypeRelation,
     TypeRoute,
+    DefaultRouteConfig
 )
 from pydantic import BaseModel
 
 from fastapi import Depends
 
-from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutesName
+from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutesName,RoutesName
 
 
 def exclude_route(
     routes: List[RouteConfig],
-    exclude_routes_name: Optional[List[DefaultRoutesName | RelationRoutesName]] = None,
+    exclude_routes_name: Optional[List[RoutesName]] = None,
 ):
     init_data: List[RouteConfig] = []
     if exclude_routes_name:
@@ -35,7 +35,7 @@ def exclude_route(
 def get_single_route(
     route_name: DefaultRoutesName, type_route: Optional[TypeRoute] = TypeRoute.PUBLIC
 ) -> RouteConfig:
-    config: DEFAULT_ROUTE_CONFIG = DEFAULT_ROUTES_CONFIGS.get(route_name)
+    config: DefaultRouteConfig = DEFAULT_ROUTES_CONFIGS.get(route_name)
     if config:
         return RouteConfig(
             route_name=route_name,
@@ -111,9 +111,7 @@ def set_response_model_config(
             None,
         )
         if response_model_config:
-            route_config.read_with_relations = response_model_config.read_with_relations
-            if response_model_config.response_model and not route_config.response_model:
-                route_config.response_model = response_model_config.response_model
+            route_config.extend_response_model_config(response_model_config=response_model_config)
             final_routes_config.append(route_config)
     return final_routes_config
 
@@ -156,14 +154,13 @@ def format_init_data(
         )
     )
     for route_config in formatted_data:
-        if not route_config.response_model:
-            response_model = set_response_model(
+        response_model = set_response_model(
                 route_config=route_config,
                 read_with_relations=read_with_relations,
                 ReadPydanticModel=ReadPydanticModel,
                 FullReadPydanticModel=FullReadPydanticModel,
             )
-            route_config.response_model = response_model
+        route_config.response_model = response_model
     return formatted_data
 
 

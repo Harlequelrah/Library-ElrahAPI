@@ -147,7 +147,7 @@ class AuthenticationManager:
         stmt = select(self.__authentication_models.sqlalchemy_model).where(
             pk_attr == pk
         )
-        result = await exec_stmt(stmt=stmt, session=session,with_unique=True)
+        result = await exec_stmt(stmt=stmt, session=session)
         user = result.scalar_one_or_none()
         if user:
             user.change_user_state()
@@ -177,8 +177,7 @@ class AuthenticationManager:
         )
         result = await exec_stmt(
             stmt=stmt,
-            session=session,
-            with_unique=True
+            session=session
         )
         user = result.scalar_one_or_none()
         if user is None:
@@ -288,8 +287,7 @@ class AuthenticationManager:
         )
         result = await exec_stmt(
             stmt=stmt,
-            session=session,
-            with_unique=True,
+            session=session
         )
         user = result.scalar_one_or_none()
         if user is None:

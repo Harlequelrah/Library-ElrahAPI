@@ -1,50 +1,13 @@
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional
+from elrahapi.router.router_routes_name import RoutesName,READ_ROUTES_NAME,DEFAULT_DETAIL_ROUTES_NAME,DefaultRoutesName
+from elrahapi.router.route_additional_config import AuthorizationConfig, ResponseModelConfig
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.router.router_routes_name import (
-    DEFAULT_DETAIL_ROUTES_NAME,
-    DefaultRoutesName,
-    RelationRoutesName,
-)
-from pydantic import BaseModel
-
-
-class DEFAULT_ROUTE_CONFIG:
-    def __init__(self, summary: str, description: str):
-        self.summary = summary
-        self.description = description
-
-
-class AuthorizationConfig:
-    def __init__(
-        self,
-        route_name: DefaultRoutesName|RelationRoutesName,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
-    ):
-        self.route_name = route_name
-        self.roles = roles if roles else []
-        self.privileges = privileges if privileges else []
-
-
-class ResponseModelConfig:
-
-    def __init__(
-        self,
-        route_name: DefaultRoutesName | RelationRoutesName,
-        read_with_relations: bool,
-        reponse_model: Optional[Type[BaseModel]] = None,
-    ):
-        self.reponse_model = reponse_model
-        self.route_name = route_name
-        self.read_with_relations = read_with_relations
-
-
 class RouteConfig:
 
     def __init__(
         self,
-        route_name: DefaultRoutesName | RelationRoutesName,
+        route_name: RoutesName,
         route_path: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -70,9 +33,19 @@ class RouteConfig:
             [auth.strip().upper() for auth in privileges] if privileges else []
         )
 
+    @property
+    def read_with_relations(self) -> bool:
+        return self.__read_with_relations
+
+    @read_with_relations.setter
+    def read_with_relations(self, value: Optional[bool]=None):
+        if self.route_name not in READ_ROUTES_NAME and value is None:
+            self.__read_with_relations =  False
+        self.__read_with_relations= value
+
     def validate_route_path(
         self,
-        route_name: DefaultRoutesName | RelationRoutesName,
+        route_name: RoutesName,
         route_path: Optional[str] = None,
     ):
         if route_path:
@@ -81,6 +54,13 @@ class RouteConfig:
             return route_path
         else:
             return f"/{route_name.value}"
+
+    def extend_response_model_config(self,response_model_config: ResponseModelConfig):
+        if response_model_config.reponse_model:
+            self.response_model = response_model_config.reponse_model
+        if response_model_config.read_with_relations is not None:
+            self.read_with_relations = response_model_config.read_with_relations
+
     def extend_authorization_config(self, authorization_config: AuthorizationConfig):
         if authorization_config.roles:
             self.roles.extend(authorization_config.roles)
@@ -93,7 +73,3 @@ class RouteConfig:
         return authentication.check_authorizations(
                 roles_name=self.roles, privileges_name=self.privileges
             )
-
-
-
-

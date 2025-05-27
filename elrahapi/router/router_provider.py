@@ -229,7 +229,7 @@ class CustomRouterProvider:
                     value: Optional[Any] = None,
                     second_model_filter: Optional[str] = None,
                     second_model_filter_value: Optional[Any] = None,
-                    skip: int = 0,
+                    skip: int = None,
                     limit: int = None,
                     relationship_name: Optional[str] = None,
                     session: ElrahSession = Depends(self.session_manager.yield_session),
@@ -237,6 +237,9 @@ class CustomRouterProvider:
                     relation: Optional[Relationship] = self.get_relationship(
                         relationship_name=relationship_name
                     )
+                    if session is None:
+                        print("Session is None")
+                    else:print("there is a session")
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
@@ -463,7 +466,7 @@ class CustomRouterProvider:
                         pk1: Any,
                         filter: Optional[str] = None,
                         value: Optional[Any] = None,
-                        skip: int = 0,
+                        skip: int = None,
                         limit: int = None,
                         session: ElrahSession = Depends(
                             self.session_manager.yield_session

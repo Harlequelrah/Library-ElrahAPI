@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypeAlias,List
 
 
 class RelationRoutesName(str,Enum):
@@ -32,7 +33,18 @@ class DefaultRoutesName(str, Enum):
     CHANGE_PASSWORD = "change-password"
     CHANGE_USER_STATE = "change-user-state"
 
-DEFAULT_DETAIL_ROUTES_NAME = [
+
+RoutesName: TypeAlias = DefaultRoutesName | RelationRoutesName
+
+READ_ROUTES_NAME: List[RoutesName] = [
+    DefaultRoutesName.READ_ALL,
+    DefaultRoutesName.READ_ONE,
+    DefaultRoutesName.READ_CURRENT_USER,
+    DefaultRoutesName.READ_ONE_USER,
+    RelationRoutesName.READ_ALL_BY_RELATION,
+    RelationRoutesName.READ_ONE_BY_RELATION,
+]
+DEFAULT_DETAIL_ROUTES_NAME: List[DefaultRoutesName] = [
     DefaultRoutesName.DELETE,
     DefaultRoutesName.UPDATE,
     DefaultRoutesName.READ_ONE,
@@ -40,8 +52,7 @@ DEFAULT_DETAIL_ROUTES_NAME = [
     DefaultRoutesName.PATCH,
 ]
 
-DEFAULT_NO_DETAIL_ROUTES_NAME = [
+DEFAULT_NO_DETAIL_ROUTES_NAME: List[DefaultRoutesName] = [
     DefaultRoutesName.READ_ALL,
     DefaultRoutesName.CREATE,
-    ]
-    
+]

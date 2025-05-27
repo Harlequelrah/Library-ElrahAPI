@@ -1,6 +1,5 @@
 from typing import Any, List, Optional, Type
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.crud.crud_models import CrudModels
 import os
@@ -72,23 +71,16 @@ def is_async_session(session:ElrahSession):
 async def exec_stmt(
     stmt: Select,
     session: ElrahSession,
-    with_scalars: bool = False,
-    with_unique: bool = False,
+    with_scalars: bool = False
 
 ):
     if isinstance(session,AsyncSession):
         if with_scalars:
             result=await session.scalars(stmt)
-            if with_unique:
-                return result.unique()
-            else:
-                return result
+            return result.unique() if result else None
         else:
             result= await session.execute(stmt)
-            if with_unique:
-                return result.unique()
-            else:
-                return result
+            return result.unique() if result else None
     else:
         if with_scalars:
             return session.scalars(stmt)

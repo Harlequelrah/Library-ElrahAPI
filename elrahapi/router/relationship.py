@@ -60,6 +60,26 @@ class Relationship:
         )
         self.check_relation_rules()
 
+    def get_second_model_key(self):
+        return self.second_entity_crud.crud_models.get_pk()
+
+    def get_relationship_keys(self):
+        if self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
+            rel_key1= self.relationship_crud.crud_models.get_attr(self.relationship_key1_name)
+            rel_key2=self.relationship_crud.crud_models.get_attr(self.relationship_key2_name)
+            return rel_key1,rel_key2
+        elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
+            if self.relation_table is not None:
+                columns= self.relation_table.c
+                rel_key1 = getattr(columns, self.relationship_key1_name)
+                rel_key2 = getattr(columns, self.relationship_key2_name)
+                return rel_key1, rel_key2
+        else:
+            raise ValueError(
+                f"relationship_keys not available for relation type {self.type_relation}"
+            )
+
+
     def check_relation_rules(self):
         for route_config in self.relations_routes_configs:
             if not is_verified_relation_rule(
