@@ -129,7 +129,6 @@ class AuthenticationRouterProvider:
                         password=form_data.password,
                         sub=form_data.username,
                     )
-
                     data = {
                         "sub": user.username,
                         "roles": [
@@ -217,6 +216,10 @@ class AuthenticationRouterProvider:
                             user_role.role.normalizedName
                             for user_role in user.user_roles
                         ],
+                        "privileges": [
+                            user_privilege.privilege.normalizedName
+                            for user_privilege in user.user_privileges
+                            ]
                     }
                     access_token_data = self.authentication.create_access_token(data)
                     refresh_token_data = self.authentication.create_refresh_token(data)
@@ -245,7 +248,7 @@ class AuthenticationRouterProvider:
                     current_password = form_data.current_password
                     new_password = form_data.new_password
                     return await self.authentication.change_password(
-                        sub=sub, 
+                        sub=sub,
                         current_password=current_password,
                         new_password=new_password,
                         session=session

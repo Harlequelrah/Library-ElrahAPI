@@ -73,12 +73,22 @@ async def exec_stmt(
     stmt: Select,
     session: ElrahSession,
     with_scalars: bool = False,
+    with_unique: bool = False,
+
 ):
     if isinstance(session,AsyncSession):
         if with_scalars:
-            return await session.scalars(stmt)
+            result=await session.scalars(stmt)
+            if with_unique:
+                return result.unique()
+            else:
+                return result
         else:
-            return await session.execute(stmt)
+            result= await session.execute(stmt)
+            if with_unique:
+                return result.unique()
+            else:
+                return result
     else:
         if with_scalars:
             return session.scalars(stmt)

@@ -59,7 +59,7 @@ class ErrorHandlingMiddleware:
             await self._log_error(request, session, response, f"Unexpected error: {exc}")
             await response(scope, receive, send)
         finally:
-            if session:
+            if session is not None:
                 await self.session_manager.close_session(session)
 
     def _create_json_response(self, status_code, content):

@@ -23,7 +23,7 @@ from fastapi import status
 class CrudForgery:
     def __init__(
         self,
-        crud_models: CrudModels,
+        crud_models: CrudModels
     ):
         self.crud_models = crud_models
         self.entity_name = crud_models.entity_name
@@ -169,7 +169,9 @@ class CrudForgery:
         pk_attr = self.crud_models.get_pk()
         stmt = select(self.SQLAlchemyModel).where(pk_attr == pk)
         result = await exec_stmt(
-            session=session, stmt=stmt, is_async_env=self.is_async_env
+            session=session,
+            stmt=stmt,
+            with_unique=True
         )
         read_obj = result.scalar_one_or_none()
         if read_obj is None:
@@ -256,5 +258,4 @@ class CrudForgery:
             else:
                 session.rollback()
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
-            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)

@@ -20,6 +20,7 @@ from elrahapi.utility.utils import exec_stmt, is_async_session
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import or_, select
 from fastapi import Depends, status
+from sqlalchemy.orm import selectinload
 
 
 class AuthenticationManager:
@@ -100,7 +101,8 @@ class AuthenticationManager:
             expire = datetime.now() + timedelta(
                 milliseconds=self.__access_token_expiration
             )
-        to_encode.update({"exp": expire})
+        iat= datetime.now()
+        to_encode.update({"exp": expire,"iat": iat})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
         )
@@ -116,7 +118,8 @@ class AuthenticationManager:
             expire = datetime.now() + timedelta(
                 milliseconds=self.__refresh_token_expiration
             )
-        to_encode.update({"exp": expire})
+        iat = datetime.now()
+        to_encode.update({"exp": expire, "iat": iat})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
         )
@@ -144,7 +147,7 @@ class AuthenticationManager:
         stmt = select(self.__authentication_models.sqlalchemy_model).where(
             pk_attr == pk
         )
-        result = await exec_stmt(stmt=stmt, session=session, with_scalars=False)
+        result = await exec_stmt(stmt=stmt, session=session,with_unique=True)
         user = result.scalar_one_or_none()
         if user:
             user.change_user_state()
@@ -161,18 +164,21 @@ class AuthenticationManager:
             )
 
     async def get_user_by_sub(self, sub: str,session: ElrahSession):
-        stmt = select(self.__authentication_models.sqlalchemy_model).where(
-            or_(
-                self.__authentication_models.sqlalchemy_model.username
-                == sub,
-                self.__authentication_models.sqlalchemy_model.email
-                == sub,
+        stmt = (
+            select(self.__authentication_models.sqlalchemy_model)
+            .where(
+                or_(
+                    self.__authentication_models.sqlalchemy_model.username
+                    == sub,
+                    self.__authentication_models.sqlalchemy_model.email
+                    == sub,
+                )
             )
         )
         result = await exec_stmt(
             stmt=stmt,
             session=session,
-            with_scalars=False,
+            with_unique=True
         )
         user = result.scalar_one_or_none()
         if user is None:
@@ -254,6 +260,7 @@ class AuthenticationManager:
         else:
             session.commit()
             session.refresh(user)
+
         return user
 
     def get_current_user_sub(
@@ -282,7 +289,7 @@ class AuthenticationManager:
         result = await exec_stmt(
             stmt=stmt,
             session=session,
-            with_scalars=False,
+            with_unique=True,
         )
         user = result.scalar_one_or_none()
         if user is None:

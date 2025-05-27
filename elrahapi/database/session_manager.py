@@ -39,26 +39,18 @@ class SessionManager:
 
     async def get_session(self):
         if self.is_async_env:
-            return anext(self.get_async_db())
+            return await anext(self.get_async_db())
         else:
             return next(self.get_sync_db())
 
     async def yield_session(self):
-        try :
-            if self.is_async_env:
-                return  self.get_async_db()
-                # return await anext(db)
+        if self.is_async_env:
+                async for session in self.get_async_db():
+                    yield session
 
-            else :
-                return  self.get_sync_db()
-                # return next(db)
-
-        except Exception as e:
-            detail = f"Cannot yield session , details : {str(e)}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=detail,
-            )
+        else :
+                for session in self.get_sync_db():
+                    yield session
 
     def get_sync_db(self):
         db= self.__session_maker()

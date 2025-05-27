@@ -143,7 +143,7 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     ),
     DefaultRoutesName.READ_ONE_USER: RouteConfig(
         route_name=DefaultRoutesName.READ_ONE_USER,
-        route_path="/read-one-user/{username_or_email}",
+        route_path="/read-one-user/{sub}",
         is_activated=True,
         is_protected=True,
         summary="read one user ",
