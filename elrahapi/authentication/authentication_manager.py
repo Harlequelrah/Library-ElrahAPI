@@ -192,7 +192,18 @@ class AuthenticationManager:
         async def is_authorized(
             token: str = Depends(self.get_access_token),
         ) -> bool:
-            session=self.session_manager.get_session(session=session)
+            try:
+                session: ElrahSession = await self.session_manager.get_session()
+            except Exception as e:
+                raise_custom_http_exception(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Error while getting session: {str(e)}",
+                )
+            print("Session is created in check_authorization")
+            if session is None:
+                print("Session is None in check_authorization")
+            else:
+                print("Session is not None in check_authorization")
             if role_name and privilege_name:
                 raise_custom_http_exception(
                     status.HTTP_500_INTERNAL_SERVER_ERROR,

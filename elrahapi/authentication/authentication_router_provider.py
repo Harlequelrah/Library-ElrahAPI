@@ -122,7 +122,7 @@ class AuthenticationRouterProvider:
                 )
                 async def login_swagger(
                     form_data: OAuth2PasswordRequestForm = Depends(),
-                    session:ElrahSession=Depends(self.session_manager.yield_session)
+                    session:ElrahSession=Depends(self.session_manager.get_async_db)
                 ):
                     user = await self.authentication.authenticate_user(
                         session=session,

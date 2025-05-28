@@ -42,6 +42,14 @@ class SessionManager:
         else:
             session.close()
 
+    async def delete_and_commit(self,session: ElrahSession, object: Any):
+        if self.is_async_env:
+            await session.delete(object)
+            await session.commit()
+        else:
+            session.delete(object)
+            session.commit()
+
     async def commit_and_refresh(self,session:ElrahSession,object:Any):
         if self.is_async_env:
             await session.commit()
@@ -79,8 +87,12 @@ class SessionManager:
         try :
             yield session
         finally:
+            print("Closing session")
             session.close()
 
     async def get_async_db(self):
         async with self.__session_maker() as session:
-            yield session
+            try:
+                yield session
+            finally:
+                print("Closing async session")

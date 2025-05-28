@@ -152,10 +152,10 @@ class BaseCrudForgery:
         self,
         session: ElrahSession,
         pk: Any,
-        existing_obj:Any,
         update_obj: Type[BaseModel],
 
     ):
+        existing_obj = await self.read_one(pk=pk, session=session)
         existing_obj = update_entity(
             existing_entity=existing_obj, update_entity=update_obj
         )
@@ -170,38 +170,22 @@ class BaseCrudForgery:
     async def bulk_delete(self, session: ElrahSession, pk_list: BulkDeleteModel):
         pk_attr = self.crud_models.get_pk()
         delete_list = pk_list.delete_liste
-        try:
-            if is_async_session(session):
-                await session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
+        if is_async_session(session):
+            await session.execute(
+                delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
                 )
-                await session.commit()
-            else:
-                session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
+            await session.commit()
+        else:
+            session.execute(
+                delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
                 )
-                session.commit()
-        except Exception as e:
-            if is_async_session(session):
-                await session.rollback()
-            else:
-                session.rollback()
-            detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
-            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+            session.commit()
+
 
     async def delete(self, session: ElrahSession, pk: Any):
         existing_obj = await self.read_one(pk=pk, session=session)
-        try:
-            if is_async_session(session):
-                await session.delete(existing_obj)
-                await session.commit()
-            else:
-                session.delete(existing_obj)
-                session.commit()
-        except Exception as e:
-            if is_async_session(session):
-                await session.rollback()
-            else:
-                session.rollback()
-            detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
-            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+        await self.session_manager.delete_and_commit(
+                session=session,
+                object=existing_obj,
+            )
+
