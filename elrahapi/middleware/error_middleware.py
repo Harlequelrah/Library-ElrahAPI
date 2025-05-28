@@ -32,8 +32,6 @@ class ErrorHandlingMiddleware:
             return
 
         request = Request(scope, receive=receive)
-        session = await self.session_manager.get_session() if self.has_log else None
-
         try:
             request.state.start_time = time.time()
             await self.app(scope, receive, send)
@@ -43,35 +41,34 @@ class ErrorHandlingMiddleware:
                 http_exc.status_code, {"detail": http_exc.detail}
             )
             await self._log_error(
-                request, session, response, f"Custom HTTP error: {http_exc.detail}"
+                request, response, f"Custom HTTP error: {http_exc.detail}"
             )
             await response(scope, receive, send)
         except SQLAlchemyError as db_error:
             response = self._create_json_response(
                 500, {"error": "Database error", "details": str(db_error)}
             )
-            await self._log_error(request, session, response, f"Database error: {db_error}")
+            await self._log_error(request, response, f"Database error: {db_error}")
             await response(scope, receive, send)
         except Exception as exc:
             response = self._create_json_response(
                 500, {"error": "Unexpected error", "details": str(exc)}
             )
-            await self._log_error(request, session, response, f"Unexpected error: {exc}")
+            await self._log_error(request, response, f"Unexpected error: {exc}")
             await response(scope, receive, send)
-        finally:
-            if session is not None:
-                await self.session_manager.close_session(session)
+
 
     def _create_json_response(self, status_code, content):
         return JSONResponse(status_code=status_code, content=content)
 
-    async def _log_error(self, request, session, response, error):
+    async def _log_error(self, request, response, error):
         if self.has_log:
             await save_log(
-                request=request,
-                LogModel=self.LogModel,
-                session=session,
-                response=response,
-                websocket_manager=self.websocket_manager,
-                error=error,
-            )
+                    request=request,
+                    LogModel=self.LogModel,
+                    session_manager=self.session_manager,
+                    response=response,
+                    websocket_manager=self.websocket_manager,
+                    error=error,
+                )
+

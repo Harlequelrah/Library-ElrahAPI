@@ -36,7 +36,6 @@ class CustomRouterProvider:
         prefix: str,
         tags: List[str],
         crud: CrudForgery,
-        session_manager: SessionManager,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
         authentication: Optional[AuthenticationManager] = None,
@@ -50,7 +49,6 @@ class CustomRouterProvider:
         self.get_access_token: Optional[callable] = (
             authentication.get_access_token if authentication else None
         )
-        self.session_manager = session_manager
         self.read_with_relations = read_with_relations
         self.ReadPydanticModel = crud.ReadPydanticModel
         self.FullReadPydanticModel = crud.FullReadPydanticModel

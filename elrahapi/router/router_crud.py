@@ -55,23 +55,39 @@ def initialize_dependecies(
     privileges: Optional[List[str]] = None,
 ):
     if not authentication:
+        print("Authentication manager is not provided, returning empty dependencies.")
         return []
     dependencies = []
     if config.is_protected:
         if roles:
             for role in roles:
                 config.roles.append(role)
+        if config.route_name== DefaultRoutesName.READ_CURRENT_USER:
+            print(f"{len(config.roles)} roles added to route {config.route_name}")
         if privileges:
             for privilege in privileges:
                 config.privileges.append(privilege)
+        if config.route_name== DefaultRoutesName.READ_CURRENT_USER:
+            print("i am currently here ")
+            print(f"{len(config.privileges)} privileges and roles {len(config.roles)} added to route {config.route_name}")
+            print(f"Roles: {config.roles}, Privileges: {config.privileges}")
         if config.roles or config.privileges:
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
+                print("there are roles or privileges")
+                print(f"Roles: {config.roles}, Privileges: {config.privileges}")
             authorizations: List[callable] = config.get_authorizations(
                 authentication=authentication
             )
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
+                print(f"{len(authorizations)} authorizations added to route {config.route_name}")
             dependencies: List[Depends] = [
                 Depends(authorization) for authorization in authorizations
             ]
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
+                print(f"{len(dependencies)} dependencies added to route {config.route_name}")
         else:
+            if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
+                print("No roles or privileges provided, using default access token dependency.")
             dependencies = [Depends(authentication.get_access_token)]
     return dependencies
 
@@ -79,6 +95,7 @@ def initialize_dependecies(
 def add_authorizations(
     routes_config: List[RouteConfig], authorizations: List[AuthorizationConfig]
 ):
+    print("adding authorizations")
     authorized_routes_config: List[RouteConfig] = []
     for route_config in routes_config:
         authorization = next(
@@ -91,7 +108,9 @@ def add_authorizations(
             None,
         )
         if authorization:
+            print(f"Adding authorization for route: {route_config.route_name}")
             route_config.extend_authorization_config(authorization)
+            print(f"Authorization added for route: {route_config.roles}")
         authorized_routes_config.append(route_config)
     return authorized_routes_config
 
@@ -131,6 +150,13 @@ def format_init_data(
     formatted_data: List[RouteConfig] = []
 
     formatted_data = exclude_route(init_data, exclude_routes_name)
+    formatted_data = (
+        formatted_data
+        if authorizations is None
+        else add_authorizations(
+            routes_config=formatted_data, authorizations=authorizations
+        )
+    )
     for route_config in formatted_data:
         if route_config.is_protected:
             route_config.dependencies = initialize_dependecies(
@@ -139,13 +165,7 @@ def format_init_data(
                 roles=roles,
                 privileges=privileges,
             )
-    formatted_data = (
-        formatted_data
-        if authorizations is None
-        else add_authorizations(
-            routes_config=formatted_data, authorizations=authorizations
-        )
-    )
+
     formatted_data = (
         formatted_data
         if response_model_configs is None

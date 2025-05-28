@@ -13,6 +13,7 @@ from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
+    USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
@@ -21,6 +22,8 @@ from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import or_, select
 from fastapi import Depends, status
 from sqlalchemy.orm import selectinload
+
+from elrahapi.exception.custom_http_exception import CustomHttpException
 
 
 class AuthenticationManager:
@@ -142,91 +145,127 @@ class AuthenticationManager:
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
 
-    async def change_user_state(self, session: ElrahSession, pk: Any):
-        pk_attr = self.__authentication_models.get_pk()
-        stmt = select(self.__authentication_models.sqlalchemy_model).where(
-            pk_attr == pk
-        )
-        result = await exec_stmt(stmt=stmt, session=session)
-        user = result.scalar_one_or_none()
-        if user:
-            user.change_user_state()
-            if is_async_session(session):
-                await session.commit()
-                await session.refresh(user)
-            else:
-                session.commit()
-                session.refresh(user)
-        else:
-            detail = "User Not Found"
-            raise_custom_http_exception(
-                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+    async def change_user_state(self,pk: Any):
+        try:
+            session: ElrahSession = await self.session_manager.get_session()
+            pk_attr = self.__authentication_models.get_pk()
+            stmt = select(self.__authentication_models.sqlalchemy_model).where(
+                pk_attr == pk
             )
+            result = await exec_stmt(stmt=stmt, session=session)
+            user = result.scalar_one_or_none()
+            if user:
+                user.change_user_state()
+                await self.session_manager.commit_and_refresh(
+                    session=session,
+                    object=user
+                )
+            else:
+                detail = "User Not Found"
+                raise_custom_http_exception(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=detail
+                )
+        except CustomHttpException as che :
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail=f"Error while changing user state: {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
+        finally:
+            await self.session_manager.close_session(session=session)
 
     async def get_user_by_sub(self, sub: str,session: ElrahSession):
-        stmt = (
-            select(self.__authentication_models.sqlalchemy_model)
-            .where(
-                or_(
-                    self.__authentication_models.sqlalchemy_model.username
-                    == sub,
-                    self.__authentication_models.sqlalchemy_model.email
-                    == sub,
+        try:
+            stmt = (
+                select(self.__authentication_models.sqlalchemy_model)
+                .where(
+                    or_(
+                        self.__authentication_models.sqlalchemy_model.username
+                        == sub,
+                        self.__authentication_models.sqlalchemy_model.email
+                        == sub,
+                    )
                 )
             )
-        )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=session
-        )
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        return user
+            result = await exec_stmt(
+                stmt=stmt,
+                session=session
+            )
+            user = result.scalar_one_or_none()
+            if user is None:
+                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+            return user
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error while getting user by sub: {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
+
+
+    async def is_authorized(
+        self,
+        sub: str,
+        privilege_name: Optional[str] = None,
+        role_name: Optional[str] = None,
+        ) -> bool:
+            try:
+                print(f"Checking authorization for sub: {sub}, privilege: {privilege_name}, role: {role_name}")
+                session: ElrahSession = await self.session_manager.get_session()
+                user = await self.get_user_by_sub(sub=sub,session=session)
+                if role_name:
+                    return user.has_role(role_name=role_name)
+                elif privilege_name:
+                    return user.has_privilege(privilege_name)
+            except CustomHttpException as che:
+                await self.session_manager.rollback_session(session=session)
+                raise che
+            except Exception as e:
+                await self.session_manager.rollback_session(session=session)
+                detail="Error while checking authorization: " + str(e)
+                raise_custom_http_exception(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=detail
+                )
+            finally:
+                    await self.session_manager.close_session(session=session)
 
     def check_authorization(
         self,
-        privilege_name: Optional[List[str]] = None,
-        role_name: Optional[List[str]] = None,
+        privilege_name: Optional[str] = None,
+        role_name: Optional[str] = None,
     ) -> callable:
-        async def is_authorized(
-            token: str = Depends(self.get_access_token),
-        ) -> bool:
-            try:
-                session: ElrahSession = await self.session_manager.get_session()
-            except Exception as e:
+        async def auth_result(token: str = Depends(self.get_access_token)):
+            payload =  self.validate_token(token)
+            sub: str = payload.get("sub")
+            if role_name and sub:
+                return await self.is_authorized(
+                    sub=sub,
+                    role_name=role_name,
+                )
+            elif privilege_name and sub :
+                return await self.is_authorized(
+                    sub=sub,
+                    privilege_name=privilege_name,
+                )
+            elif (role_name and privilege_name) or (not role_name and not privilege_name):
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Error while getting session: {str(e)}",
+                    detail="Either role or privilege must be provided, not both"
                 )
-            print("Session is created in check_authorization")
-            if session is None:
-                print("Session is None in check_authorization")
             else:
-                print("Session is not None in check_authorization")
-            if role_name and privilege_name:
                 raise_custom_http_exception(
-                    status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    "Cannot check role and privilege in the same time",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Sub must be provided , Maybe User is not authenticated"
                 )
-            payload =  self.validate_token(token)
-            sub = payload.get("sub")
-            try:
-                user = await self.get_user_by_sub(sub=sub,session=session)
-            finally:
-                await self.session_manager.close_session(session=session)
-            if not user:
-                raise_custom_http_exception(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
-                )
-            if role_name:
-                return user.has_role(role_name=role_name)
-            elif privilege_name:
-                return user.has_privilege(privilege_name)
-            else:
-                raise INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION
+        return auth_result
 
-        return is_authorized
 
     def check_authorizations(
         self,
@@ -248,30 +287,35 @@ class AuthenticationManager:
         session: ElrahSession,
         sub: Optional[str] = None,
     ):
-        if sub is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        user = await self.get_user_by_sub(session=session, sub=sub)
-        if user:
-            if not user.check_password(password):
-                user.try_login(False)
-                if is_async_session(session):
-                    await session.commit()
-                    await session.refresh(user)
-                else:
-                    session.commit()
-                    session.refresh(user)
-                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-            if not user.is_active:
-                raise INACTIVE_USER_CUSTOM_HTTP_EXCEPTION
-        user.try_login(True)
-        if is_async_session(session):
-            await session.commit()
-            await session.refresh(user)
-        else:
-            session.commit()
-            session.refresh(user)
-
-        return user
+        try :
+            if sub is None:
+                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+            user = await self.get_user_by_sub(session=session, sub=sub)
+            if user:
+                if not user.check_password(password):
+                    user.try_login(False)
+                    await  self.session_manager.commit_and_refresh(
+                        session=session,
+                        object=user
+                    )
+                    raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+                if not user.is_active:
+                    raise INACTIVE_USER_CUSTOM_HTTP_EXCEPTION
+            user.try_login(True)
+            await self.session_manager.commit_and_refresh(
+                session=session,
+                object=user
+            )
+            return user
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error while authenticating user: {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
 
     def get_current_user_sub(
         self,
@@ -286,41 +330,48 @@ class AuthenticationManager:
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken
     ):
-        payload =  self.validate_token(refresh_token_data.refresh_token)
-        sub = payload.get("sub")
-        if sub is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        stmt = select(self.__authentication_models.sqlalchemy_model).where(
-            or_(
-                self.__authentication_models.sqlalchemy_model.username == sub,
-                self.__authentication_models.sqlalchemy_model.email == sub,
+        try :
+            payload =  self.validate_token(refresh_token_data.refresh_token)
+            sub = payload.get("sub")
+            if sub is None:
+                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+            user = await self.get_user_by_sub(sub=sub, session=session)
+            access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
+            data = user.build_access_token_data()
+            access_token = self.create_access_token(
+                data=data, expires_delta=access_token_expiration
             )
-        )
-        result = await exec_stmt(
-            stmt=stmt,
-            session=session
-        )
-        user = result.scalar_one_or_none()
-        if user is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
-        access_token = self.create_access_token(
-            data={"sub": sub}, expires_delta=access_token_expiration
-        )
-        return access_token
+            return access_token
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error while refreshing token: {str(e)}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
 
     async def is_existing_user(self,session:ElrahSession, sub: str):
         user= await self.get_user_by_sub(sub=sub,session=session)
         return user is not None
 
-    async def read_one_user(self,session:ElrahSession,sub: str):
-        user= await self.get_user_by_sub(sub=sub,session=session)
-        if not user:
-            detail = f"User with username or email {sub} not found"
+    async def read_one_user(self,sub: str):
+        try:
+            session: ElrahSession = await self.session_manager.get_session()
+            user= await self.get_user_by_sub(sub=sub,session=session)
+            return user
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error while reading user with sub {sub} , details : {str(e)}"
             raise_custom_http_exception(
-                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
-        return user
+        finally:
+            await self.session_manager.close_session(session=session)
 
     async def change_password(
         self,session:ElrahSession, sub: str, current_password: str, new_password: str
@@ -331,9 +382,7 @@ class AuthenticationManager:
             session=session,
         )
         current_user.password = new_password
-        if is_async_session(session):
-            await session.commit()
-            await session.refresh(current_user)
-        else:
-            session.commit()
-            session.refresh(current_user)
+        await self.session_manager.commit_and_refresh(
+            session=session,
+            object=current_user
+        )

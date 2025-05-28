@@ -42,6 +42,7 @@ class AuthenticationRouterProvider:
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
+        print(f"{len(authorizations)=}")
         formatted_data = format_init_data(
             init_data=init_data,
             read_with_relations=self.read_with_relations,
@@ -65,11 +66,8 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def read_one_user(sub: str,session:ElrahSession=Depends(self.session_manager.yield_session)):
-                    return await self.authentication.read_one_user(
-                        sub=sub,
-                        session=session
-                        )
+                async def read_one_user(sub: str):
+                    return await self.authentication.read_one_user(sub=sub)
 
             if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
 
@@ -82,13 +80,13 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def change_user_state(pk:Any,session:ElrahSession=Depends(self.session_manager.yield_session)):
+                async def change_user_state(pk:Any):
                     return await self.authentication.change_user_state(
-                        pk=pk,
-                        session=session
+                        pk=pk
                         )
 
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
+                print(f"{len(config.dependencies)=}")
 
                 @self.router.get(
                     path=config.route_path,
@@ -122,26 +120,17 @@ class AuthenticationRouterProvider:
                 )
                 async def login_swagger(
                     form_data: OAuth2PasswordRequestForm = Depends(),
-                    session:ElrahSession=Depends(self.session_manager.get_async_db)
+                    session:ElrahSession=Depends(self.session_manager.yield_session)
                 ):
                     user = await self.authentication.authenticate_user(
                         session=session,
                         password=form_data.password,
                         sub=form_data.username,
                     )
-                    data = {
-                        "sub": user.username,
-                        "roles": [
-                            user_role.role.normalizedName
-                            for user_role in user.user_roles
-                        ],
-                        "privileges":[
-                            user_privilege.privilege.normalizedName
-                            for user_privilege in user.user_privileges
-                        ]
-                    }
-                    access_token = self.authentication.create_access_token(data)
-                    refresh_token = self.authentication.create_refresh_token(data)
+                    access_token_data = user.build_access_token_data()
+                    refresh_token_data = user.build_refresh_token_data()
+                    access_token = self.authentication.create_access_token(access_token_data)
+                    refresh_token = self.authentication.create_refresh_token(refresh_token_data)
                     return {
                         "access_token": access_token["access_token"],
                         "refresh_token": refresh_token["refresh_token"],
@@ -167,7 +156,7 @@ class AuthenticationRouterProvider:
                         sub=current_user_sub,
                         session=session
                         )
-                    data = {"sub": current_user.username}
+                    data = current_user.build_refresh_token_data()
                     refresh_token = self.authentication.create_refresh_token(data)
                     return refresh_token
 

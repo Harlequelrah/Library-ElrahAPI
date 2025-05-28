@@ -15,14 +15,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         self.websocket_manager = websocket_manager
 
     async def dispatch(self, request : Request, call_next):
-        session= await self.session_manager.get_session()
         try:
-            return await save_log(request=request,call_next=call_next,LogModel=self.LogModel,session=session,websocket_manager=self.websocket_manager)
+            return await save_log(request=request,call_next=call_next,LogModel=self.LogModel,session_manager=self.session_manager,websocket_manager=self.websocket_manager)
         except Exception as e:
-            if self.session_manager.is_async_env:
-                await session.rollback()
-            else:
-                session.rollback()
-            return await save_log(request, call_next=call_next,LogModel= self.LogModel, session=session,error=f"error during saving log , detail :{str(e)}",websocket_manager=self.websocket_manager)
-        finally:
-            await self.session_manager.close_session(session)
+            return await save_log(request, call_next=call_next,LogModel= self.LogModel, session_manager=self.session_manager,error=f"error during saving log , detail :{str(e)}",websocket_manager=self.websocket_manager)

@@ -1,12 +1,10 @@
 import json
 import time
+from elrahapi.database.session_manager import SessionManager
 from fastapi import Request,status
 from starlette.responses import Response
 from  elrahapi.websocket.connection_manager import ConnectionManager
-from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import is_async_session
 async def get_response_and_process_time(request:Request,call_next=None,response:Response=None):
     if call_next is None:
         process_time = (
@@ -22,7 +20,7 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
     return [current_response,process_time]
 
 async def save_log(
-    request: Request,LogModel, session: ElrahSession ,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
+    request: Request,LogModel, session_manager:SessionManager ,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
 ):
     if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
         if call_next is None:
@@ -40,28 +38,27 @@ async def save_log(
     remote_address=str(request.client.host)
     )
     try :
+        session = await session_manager.get_session()
         session.add(log)
-        if is_async_session(session):
-            await session.commit()
-            await session.refresh(log)
-        else:
-            session.commit()
-            session.refresh(log)
+        await session_manager.commit_and_refresh(
+            session=session,
+            object=log
+            )
         if error is not None and websocket_manager is not None:
             message=f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
+        return response
     except Exception as err:
-        if is_async_session(session):
-            await session.rollback()
-        else:
-            session.rollback()
+        await session_manager.rollback_session(session)
         error_message= f"error : An unexpected error occurred during saving log , details : {str(err)}"
         raise_custom_http_exception(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=error_message
         )
-    return response
+    finally :
+        await session_manager.close_session(session)
+
 
 async def read_response_body(response: Response)  -> str | None:
     """Capture, décode le corps de la réponse et extrait la valeur du champ 'detail'."""

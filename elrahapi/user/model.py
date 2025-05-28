@@ -39,6 +39,24 @@ class UserModel:
     MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
+    def build_access_token_data(self):
+        data = {
+            "sub": self.username,
+            "roles": [user_role.role.normalizedName for user_role in self.user_roles],
+            "privileges": [
+                user_privilege.privilege.normalizedName
+                for user_privilege in self.user_privileges
+            ],
+        }
+        return data
+
+    def build_refresh_token_data(self):
+        data = {
+            "sub": self.username,
+        }
+        return data
+
+
     def try_login(self, is_success: bool):
         if is_success:
             self.attempt_login = 0
@@ -59,7 +77,6 @@ class UserModel:
         except Ex.InvalidHashError:
             self.password = self.password
             return self.check_password(password)
-
 
     def has_role(self, role_name: str):
         for user_role in self.user_roles:

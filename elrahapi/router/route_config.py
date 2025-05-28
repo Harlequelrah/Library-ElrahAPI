@@ -70,6 +70,8 @@ class RouteConfig:
     def get_authorizations(
         self, authentication: AuthenticationManager
     ) -> List[callable]:
+        if self.route_name==DefaultRoutesName.READ_CURRENT_USER:
+            print("try to get authorizations for READ_CURRENT_USER route")
         return authentication.check_authorizations(
                 roles_name=self.roles, privileges_name=self.privileges
             )
