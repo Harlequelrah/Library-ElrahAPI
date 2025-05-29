@@ -75,7 +75,7 @@ def initialize_dependecies(
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
                 print("there are roles or privileges")
                 print(f"Roles: {config.roles}, Privileges: {config.privileges}")
-            authorizations: List[callable] = config.get_authorizations(
+            authorizations: List[callable] =  config.get_authorizations(
                 authentication=authentication
             )
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
@@ -159,7 +159,7 @@ def format_init_data(
     )
     for route_config in formatted_data:
         if route_config.is_protected:
-            route_config.dependencies = initialize_dependecies(
+            route_config.dependencies =  initialize_dependecies(
                 config=route_config,
                 authentication=authentication,
                 roles=roles,

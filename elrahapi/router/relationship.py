@@ -51,13 +51,11 @@ class Relationship:
         self.relationship_key2_name = relationship_key2_name
         self.type_relation = type_relation
         self.relation_table = relation_table
-        self.relations_routes_configs = self.init_routes_configs(
-            default_public_relation_routes_name=default_public_relation_routes_name,
-            default_protected_relation_routes_name=default_protected_relation_routes_name,
-            relations_routes_configs=relations_routes_configs,
-            relations_authorizations_configs=relations_authorizations_configs,
-            relations_responses_model_configs=relations_responses_model_configs,
-        )
+        self.relations_routes_configs = relations_routes_configs or []
+        self.default_public_relation_routes_name=default_public_relation_routes_name or []
+        self.default_protected_relation_routes_name=default_protected_relation_routes_name or []
+        self.relations_authorizations_configs=relations_authorizations_configs or []
+        self.relations_responses_model_configs=relations_responses_model_configs or []
         self.check_relation_rules()
 
     def get_second_model_key(self):
@@ -79,7 +77,6 @@ class Relationship:
                 f"relationship_keys not available for relation type {self.type_relation}"
             )
 
-
     def check_relation_rules(self):
         for route_config in self.relations_routes_configs:
             if not is_verified_relation_rule(
@@ -92,13 +89,9 @@ class Relationship:
 
     def init_default_routes(
         self,
-        default_public_relation_routes_name: List[RelationRoutesName] = None,
-        default_protected_relation_routes_name: List[RelationRoutesName] = None,
+        default_public_relation_routes_name: List[RelationRoutesName],
+        default_protected_relation_routes_name: List[RelationRoutesName] ,
     ):
-        default_public_relation_routes_name = default_public_relation_routes_name or []
-        default_protected_relation_routes_name = (
-            default_protected_relation_routes_name or []
-        )
         full_routes_configs = (
             default_public_relation_routes_name + default_protected_relation_routes_name
         )
@@ -245,63 +238,60 @@ class Relationship:
 
     def init_routes_configs(
         self,
-        relations_routes_configs: Optional[RouteConfig] = None,
-        relations_authorizations_configs: Optional[List[AuthorizationConfig]] = None,
-        relations_responses_model_configs: Optional[ResponseModelConfig] = None,
-        default_public_relation_routes_name: List[RelationRoutesName] = None,
-        default_protected_relation_routes_name: List[RelationRoutesName] = None,
+        authentication: Optional[AuthenticationManager] = None,
+        roles: Optional[List[str]] = None,
+        privileges: Optional[List[str]] = None,
     ):
         routes_configs: List[RouteConfig] = []
-        relations_authorizations_configs: List[AuthorizationConfig] = (
-            relations_authorizations_configs or []
-        )
-        relations_responses_model_configs: List[ResponseModelConfig] = (
-            relations_responses_model_configs or []
-        )
         if (
-            default_protected_relation_routes_name
-            or default_public_relation_routes_name
+            self.default_protected_relation_routes_name
+            or self.default_public_relation_routes_name
         ):
             default_routes_configs = self.init_default_routes(
-                default_public_relation_routes_name=default_public_relation_routes_name,
-                default_protected_relation_routes_name=default_protected_relation_routes_name,
+                default_public_relation_routes_name= self.default_public_relation_routes_name,
+                default_protected_relation_routes_name=self.default_protected_relation_routes_name,
             )
-            if relations_routes_configs is None:
+            if not self.relations_routes_configs:
                 routes_configs = default_routes_configs
             else:
                 routes_configs = (
-                    deepcopy(relations_routes_configs) + default_routes_configs
+                    deepcopy(self.relations_routes_configs) + default_routes_configs
                 )
 
         purged_routes_configs = self.purge_relations(routes_configs)
         purged_routes_configs = (
             add_authorizations(
                 routes_configs=purged_routes_configs,
-                authorizations=relations_authorizations_configs,
+                authorizations=self.relations_authorizations_configs,
             )
-            if relations_authorizations_configs
+            if self.relations_authorizations_configs
             else purged_routes_configs
         )
         purged_routes_configs = (
             set_response_model_config(
                 routes_config=purged_routes_configs,
-                response_model_configs=relations_responses_model_configs,
+                response_model_configs=self.relations_responses_model_configs,
             )
-            if relations_responses_model_configs
+            if self.relations_responses_model_configs
             else purged_routes_configs
         )
-        return purged_routes_configs
+        return self.initialize_relation_route_configs_dependencies(
+            routes_configs=purged_routes_configs,
+            authentication=authentication,
+            roles=roles,
+            privileges=privileges,
+            )
 
     def initialize_relation_route_configs_dependencies(
         self,
+        routes_configs: List[RouteConfig],
         authentication: Optional[AuthenticationManager] = None,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
     ) -> List[RouteConfig]:
-        route_configs = self.relations_routes_configs
         if not authentication:
-            route_configs
-        for route_config in route_configs:
+            routes_configs
+        for route_config in routes_configs:
             if route_config.is_protected:
                 route_config.dependencies = initialize_dependecies(
                     config=route_config,
@@ -309,7 +299,7 @@ class Relationship:
                     roles=roles,
                     privileges=privileges,
                 )
-        return route_configs
+        return routes_configs
 
     async def create_relation(self,session:ElrahSession,entity_crud: CrudForgery, pk1: Any, pk2: Any):
         entity_1 = await entity_crud.read_one(session=session, pk=pk1)

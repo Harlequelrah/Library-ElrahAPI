@@ -41,6 +41,7 @@ class CustomRouterProvider:
         authentication: Optional[AuthenticationManager] = None,
         read_with_relations: bool = False,
         relations: Optional[List[Relationship]] = None,
+        session_manager:SessionManager=None
     ):
         self.relations = relations or []
         self.authentication: AuthenticationManager = (
@@ -188,9 +189,10 @@ class CustomRouterProvider:
                     operation_id=f"{config.route_name}_{self.crud.entity_name}",
                     name=f"{config.route_name}_{self.crud.entity_name}",
                 )
-                async def count():
-                    count = await self.crud.count()
-                    print("Count:", count)
+                async def count(
+                    session: ElrahSession = Depends(self.crud.session_manager.yield_session)
+                ):
+                    count = await self.crud.count(session=session)
                     return {"count": count}
 
             if config.route_name == DefaultRoutesName.READ_ONE:
@@ -206,8 +208,14 @@ class CustomRouterProvider:
                 )
                 async def read_one(
                     pk: Any,
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
-                    return await self.crud.read_one(pk=pk)
+                    return await self.crud.read_one(
+                        session=session,
+                        pk=pk
+                        )
 
             if config.route_name == DefaultRoutesName.READ_ALL:
 
@@ -228,7 +236,9 @@ class CustomRouterProvider:
                     skip: int = None,
                     limit: int = None,
                     relationship_name: Optional[str] = None,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
                     relation: Optional[Relationship] = self.get_relationship(
                         relationship_name=relationship_name
@@ -241,6 +251,7 @@ class CustomRouterProvider:
                         second_model_filter=second_model_filter,
                         second_model_filter_value=second_model_filter_value,
                         relation=relation,
+                        session=session
                     )
 
             if (
@@ -260,9 +271,12 @@ class CustomRouterProvider:
                 )
                 async def create(
                     create_obj: self.CreatePydanticModel,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
                     return await self.crud.create(
+                        session=session,
                         create_obj=create_obj
                     )
 
@@ -283,12 +297,15 @@ class CustomRouterProvider:
                 async def update(
                     pk: Any,
                     update_obj: self.UpdatePydanticModel,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
                     return await self.crud.update(
                         pk=pk,
                         update_obj=update_obj,
                         is_full_update=True,
+                        session=session,
                     )
 
             if config.route_name == DefaultRoutesName.PATCH and self.PatchPydanticModel:
@@ -305,12 +322,15 @@ class CustomRouterProvider:
                 async def patch(
                     pk: Any,
                     update_obj: self.PatchPydanticModel,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
                     return await self.crud.update(
                         pk=pk,
                         update_obj=update_obj,
                         is_full_update=False,
+                        session=session
                     )
 
             if config.route_name == DefaultRoutesName.DELETE:
@@ -326,9 +346,14 @@ class CustomRouterProvider:
                 )
                 async def delete(
                     pk: Any,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
-                    return await self.crud.delete(pk=pk)
+                    return await self.crud.delete(
+                        session=session,
+                        pk=pk
+                        )
 
             if config.route_name == DefaultRoutesName.BULK_DELETE:
 
@@ -343,9 +368,14 @@ class CustomRouterProvider:
                 )
                 async def bulk_delete(
                     pk_list: BulkDeleteModel,
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
-                    return await self.crud.bulk_delete(pk_list=pk_list)
+                    return await self.crud.bulk_delete(
+                        session=session,
+                        pk_list=pk_list
+                        )
 
             if config.route_name == DefaultRoutesName.BULK_CREATE:
 
@@ -361,18 +391,22 @@ class CustomRouterProvider:
                 )
                 async def bulk_create(
                     create_obj_list: List[self.CreatePydanticModel],
-
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
                 ):
                     return await self.crud.bulk_create(
+                        session=session,
                         create_obj_list=create_obj_list
                     )
 
         for relation in self.relations:
-            routes_configs = relation.initialize_relation_route_configs_dependencies(
+            routes_configs = relation.init_routes_configs(
                 roles=self.roles,
                 privileges=self.privileges,
                 authentication=self.authentication,
             )
+            print(f"{relation.relationship_name,relation.second_entity_crud.entity_name,relation.second_entity_crud.CreatePydanticModel=}")
             for route_config in routes_configs:
 
                 if (
@@ -395,7 +429,9 @@ class CustomRouterProvider:
                     async def create_relation(
                         pk1: Any,
                         pk2: Any,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        )
                     ):
                         return await relation.create_relation(
                             session=session,
@@ -423,9 +459,12 @@ class CustomRouterProvider:
                     async def delete_relation(
                         pk1: Any,
                         pk2: Any,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
                         return await relation.delete_relation(
+                            session=session,
                             entity_crud=self.crud,
                             pk1=pk1, pk2=pk2
                         )
@@ -453,7 +492,9 @@ class CustomRouterProvider:
                         value: Optional[Any] = None,
                         skip: int = None,
                         limit: int = None,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
 
                         return await relation.read_all_by_relation(
@@ -462,7 +503,8 @@ class CustomRouterProvider:
                             value=value,
                             limit=limit,
                             skip=skip,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
+                            session=session
                         )
 
                 if (
@@ -484,10 +526,14 @@ class CustomRouterProvider:
                     )
                     async def read_one_by_relation(
                         pk1: Any,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
                         return await relation.read_one_by_relation(
-                            entity_crud=self.crud, pk1=pk1
+                            session=session,
+                            entity_crud=self.crud,
+                            pk1=pk1
                         )
 
                 if (
@@ -511,12 +557,16 @@ class CustomRouterProvider:
                     async def create_by_relation(
                         pk1: Any,
                         create_obj: relation.second_entity_crud.crud_models.create_model,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
+
                         return await relation.create_by_relation(
                             pk1=pk1,
                             create_obj=create_obj,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
+                            session=session
                         )
 
                 if (
@@ -538,11 +588,14 @@ class CustomRouterProvider:
                     )
                     async def delete_by_relation(
                         pk1: Any,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
                         return await relation.delete_by_relation(
                             pk1=pk1,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
+                            session=session
                         )
 
                 if (
@@ -565,12 +618,15 @@ class CustomRouterProvider:
                     async def update_by_relation(
                         pk1: Any,
                         update_obj: relation.second_entity_crud.crud_models.update_model,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
                         return await relation.update_by_relation(
                             pk1=pk1,
                             update_obj=update_obj,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
+                            session=session
                         )
 
                 if (
@@ -593,12 +649,15 @@ class CustomRouterProvider:
                     async def patch_by_relation(
                         pk1: Any,
                         patch_obj: relation.second_entity_crud.crud_models.patch_model,
-
+                        session: ElrahSession = Depends(
+                            self.crud.session_manager.yield_session
+                        ),
                     ):
                         return await relation.patch_by_relation(
                             pk1=pk1,
                             patch_obj=patch_obj,
-                            entity_crud=self.crud
+                            entity_crud=self.crud,
+                            session=session
                         )
 
         return self.router

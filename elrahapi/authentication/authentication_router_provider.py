@@ -42,7 +42,6 @@ class AuthenticationRouterProvider:
         exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
         response_model_configs: Optional[List[ResponseModelConfig]] = None,
     ) -> APIRouter:
-        print(f"{len(authorizations)=}")
         formatted_data = format_init_data(
             init_data=init_data,
             read_with_relations=self.read_with_relations,
@@ -66,8 +65,11 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def read_one_user(sub: str):
-                    return await self.authentication.read_one_user(sub=sub)
+                async def read_one_user(sub: str,session: ElrahSession = Depends(self.session_manager.yield_session)):
+                    return await self.authentication.read_one_user(
+                        session=session,
+                        sub=sub
+                        )
 
             if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
 
@@ -80,13 +82,16 @@ class AuthenticationRouterProvider:
                     operation_id=f"{config.route_name}_auth",
                     name=f"{config.route_name}_auth",
                 )
-                async def change_user_state(pk:Any):
+                async def change_user_state(
+                    pk: Any,
+                    session: ElrahSession = Depends(self.session_manager.yield_session),
+                ):
                     return await self.authentication.change_user_state(
+                        session=session,
                         pk=pk
                         )
 
             if config.route_name == DefaultRoutesName.READ_CURRENT_USER:
-                print(f"{len(config.dependencies)=}")
 
                 @self.router.get(
                     path=config.route_path,
@@ -199,19 +204,10 @@ class AuthenticationRouterProvider:
                         session=session,
                         password=usermodel.password,sub= sub
                     )
-                    data = {
-                        "sub": sub,
-                        "roles": [
-                            user_role.role.normalizedName
-                            for user_role in user.user_roles
-                        ],
-                        "privileges": [
-                            user_privilege.privilege.normalizedName
-                            for user_privilege in user.user_privileges
-                            ]
-                    }
-                    access_token_data = self.authentication.create_access_token(data)
-                    refresh_token_data = self.authentication.create_refresh_token(data)
+                    access_token_data = user.build_access_token_data()
+                    refresh_token_data = user.build_refresh_token_data()
+                    access_token_data = self.authentication.create_access_token(data=access_token_data)
+                    refresh_token_data = self.authentication.create_refresh_token(data=refresh_token_data)
                     return {
                         "access_token": access_token_data.get("access_token"),
                         "refresh_token": refresh_token_data.get("refresh_token"),
