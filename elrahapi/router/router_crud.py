@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import  List, Optional, Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     AuthorizationConfig,
@@ -14,9 +14,7 @@ from elrahapi.router.router_namespace import (
     DefaultRouteConfig
 )
 from pydantic import BaseModel
-
 from fastapi import Depends
-
 from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutesName,RoutesName
 
 
@@ -209,3 +207,6 @@ def is_verified_relation_rule(
     relation_route_name: RelationRoutesName,
 ):
     return relation_route_name in RELATION_RULES[type_relation]
+
+
+

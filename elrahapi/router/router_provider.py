@@ -41,7 +41,6 @@ class CustomRouterProvider:
         authentication: Optional[AuthenticationManager] = None,
         read_with_relations: bool = False,
         relations: Optional[List[Relationship]] = None,
-        session_manager:SessionManager=None
     ):
         self.relations = relations or []
         self.authentication: AuthenticationManager = (
@@ -416,28 +415,25 @@ class CustomRouterProvider:
                         relation_route_name=route_config.route_name
                     )
                 ):
+                    def f():
+                        def k():
+                            return "k"
+                        return  k
+                    @self.router.get("/")
+                    (return k)
 
-                    @self.router.post(
-                        path=route_config.route_path,
-                        dependencies=route_config.dependencies,
-                        status_code=status.HTTP_201_CREATED,
-                        summary=route_config.summary,
-                        description=route_config.description,
-                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
-                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
-                    )
-                    async def create_relation(
-                        pk1: Any,
-                        pk2: Any,
-                        session: ElrahSession = Depends(
-                            self.crud.session_manager.yield_session
-                        )
-                    ):
-                        return await relation.create_relation(
-                            session=session,
-                            entity_crud=self.crud,
-                            pk1=pk1, pk2=pk2
-                        )
+                    # (
+                    # @self.router.post(
+                    #     path=route_config.route_path,
+                    #     dependencies=route_config.dependencies,
+                    #     status_code=status.HTTP_201_CREATED,
+                    #     summary=route_config.summary,
+                    #     description=route_config.description,
+                    #     operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                    #     name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                    # )
+                    # (f())
+                    # )
 
                 if (
                     route_config.route_name == RelationRoutesName.DELETE_RELATION
@@ -446,7 +442,6 @@ class CustomRouterProvider:
                         relation_route_name=route_config.route_name,
                     )
                 ):
-
                     @self.router.delete(
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -455,20 +450,7 @@ class CustomRouterProvider:
                         description=route_config.description,
                         operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                         name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
-                    )
-                    async def delete_relation(
-                        pk1: Any,
-                        pk2: Any,
-                        session: ElrahSession = Depends(
-                            self.crud.session_manager.yield_session
-                        ),
-                    ):
-                        return await relation.delete_relation(
-                            session=session,
-                            entity_crud=self.crud,
-                            pk1=pk1, pk2=pk2
-                        )
-
+                    )(self.make_delete_relation_route(relation=relation))
                 if (
                     route_config.route_name == RelationRoutesName.READ_ALL_BY_RELATION
                     and is_verified_relation_rule(
@@ -485,27 +467,8 @@ class CustomRouterProvider:
                         description=route_config.description,
                         operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                         name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
-                    )
-                    async def read_all_by_relation(
-                        pk1: Any,
-                        filter: Optional[str] = None,
-                        value: Optional[Any] = None,
-                        skip: int = None,
-                        limit: int = None,
-                        session: ElrahSession = Depends(
-                            self.crud.session_manager.yield_session
-                        ),
-                    ):
+                    )(self.make_read_all_by_relation_route(relation=relation))
 
-                        return await relation.read_all_by_relation(
-                            pk1=pk1,
-                            filter=filter,
-                            value=value,
-                            limit=limit,
-                            skip=skip,
-                            entity_crud=self.crud,
-                            session=session
-                        )
 
                 if (
                     route_config.route_name == RelationRoutesName.READ_ONE_BY_RELATION
@@ -678,3 +641,58 @@ class CustomRouterProvider:
         ]:
             relation = None
         return relation
+
+    def make_create_relation_route(
+        self,
+        relation:Relationship,
+        ):
+            async def create_relation(
+                pk1: Any,
+                pk2: Any,
+                session: ElrahSession = Depends(
+                    self.crud.session_manager.yield_session
+                    )
+            ):
+                return await relation.create_relation(
+                    session=session,
+                    entity_crud=self.crud,
+                    pk1=pk1, pk2=pk2
+                )
+            return create_relation
+
+    def make_delete_relation_route(self,relation:Relationship):
+        async def delete_relation(
+            pk1: Any,
+            pk2: Any,
+            session: ElrahSession = Depends(
+            self.crud.session_manager.yield_session
+                ),
+            ):
+                return await relation.delete_relation(
+                    session=session,
+                    entity_crud=self.crud,
+                    pk1=pk1, pk2=pk2
+                )
+        return delete_relation
+
+    def make_read_all_by_relation_route(self, relation: Relationship):
+        async def read_all_by_relation(
+            pk1: Any,
+            filter: Optional[str] = None,
+            value: Optional[Any] = None,
+            skip: int = None,
+            limit: int = None,
+            session: ElrahSession = Depends(
+                self.crud.session_manager.yield_session
+            ),
+            ):
+            return await relation.read_all_by_relation(
+                pk1=pk1,
+                filter=filter,
+                value=value,
+                limit=limit,
+                skip=skip,
+                entity_crud=self.crud,
+                session=session
+            )
+        return read_all_by_relation
