@@ -513,7 +513,7 @@ async def websocket_notification(websocket: WebSocket):
 
 ## **9.** `Utilisation de certaines fonctions utiles` :
 
-- `raise_custom_http_exception` :
+- `raise_custom_http_exception` :  permet de lever un CustomHttpException
 
 ```python
   from elrahapi.exception.exception_utils import raise_custom_http_exception
@@ -521,6 +521,25 @@ async def websocket_notification(websocket: WebSocket):
   raise_custom_http_exception(
   status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
   detail="Cette requête est intraitable par le serveur")
+```
+
+- `validate_value` : permet de valider une valeur
+
+```python
+  from elrahapi.utility.utils import validate_value
+  a = validate_value("True") # a contient True
+  b = validate_value("false") # b continent False
+  c = validate_value("1")  # c contient 1
+```
+
+- `update_entity` : permet de mettre à jour un objet sqlalchemy
+
+```python
+  from elrahapi.utility.utils import update_entity
+        existing_plant = update_entity(
+            existing_entity=existing_plant,
+            update_entity=plant_update_obj
+        )
 ```
 
 ## **10.** `Utilisation de patterns ` :
@@ -545,7 +564,7 @@ Vérifier la version  en executant `pip show elrahapi`
 
 Pour un exemple concret , vous pouvez consulter le repository de test pour cette version : `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
 
-Pour consulter la documentation technique :
+Vous pouvez  consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
 ├── docs/
 │ ├── README.md
