@@ -4,31 +4,31 @@
 
 # **1.** `Description`
 
-Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée ou framework basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
+Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque/package/framework personnalisée basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
 
 # **2.** `Objectifs`
 
 ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
-- Démarrer rapidement un projet en fournissant une architecture de projet ;
+- Démarrer rapidement un projet en fournissant une architecture de dossier ;
 
-- Minimiser les configurations pour un projet ;
+- Minimiser les configurations de base de données et de gestion des sessions pour un projet ;
 
-- Fournir un système d'authentification configurable ;
+- Fournir et gérer un système d'authentification simple et configurable ;
 
 - Générer les principaux cruds d'un model ;
 
-- Configurer facilement les routes avec des configurations personnalisées ;
+- Fournir Configurer facilement les routes avec des configurations personnalisées ;
 
-- Fournir et configurer facilement les principales routes d'un model ;
+- Pemettre d'utiliser les sessions asynchrones ;
 
 - Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log ;
 
-- Fournir un middleware de gestion d'erreur et des utilitaires pour lancer des exceptions personnalisées ;
-
-- Permet de gérer efficement l'authentification et les routes protégées ;
+- Fournir un middleware de gestion d'erreur  ;
 
 - Une gestion simple et efficace de l'autorisation par l'utilisation de rôles et privileges ;
+
+- Fournir une pile d'utilitaires ;
 
 - L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes .
 
@@ -68,11 +68,11 @@ ou si virtualenv est dejà installé au préalable
 
 ## **1.** `Quelques recommandations` :
 
-- Il est recommandé de créer un environnement virtuel pour chaque projet
+- Il est recommandé de créer un environnement virtuel pour chaque projet ;
 
-- **myproject** designe le nom de votre projet .
+- **myproject** designe le nom de votre projet ;
 
-- **myapp** designe le nom d'une application .
+- **myapp** designe le nom d'une application ;
 
 - Après la creation du projet configurer l'environnement .
 
@@ -84,21 +84,20 @@ ou si virtualenv est dejà installé au préalable
 
 ## **3.** `configurer l'environnement`
 
-- Ouvrer le fichier .env et configurer le
+- Ouvrez le fichier .env et configurez le !
 
 - Configurer alembic au besoin :
 
-  - Configurer le alembic.ini par son paramètre `sqlalchemy.url`
+  - Configurer le alembic.ini par son paramètre `sqlalchemy.url` :
 
     - exemple pour sqlite : `sqlite:///database.db`
 
   - Configurer le alembic/env.py :
 
-    - Ajouter l'import : from myproject.settings.models_metadata import target_metadata
+    - Ajouter l'import : from myproject.settings.database import database ;
 
-    - Passer les metadata à target_metadata : target_metadata=target_metadata
+    - Passer les metadata à target_metadata : database.target_metadata=target_metadata ;
 
-- Configurer le main.py en decommentant les lignes commentées au besoin
 
 ## **4.** `Demarrer le projet `
 
@@ -130,19 +129,72 @@ ou si virtualenv est dejà installé au préalable
 
 ### **6.1.** `Définir les models de l'application`
 
+`Entity` représente le nom d'une entité de base de donnée .
+
 - Créer les models SQLAlchemy dans `models.py`
 
-- Créer les models Pydantic dans `schemas.py`
+- Créer les schémas Pydantic dans `schemas.py`
 
-- Créer les meta models dans` meta_models.py` si nécessaire
+- Créer les meta models dans `meta_models.py`  si nécessaire ;
 
-- Importer la variable metadata depuis `myapp/models.py` de l'application dans le settings/models_metadata.py
+**`Note:`** :
+
+Avec `SQLAlchemy` en asynchrone , si dans vos schémas vous retourner des relations d'un model , il faudra ajouter `lazy=joined` aux relationship des models SQLAlchemy .
+
+Pour les schémas pydantic l'on pourra d'abord créer ou non un EntityBaseModel dans `meta_models.py` pour le réutiliser au besoin dans les autres schémas .
+
+Dans `schemas.py` il peut y avoir généralement :
+
+- EntityCreateModel : pour la création d' une entité ;
+
+- EntityUpdateModel : pour la mise à jour totale d'une entité ;
+
+- EntityPatchModel : pour la mise à jour partielle d'une 'entité ;
+
+- EntityReadModel : pour la lecture partielle d'une entité ;
+
+- EntityFullReadModel : pour la lecture totale d'une entité avec ses relations ;
+
+
+**`exemple : `**
+
+```python
+  class User( UserModel,database.base):
+    user_privileges = relationship("UserPrivilege", back_populates="user",lazy="joined")
+    user_roles=relationship("UserRole",back_populates="user",lazy="joined")
+
+  class UserFullReadModel(UserReadModel) :
+    user_roles:List["MetaUserRoleModel"] = []
+    user_privileges: List["MetaUserPrivilegeModel"]=[]
+```
 
 ### **6.2.** `Créer les cruds`
 
-- Configurer un objet de type CrudModels
+Dans `cruds.py`
 
-- Configurer le CrudForgery dans cruds.py
+- Créer un  CrudModels
+
+- Créer un CrudForgery dans cruds.py
+
+**`exemple : `**
+
+
+```python
+myapp_crud_models = CrudModels(
+    entity_name="myapp",
+    primary_key_name="id",  #remplacer au besoin par le nom de la clé primaire
+    SQLAlchemyModel=Entity, #remplacer par l'entité SQLAlchemy
+    ReadModel=EntityReadModel,
+    CreateModel=EntityCreateModel, #Optionel
+    UpdateModel=EntityUpdateModel, #Optionel
+    PatchModel=EntityPatchModel, #Optionel
+    FullReadModel=EntityFullReadModel #Optionel
+)
+myapp_crud = CrudForgery(
+    crud_models=myapp_crud_models,
+    session_manager=database.session_manager
+)
+```
 
 ### **6.3.** `Configurer le fournisseur de routage de l'application`
 
@@ -150,14 +202,13 @@ Configurer le CustomRouterProvider dans router.py
 
 - **`Configuration de base`**
 
-Importer le crud depuis `myapp/cruds`
+Il faut au préalable s'assurer importer  le crud depuis `myapp/cruds`
 
 ```python
    router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
-    crud=myapp_crud,
-
+    crud=myapp_crud
 )
 ```
 
@@ -179,20 +230,24 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
 )
 ```
 
-- **`Configuration avec relations entre model`** :
+- **`Configuration des models de réponse`** :
 
-La configuration des relations se fait par le paramètre `with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
+La configuration des relations se fait par le paramètre `read_with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
 
 ```python
    router_provider = CustomRouterProvider(
     prefix="/items",
     tags=["item"],
     crud=myapp_crud,
-    with_relations = True
+    read_with_relations = True
 )
 ```
 
-Cette configuration se fait aussi par le paramètre `relations` qui définit une liste d'instance de `Relationship`
+- **`Configuration des relations`** :
+
+Cette configuration se fait  par le paramètre `relations` qui définit une liste d'instance de `Relationship`.
+
+**`exemple`** :
 
 ```python
    router_provider = CustomRouterProvider(
@@ -200,15 +255,79 @@ Cette configuration se fait aussi par le paramètre `relations` qui définit une
     tags=["item"],
     crud=myapp_crud,
     relations=[
-        Relationship(
-            relationship_name="item_categories",
-            relationship_crud_models=item_categories.crud_models,
-            joined_entity_crud_models=category_crud.crud_models,
-            relationship_key1_name="item_id",
-            relationship_key2_name="category_id",
-            joined_model_key_name="id",
-        )
+    user_role_relation,
+    post_relation
     ],
+)
+```
+
+**`exemples de relations `** :
+
+**Note** : RELATION_RULES est un dictionnaire où la clé est le type de relation et la valeur une liste des routes permises .
+
+- Relation plusieurs à plusieurs avec une classe `SQLAlchemy` intermédiaire :
+
+```python
+user_role_relation: Relationship = Relationship(
+    relationship_name="user_roles",
+    second_entity_crud=role_crud,
+    relationship_crud=user_role_crud,
+    type_relation=TypeRelation.MANY_TO_MANY_CLASS,
+    relationship_key1_name="user_id",
+    relationship_key2_name="role_id",
+    default_public_relation_routes_name=[
+      RelationRoutesName.READ_ALL_BY_RELATION,
+      RelationRoutesName.DELETE_RELATION,
+    ],
+)
+```
+
+- Relation plusieurs à plusieurs avec table `Table` intermédiaire :
+
+```python
+tag_relation: Relationship = Relationship(
+    relation_table=post_tag_table,
+    relationship_name="tags",
+    second_entity_crud=tag_crud,
+    relationship_key1_name="post_id",
+    relationship_key2_name="tag_id",
+    type_relation=TypeRelation.MANY_TO_MANY_TABLE,
+    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_MANY_TABLE],
+)
+```
+
+- Relation un à un :
+
+```python
+profile_relation: Relationship = Relationship(
+    relationship_name="profile",
+    second_entity_crud=profile_crud,
+    type_relation=TypeRelation.ONE_TO_ONE,
+    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_ONE],
+)
+```
+- Relation un à plusieurs :
+
+```python
+post_relation: Relationship = Relationship(
+    relationship_name="posts",
+    second_entity_crud=post_crud,
+    second_entity_fk_name="user_id",
+    type_relation=TypeRelation.ONE_TO_MANY,
+    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_MANY],
+)
+```
+
+**Note** : second_entity_fk_name est facultatif et permet d'attribuer cette valeur automatiquement dans la création , mise à jour partielle , mise à jour totale de l'entité secondaire . Il faut tout de même avoir ce champ dans les schémas correspondant ,et il pourra désormais etre optionel .
+
+- Relation plusieurs à un :
+
+```python
+user_relation: Relationship = Relationship(
+    relationship_name="user",
+    second_entity_crud=user_crud,
+    type_relation=TypeRelation.MANY_TO_ONE,
+    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_ONE],
 )
 ```
 
@@ -223,7 +342,7 @@ Les possibilités de configuration d'un routeur :
     RouteConfig(
       route_name=DefaultRoutesName.CREATE,
       is_activated=True,
-      with_relations = False
+      read_with_relations = False
      ),
     RouteConfig(
       route_name=DefaultRoutesName.READ_ONE,
@@ -241,6 +360,18 @@ Les possibilités de configuration d'un routeur :
     RouteConfig(route_name=DefaultRoutesName.DELETE, is_activated=True),
 ]
 ```
+- **`Création des configurations de routes de relation`**
+
+```python
+user_relation: Relationship = Relationship(
+    relationship_name="user",
+    second_entity_crud=user_crud,
+    type_relation=TypeRelation.MANY_TO_ONE,
+    default_public_relation_routes_name=[
+    RouteConfig(route_name=RelationRoutesName.UPDATE_BY_RELATION, is_activated=True)
+    ],
+)
+```
 
 - **`Création des configurations d'authorizations de routes`**
 
@@ -251,12 +382,12 @@ Les possibilités de configuration d'un routeur :
   ]
 ```
 
-- **`Création des configurations de model de reponse pour les routes`**
+- **`Création des configurations de model de réponse pour les routes`**
 
 ```python
   custom_response_models : List[ResponseModelConfig] = [
-  ResponseModelConfig(route_name=DefaultRoutesName.DELETE,response_model=MyModel),
-  ResponseModelConfig(route_name=DefaultRoutesName.UPDATE,with_relations=True
+  ResponseModelConfig(route_name=DefaultRoutesName.READ_ONE,response_model=MyModel),
+  ResponseModelConfig(route_name=DefaultRoutesName.READ_ALL,read_with_relations=True
   ]
 ```
 
@@ -317,7 +448,7 @@ app.include_router(app_myapp)
 
 ## **7.** `Configurer les logs`
 
-- Configurer au besoin `settings/logger`
+- Configurer au besoin `settings/logger` et ajouter son routeur au `myproject/main.py`
 
 - Dans le fichier `myproject/main.py` du projet , ajouter et configurer le middleware de logs et ou celui d'erreur :
 
@@ -325,20 +456,20 @@ app.include_router(app_myapp)
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 from .settings.logger.router import app_logger
-from .settings.logger.model import Log
-from .settings.database import engine,session_manager
+from .settings.logger.model import LogModel
+from .settings.database import database
 
 app = FastAPI()
 app.include_router(app_logger)
 app.add_middleware(
     ErrorHandlingMiddleware,
-    LogModel=Logger,
-    session_manager=session_manager
+    LogModel=LogModel,
+    session_manager=database.session_manager
 )
 app.add_middleware(
     LoggerMiddleware,
-    LogModel=Logger,
-    session_manager=session_manager
+    LogModel=LogModel,
+    session_manager=database.session_manager
 )
 ```
 
@@ -382,14 +513,33 @@ async def websocket_notification(websocket: WebSocket):
 
 ## **9.** `Utilisation de certaines fonctions utiles` :
 
-- `raise_custom_http_exception` :
+- `raise_custom_http_exception` :  permet de lever un CustomHttpException
 
 ```python
   from elrahapi.exception.exception_utils import raise_custom_http_exception
   from fastapi import status
   raise_custom_http_exception(
   status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-  detail="Cette requête est intratable par le serveur")
+  detail="Cette requête est intraitable par le serveur")
+```
+
+- `validate_value` : permet de valider une valeur
+
+```python
+  from elrahapi.utility.utils import validate_value
+  a = validate_value("True") # a contient True
+  b = validate_value("false") # b continent False
+  c = validate_value("1")  # c contient 1
+```
+
+- `update_entity` : permet de mettre à jour un objet sqlalchemy
+
+```python
+  from elrahapi.utility.utils import update_entity
+        existing_plant = update_entity(
+            existing_entity=existing_plant,
+            update_entity=plant_update_obj
+        )
 ```
 
 ## **10.** `Utilisation de patterns ` :
@@ -408,7 +558,13 @@ class Test(BaseModel):
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-Pour consulter la documentation technique :
+La version actuelle est le `1.1.6`
+
+Vérifier la version  en executant `pip show elrahapi`
+
+Pour un exemple concret , vous pouvez consulter le repository de test pour cette version : `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
+
+Vous pouvez  consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
 ├── docs/
 │ ├── README.md

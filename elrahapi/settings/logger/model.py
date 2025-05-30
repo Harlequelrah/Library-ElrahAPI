@@ -1,6 +1,7 @@
-from ..database import Base
+from ..database import database
 from elrahapi.middleware.models import LogModel
 
-class Log(Base, LogModel):
+class Log(database.base, LogModel):
     __tablename__ = "logs"
-metadata = Base.metadata
+metadata = database.base.metadata
+database.target_metadata = metadata

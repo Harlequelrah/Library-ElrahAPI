@@ -126,7 +126,7 @@ Ce sous module contient des quelques fonctions utiles .
 
   - **sortie** : **existing_entity**
 
-- `validate_value_type` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
+- `validate_value` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
 
   - **paramètres** :
 
@@ -137,7 +137,7 @@ Ce sous module contient des quelques fonctions utiles .
   - **utilisation** :
 
   ```python
-  myvalue= validate_value_type("True") # retourne True
+  myvalue= validate_value("True") # retourne True
   ```
 
 - **create_database_if_not_exists** : créer la base de donnée si elle n'existe pas .
@@ -395,7 +395,7 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
   - authentication : **AuthenticationManager**
 
-  - with_relations : **Optional[bool]**
+  - read_with_relations : **Optional[bool]**
 
   - roles : **Optional[List[str]]**
 
@@ -411,7 +411,7 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
       - authentication : **AuthenticationManager**
 
-      - with_relations : **Optional[bool]**
+      - read_with_relations : **Optional[bool]**
 
       - roles : **Optional[List[str]]**
 
@@ -1090,9 +1090,9 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `value`: **Optiona[Any]**
 
-    - `joined_model_filter`: **Optional[str]**
+    - `second_model_filter`: **Optional[str]**
 
-    - `joined_model_filter_value`: **Optional[Any]**
+    - `second_model_filter_value`: **Optional[Any]**
 
     - `skip`: **Optional[int]**
 
@@ -1120,7 +1120,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `update_obj`: : **Type[BaseModel]** mais potentiellement **UpdatePydanticModel** ou **PatchPydanticModel**
 
-    - `is_full_updated`: **bool** , True pour une mise à jour totale et False pour une mise à jour partielle
+    - `is_full_update`: **bool** , True pour une mise à jour totale et False pour une mise à jour partielle
 
   - **sortie** : **SQLAlchemyModel**
 
@@ -1220,7 +1220,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `dependencies` : **Optional[List[Callable[...,Any]]]**
 
-    - `with_relations` : Optional[bool]
+    - `read_with_relations` : Optional[bool]
 
     - `response_model` : Optional[Any]
 
@@ -1262,7 +1262,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - route_name : **DefaultRoutesName**
 
-    - with_relations : **bool**
+    - read_with_relations : **bool**
 
     - response_model : **Optional[Any]**
 
@@ -1313,7 +1313,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `privileges `: **Optional[List[str]]**
 
-    - `with_relations` : **bool**
+    - `read_with_relations` : **bool**
 
     - `relations` : **Optional[List[Relationship]]**
 
@@ -1447,7 +1447,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - init_data : **List[RouteConfig]**
 
-    - with_relations: **bool**
+    - read_with_relations: **bool**
 
     - authorizations : **List[AuthorizationConfig]**
 
@@ -1487,7 +1487,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - route_config: **RouteConfig**
 
-    - with_relations:**bool**
+    - read_with_relations:**bool**
 
   - **sortie** : **Type[BaseModel]**
 
@@ -1515,7 +1515,7 @@ Ce sous module définit `Relationship` une classe pour permettre de retourner de
 
 - `get_relationship_key2`
 
-- `get_joined_model_key`
+- `get_second_model_key`
 
 #### 2.10. Module `security`
 

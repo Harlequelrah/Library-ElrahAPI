@@ -89,11 +89,11 @@ class CrudModels:
     def patch_model(self, model: Type[BaseModel]):
         self.__PatchModel = model
 
-    async def get_pk(self):
-        return await self.get_attr(self.__primary_key_name)
+    def get_pk(self):
+        return  self.get_attr(self.__primary_key_name)
 
 
-    async def get_attr(self,attr_name:str):
+    def get_attr(self,attr_name:str):
         try:
             return getattr(self.__SQLAlchemyModel, attr_name)
         except Exception as e:

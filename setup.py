@@ -5,13 +5,13 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="elrahapi",
-    version="1.1.5",
+    version="1.1.6",
     packages=find_packages(),
-    description="Framework de développement d'API basé FastAPI",
+    description="Package de développement d'API basé FastAPI",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Harlequelrah",
-    author_email="maximeatsoudegbovi@example.com",
+    author_email="maximeatsoudegbovi@gmail.com",
     url="https://github.com/Harlequelrah/Library-ElrahAPI",
     include_package_data=True,
     license="LGPL-3.0-only",
@@ -24,7 +24,8 @@ setup(
         "python-jose[cryptography]>=3.3.0",
         "black>=24.10.0",
         "sqlalchemy>=2.0.38",
-        "sqlalchemy-utils>=0.41.2"
+        "sqlalchemy-utils>=0.41.2",
+        "aiosqlite>=0.21.0"
     ],
     entry_points={"console_scripts": ["elrahapi=elrahapi.__main__:main"]},
 )
