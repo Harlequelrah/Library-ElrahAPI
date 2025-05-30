@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import Any, List, Optional, Type
 from elrahapi.utility.types import ElrahSession
+from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
@@ -312,12 +313,11 @@ class Relationship:
         ]:
             entity_1_attr = getattr(entity_1, self.relationship_name)
             entity_1_attr.append(entity_2)
-        if is_async_session(session):
-            await session.commit()
-            await session.refresh(entity_1)
-        else:
-            session.commit()
-            session.refresh(entity_1)
+        await entity_crud.session_manager.commit_and_refresh(
+            session=session,
+            object=entity_1
+        )
+
 
     async def delete_relation(
         self, session: ElrahSession, entity_crud: CrudForgery, pk1: Any, pk2: Any
@@ -327,12 +327,27 @@ class Relationship:
 
         if self.type_relation == TypeRelation.ONE_TO_ONE:
             setattr(entity_1, self.relationship_name, None)
+            await entity_crud.session_manager.commit_and_refresh(
+            session=session,
+            object=entity_1
+            )
         elif self.type_relation in [
             TypeRelation.MANY_TO_MANY_TABLE,
             TypeRelation.ONE_TO_MANY,
         ]:
             entity_1_attr = getattr(entity_1, self.relationship_name)
-            entity_1_attr.remove(entity_2)
+            if entity_2 in entity_1_attr:
+                entity_1_attr.remove(entity_2)
+                await entity_crud.session_manager.commit_and_refresh(
+                    session=session,
+                    object=entity_1
+                    )
+            else:
+                detail = f"Relation between {entity_crud.entity_name} with pk {pk1} and {self.second_entity_crud.entity_name} with pk {pk2} not found"
+                raise_custom_http_exception(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=detail
+                )
         elif self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
             rel= await self.read_one_relation(
                 session=session,
@@ -341,12 +356,7 @@ class Relationship:
             )
             rel_pk=getattr(rel,self.relationship_crud.primary_key_name)
             return await self.relationship_crud.delete(session=session,pk=rel_pk)
-        if is_async_session(session):
-            await session.commit()
-            await session.refresh(entity_1)
-        else:
-            session.commit()
-            session.refresh(entity_1)
+
 
     async def read_one_relation(self, session: ElrahSession, pk1: Any, pk2: Any):
         rel_key1,rel_key2=self.get_relationship_keys()
@@ -389,11 +399,20 @@ class Relationship:
         create_obj: Type[BaseModel],
         entity_crud: CrudForgery,
     ):
+        e1 = await entity_crud.read_one(session=session,pk=pk1)
+        e2 = getattr(e1, self.relationship_name)
+        if self.type_relation==TypeRelation.ONE_TO_ONE and e2 is not None:
+            detail=f"{self.second_entity_crud.entity_name} already exists for {entity_crud.entity_name} with pk {pk1}"
+            raise_custom_http_exception(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=detail
+            )
         create_obj= self.add_fk(obj=create_obj,fk=pk1)
         new_obj = await self.second_entity_crud.create(session=session,create_obj=create_obj)
         pk2 = getattr(new_obj, self.second_entity_crud.primary_key_name)
         await self.create_relation(session=session,entity_crud=entity_crud, pk1=pk1, pk2=pk2)
         return new_obj
+
 
     async def delete_by_relation(
         self, session: ElrahSession, pk1: Any, entity_crud: CrudForgery
@@ -480,8 +499,8 @@ class Relationship:
             rel_key1,rel_key2=self.get_relationship_keys()
             stmt = (
                 select(e2_cm.sqlalchemy_model)
-                .join(rel_model, e2_pk == rel_key2)
-                .join(e1_cm.sqlalchemy_model, rel_key1 == e1_pk)
+                .join(rel_model)
+                .where(rel_key1==pk1)
             )
             stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
             stmt = stmt.offset(skip).limit(limit)
