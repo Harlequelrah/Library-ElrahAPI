@@ -28,7 +28,7 @@ class DatabaseManager:
         self.__base:Optional[DeclarativeMeta]=None
         self.__target_metadata:MetaData= MetaData()
         self.__session_manager:SessionManager=None
-        self.__is_async_env= True if is_async_env and self.__database_async_connector  else False
+        self.__is_async_env= True if is_async_env is True and self.__database_async_connector  else False
 
 
     @property

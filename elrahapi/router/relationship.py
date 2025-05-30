@@ -443,6 +443,7 @@ class Relationship:
         update_obj: Type[BaseModel],
         entity_crud: CrudForgery,
     ):
+        update_obj= self.add_fk(obj=update_obj,fk=pk1)
         entity = await entity_crud.read_one(session=session,pk=pk1)
         entity_2 = getattr(entity, self.relationship_name)
         pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
@@ -458,6 +459,7 @@ class Relationship:
         patch_obj: Type[BaseModel],
         entity_crud: CrudForgery,
     ):
+        update_obj= self.add_fk(obj=update_obj,fk=pk1)
         entity = await entity_crud.read_one(session=session,pk=pk1)
         entity_2 = getattr(entity, self.relationship_name)
         pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)

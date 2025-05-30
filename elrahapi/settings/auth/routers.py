@@ -40,8 +40,6 @@ privilege_router_provider = CustomRouterProvider(
     tags=["privileges"],
     crud=privilege_crud,
     authentication=authentication,
-
-    privileges=["CAN_ADD_PRIVILEGE"],
 )
 
 role_privilege_router_provider = CustomRouterProvider(
