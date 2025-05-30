@@ -1,11 +1,10 @@
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Any
 from fastapi import status
 
 from elrahapi.utility.types import ElrahSession
-import random
+
 
 class SessionManager:
 
@@ -74,7 +73,7 @@ class SessionManager:
                     try :
                         yield session
                     except GeneratorExit:
-                        passs
+                        pass
                         # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
         else :
                 for session in self.get_sync_db():

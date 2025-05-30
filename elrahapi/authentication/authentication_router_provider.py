@@ -20,18 +20,16 @@ class AuthenticationRouterProvider:
     def __init__(
         self,
         authentication: AuthenticationManager,
-        session_manager:SessionManager,
         read_with_relations: Optional[bool] = False,
         roles: Optional[List[str]] = None,
         privileges: Optional[List[str]] = None,
 
     ):
-
         self.authentication = authentication
         self.roles = roles
         self.privileges = privileges
         self.read_with_relations = read_with_relations
-        self.session_manager=session_manager
+        self.session_manager=authentication.session_manager
 
         self.router = APIRouter(prefix="/auth", tags=["auth"])
 

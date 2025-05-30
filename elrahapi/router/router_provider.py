@@ -4,7 +4,6 @@ from typing import Any, List, Optional
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.database.session_manager import SessionManager
 from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
@@ -404,9 +403,8 @@ class CustomRouterProvider:
                 roles=self.roles,
                 privileges=self.privileges,
                 authentication=self.authentication,
-            ))
+            )
             for route_config in routes_configs:
-
                 if (
                     route_config.route_name == RelationRoutesName.CREATE_RELATION
                     and is_verified_relation_rule(

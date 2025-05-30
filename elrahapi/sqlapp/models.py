@@ -9,14 +9,15 @@
 #     ForeignKey,
 #     Table,
 # )
-# from ..settings.database import Base
+# from ..settings.database import database
 
 # from sqlalchemy.sql import func
 # from sqlalchemy.orm import relationship
 
 
-# class Entity(Base):
+# class Entity(database.base):
 #     __tablename__ = 'entities'
 #     id = Column(Integer, primary_key=True)
 
-# metadata= Base.metadata
+# metadata = database.base.metadata
+# database.target_metadata = metadata

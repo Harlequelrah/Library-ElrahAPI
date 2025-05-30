@@ -9,15 +9,12 @@ from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import (
     exec_stmt,
-    is_async_session,
     make_filter,
     map_list_to,
     update_entity,
 )
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from fastapi import status
 
@@ -48,7 +45,7 @@ class CrudForgery:
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail
                 )
             session.add_all(create_list)
-            if is_async_session(session):
+            if self.session_manager.is_async_env:
                 await session.commit()
                 for create_obj in create_list:
                     await session.refresh(create_obj)
@@ -231,7 +228,7 @@ class CrudForgery:
         try:
             pk_attr = self.crud_models.get_pk()
             delete_list = pk_list.delete_liste
-            if is_async_session(session):
+            if self.session_manager.is_async_env:
                 await session.execute(
                     delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
                 )

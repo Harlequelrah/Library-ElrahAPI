@@ -16,6 +16,7 @@ class DatabaseManager:
         database_name: str,
         database_server: str,
         database_async_connector: str,
+        is_async_env=bool
     ):
         self.__database = database
         self.__database_username = database_username
@@ -25,8 +26,17 @@ class DatabaseManager:
         self.database_name = database_name
         self.__database_server = database_server
         self.__base:Optional[DeclarativeMeta]=None
-        self.__target_metadata:Optional[MetaData]=None
+        self.__target_metadata:MetaData= MetaData()
+        self.__session_manager:SessionManager=None
+        self.__is_async_env= True if is_async_env and self.__database_async_connector  else False
 
+
+    @property
+    def session_manager(self):
+        return self.__session_manager
+    @session_manager.setter
+    def session_manager(self,session_manager:SessionManager):
+        self.__session_manager=session_manager
     @property
     def target_metadata(self):
         return self.__target_metadata
@@ -89,7 +99,7 @@ class DatabaseManager:
 
     @database_name.setter
     def database_name(self, database_name: str):
-        if self.database == "sqlite" and database_name in [None,'']:
+        if self.database == "sqlite" and database_name :
             self.__database_name = "database"
         else:
             self.__database_name = database_name
@@ -104,7 +114,11 @@ class DatabaseManager:
 
     @property
     def is_async_env(self) -> bool:
-        return self.__database_async_connector not in [None,'']
+        return self.__is_async_env
+
+    @is_async_env.setter
+    def is_async_env(self,is_async_env:bool):
+        self.__is_async_env=is_async_env
 
     @property
     def database_url(self) -> str:
@@ -157,7 +171,7 @@ class DatabaseManager:
             engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
         return engine
 
-    def create_session_maker(self):
+    def create_session_manager(self):
         if self.is_async_env:
             sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine,expire_on_commit=True,class_=AsyncSession)
             session_manager=SessionManager(
@@ -169,9 +183,10 @@ class DatabaseManager:
             session_manager = SessionManager(
                 session_maker=sessionLocal, is_async_env=False
             )
-        return session_manager
+        self.__session_manager=session_manager
 
-    async def create_async(self):
+
+    async def create_async_tables(self):
         async with self.engine.begin() as conn:
             await conn.run_sync(self.base.metadata.create_all)
 
@@ -179,8 +194,8 @@ class DatabaseManager:
         if self.is_async_env:
             try:
                 loop=asyncio.get_running_loop()
-                loop.create_task(self.create_async())
+                loop.create_task(self.create_async_tables())
             except RuntimeError:
-                asyncio.run(self.create_async())
+                asyncio.run(self.create_async_tables())
         else:
             self.__target_metadata.create_all(bind=self.engine)

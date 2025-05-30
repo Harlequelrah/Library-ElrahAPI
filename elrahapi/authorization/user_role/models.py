@@ -1,9 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 
-from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
-
-
-
 class UserRoleModel:
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"),nullable=False)

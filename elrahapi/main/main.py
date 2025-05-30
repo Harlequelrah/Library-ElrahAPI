@@ -2,12 +2,9 @@ from fastapi import FastAPI
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 
 # from .myapp.router import app_myapp
-from .settings.models_metadata import database
-
-
+from .settings.database import database
 
 app = FastAPI()
-
 
 @app.get("/")
 async def hello():

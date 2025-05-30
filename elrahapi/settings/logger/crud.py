@@ -1,6 +1,6 @@
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
-from ..database import session_manager
+from ..database import database
 from .model import Log
 from .schema import LogReadModel
 log_crud_models = CrudModels (
@@ -10,5 +10,6 @@ log_crud_models = CrudModels (
     ReadModel=LogReadModel
 )
 logCrud = CrudForgery(
-    crud_models=log_crud_models
+    crud_models=log_crud_models,
+    session_manager= database.session_manager
 )

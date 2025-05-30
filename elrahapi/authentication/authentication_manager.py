@@ -11,17 +11,15 @@ from elrahapi.authentication.token import AccessToken, RefreshToken
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
-    INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
     USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
-from elrahapi.utility.utils import exec_stmt, is_async_session
+from elrahapi.utility.utils import exec_stmt
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import or_, select
 from fastapi import Depends, status
-from sqlalchemy.orm import selectinload
 
 from elrahapi.exception.custom_http_exception import CustomHttpException
 

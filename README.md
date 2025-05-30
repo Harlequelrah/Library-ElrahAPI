@@ -408,6 +408,12 @@ class Test(BaseModel):
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
+La version actuelle est le `1.1.6`
+
+Vérifier la version  en executant `pip show elrahapi`
+
+Pour un exemple concret , vous pouvez consulter le repository de test pour cette version : `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
+
 Pour consulter la documentation technique :
 
 ├── docs/

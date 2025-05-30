@@ -1,7 +1,6 @@
 from typing import Any, Callable, List, Optional
-from elrahapi.router.router_routes_name import RoutesName,READ_ROUTES_NAME,DEFAULT_DETAIL_ROUTES_NAME,DefaultRoutesName
+from elrahapi.router.router_routes_name import RoutesName,READ_ROUTES_NAME,DEFAULT_DETAIL_ROUTES_NAME
 from elrahapi.router.route_additional_config import AuthorizationConfig, ResponseModelConfig
-
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 class RouteConfig:
 
