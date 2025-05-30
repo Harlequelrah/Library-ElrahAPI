@@ -65,7 +65,6 @@ class CrudForgery:
             )
 
     async def create(self, session: ElrahSession, create_obj: Type[BaseModel]):
-        print(f"create_obj: {create_obj} , type: {type(create_obj)}, isinstance: {isinstance(create_obj, self.CreatePydanticModel)} , CreatePydanticModel: {self.CreatePydanticModel}")
         if not isinstance(create_obj, self.CreatePydanticModel):
             detail = f"Invalid {self.entity_name} object for creation"
             raise_custom_http_exception(
@@ -203,7 +202,6 @@ class CrudForgery:
     ):
         valide_update = isinstance(update_obj, self.UpdatePydanticModel) and is_full_update
         valide_patch= isinstance(update_obj, self.PatchPydanticModel) and  not is_full_update
-        print(f"valide_update: {valide_update}, valide_patch: {valide_patch}, update_obj: {update_obj} , is_full_update: {is_full_update}")
         if (not valide_update and not valide_patch):
             detail = f"Invalid {self.entity_name}  object for update"
             raise_custom_http_exception(

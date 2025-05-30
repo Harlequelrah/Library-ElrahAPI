@@ -74,13 +74,15 @@ class SessionManager:
                     try :
                         yield session
                     except GeneratorExit:
-                        print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
+                        passs
+                        # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
         else :
                 for session in self.get_sync_db():
                     try :
                         yield session
                     except GeneratorExit:
-                        print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
+                        pass
+                        # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
 
 
 

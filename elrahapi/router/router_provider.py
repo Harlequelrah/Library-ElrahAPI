@@ -404,8 +404,7 @@ class CustomRouterProvider:
                 roles=self.roles,
                 privileges=self.privileges,
                 authentication=self.authentication,
-            )
-            print(f"{relation.relationship_name,relation.second_entity_crud.entity_name,relation.second_entity_crud.CreatePydanticModel=}")
+            ))
             for route_config in routes_configs:
 
                 if (
