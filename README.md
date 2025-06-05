@@ -483,9 +483,9 @@ app.add_middleware(
 
 - Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
-## **9.** `Utilisation de  ConnectionManager`
+## **9.** `Utilisation de  ConnectionManager et de ChatManager`
 
-La classe ConnectionManager permet de gérer les websockets .
+La classe ConnectionManager permet de gérer les websockets de façon basique .
 Exemple :
 
 Il est aussi possible d'ajouter un objet de type ConnectionManager aux middlewares pour notifier les erreurs dans le projet
@@ -511,7 +511,28 @@ async def websocket_notification(websocket: WebSocket):
         await websocket_manager.disconnect(websocket)
 ```
 
-## **9.** `Utilisation de certaines fonctions utiles` :
+La classe ChatManager permet une gestion plus poussé des websockets avec utilisations des rooms et des sub.
+
+**`exemple`** :
+
+```python
+
+chat_manager = ChatConnectionManager()
+@app.websocket("/ws/room/{room_name}")
+async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
+    chat_manager.create_room(room_name=room_name)
+    await chat_manager.connect(websocket=websocket,room_name=room_name,sub=sub)
+    try:
+        while True:
+            data= await websocket.receive_text()
+            await chat_manager.broadcast(room_name=room_name,message=f"{sub} a dit : {data}")
+    except WebSocketDisconnect:
+        sub = await chat_manager.disconnect(websocket=websocket,room_name=room_name)
+```
+
+**`Note:`** : Pour en savoir plus , vous pouvez consulter : `https://github.com/Harlequelrah/learning_websocket`
+
+## **10.** `Utilisation de certaines fonctions utiles` :
 
 - `raise_custom_http_exception` :  permet de lever un CustomHttpException
 
@@ -542,7 +563,7 @@ async def websocket_notification(websocket: WebSocket):
         )
 ```
 
-## **10.** `Utilisation de patterns ` :
+## **11.** `Utilisation de patterns ` :
 
 ```python
 from elrahapi.utility.patterns import TELEPHONE_PATTERN
@@ -558,11 +579,11 @@ class Test(BaseModel):
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.1.6`
+La version actuelle est le `1.1.7`
 
 Vérifier la version  en executant `pip show elrahapi`
 
-Pour un exemple concret , vous pouvez consulter le repository de test pour cette version : `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
+Pour un exemple concret , vous pouvez consulter le repository de test pour cette version ou le plus récent si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
 
 Vous pouvez  consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
