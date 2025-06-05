@@ -42,10 +42,10 @@ class UserModel:
     def build_access_token_data(self):
         data = {
             "sub": self.username,
-            "roles": [user_role.role.normalizedName for user_role in self.user_roles],
+            "roles": [user_role.role.normalizedName for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
             "privileges": [
                 user_privilege.privilege.normalizedName
-                for user_privilege in self.user_privileges
+                for user_privilege in self.user_privileges if user_privilege.is_active and user_privilege.privilege.is_active
             ],
         }
         return data

@@ -12,7 +12,6 @@ from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
-    USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
@@ -191,7 +190,7 @@ class AuthenticationManager:
             )
             user = result.scalar_one_or_none()
             if user is None:
-                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             return user
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
@@ -285,7 +284,7 @@ class AuthenticationManager:
     ):
         try :
             if sub is None:
-                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(session=session, sub=sub)
             if user:
                 if not user.check_password(password):
@@ -330,7 +329,7 @@ class AuthenticationManager:
             payload =  self.validate_token(refresh_token_data.refresh_token)
             sub = payload.get("sub")
             if sub is None:
-                raise USER_SUBJECT_NOT_FOUND_CUSTOM_HTTP_EXCEPTION
+                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(sub=sub, session=session)
             access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
             data = user.build_access_token_data()
