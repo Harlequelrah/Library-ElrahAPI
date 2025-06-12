@@ -19,18 +19,21 @@ from elrahapi.router.router_crud import (
 )
 from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.router.router_routes_name import RelationRoutesName
-from elrahapi.utility.utils import exec_stmt, make_filter, validate_value,is_async_session
+from elrahapi.utility.utils import exec_stmt, make_filter, validate_value
 from pydantic import BaseModel
 from sqlalchemy import and_, select
 
 from fastapi import status
 from sqlalchemy.sql.schema import Table
+
+from elrahapi.crud.relation_crud_forgery import RelationCrudForgery
 class Relationship:
 
     def __init__(
         self,
         relationship_name: str,
-        type_relation: TypeRelation,
+        relation_crud:RelationCrudForgery,
+
         second_entity_crud: CrudForgery,
         relationship_crud: Optional[CrudForgery] = None,
         relationship_key1_name: Optional[str] = None,
@@ -50,7 +53,6 @@ class Relationship:
         self.second_entity_crud = second_entity_crud
         self.relationship_key1_name = relationship_key1_name
         self.relationship_key2_name = relationship_key2_name
-        self.type_relation = type_relation
         self.relation_table = relation_table
         self.relations_routes_configs = relations_routes_configs or []
         self.default_public_relation_routes_name=default_public_relation_routes_name or []
@@ -63,11 +65,11 @@ class Relationship:
         return self.second_entity_crud.crud_models.get_pk()
 
     def get_relationship_keys(self):
-        if self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
+        if self.relation_crud.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
             rel_key1= self.relationship_crud.crud_models.get_attr(self.relationship_key1_name)
             rel_key2=self.relationship_crud.crud_models.get_attr(self.relationship_key2_name)
             return rel_key1,rel_key2
-        elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
+        elif self.relation_crud.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
             if self.relation_table is not None:
                 columns= self.relation_table.c
                 rel_key1 = getattr(columns, self.relationship_key1_name)
@@ -75,17 +77,17 @@ class Relationship:
                 return rel_key1, rel_key2
         else:
             raise ValueError(
-                f"relationship_keys not available for relation type {self.type_relation}"
+                f"relationship_keys not available for relation type {self.relation_crud.type_relation}"
             )
 
     def check_relation_rules(self):
         for route_config in self.relations_routes_configs:
             if not is_verified_relation_rule(
                 relation_route_name=route_config.route_name,
-                type_relation=self.type_relation
+                type_relation=self.relation_crud.type_relation
                 ):
                 raise ValueError(
-                    f" Route operation {route_config.route_name} not allowed for the relation type {self.type_relation}"
+                    f" Route operation {route_config.route_name} not allowed for the relation type {self.relation_crud.type_relation}"
                 )
 
     def init_default_routes(
@@ -229,7 +231,7 @@ class Relationship:
         for route_config in routes_configs:
             if (
                 is_verified_relation_rule(
-                    type_relation=self.type_relation,
+                    type_relation=self.relation_crud.type_relation,
                     relation_route_name=route_config.route_name,
                 )
                 and route_config.is_activated
@@ -305,9 +307,9 @@ class Relationship:
     async def create_relation(self,session:ElrahSession,entity_crud: CrudForgery, pk1: Any, pk2: Any):
         entity_1 = await entity_crud.read_one(session=session, pk=pk1)
         entity_2 = await self.second_entity_crud.read_one(session=session, pk=pk2)
-        if self.type_relation == TypeRelation.ONE_TO_ONE:
+        if self.relation_crud.type_relation == TypeRelation.ONE_TO_ONE:
             setattr(entity_1, self.relationship_name, entity_2)
-        elif self.type_relation in [
+        elif self.relation_crud.type_relation in [
             TypeRelation.MANY_TO_MANY_TABLE,
             TypeRelation.ONE_TO_MANY,
         ]:
@@ -325,13 +327,13 @@ class Relationship:
         entity_1 = await entity_crud.read_one(session=session, pk=pk1)
         entity_2 = await self.second_entity_crud.read_one(session=session, pk=pk2)
 
-        if self.type_relation == TypeRelation.ONE_TO_ONE:
+        if self.relation_crud.type_relation == TypeRelation.ONE_TO_ONE:
             setattr(entity_1, self.relationship_name, None)
             await entity_crud.session_manager.commit_and_refresh(
             session=session,
             object=entity_1
             )
-        elif self.type_relation in [
+        elif self.relation_crud.type_relation in [
             TypeRelation.MANY_TO_MANY_TABLE,
             TypeRelation.ONE_TO_MANY,
         ]:
@@ -348,7 +350,7 @@ class Relationship:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=detail
                 )
-        elif self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
+        elif self.relation_crud.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
             rel= await self.read_one_relation(
                 session=session,
                 pk1=pk1,
@@ -360,7 +362,7 @@ class Relationship:
 
     async def read_one_relation(self, session: ElrahSession, pk1: Any, pk2: Any):
         rel_key1,rel_key2=self.get_relationship_keys()
-        if self.type_relation==TypeRelation.MANY_TO_MANY_CLASS:
+        if self.relation_crud.type_relation==TypeRelation.MANY_TO_MANY_CLASS:
             stmt = select(self.relationship_crud.crud_models.sqlalchemy_model).where(
                 and_(
                     rel_key1==pk1,
@@ -380,7 +382,7 @@ class Relationship:
                 )
             return rel
         else :
-            detail = f"Bad Operation for relation {self.type_relation} of relationship {self.relationship_name}"
+            detail = f"Bad Operation for relation {self.relation_crud.type_relation} of relationship {self.relationship_name}"
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
@@ -392,143 +394,3 @@ class Relationship:
             return new_obj
         return obj
 
-    async def create_by_relation(
-        self,
-        session: ElrahSession,
-        pk1: Any,
-        create_obj: Type[BaseModel],
-        entity_crud: CrudForgery,
-    ):
-        e1 = await entity_crud.read_one(session=session,pk=pk1)
-        e2 = getattr(e1, self.relationship_name)
-        if self.type_relation==TypeRelation.ONE_TO_ONE and e2 is not None:
-            detail=f"{self.second_entity_crud.entity_name} already exists for {entity_crud.entity_name} with pk {pk1}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=detail
-            )
-        create_obj= self.add_fk(obj=create_obj,fk=pk1)
-        new_obj = await self.second_entity_crud.create(session=session,create_obj=create_obj)
-        pk2 = getattr(new_obj, self.second_entity_crud.primary_key_name)
-        await self.create_relation(session=session,entity_crud=entity_crud, pk1=pk1, pk2=pk2)
-        return new_obj
-
-
-    async def delete_by_relation(
-        self, session: ElrahSession, pk1: Any, entity_crud: CrudForgery
-    ):
-        entity_1 = await entity_crud.read_one(session=session,pk=pk1)
-        entity_2 = getattr(entity_1, self.relationship_name)
-        e2_pk = getattr(entity_2, self.second_entity_crud.primary_key_name)
-        entity_2 = None
-        return await self.second_entity_crud.delete(session=session,pk=e2_pk)
-
-    async def read_one_by_relation(
-        self, session: ElrahSession, pk1: Any, entity_crud: CrudForgery
-    ):
-        e1 = await entity_crud.read_one(session=session,pk=pk1)
-        e2 = getattr(e1, self.relationship_name)
-        if e2 is None :
-            detail=f"{self.relationship_name} not found for {entity_crud.entity_name} with pk {pk1}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=detail
-            )
-        return e2
-
-    async def update_by_relation(
-        self,
-        pk1: Any,
-        session: ElrahSession,
-        update_obj: Type[BaseModel],
-        entity_crud: CrudForgery,
-    ):
-        update_obj= self.add_fk(obj=update_obj,fk=pk1)
-        entity = await entity_crud.read_one(session=session,pk=pk1)
-        entity_2 = getattr(entity, self.relationship_name)
-        pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
-        return await self.second_entity_crud.update(
-            session=session,
-            pk=pk2, update_obj=update_obj, is_full_update=True
-        )
-
-    async def patch_by_relation(
-        self,
-        session: ElrahSession,
-        pk1: Any,
-        patch_obj: Type[BaseModel],
-        entity_crud: CrudForgery,
-    ):
-        update_obj= self.add_fk(obj=update_obj,fk=pk1)
-        entity = await entity_crud.read_one(session=session,pk=pk1)
-        entity_2 = getattr(entity, self.relationship_name)
-        pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
-        return await self.second_entity_crud.update(
-            session=session,
-            pk=pk2, update_obj=patch_obj, is_full_update=False
-        )
-
-    async def read_all_by_relation(
-        self,
-        session: ElrahSession,
-        entity_crud: CrudForgery,
-        pk1: Any,
-        filter: Optional[str] = None,
-        value: Optional[Any] = None,
-        skip: int = 0,
-        limit: int = None,
-    ):
-        e2_cm: CrudModels = self.second_entity_crud.crud_models
-        e1_cm = entity_crud.crud_models
-        e2_pk = e2_cm.get_pk()
-        e1_pk = e1_cm.get_pk()
-        if self.type_relation == TypeRelation.ONE_TO_MANY:
-            stmt = (
-                select(e2_cm.sqlalchemy_model)
-                .join(e1_cm.sqlalchemy_model)
-                .where(e1_pk == pk1)
-            )
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
-            stmt = stmt.offset(skip).limit(limit)
-            results = await exec_stmt(
-                session=session,
-                with_scalars=True,
-                stmt=stmt,
-            )
-            return results.all()
-        elif self.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
-            rel_model = self.relationship_crud.crud_models.sqlalchemy_model
-            rel_key1,rel_key2=self.get_relationship_keys()
-            stmt = (
-                select(e2_cm.sqlalchemy_model)
-                .join(rel_model)
-                .where(rel_key1==pk1)
-            )
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
-            stmt = stmt.offset(skip).limit(limit)
-            results = await exec_stmt(
-                session=session,
-                with_scalars=True,
-                stmt=stmt,
-            )
-            return results.all()
-        elif self.type_relation == TypeRelation.MANY_TO_MANY_TABLE:
-            rel_key1,rel_key2=self.get_relationship_keys()
-            stmt = (
-                    select(e2_cm.sqlalchemy_model)
-                    .join(self.relation_table,e2_pk==rel_key2)
-                    .join(e1_cm.sqlalchemy_model,rel_key1==e1_pk)
-                    )
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
-            stmt = stmt.offset(skip).limit(limit)
-            results = await exec_stmt(
-                session=session,
-                with_scalars=True,
-                stmt=stmt,
-            )
-            return results.all()
-        else:
-            detail = f"Operation Invalid for relation {self.type_relation}"
-            raise_custom_http_exception(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=detail
-            )
