@@ -576,6 +576,21 @@ class Test(BaseModel):
     )
 ```
 
+## **12.** `Generation de clé` :
+
+Vous pouve générer une clé pour coder vos tokens JWT comme suit :
+
+```cmd
+elrahapi generate_secret_key
+```
+**Note** : par défaut l'algorithme est HS256
+
+```cmd
+elrahapi generate_secret_key HS512
+```
+
+**Note** : vous pouvez choisir entre  HS256 , HS384 et HS512 .
+
 # V - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.

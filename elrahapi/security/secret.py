@@ -20,6 +20,8 @@ def define_algorithm_and_key(
             if secret_key:
                 return algorithm, secret_key
             else:
+                if algorithm.upper() not in ALGORITHMS:
+                    raise ValueError(f"Invalid algorithm: {algorithm}. Choose from {ALGORITHMS}.")
                 key_length = ALGORITHMS_KEY_SIZES.get(algorithm.upper())
                 return algorithm, secrets.token_hex(key_length)
         else:

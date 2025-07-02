@@ -3,7 +3,37 @@ import shutil
 import sys
 import subprocess
 
+from elrahapi.security.secret import define_algorithm_and_key
 
+def repline(file, line, line_content):
+    with open(file, "r") as ficher:
+        a = ficher.readlines()
+    with open(file, "w") as ficher:
+        ficher.writelines(a[0 : line - 1])
+        ficher.write(line_content)
+        ficher.writelines(a[line:])
+
+def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"):
+            algo, key = define_algorithm_and_key(algorithm=algorithm)
+            with open(env_file, "r") as f:
+                lines = f.readlines()
+            secret_key_line = None
+            algorithm_line = None
+            for idx, line in enumerate(lines):
+                if line.strip().startswith("SECRET_KEY"):
+                    secret_key_line = idx + 1
+                if line.strip().startswith("ALGORITHM"):
+                    algorithm_line = idx + 1
+            if secret_key_line:
+                repline(env_file, secret_key_line, f"SECRET_KEY={key}\n")
+            if algorithm_line:
+                repline(env_file, algorithm_line, f"ALGORITHM={algo}\n")
+
+def generate_secret_key(algorithm: str = "HS256") -> str:
+        project_folder = os.getcwd()
+        env_src_path = os.path.join(project_folder, ".env")
+        update_env_with_secret_and_algorithm(env_src_path, algorithm)
+        print("SECRET_KEY and ALGORITHM have been generated and added to the .env file")
 
 
 def startproject(project_name):
@@ -17,10 +47,10 @@ def startproject(project_name):
         subprocess.run(["git", "init", project_path])
         print(f"Git repo initialized in {project_path}")
     except Exception as e :
-        print(f"Erreur lors de l'initialisation du dépôt Git: {e}")
+        print(f"Error initializing the Git repository: {e}")
 
     subprocess.run(["alembic", "init","alembic"], cwd=project_path)
-    print(f"Alembic a été initialisé dans {project_path}")
+    print(f"Alembic has been initialized in {project_path}")
 
     with open(f"{project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
@@ -37,33 +67,34 @@ def startproject(project_name):
     main_script_src_path = os.path.join(main_path_dir, "main.py")
     main_script_dest_path = os.path.join(sub_project_path, "main.py")
     shutil.copyfile(main_script_src_path, main_script_dest_path)
-    print(f"Le ficher 'main.py' a été copié vers {main_script_dest_path}")
+    print(f"The file 'main.py' has been copied to {main_script_dest_path}")
 
     env_src_path = os.path.join(main_path_dir, ".env")
     env_dest_path = os.path.join(project_path, ".env")
     shutil.copyfile(env_src_path, env_dest_path)
-    print(f"Le ficher '.env' a été copié vers {env_dest_path}")
+    print(f"The '.env' file has been copied to {env_dest_path}")
 
     example_env_src_path = os.path.join(main_path_dir, ".env.example")
     example_env_dest_path = os.path.join(project_path, ".env.example")
     shutil.copyfile(example_env_src_path, example_env_dest_path)
-    print(f"Le ficher '.env.example' a été copié vers {example_env_dest_path}")
+    print(f"The file '.env.example' has been copied to {example_env_dest_path}")
 
     main_project_files_path = os.path.join(main_path_dir,"main_project_files")
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
-        print("Les fichiers .gitignore __main__.py et README.md ont été copiés avec succès.")
+        print("The files .gitignore, __main__.py, and README.md have been copied successfully.")
     else:
-        print("Le dossier source 'main_project_files' est introuvable.")
+        print("The source folder 'main_project_files' was not found.")
 
     if os.path.exists(source_settings_path):
         shutil.copytree(source_settings_path, settings_path, dirs_exist_ok=True)
-        print("Le dossier settings a été copié avec succès.")
+        print("The 'settings' folder has been copied successfully.")
     else:
-        print("Le dossier source 'settings' est introuvable.")
+        print("The source folder 'settings' was not found.")
     with open(os.path.join(project_path, "requirements.txt"), "w") as f:
         subprocess.run(["pip", "freeze"], stdout=f)
-    print(f"Le projet {project_name} a été créé avec succès.")
+    print(f"The project {project_name} has been created successfully.")
+    generate_secret_key()
 
 
 def startapp(app_name):
@@ -76,9 +107,9 @@ def startapp(app_name):
 
     if os.path.exists(sqlapp_path):
         shutil.copytree(sqlapp_path, app_path, dirs_exist_ok=True)
-        print(f"L'application {app_name} a été créée avec succès.")
+        print(f"The application {app_name} has been created successfully.")
     else:
-        print("Le dossier 'sqlapp' est introuvable.")
+        print("The 'sqlapp' folder was not found.")
 
 
 def get_project_folder():
@@ -92,11 +123,10 @@ def get_project_folder():
     ]
 
     if not project_folders:
-        print("Aucun projet trouvé. Veuillez d'abord créer un projet.")
+        print("No project found. Please create a project first.")
         return
 
     return os.path.join(parent_dir, project_folders[0])
-
 
 
 def run():
@@ -106,7 +136,7 @@ def run():
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: elrahapi <commande> <nom>")
+        print("Usage: elrahapi <commande> <name>")
         sys.exit(1)
     if len(sys.argv)>=2:
         command = sys.argv[1]
@@ -118,8 +148,13 @@ def main():
         startproject(name)
     elif command == "startapp":
         startapp(name)
+    elif command == "generate_secret_key":
+        if len(sys.argv) == 2:
+            generate_secret_key()
+        elif len(sys.argv) == 3:
+            generate_secret_key(algorithm=name)
     else:
-        print(f"Commande inconnue: {command}")
+        print(f"Unknown command: {command}")
 
 
 if __name__ == "__main__":
