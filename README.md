@@ -4,7 +4,7 @@
 
 # **1.** `Description`
 
-Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque/package/framework personnalisée basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
+Passioné par la programmation et le développement avec python je me lance dans la création progressive d'une bibliothèque personnalisée basé sur pour `FASTAPI` m'ameliorer , devenir plus productif et partager mon expertise .
 
 # **2.** `Objectifs`
 
@@ -24,7 +24,7 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log ;
 
-- Fournir un middleware de gestion d'erreur  ;
+- Fournir un middleware de gestion d'erreur ;
 
 - Une gestion simple et efficace de l'autorisation par l'utilisation de rôles et privileges ;
 
@@ -94,10 +94,9 @@ ou si virtualenv est dejà installé au préalable
 
   - Configurer le alembic/env.py :
 
-    - Ajouter l'import : from myproject.settings.database import database ;
+    - Ajouter l'import : from myproject.settings.models_metadata import database ;
 
     - Passer les metadata à target_metadata : database.target_metadata=target_metadata ;
-
 
 ## **4.** `Demarrer le projet `
 
@@ -135,7 +134,9 @@ ou si virtualenv est dejà installé au préalable
 
 - Créer les schémas Pydantic dans `schemas.py`
 
-- Créer les meta models dans `meta_models.py`  si nécessaire ;
+- Créer les meta models dans `meta_models.py` si nécessaire ;
+
+- Ajouter les metadonnées dans models_metadata.py comme suite : `from .myapp.models import metadata as myapp_metadata`
 
 **`Note:`** :
 
@@ -155,7 +156,6 @@ Dans `schemas.py` il peut y avoir généralement :
 
 - EntityFullReadModel : pour la lecture totale d'une entité avec ses relations ;
 
-
 **`exemple : `**
 
 ```python
@@ -172,12 +172,11 @@ Dans `schemas.py` il peut y avoir généralement :
 
 Dans `cruds.py`
 
-- Créer un  CrudModels
+- Créer un CrudModels
 
 - Créer un CrudForgery dans cruds.py
 
 **`exemple : `**
-
 
 ```python
 myapp_crud_models = CrudModels(
@@ -202,7 +201,7 @@ Configurer le CustomRouterProvider dans router.py
 
 - **`Configuration de base`**
 
-Il faut au préalable s'assurer importer  le crud depuis `myapp/cruds`
+Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 
 ```python
    router_provider = CustomRouterProvider(
@@ -245,7 +244,7 @@ La configuration des relations se fait par le paramètre `read_with_relations` p
 
 - **`Configuration des relations`** :
 
-Cette configuration se fait  par le paramètre `relations` qui définit une liste d'instance de `Relationship`.
+Cette configuration se fait par le paramètre `relations` qui définit une liste d'instance de `Relationship`.
 
 **`exemple`** :
 
@@ -306,6 +305,7 @@ profile_relation: Relationship = Relationship(
     default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_ONE],
 )
 ```
+
 - Relation un à plusieurs :
 
 ```python
@@ -360,6 +360,7 @@ Les possibilités de configuration d'un routeur :
     RouteConfig(route_name=DefaultRoutesName.DELETE, is_activated=True),
 ]
 ```
+
 - **`Création des configurations de routes de relation`**
 
 ```python
@@ -534,7 +535,7 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
 
 ## **10.** `Utilisation de certaines fonctions utiles` :
 
-- `raise_custom_http_exception` :  permet de lever un CustomHttpException
+- `raise_custom_http_exception` : permet de lever un CustomHttpException
 
 ```python
   from elrahapi.exception.exception_utils import raise_custom_http_exception
@@ -579,13 +580,13 @@ class Test(BaseModel):
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.1.7`
+La version actuelle est le `1.1.8`
 
-Vérifier la version  en executant `pip show elrahapi`
+Vérifier la version en executant `pip show elrahapi`
 
 Pour un exemple concret , vous pouvez consulter le repository de test pour cette version ou le plus récent si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
 
-Vous pouvez  consulter la documentation technique pour découvrir toutes les fonctionnaliés :
+Vous pouvez consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
 ├── docs/
 │ ├── README.md

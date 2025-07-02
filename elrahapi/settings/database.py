@@ -1,5 +1,5 @@
 from typing import Optional
-
+# from .models_metadata import target_metadata
 from elrahapi.database.database_manager import DatabaseManager
 from elrahapi.database.session_manager import SessionManager
 from .secret import (
@@ -31,4 +31,3 @@ finally:
     Base = declarative_base()
     database.create_session_manager()
     database.base = Base
-    database.create_tables()

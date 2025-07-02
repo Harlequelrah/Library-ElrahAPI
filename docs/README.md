@@ -445,15 +445,11 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
   - name : **Column(String)**
 
-  - normalizedName : **Column(String)** , dépend de name
-
   - description : **Column(String)**
 
   - is_active : **Column(Boolean)**
 
 - `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
-
-  - normalizedName : **str**
 
   - is_active : **bool**
 

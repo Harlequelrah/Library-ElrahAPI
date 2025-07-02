@@ -52,4 +52,4 @@ class UserRole(UserRoleModel,database.base):
     role = relationship("Role", back_populates="role_users")
 
 metadata=database.base.metadata
-database.target_metadata=metadata
+

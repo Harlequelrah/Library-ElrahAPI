@@ -42,9 +42,9 @@ class UserModel:
     def build_access_token_data(self):
         data = {
             "sub": self.username,
-            "roles": [user_role.role.normalizedName for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
+            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
             "privileges": [
-                user_privilege.privilege.normalizedName
+                user_privilege.privilege.name
                 for user_privilege in self.user_privileges if user_privilege.is_active and user_privilege.privilege.is_active
             ],
         }
@@ -84,7 +84,7 @@ class UserModel:
             if (
                 user_role.is_active
                 and role.is_active
-                and role.normalizedName == role_name.upper()
+                and role.name == role_name.upper()
             ):
                 return True
         else:
@@ -96,7 +96,7 @@ class UserModel:
             if (
                 user_privilege.is_active
                 and privilege.is_active
-                and privilege.normalizedName == privilege_name.upper()
+                and privilege.name == privilege_name.upper()
             ):
                 return True
         else:
@@ -107,7 +107,7 @@ class UserModel:
             for user_privilege in user_role.role.role_privileges:
                 privilege = user_privilege.privilege
                 if (
-                    privilege.normalizedName == privilege_name.upper()
+                    privilege.name == privilege_name.upper()
                     and privilege.is_active
                     and user_privilege.is_active
                 ):

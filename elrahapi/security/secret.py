@@ -14,6 +14,8 @@ ALGORITHMS = list(ALGORITHMS_KEY_SIZES.keys())
 def define_algorithm_and_key(
         secret_key: Optional[str] = None, algorithm: Optional[str] = None
     ):
+        if secret_key and not algorithm:
+            raise ValueError("If a secret key is provided, an algorithm must also be specified.")
         if algorithm:
             if secret_key:
                 return algorithm, secret_key
