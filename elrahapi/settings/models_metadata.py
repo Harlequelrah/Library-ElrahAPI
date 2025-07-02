@@ -8,4 +8,3 @@ target_metadata = MetaData()
 # target_metadata = myapp_metadata2
 target_metadata = auth_metadata
 target_metadata = logger_metadata
-database.create_tables(target_metadata=target_metadata)
