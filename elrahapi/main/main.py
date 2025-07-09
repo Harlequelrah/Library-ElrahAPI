@@ -6,7 +6,9 @@ from .settings.models_metadata import target_metadata
 from .settings.database import database
 
 database.create_tables(target_metadata=target_metadata)
-app = FastAPI()
+app = FastAPI(
+    root_path="/api"
+)
 
 
 @app.get("/")
