@@ -1,6 +1,6 @@
 
 from pydantic import BaseModel,Field
-from typing import Optional
+
 
 from elrahapi.user.schemas import UserBaseModel
 
@@ -12,7 +12,7 @@ from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
 class UserRoleCreateModel(BaseModel):
     user_id: int = Field(example=1)
     role_id: int=Field(example=2)
-    is_active: Optional[bool] = Field(exemple=True,default=True)
+    is_active: bool = Field(exemple=True,default=True)
 
 
 class UserRoleReadModel(UserRoleCreateModel):
@@ -26,9 +26,9 @@ class UserRoleFullReadModel(BaseModel):
     is_active:bool
 
 class UserRolePatchModel(BaseModel):
-    user_id: Optional[int ]= Field(example=1,default=None)
-    role_id: Optional[int]=Field(example=2,default=None)
-    is_active: Optional[bool] = Field(exemple=True,default=None)
+    user_id: int | None = Field(example=1,default=None)
+    role_id: int| None =Field(example=2,default=None)
+    is_active: bool| None  = Field(exemple=True,default=None)
 
 
 class UserRoleUpdateModel(BaseModel):
