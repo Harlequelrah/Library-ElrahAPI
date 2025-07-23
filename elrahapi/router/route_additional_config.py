@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import  List, Optional, Type
+from typing import  Type
 from elrahapi.router.router_routes_name import RoutesName
 
 class DefaultRouteConfig:
@@ -13,8 +13,8 @@ class ResponseModelConfig:
     def __init__(
         self,
         route_name: RoutesName,
-        read_with_relations: Optional[bool]=None,
-        reponse_model: Optional[Type[BaseModel]] = None,
+        read_with_relations: bool | None =None,
+        reponse_model: Type[BaseModel] | None = None,
     ):
         self.reponse_model = reponse_model
         self.route_name = route_name
@@ -25,8 +25,8 @@ class AuthorizationConfig:
     def __init__(
         self,
         route_name: RoutesName,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
+        roles: list[str] | None = None,
+        privileges: list[str] | None = None,
     ):
         self.route_name = route_name
         self.roles = roles if roles else []

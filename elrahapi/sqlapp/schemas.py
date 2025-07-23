@@ -1,5 +1,4 @@
 # from pydantic import BaseModel, Field
-# from typing import List, Optional
 # from datetime import datetime
 # from decimal import Decimal
 
@@ -15,7 +14,9 @@
 #     pass
 
 # class EntityReadModel(BaseModel):
-#     pass
+#     id : int
+#     date_created: datetime
+#     date_updated: datetime 
 #     class Config:
 #         from_attributes=True
 

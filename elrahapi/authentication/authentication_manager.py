@@ -30,8 +30,8 @@ class AuthenticationManager:
         session_manager:SessionManager ,
         secret_key: str | None = None,
         algorithm: str | None = None,
-        refresh_token_expiration: Optional[int] = None,
-        access_token_expiration: Optional[int] = None,
+        refresh_token_expiration: int | None = None,
+        access_token_expiration: int | None = None,
 
     ):
         self.__authentication_models: CrudModels = None

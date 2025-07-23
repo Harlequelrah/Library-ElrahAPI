@@ -2,7 +2,6 @@ import os
 import shutil
 import sys
 import subprocess
-from typing import Optional
 
 from elrahapi.security.secret import define_algorithm_and_key
 
@@ -33,7 +32,7 @@ def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"
         repline(env_file, algorithm_line, f"ALGORITHM={algo}\n")
 
 
-def generate_secret_key(env_src_path:Optional[str]=None,algorithm: str = "HS256") -> str:
+def generate_secret_key(env_src_path:str | None =None,algorithm: str = "HS256") -> str:
     if env_src_path is None :
         project_folder = os.getcwd()
         env_src_path = os.path.join(project_folder, ".env")

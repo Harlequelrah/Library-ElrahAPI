@@ -1,4 +1,3 @@
-from typing import List, Optional
 from elrahapi.user import  schemas
 from pydantic import Field,BaseModel
 

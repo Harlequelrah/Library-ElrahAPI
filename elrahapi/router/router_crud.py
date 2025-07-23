@@ -1,4 +1,4 @@
-from typing import  List, Optional, Type
+from typing import  Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     AuthorizationConfig,
@@ -19,10 +19,10 @@ from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutes
 
 
 def exclude_route(
-    routes: List[RouteConfig],
-    exclude_routes_name: Optional[List[RoutesName]] = None,
+    routes: list[RouteConfig],
+    exclude_routes_name: list[RoutesName] | None = None,
 ):
-    init_data: List[RouteConfig] = []
+    init_data: list[RouteConfig] = []
     if exclude_routes_name:
         for route in routes:
             if route.route_name not in exclude_routes_name and route.is_activated:
@@ -31,7 +31,7 @@ def exclude_route(
 
 
 def get_single_route(
-    route_name: DefaultRoutesName, type_route: Optional[TypeRoute] = TypeRoute.PUBLIC
+    route_name: DefaultRoutesName, type_route: TypeRoute | None = TypeRoute.PUBLIC
 ) -> RouteConfig:
     config: DefaultRouteConfig = DEFAULT_ROUTES_CONFIGS.get(route_name)
     if config:
@@ -48,9 +48,9 @@ def get_single_route(
 
 def initialize_dependecies(
     config: RouteConfig,
-    authentication: Optional[AuthenticationManager] = None,
-    roles: Optional[List[str]] = None,
-    privileges: Optional[List[str]] = None,
+    authentication: AuthenticationManager = None,
+    roles: list[str] = None,
+    privileges: list[str] = None,
 ):
     if not authentication:
         return []
@@ -63,10 +63,10 @@ def initialize_dependecies(
             for privilege in privileges:
                 config.privileges.append(privilege)
         if config.roles or config.privileges:
-            authorizations: List[callable] =  config.get_authorizations(
+            authorizations: list[callable] =  config.get_authorizations(
                 authentication=authentication
             )
-            dependencies: List[Depends] = [
+            dependencies: list[Depends] = [
                 Depends(authorization) for authorization in authorizations
             ]
         else:
@@ -75,9 +75,9 @@ def initialize_dependecies(
 
 
 def add_authorizations(
-    routes_config: List[RouteConfig], authorizations: List[AuthorizationConfig]
+    routes_config: list[RouteConfig], authorizations: list[AuthorizationConfig]
 ):
-    authorized_routes_config: List[RouteConfig] = []
+    authorized_routes_config: list[RouteConfig] = []
     for route_config in routes_config:
         authorization = next(
             (
@@ -95,10 +95,10 @@ def add_authorizations(
 
 
 def set_response_model_config(
-    routes_config: List[RouteConfig],
-    response_model_configs: List[ResponseModelConfig],
+    routes_config: list[RouteConfig],
+    response_model_configs: list[ResponseModelConfig],
 ):
-    final_routes_config: List[RouteConfig] = []
+    final_routes_config: list[RouteConfig] = []
     for route_config in routes_config:
         response_model_config = next(
             (
@@ -115,18 +115,18 @@ def set_response_model_config(
 
 
 def format_init_data(
-    init_data: List[RouteConfig],
+    init_data: list[RouteConfig],
     read_with_relations: bool,
-    authorizations: Optional[List[AuthorizationConfig]] = None,
-    exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-    authentication: Optional[AuthenticationManager] = None,
-    response_model_configs: Optional[List[ResponseModelConfig]] = None,
-    roles: Optional[List[str]] = None,
-    privileges: Optional[List[str]] = None,
-    ReadPydanticModel: Optional[Type[BaseModel]] = None,
-    FullReadPydanticModel: Optional[Type[BaseModel]] = None,
+    authorizations: list[AuthorizationConfig] | None = None,
+    exclude_routes_name: list[DefaultRoutesName] | None = None,
+    authentication: AuthenticationManager |  None = None,
+    response_model_configs: list[ResponseModelConfig] | None = None,
+    roles: list[str] | None = None,
+    privileges: list[str] | None = None,
+    ReadPydanticModel: Type[BaseModel] | None = None,
+    FullReadPydanticModel: Type[BaseModel] | None = None,
 ):
-    formatted_data: List[RouteConfig] = []
+    formatted_data: list[RouteConfig] = []
 
     formatted_data = exclude_route(init_data, exclude_routes_name)
     formatted_data = (
@@ -166,8 +166,8 @@ def format_init_data(
 def set_response_model(
     route_config: RouteConfig,
     read_with_relations: bool,
-    ReadPydanticModel: Optional[Type[BaseModel]] = None,
-    FullReadPydanticModel: Optional[Type[BaseModel]] = None,
+    ReadPydanticModel: Type[BaseModel] | None= None,
+    FullReadPydanticModel: Type[BaseModel] |  None = None,
 ):
     if FullReadPydanticModel is None:
         return ReadPydanticModel

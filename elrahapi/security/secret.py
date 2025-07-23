@@ -1,7 +1,7 @@
 
 from random import choice
 import secrets
-from typing import Optional
+
 
 
 ALGORITHMS_KEY_SIZES = {
@@ -12,7 +12,7 @@ ALGORITHMS_KEY_SIZES = {
 ALGORITHMS = list(ALGORITHMS_KEY_SIZES.keys())
 
 def define_algorithm_and_key(
-        secret_key: Optional[str] = None, algorithm: Optional[str] = None
+        secret_key: str | None = None, algorithm: str | None = None
     ):
         if secret_key and not algorithm:
             raise ValueError("If a secret key is provided, an algorithm must also be specified.")

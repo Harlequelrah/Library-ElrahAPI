@@ -19,7 +19,7 @@ class UserModel:
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, default=func.now())
-    date_updated = Column(DateTime, onupdate=func.now())
+    date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
 

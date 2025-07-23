@@ -1,6 +1,4 @@
 import asyncio
-from typing import Optional
-
 from elrahapi.database.session_manager import SessionManager
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -28,7 +26,7 @@ class DatabaseManager:
         self.__database_async_connector = database_async_connector
         self.database_name = database_name
         self.__database_server = database_server
-        self.__base: Optional[DeclarativeMeta] = None
+        self.__base: DeclarativeMeta | None = None
         self.__session_manager: SessionManager = None
         self.__is_async_env = (
             True if is_async_env is True and self.__database_async_connector else False

@@ -1,5 +1,4 @@
 import time
-from typing import Optional
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.middleware.crud_middleware import save_log
@@ -15,7 +14,7 @@ class ErrorHandlingMiddleware:
         self,
         app,
         LogModel=None,
-        session_manager: Optional[SessionManager] = None,
+        session_manager: SessionManager | None = None,
         websocket_manager: ConnectionManager = None,
     ):
         self.app = app

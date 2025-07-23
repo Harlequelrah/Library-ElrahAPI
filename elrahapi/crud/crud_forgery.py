@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Type
 
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
@@ -33,7 +33,7 @@ class CrudForgery:
         self.primary_key_name = crud_models.primary_key_name
 
     async def bulk_create(
-        self, session: ElrahSession, create_obj_list: List[BaseModel]
+        self, session: ElrahSession, create_obj_list: list[BaseModel]
     ):
         try:
             create_list = map_list_to(
@@ -108,10 +108,10 @@ class CrudForgery:
     async def read_all(
         self,
         session: ElrahSession,
-        filter: Optional[str] = None,
-        second_model_filter: Optional[str] = None,
-        second_model_filter_value: Optional[Any] = None,
-        value: Optional[str] = None,
+        filter: str | None = None,
+        second_model_filter: str | None = None,
+        second_model_filter_value:Any = None,
+        value: str | None = None,
         skip: int = 0,
         limit: int = None,
         relation: Any = None,

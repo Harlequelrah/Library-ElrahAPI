@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Type
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.crud.crud_models import CrudModels
@@ -8,7 +8,7 @@ from elrahapi.utility.types import ElrahSession
 
 
 def map_list_to(
-    obj_list: List[BaseModel],
+    obj_list: list[BaseModel],
     obj_sqlalchemy_class: type,
     obj_pydantic_class: Type[BaseModel],
 ):
@@ -47,8 +47,8 @@ def validate_value(value: Any):
 def make_filter(
     stmt: Select,
     crud_models: CrudModels,
-    filter: Optional[str] = None,
-    value: Optional[str] = None,
+    filter: str | None = None,
+    value: str | None = None,
 ) -> Select:
     if filter and value:
         exist_filter = crud_models.get_attr(filter)

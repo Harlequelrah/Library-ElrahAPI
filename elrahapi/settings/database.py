@@ -1,4 +1,3 @@
-from typing import Optional
 from elrahapi.database.database_manager import DatabaseManager
 from .secret import (
     DATABASE,
