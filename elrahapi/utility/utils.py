@@ -43,7 +43,14 @@ def validate_value(value: Any):
             value = str(value)
     return value
 
+def get_pks(l : list,pk_name:str):
+    pk_list = []
+    for i in l :
+        pk = getattr(i,pk_name)
+        pk_list.append(pk)
+    return pk_list
 
+    pass
 def make_filter(
     stmt: Select,
     crud_models: CrudModels,
