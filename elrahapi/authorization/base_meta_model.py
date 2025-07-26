@@ -13,8 +13,7 @@ class MetaAuthorization:
 
     @validates('name')
     def validate_name(self,key,value):
-        self.name = value.upper().strip() if value else None
-        return value
+        return value.upper().strip() if value else None
 
 class MetaAuthorizationBaseModel(BaseModel):
     is_active: bool

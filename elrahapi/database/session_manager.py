@@ -2,7 +2,7 @@ from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Any
 from fastapi import status
-
+import asyncio
 from elrahapi.utility.types import ElrahSession
 
 
@@ -67,28 +67,32 @@ class SessionManager:
                 detail=f"Error while getting session: {str(e)}",
             )
 
+    def get_session_for_script(self):
+        try :
+            loop=asyncio.get_running_loop()
+            return loop.run_until_complete(self.get_session())
+        except RuntimeError:
+            return asyncio.run(self.get_session())
+
     async def yield_session(self):
         if self.is_async_env:
-                async for session in self.get_async_db():
-                    try :
-                        yield session
-                    except GeneratorExit:
-                        pass
-                        # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
+            async for session in self.get_async_db():
+                try :
+                    yield session
+                except GeneratorExit:
+                    pass
+                    # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
         else :
-                for session in self.get_sync_db():
-                    try :
-                        yield session
-                    except GeneratorExit:
-                        pass
-                        # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
-
-
+            for session in self.get_sync_db():
+                try :
+                    yield session
+                except GeneratorExit:
+                    pass
+                    # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
 
     def get_sync_db(self):
         session= self.__session_maker()
         yield session
-
 
     async def get_async_db(self):
         async with self.__session_maker() as session:

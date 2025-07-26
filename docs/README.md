@@ -1172,7 +1172,7 @@ Ce sous module définit des classes pour les opérations en masse .
 
 - **`BulkDeleteModel`** : pour la suppression multiple
 
-  - delete_liste : **list**
+  - delete_list : **list**
 
 ## **2.9. Module `router`**
 

@@ -12,11 +12,17 @@ def map_list_to(
     obj_sqlalchemy_class: type,
     obj_pydantic_class: Type[BaseModel],
 ):
-    return [
-        obj_sqlalchemy_class(**obj.model_dump())
-        for obj in obj_list
-        if isinstance(obj, obj_pydantic_class)
-    ]
+    try:
+        if not obj_list:
+            return []
+        return [
+            obj_sqlalchemy_class(**obj.model_dump())
+            for obj in obj_list
+            if isinstance(obj, obj_pydantic_class)
+        ]
+    except Exception as e:
+        raise ValueError(f"Error mapping list to SQLAlchemy class: {e}") from e
+        # print(f"Error mapping list to SQLAlchemy class: {e}")
 
 
 def update_entity(existing_entity, update_entity: Type[BaseModel]):
