@@ -33,7 +33,16 @@ class DefaultRoutesName(str, Enum):
     CHANGE_PASSWORD = "change-password"
     CHANGE_USER_STATE = "change-user-state"
 
-
+CREATE_ALL_PRIVILEGE_ROUTES_NAME: list[DefaultRoutesName] = [
+    DefaultRoutesName.CREATE,
+    DefaultRoutesName.READ_ALL,
+    DefaultRoutesName.READ_ONE,
+    DefaultRoutesName.UPDATE,
+    DefaultRoutesName.DELETE,
+    DefaultRoutesName.PATCH,
+    DefaultRoutesName.BULK_CREATE,
+    DefaultRoutesName.BULK_DELETE,
+]
 RoutesName: TypeAlias = DefaultRoutesName | RelationRoutesName
 
 READ_ROUTES_NAME: list[RoutesName] = [

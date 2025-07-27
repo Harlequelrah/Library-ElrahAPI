@@ -11,5 +11,6 @@ myapp_seed = Seed(
     crud_forgery=myapp_crud, data=data, logger=seeders_logger, seeders_logs=SEEDERS_LOGS
 )
 
-session = database.session_manager.get_session_for_script()
-myapp_seed.run_seed(sys.argv, session)
+if __name__ == "__main__":
+    session = database.session_manager.get_session_for_script()
+    myapp_seed.run_seed(sys.argv, session)

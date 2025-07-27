@@ -1,9 +1,11 @@
 from typing import Any, Type
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.crud.crud_models import CrudModels
 import os
 from sqlalchemy.sql import Select
+from elrahapi.router.router_routes_name import CREATE_ALL_PRIVILEGE_ROUTES_NAME
 from elrahapi.utility.types import ElrahSession
 
 
@@ -99,3 +101,17 @@ async def exec_stmt(
             return session.scalars(stmt)
         else:
             return session.execute(stmt)
+
+
+def get_entities_all_privilege_data(entities_names:list[str]) -> list[BaseModel]:
+    privileges: list[PrivilegeCreateModel] = []
+    operations = [op.value.upper() for op in CREATE_ALL_PRIVILEGE_ROUTES_NAME]
+    for entity_name in entities_names:
+        for operation in operations:
+            privilege = PrivilegeCreateModel(
+                name=f"CAN {operation} {entity_name}",
+                description=f"{entity_name} {operation.lower()} privilege",
+                is_active=True,
+            )
+            privileges.append(privilege)
+    return privileges

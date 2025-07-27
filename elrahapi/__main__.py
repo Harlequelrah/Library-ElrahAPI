@@ -252,35 +252,36 @@ def run():
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: elrahapi <commande> <name>")
+        print("Usage: elrahapi <commande> <name> [<action>]")
         sys.exit(1)
-    if len(sys.argv) >= 2:
-        command = sys.argv[1]
-    if len(sys.argv) >= 3:
+    command = sys.argv[1]
+    name : str | None = None
+    action :str | None= None
+    if len(sys.argv) >2 :
         name = sys.argv[2]
+    if len(sys.argv) > 3:
+        action = sys.argv[3]
     if command == "run":
         run()
-    if command =="run_seed":
-        seed_name=name
-        action_name = sys.argv[3] or "up"
+    elif command == "startapp" and name:
+        startapp(name)
+    elif command == "startproject" and name:
+        startproject(name)
+    elif command == "create_seed" and name:
+        create_seed(name)
+    if command =="run_seed" and name:
+        action_name= action or "up"
         action = True if action_name =="up" else False
-        run_seed(seed_name=seed_name,action=action)
+        run_seed(seed_name=name,action=action)
     elif command == "run_seed_manager":
-        action_name = sys.argv[2] or "up"
+        action_name = name or "up"
         action = True if action_name == "up" else False
         run_seed_manager(action=action)
-    elif command == "create_seed":
-        seed_name = name
-        create_seed(seed_name)
-    elif command == "startproject":
-        startproject(name)
-    elif command == "startapp":
-        startapp(name)
     elif command == "generate_secret_key":
-        if len(sys.argv) == 2:
-            generate_secret_key()
-        elif len(sys.argv) == 3:
+        if name:
             generate_secret_key(algorithm=name)
+        else:
+            generate_secret_key()
     else:
         print(f"Unknown command: {command}")
 

@@ -1,13 +1,12 @@
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import get_pks
+from elrahapi.utility.utils import  get_pks
 from pydantic import BaseModel
 from elrahapi.crud.crud_forgery import CrudForgery
 import asyncio
 import re
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from logging import Logger
-
 
 class Seed:
 
@@ -19,13 +18,16 @@ class Seed:
         self.logger = logger
         self.seeders_logs = seeders_logs
 
+
+
+
     async def up(self, session: ElrahSession):
         created_data = await self.crud_forgery.bulk_create(
             create_obj_list=self.data, session=session
         )
         pk_list = get_pks(l=created_data, pk_name=self.crud_forgery.primary_key_name)
         self.logger.info(
-            f"Seeded {self.crud_forgery.entity_name} with {len(pk_list)} records successfully . PKS:{pk_list}"
+            f"Seeded {self.crud_forgery.entity_name} - with {len(pk_list)} records successfully . PKS:{pk_list}"
         )
 
     def get_pks_list(self):
@@ -34,7 +36,7 @@ class Seed:
             lines = file.readlines()
         # On parcourt les lignes à l'envers
         for line in reversed(lines):
-            if "Seeded" in line and entity_name in line.lower():
+            if f"seeded {entity_name} - with" in line.lower():
                 match = re.search(r"PKS:\[(.*?)\]", line)
                 if match:
                     pks_str = match.group(1)
@@ -44,7 +46,6 @@ class Seed:
 
     async def down(self, session: ElrahSession):
         delete_list = self.get_pks_list() or []
-        print(f"Delete list: {delete_list}")
         pk_list = BulkDeleteModel(delete_list=delete_list)
         await self.crud_forgery.bulk_delete(session=session, pk_list=pk_list)
         self.logger.info(
@@ -63,7 +64,7 @@ class Seed:
 
     def run_seed(self, argv: list[str], session: ElrahSession):
         if len(argv) > 1:
-            action = argv[1] or "up"
+            action = argv[1]
             try:
                 loop = asyncio.get_running_loop()
                 loop.create_task(self.start(action, session))
@@ -78,39 +79,44 @@ class SeedManager:
         self.seeds_dict = seeds_dict
         self.session_manager = session_manager
 
-    async def up(self, full_seeds: bool = True, seeds_name: list[str] | None = None):
-        await self.run(seeds_name=seeds_name, full_seeds=full_seeds, up=True)
+    async def up(self, seeds_name: list[str] | None = None):
+        await self.run(seeds_name=seeds_name, action=True)
 
-    async def down(self, full_seeds: bool = True, seeds_name: list[str] | None = None):
-        await self.run(full_seeds=full_seeds, seeds_name=seeds_name, up=False)
+    async def down(self, seeds_name: list[str] | None = None):
+        await self.run(seeds_name=seeds_name, action=False)
 
-    def run_seed_manager(self, argv: list[str], full_seeds: bool = True, seeds_name: list[str] | None = None):
-        action = argv[1] if len(argv) > 1 else "up"
+    def run_seed_manager(self, argv: list[str],seeds_name: list[str] | None = None):
+        action_name = argv[1] if len(argv) > 1 else "up"
+        action = action_name.lower() == "up"
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(self.run(action=action, full_seeds=full_seeds, seeds_name=seeds_name))
+            loop.create_task(self.run(action=action, seeds_name=seeds_name))
         except RuntimeError:
             asyncio.run(
-                self.run(action=action, full_seeds=full_seeds, seeds_name=seeds_name)
+                self.run(action=action, seeds_name=seeds_name)
             )
 
     async def run(
-        self,action, full_seeds: bool = True, seeds_name: list[str] | None = None
+        self,action:bool, seeds_name: list[str] | None = None
     ):
-
         try:
             session = await self.session_manager.get_session()
             seeds = (
-                self.seeds_dict.values()
-                if full_seeds
+                list(self.seeds_dict.values())
+                if not seeds_name
                 else [
-                    seed[seed_name]
+                    self.seeds_dict.get(seed_name)
                     for seed_name in self.seeds_dict
-                    if seed_name in seeds_name or []
+                    if seed_name in seeds_name
                 ]
             )
+            if not action :
+                seeds.reverse()
             for seed in seeds:
-                await seed.down(session) if action=="down" else seed.up(session)
+                if action :
+                    await seed.up(session)
+                else:
+                    await seed.down(session)
         except:
             await self.session_manager.rollback_session(session)
         finally:
