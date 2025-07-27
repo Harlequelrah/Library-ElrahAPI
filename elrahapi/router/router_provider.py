@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, List, Optional
+from typing import Any
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
@@ -33,19 +33,19 @@ class CustomRouterProvider:
     def __init__(
         self,
         prefix: str,
-        tags: List[str],
+        tags: list[str],
         crud: CrudForgery,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
-        authentication: Optional[AuthenticationManager] = None,
+        roles: list[str] | None = None,
+        privileges: list[str] | None = None,
+        authentication: AuthenticationManager | None = None,
         read_with_relations: bool = False,
-        relations: Optional[List[Relationship]] = None,
+        relations: list[Relationship] | None = None,
     ):
         self.relations = relations or []
         self.authentication: AuthenticationManager = (
             authentication if authentication else None
         )
-        self.get_access_token: Optional[callable] = (
+        self.get_access_token: callable | None = (
             authentication.get_access_token if authentication else None
         )
         self.read_with_relations = read_with_relations
@@ -64,8 +64,8 @@ class CustomRouterProvider:
 
     def get_public_router(
         self,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
     ) -> APIRouter:
         return self.initialize_router(
             init_data=ROUTES_PUBLIC_CONFIG,
@@ -75,9 +75,9 @@ class CustomRouterProvider:
 
     def get_protected_router(
         self,
-        authorizations: Optional[List[AuthorizationConfig]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        authorizations: list[AuthorizationConfig] | None = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
     ) -> APIRouter:
         if not self.authentication:
             raise ValueError("No authentication provided in the router provider")
@@ -91,8 +91,8 @@ class CustomRouterProvider:
     def get_custom_router_init_data(
         self,
         is_protected: TypeRoute,
-        init_data: Optional[List[RouteConfig]] = None,
-        route_names: Optional[List[DefaultRoutesName]] = None,
+        init_data: list[RouteConfig] | None = None,
+        route_names: list[DefaultRoutesName] | None = None,
     ):
         custom_init_data = init_data if init_data else []
         if route_names:
@@ -107,11 +107,11 @@ class CustomRouterProvider:
 
     def get_custom_router(
         self,
-        init_data: Optional[List[RouteConfig]] = None,
-        routes_name: Optional[List[DefaultRoutesName]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        authorizations: Optional[List[AuthorizationConfig]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        init_data: list[RouteConfig] | None = None,
+        routes_name: list[DefaultRoutesName] | None = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        authorizations: list[AuthorizationConfig] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
         type_route: TypeRoute = TypeRoute.PUBLIC,
     ):
         if type_route == TypeRoute.PROTECTED and not self.authentication:
@@ -128,11 +128,11 @@ class CustomRouterProvider:
 
     def get_mixed_router(
         self,
-        init_data: Optional[List[RouteConfig]] = None,
-        public_routes_name: Optional[List[DefaultRoutesName]] = None,
-        protected_routes_name: Optional[List[DefaultRoutesName]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        init_data: list[RouteConfig] | None = None,
+        public_routes_name: list[DefaultRoutesName] | None = None,
+        protected_routes_name: list[DefaultRoutesName] | None = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
     ) -> APIRouter:
         if not self.authentication:
             raise ValueError("No authentication provided in the router provider")
@@ -157,10 +157,10 @@ class CustomRouterProvider:
 
     def initialize_router(
         self,
-        init_data: List[RouteConfig],
-        authorizations: Optional[List[AuthorizationConfig]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        init_data: list[RouteConfig],
+        authorizations: list[AuthorizationConfig] | None = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
     ) -> APIRouter:
         copied_init_data = deepcopy(init_data)
         formatted_data = format_init_data(
@@ -221,24 +221,24 @@ class CustomRouterProvider:
                     path=config.route_path,
                     summary=config.summary,
                     description=config.description,
-                    response_model=List[config.response_model],
+                    response_model=list[config.response_model],
                     dependencies=config.dependencies,
                     operation_id=f"{config.route_name}_{self.crud.entity_name}",
                     name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def read_all(
-                    filter: Optional[str] = None,
-                    value: Optional[Any] = None,
-                    second_model_filter: Optional[str] = None,
-                    second_model_filter_value: Optional[Any] = None,
+                    filter: str | None = None,
+                    value: Any | None = None,
+                    second_model_filter: str | None = None,
+                    second_model_filter_value: Any | None = None,
                     skip: int = None,
                     limit: int = None,
-                    relationship_name: Optional[str] = None,
+                    relationship_name: str | None = None,
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
                 ):
-                    relation: Optional[Relationship] = self.get_relationship(
+                    relation: Relationship | None = self.get_relationship(
                         relationship_name=relationship_name
                     )
                     return await self.crud.read_all(
@@ -382,13 +382,13 @@ class CustomRouterProvider:
                     summary=config.summary,
                     description=config.description,
                     dependencies=config.dependencies,
-                    response_model=List[config.response_model],
+                    response_model=list[config.response_model],
                     status_code=status.HTTP_201_CREATED,
                     operation_id=f"{config.route_name}_{self.crud.entity_name}",
                     name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def bulk_create(
-                    create_obj_list: List[self.CreatePydanticModel],
+                    create_obj_list: list[self.CreatePydanticModel],
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
@@ -454,7 +454,7 @@ class CustomRouterProvider:
                         methods=["GET"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
-                        response_model=List[route_config.response_model],
+                        response_model=list[route_config.response_model],
                         summary=route_config.summary,
                         description=route_config.description,
                         operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
@@ -558,7 +558,7 @@ class CustomRouterProvider:
         return self.router
 
     def get_relationship(self, relationship_name: str):
-        relation: Optional[Relationship] = next(
+        relation: Relationship | None = next(
             (
                 relation
                 for relation in self.relations
@@ -610,8 +610,8 @@ class CustomRouterProvider:
     def make_read_all_by_relation_route(self, relation: Relationship):
         async def read_all_by_relation(
             pk1: Any,
-            filter: Optional[str] = None,
-            value: Optional[Any] = None,
+            filter: str | None = None,
+            value: Any | None = None,
             skip: int = None,
             limit: int = None,
             session: ElrahSession = Depends(

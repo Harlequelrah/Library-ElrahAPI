@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import  Type
 from fastapi import status
 from pydantic import BaseModel
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
@@ -11,10 +11,10 @@ class CrudModels:
         primary_key_name: str,
         SQLAlchemyModel: Type,
         ReadModel: Type[BaseModel],
-        CreateModel: Optional[Type[BaseModel]] = None,
-        UpdateModel: Optional[Type[BaseModel]] = None,
-        PatchModel: Optional[Type[BaseModel]] = None,
-        FullReadModel: Optional[Type[BaseModel]] = None,
+        CreateModel: Type[BaseModel] | None = None,
+        UpdateModel: Type[BaseModel] | None = None,
+        PatchModel: Type[BaseModel] | None = None,
+        FullReadModel: Type[BaseModel] | None = None,
     ):
         self.__entity_name = entity_name
         self.__primary_key_name = primary_key_name

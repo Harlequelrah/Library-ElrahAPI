@@ -1,5 +1,3 @@
-from typing import List
-
 from elrahapi.router.router_namespace import (
     DefaultRoutesName,
     TypeRoute,

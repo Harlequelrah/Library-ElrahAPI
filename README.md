@@ -22,6 +22,8 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Pemettre d'utiliser les sessions asynchrones ;
 
+- Fourni des classes pour gérer les seeders ;
+
 - Permet d'effectuer un enregistrement des logs dans la base de donnée grâce à un middleware de log ;
 
 - Fournir un middleware de gestion d'erreur ;
@@ -484,7 +486,86 @@ app.add_middleware(
 
 - Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
-## **9.** `Utilisation de  ConnectionManager et de ChatManager`
+
+## **9.** `Utilisation des seeders`
+
+Deux classes principales servent au seeders .
+`Seed` pour un seed simple et `SeedManager` pour gérer  les opérations de plusieurs Seed simultanément.
+
+Dans le repertoire `myproject/settings/seeders` du projet vous trouverez les seeders par défaut.
+
+Vous pouvez voir des fichers seeders `Seed` comme `user_seed.py` et ``SeedManager` comme `seed_manager_seed.py`.
+
+Dans le repertoire `seeders/log` il y a le ficher `seeders_logger.py` qui contient un logger pour enregistrer les logs des seeders dans le fichier `seeders.log`.
+
+### **9.1.** `Creer un seeder`
+
+```cmd
+elrahapi create_seed nomduseeder
+```
+ex : nomduseeder peut être user , book ou item etc...
+
+**Note** : Ensuite mettez à jour les imports et le ficher
+
+### **9.2.** `Lancer un seeder`
+
+Seed ou SeedManager se lance en mode up ou down.
+Le mode up pour seeder et down pour rollback.
+Sans précision c'est le mode up qui sera actif.
+
+### **9.2.1** `Seed`
+
+**`exemple`** :
+
+```cmd
+elrahapi run_seed nomduseeder
+```
+ou
+```cmd
+elrahapi run_seed nomduseeder down
+```
+
+
+### **9.2.1** `SeedManager`
+
+**`exemple`** :
+
+```cmd
+elrahapi run_seed_manager up
+```
+
+la variable `seeds_dict` est un dictionnaire qui contient les seeders et leurs noms.
+
+On peut toutes fois remplir `seeds_name`  avec des noms de seeders pour en exécuter que ceux là .
+
+En mode up les seeders sont exécutés dans l'ordre de leur nom dans le dictionnaire `seeds_dict` et dans l'ordre inverse en mode down .
+
+### **9.3.** `Seeder des privlièges`
+
+Il est possible de seeder des privilèges pour des entités précises et obtenir des privileges génériques facilement comme `CAN CREATE BOOK` ou `CAN READ ITEM` etc...
+
+Cela se passe dans `seeders/privilege_seed.py`.
+
+**`exemple`** :
+
+```python
+from elrahapi.utility.utils import get_entities_all_privilege_data
+
+data: list[PrivilegeCreateModel] = []
+entities_name:list[str]=[
+    "user",
+    "role",
+    "role_privilege",
+    "user_privilege",
+    "user_role",
+    "privilege",
+    ] # lister les entités pour lesquelles on veut créer des privilèges génériques
+entities_data =  get_entities_all_privilege_data(entities_names=entities_name)
+data.extend(entities_data)
+```
+
+
+## **10.** `Utilisation de  ConnectionManager et de ChatManager`
 
 La classe ConnectionManager permet de gérer les websockets de façon basique .
 Exemple :
@@ -533,7 +614,7 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
 
 **`Note:`** : Pour en savoir plus , vous pouvez consulter : `https://github.com/Harlequelrah/learning_websocket`
 
-## **10.** `Utilisation de certaines fonctions utiles` :
+## **11.** `Utilisation de certaines fonctions utiles` :
 
 - `raise_custom_http_exception` : permet de lever un CustomHttpException
 
@@ -564,7 +645,14 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
         )
 ```
 
-## **11.** `Utilisation de patterns ` :
+
+## **12.** `Patterns ` :
+
+- TELEPHONE_PATTERN
+
+- URL_PATTERN
+
+**exemple :**
 
 ```python
 from elrahapi.utility.patterns import TELEPHONE_PATTERN
@@ -576,7 +664,7 @@ class Test(BaseModel):
     )
 ```
 
-## **12.** `Generation de clé` :
+## **13.** `Generation de clé` :
 
 Vous pouve générer une clé pour coder vos tokens JWT comme suit :
 
@@ -595,13 +683,17 @@ elrahapi generate_secret_key HS512
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.1.8`
+La version actuelle est le `1.1.9`
 
 Vérifier la version en executant `pip show elrahapi`
 
-Pour un exemple concret , vous pouvez consulter le repository de test pour cette version ou le plus récent si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.6`
+Pour un exemple concret , vous pouvez consulter le repository de test pour cette version ou le plus récent si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.9`
 
 Vous pouvez consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
-├── docs/
-│ ├── README.md
+```
+docs/
+├── README.md
+```
+
+**Note** : `la documentation technique n'est pas à jour`.

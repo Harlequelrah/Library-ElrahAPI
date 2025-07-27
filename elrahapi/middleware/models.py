@@ -1,4 +1,3 @@
-from typing import Optional
 from sqlalchemy import (
     Column,
     Integer,
@@ -30,7 +29,7 @@ class LogReadModel(BaseModel):
     status_code:int
     method:str
     url:str
-    error_message:Optional[str]
+    error_message:str | None
     date_created:datetime
     process_time:float
     remote_address:str

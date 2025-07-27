@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="elrahapi",
-    version="1.1.8",
+    version="1.1.9",
     packages=find_packages(),
     description="Package de développement d'API basé FastAPI",
     long_description=long_description,
@@ -25,7 +25,8 @@ setup(
         "black>=24.10.0",
         "sqlalchemy>=2.0.38",
         "sqlalchemy-utils>=0.41.2",
-        "aiosqlite>=0.21.0"
+        "aiosqlite>=0.21.0",
+        "colorama>=6.9.0"
     ],
     entry_points={"console_scripts": ["elrahapi=elrahapi.__main__:main"]},
 )

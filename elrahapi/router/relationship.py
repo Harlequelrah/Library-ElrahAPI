@@ -1,7 +1,6 @@
 from copy import deepcopy
-from typing import Any, List, Optional, Type
+from typing import Any, Type
 from elrahapi.utility.types import ElrahSession
-from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
@@ -19,7 +18,7 @@ from elrahapi.router.router_crud import (
 )
 from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.router.router_routes_name import RelationRoutesName
-from elrahapi.utility.utils import exec_stmt, make_filter, validate_value,is_async_session
+from elrahapi.utility.utils import exec_stmt, make_filter, validate_value
 from pydantic import BaseModel
 from sqlalchemy import and_, select
 
@@ -32,16 +31,16 @@ class Relationship:
         relationship_name: str,
         type_relation: TypeRelation,
         second_entity_crud: CrudForgery,
-        relationship_crud: Optional[CrudForgery] = None,
-        relationship_key1_name: Optional[str] = None,
-        relationship_key2_name: Optional[str] = None,
-        relations_routes_configs: Optional[RouteConfig] = None,
-        relation_table: Optional[Table] = None,
-        second_entity_fk_name: Optional[str] = None,
-        relations_authorizations_configs: Optional[AuthorizationConfig] = None,
-        relations_responses_model_configs: Optional[ResponseModelConfig] = None,
-        default_public_relation_routes_name: List[RelationRoutesName] = None,
-        default_protected_relation_routes_name: List[RelationRoutesName] = None,
+        relationship_crud: CrudForgery | None = None,
+        relationship_key1_name: str | None = None,
+        relationship_key2_name: str | None = None,
+        relations_routes_configs: RouteConfig | None = None,
+        relation_table: Table | None = None,
+        second_entity_fk_name: str | None = None,
+        relations_authorizations_configs: AuthorizationConfig | None = None,
+        relations_responses_model_configs: ResponseModelConfig | None = None,
+        default_public_relation_routes_name: list[RelationRoutesName] | None = None,
+        default_protected_relation_routes_name: list[RelationRoutesName] | None = None,
     ):
         self.relationship_name = relationship_name
         self.second_entity_fk_name=second_entity_fk_name
@@ -90,13 +89,13 @@ class Relationship:
 
     def init_default_routes(
         self,
-        default_public_relation_routes_name: List[RelationRoutesName],
-        default_protected_relation_routes_name: List[RelationRoutesName] ,
+        default_public_relation_routes_name: list[RelationRoutesName],
+        default_protected_relation_routes_name: list[RelationRoutesName] ,
     ):
         full_routes_configs = (
             default_public_relation_routes_name + default_protected_relation_routes_name
         )
-        routes_configs: List[RouteConfig] = []
+        routes_configs: list[RouteConfig] = []
         second_entity_name = self.second_entity_crud.entity_name
         path = f"/{{pk1}}/{second_entity_name}"
         for route_name in full_routes_configs:
@@ -224,8 +223,8 @@ class Relationship:
                 routes_configs.append(route_config)
         return routes_configs
 
-    def purge_relations(self, routes_configs: List[RouteConfig]):
-        purged_routes_configs: List[RouteConfig] = []
+    def purge_relations(self, routes_configs: list[RouteConfig]):
+        purged_routes_configs: list[RouteConfig] = []
         for route_config in routes_configs:
             if (
                 is_verified_relation_rule(
@@ -239,11 +238,11 @@ class Relationship:
 
     def init_routes_configs(
         self,
-        authentication: Optional[AuthenticationManager] = None,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
+        authentication: AuthenticationManager | None = None,
+        roles: list[str] | None = None,
+        privileges: list[str] | None = None,
     ):
-        routes_configs: List[RouteConfig] = []
+        routes_configs: list[RouteConfig] = []
         if (
             self.default_protected_relation_routes_name
             or self.default_public_relation_routes_name
@@ -285,11 +284,11 @@ class Relationship:
 
     def initialize_relation_route_configs_dependencies(
         self,
-        routes_configs: List[RouteConfig],
-        authentication: Optional[AuthenticationManager] = None,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
-    ) -> List[RouteConfig]:
+        routes_configs: list[RouteConfig],
+        authentication: AuthenticationManager | None = None,
+        roles: list[str] | None = None,
+        privileges: list[str] | None = None,
+    ) -> list[RouteConfig]:
         if not authentication:
             routes_configs
         for route_config in routes_configs:
@@ -473,8 +472,8 @@ class Relationship:
         session: ElrahSession,
         entity_crud: CrudForgery,
         pk1: Any,
-        filter: Optional[str] = None,
-        value: Optional[Any] = None,
+        filter: str | None = None,
+        value: Any | None = None,
         skip: int = 0,
         limit: int = None,
     ):

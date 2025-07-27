@@ -1,6 +1,4 @@
 import os
-from typing import Optional
-
 from dotenv import load_dotenv
 from elrahapi.utility.utils import get_env_int,validate_value
 
@@ -15,8 +13,8 @@ DATABASE_NAME = os.getenv("DATABASE_NAME")
 DATABASE_ASYNC_CONNECTOR = os.getenv("DATABASE_ASYNC_CONNECTOR")
 DATABASE_SERVER = os.getenv("DATABASE_SERVER")
 IS_ASYNC_ENV = validate_value(os.getenv("IS_ASYNC_ENV"))
-USER_MAX_ATTEMPT_LOGIN: Optional[int] = get_env_int("USER_MAX_ATTEMPT_LOGIN")
-ACCESS_TOKEN_EXPIRATION: Optional[int] = get_env_int("ACCESS_TOKEN_EXPIRATION")
-REFRESH_TOKEN_EXPIRATION: Optional[int] = get_env_int("REFRESH_TOKEN_EXPIRATION")
+USER_MAX_ATTEMPT_LOGIN: int | None = get_env_int("USER_MAX_ATTEMPT_LOGIN")
+ACCESS_TOKEN_EXPIRATION: int | None = get_env_int("ACCESS_TOKEN_EXPIRATION")
+REFRESH_TOKEN_EXPIRATION: int | None = get_env_int("REFRESH_TOKEN_EXPIRATION")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

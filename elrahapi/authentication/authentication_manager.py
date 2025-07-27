@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, List, Optional
+from typing import Any
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_namespace import (
@@ -28,10 +28,10 @@ class AuthenticationManager:
     def __init__(
         self,
         session_manager:SessionManager ,
-        secret_key: Optional[str] = None,
-        algorithm: Optional[str] = None,
-        refresh_token_expiration: Optional[int] = None,
-        access_token_expiration: Optional[int] = None,
+        secret_key: str | None = None,
+        algorithm: str | None = None,
+        refresh_token_expiration: int | None = None,
+        access_token_expiration: int | None = None,
 
     ):
         self.__authentication_models: CrudModels = None
@@ -205,8 +205,8 @@ class AuthenticationManager:
     async def is_authorized(
         self,
         sub: str,
-        privilege_name: Optional[str] = None,
-        role_name: Optional[str] = None,
+        privilege_name: str | None = None,
+        role_name: str | None = None,
         ) -> bool:
         try:
             session: ElrahSession = await self.session_manager.get_session()
@@ -230,8 +230,8 @@ class AuthenticationManager:
 
     def check_authorization(
         self,
-        privilege_name: Optional[str] = None,
-        role_name: Optional[str] = None,
+        privilege_name: str | None = None,
+        role_name: str | None = None,
     ) -> callable:
         async def auth_result(token: str = Depends(self.get_access_token)):
             payload =  self.validate_token(token)
@@ -260,9 +260,9 @@ class AuthenticationManager:
 
     def check_authorizations(
         self,
-        privileges_name: Optional[List[str]] = None,
-        roles_name: Optional[List[str]] = None,
-    ) -> List[callable]:
+        privileges_name: list[str] | None = None,
+        roles_name: list[str] | None = None,
+    ) ->list[callable]:
         authorizations = []
         for privilege_name in privileges_name:
             authorizations.append(
@@ -280,7 +280,7 @@ class AuthenticationManager:
         self,
         password: str,
         session: ElrahSession,
-        sub: Optional[str] = None,
+        sub: str | None = None,
     ):
         try :
             if sub is None:

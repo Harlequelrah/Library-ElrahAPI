@@ -1,5 +1,5 @@
 from fastapi.websockets import WebSocket
-from typing import Any,List
+from typing import Any
 
 
 class Room:
@@ -24,7 +24,7 @@ class ChatConnectionManager:
     def __init__(self):
         self.rooms:dict[str,Room]={}
 
-    def list_rooms(self)->List[str]:
+    def list_rooms(self)->list[str]:
         return list(self.rooms.keys())
 
     def list_rooms_user(self,room_name:str):

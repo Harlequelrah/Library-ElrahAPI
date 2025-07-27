@@ -18,6 +18,8 @@
 # class Entity(database.base):
 #     __tablename__ = 'entities'
 #     id = Column(Integer, primary_key=True)
-
+#     date_created = Column(DateTime, default=func.now())
+#     date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
 # metadata = database.base.metadata
 # database.target_metadata = metadata
+

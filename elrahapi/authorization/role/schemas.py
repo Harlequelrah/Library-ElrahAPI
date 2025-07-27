@@ -4,7 +4,6 @@ from elrahapi.authorization.base_meta_model import (
     MetaAuthorizationReadModel,
 )
 from pydantic import BaseModel, Field
-from typing import List, Optional
 
 from elrahapi.authorization.role.meta_models import MetaRoleUsers
 
@@ -16,16 +15,16 @@ class RoleBaseModel(BaseModel):
 
 
 class RoleCreateModel(RoleBaseModel):
-    is_active: Optional[bool] = Field(example=True, default=True)
+    is_active: bool = Field(example=True, default=True)
 
 
 class RoleUpdateModel(RoleBaseModel):
     is_active: bool = Field(example=True)
 
 class RolePatchModel(BaseModel):
-    name: Optional[str] = Field(example="Admin", default=None)
-    is_active: Optional[bool] = Field(example=True, default=None)
-    description: Optional[str] = Field(example="allow to manage all the system", default=None)
+    name: str | None = Field(example="Admin", default=None)
+    is_active: bool|None = Field(example=True, default=None)
+    description: str | None = Field(example="allow to manage all the system", default=None)
 
 
 class RoleReadModel(MetaAuthorizationReadModel):
@@ -34,8 +33,8 @@ class RoleReadModel(MetaAuthorizationReadModel):
 
 
 class RoleFullReadModel(MetaAuthorizationReadModel):
-    role_privileges: List["MetaAuthorizationBaseModel"] = []
-    role_users:List["MetaRoleUsers"]=[]
+    role_privileges: list["MetaAuthorizationBaseModel"] = []
+    role_users:list["MetaRoleUsers"]=[]
 
     class Config:
         from_attributes = True

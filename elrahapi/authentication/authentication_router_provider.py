@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token
@@ -19,9 +19,9 @@ class AuthenticationRouterProvider:
     def __init__(
         self,
         authentication: AuthenticationManager,
-        read_with_relations: Optional[bool] = False,
-        roles: Optional[List[str]] = None,
-        privileges: Optional[List[str]] = None,
+        read_with_relations: bool|None = False,
+        roles: list[str] | None = None,
+        privileges: list[str] | None = None,
 
     ):
         self.authentication = authentication
@@ -34,10 +34,10 @@ class AuthenticationRouterProvider:
 
     def get_auth_router(
         self,
-        init_data: List[RouteConfig] = USER_AUTH_CONFIG_ROUTES,
-        authorizations: Optional[List[AuthorizationConfig]] = None,
-        exclude_routes_name: Optional[List[DefaultRoutesName]] = None,
-        response_model_configs: Optional[List[ResponseModelConfig]] = None,
+        init_data: list[RouteConfig] = USER_AUTH_CONFIG_ROUTES,
+        authorizations: list[AuthorizationConfig] | None = None,
+        exclude_routes_name: list[DefaultRoutesName] | None = None,
+        response_model_configs: list[ResponseModelConfig] | None = None,
     ) -> APIRouter:
         formatted_data = format_init_data(
             init_data=init_data,

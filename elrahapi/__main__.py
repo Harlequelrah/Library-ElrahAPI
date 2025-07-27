@@ -2,9 +2,12 @@ import os
 import shutil
 import sys
 import subprocess
-from typing import Optional
-
+from colorama import Style , init , Fore
 from elrahapi.security.secret import define_algorithm_and_key
+
+
+
+init(autoreset=True)
 
 
 def repline(file, line, line_content):
@@ -28,17 +31,17 @@ def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"
         if line.strip().startswith("ALGORITHM"):
             algorithm_line = idx + 1
     if secret_key_line:
-        repline(env_file, secret_key_line, f"SECRET_KEY={key}\n")
+        repline(env_file, secret_key_line, f"SECRET_KEY = {key}\n")
     if algorithm_line:
-        repline(env_file, algorithm_line, f"ALGORITHM={algo}\n")
+        repline(env_file, algorithm_line, f"ALGORITHM = {algo}\n")
 
 
-def generate_secret_key(env_src_path:Optional[str]=None,algorithm: str = "HS256") -> str:
+def generate_secret_key(env_src_path:str | None =None,algorithm: str = "HS256") -> str:
     if env_src_path is None :
         project_folder = os.getcwd()
         env_src_path = os.path.join(project_folder, ".env")
     update_env_with_secret_and_algorithm(env_src_path, algorithm)
-    print("SECRET_KEY and ALGORITHM have been generated and added to the .env file")
+    print(Fore.GREEN+"SECRET_KEY and ALGORITHM have been generated and added to the .env file")
 
 
 def startproject(project_name):
@@ -55,7 +58,7 @@ def startproject(project_name):
         print(f"Error initializing the Git repository: {e}")
 
     subprocess.run(["alembic", "init", "alembic"], cwd=project_path)
-    print(f"Alembic has been initialized in {project_path}")
+    print(Fore.GREEN+f"Alembic has been initialized in {project_path}")
 
     with open(f"{project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
@@ -85,14 +88,8 @@ def startproject(project_name):
     shutil.copyfile(example_env_src_path, example_env_dest_path)
     print(f"The file '.env.example' has been copied to {example_env_dest_path}")
 
-    with open(env_dest_path, "r") as f:
-        lines = f.readlines()
-    with open(env_dest_path, "w") as f:
-        for line in lines:
-            if line.strip().startswith("PROJECT_NAME="):
-                f.write(f"PROJECT_NAME={project_name}\n")
-            else:
-                f.write(line)
+
+
     main_project_files_path = os.path.join(main_path_dir, "main_project_files")
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
@@ -109,9 +106,31 @@ def startproject(project_name):
         print("The source folder 'settings' was not found.")
     with open(os.path.join(project_path, "requirements.txt"), "w") as f:
         subprocess.run(["pip", "freeze"], stdout=f)
-    print(f"The project {project_name} has been created successfully.")
+    with open(env_dest_path, "r") as f:
+        lines = f.readlines()
+    with open(env_dest_path, "w") as f:
+        for line in lines:
+            if line.strip().startswith("PROJECT_NAME"):
+                f.write(f"PROJECT_NAME = {project_name}\n")
+            else:
+                f.write(line)
+    print(Fore.CYAN+f"The project {project_name} has been created successfully.")
     generate_secret_key(env_src_path=env_dest_path)
 
+def create_seed(seed_name):
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    main_path_dir = os.path.join(script_dir, "main")
+    seed_src_src = os.path.join(main_path_dir, "seed.py")
+    seeders_dir = get_seeders_dir()
+    if not seeders_dir:
+        print(Fore.RED + Style.BRIGHT + "Seeders directory not found")
+        return
+    seed_file_dest = os.path.join(seeders_dir, f"{seed_name}_seed.py")
+    if os.path.exists(seed_file_dest):
+        print(Fore.RED + Style.BRIGHT + f"Seeder {seed_name} already exists.")
+        return
+    shutil.copyfile(seed_src_src, seed_file_dest)
+    print(Fore.GREEN + Style.BRIGHT + f"The seeder '{seed_name}_seed.py' file has been create to {seed_file_dest}")
 
 def startapp(app_name):
     apps_dir_folder = get_apps_dir()
@@ -123,7 +142,7 @@ def startapp(app_name):
 
     if os.path.exists(sqlapp_path):
         shutil.copytree(sqlapp_path, app_path, dirs_exist_ok=True)
-        print(f"The application {app_name} has been created successfully.")
+        print(Fore.CYAN + f"The application {app_name} has been created successfully.")
     else:
         print("The 'sqlapp' folder was not found.")
 
@@ -153,31 +172,116 @@ def get_apps_dir():
     return apps_dir_folder
 
 
+def get_settings_dir():
+    apps_dir = get_apps_dir()
+    if not apps_dir:
+        print(Fore.RED + Style.BRIGHT + "Apps directory not found")
+        return None
+    settings_dir = os.path.join(apps_dir, "settings")
+    if not os.path.exists(settings_dir):
+        print(Fore.RED + Style.BRIGHT + "Settings directory not found")
+        return None
+    return settings_dir
+
+
+def get_seeders_dir():
+    settings_dir = get_settings_dir()
+    if not settings_dir:
+        print(Fore.RED + Style.BRIGHT + "Settings directory not found")
+        return None
+    seeders_dir = os.path.join(settings_dir, "seeders")
+    if not os.path.exists(seeders_dir):
+        print(Fore.RED + Style.BRIGHT + "Seeders directory not found")
+        return None
+    return seeders_dir
+
+
+def get_seeders_log_file():
+    seeders_dir = get_seeders_dir()
+    if not seeders_dir:
+        print(Fore.RED + Style.BRIGHT + "Seeders directory not found")
+        return None
+    log_file = os.path.join(seeders_dir, "seeders.log")
+    return log_file
+
+
+def run_seed(seed_name,action:bool):
+    seeders_dir = get_seeders_dir()
+    apps_dir = get_apps_dir()
+    seeder_path = os.path.join(seeders_dir,f"{seed_name}_seed.py")
+    if not os.path.exists(seeder_path):
+        print(Fore.RED + Style.BRIGHT + f"seeder {seed_name} file not found")
+        return
+    env = os.environ.copy()
+    env["PYTHONPATH"] = apps_dir
+    subprocess.run(
+        [
+            "python",
+            seeder_path,
+            "up" if action else "down",
+        ],
+        env=env,
+    )
+
+# def seeders(one_seed:bool=True,seed_name):
+#     pass
+def run_seed_manager(action:str):
+    seeders_dir = get_seeders_dir()
+    apps_dir = get_apps_dir()
+    seeder_path = os.path.join(seeders_dir, "seed_manager_seed.py")
+    if not os.path.exists(seeder_path):
+        print(Fore.RED + Style.BRIGHT + f"seeder seed_manager_seed file not found")
+        return
+    env = os.environ.copy()
+    env["PYTHONPATH"] = apps_dir
+    subprocess.run(
+        [
+            "python",
+            seeder_path,
+            "up" if action else "down",
+        ],
+        env=env,
+    )
+
+
 def run():
-    project_folder =  os.getcwd()
+    project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
     subprocess.run(["python", main_entry])
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: elrahapi <commande> <name>")
+        print("Usage: elrahapi <commande> <name> [<action>]")
         sys.exit(1)
-    if len(sys.argv) >= 2:
-        command = sys.argv[1]
-    if len(sys.argv) >= 3:
+    command = sys.argv[1]
+    name : str | None = None
+    action :str | None= None
+    if len(sys.argv) >2 :
         name = sys.argv[2]
+    if len(sys.argv) > 3:
+        action = sys.argv[3]
     if command == "run":
         run()
-    if command == "startproject":
-        startproject(name)
-    elif command == "startapp":
+    elif command == "startapp" and name:
         startapp(name)
+    elif command == "startproject" and name:
+        startproject(name)
+    elif command == "create_seed" and name:
+        create_seed(name)
+    elif command =="run_seed" and name:
+        action_name= action or "up"
+        action = True if action_name =="up" else False
+        run_seed(seed_name=name,action=action)
+    elif command == "run_seed_manager":
+        action_name = name or "up"
+        action = True if action_name == "up" else False
+        run_seed_manager(action=action)
     elif command == "generate_secret_key":
-        if len(sys.argv) == 2:
-            generate_secret_key()
-        elif len(sys.argv) == 3:
+        if name:
             generate_secret_key(algorithm=name)
+        else:
+            generate_secret_key()
     else:
         print(f"Unknown command: {command}")
 

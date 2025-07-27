@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 from elrahapi.router.router_routes_name import (
     DefaultRoutesName,
     RelationRoutesName,
@@ -20,7 +19,7 @@ class TypeRelation(str, Enum):
     MANY_TO_ONE = "Many To One"
 
 
-RELATION_RULES: dict[TypeRelation, List[RelationRoutesName]] = {
+RELATION_RULES: dict[TypeRelation, list[RelationRoutesName]] = {
     TypeRelation.ONE_TO_ONE: [
         RelationRoutesName.READ_ONE_BY_RELATION,
         RelationRoutesName.CREATE_RELATION,
@@ -82,7 +81,7 @@ DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DefaultRouteConfig] = {
 }
 
 
-ROUTES_PUBLIC_CONFIG: List[RouteConfig] = [
+ROUTES_PUBLIC_CONFIG: list[RouteConfig] = [
     RouteConfig(
         route_name=route_name,
         is_activated=True,
@@ -92,7 +91,7 @@ ROUTES_PUBLIC_CONFIG: List[RouteConfig] = [
     )
     for route_name, route_config in DEFAULT_ROUTES_CONFIGS.items()
 ]
-ROUTES_PROTECTED_CONFIG: List[RouteConfig] = [
+ROUTES_PROTECTED_CONFIG: list[RouteConfig] = [
     RouteConfig(
         route_name=route_name,
         is_activated=True,
@@ -162,6 +161,6 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
         description="change user state (active or inactive)",
     ),
 }
-USER_AUTH_CONFIG_ROUTES: List[RouteConfig] = [
+USER_AUTH_CONFIG_ROUTES: list[RouteConfig] = [
     route for route in USER_AUTH_CONFIG.values()
 ]
