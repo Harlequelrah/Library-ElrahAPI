@@ -687,7 +687,7 @@ La version actuelle est le `1.1.9`
 
 Vérifier la version en executant `pip show elrahapi`
 
-Pour un exemple concret , vous pouvez consulter le repository de test pour cette version ou le plus récent si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject-v-1.1.9`
+Pour un exemple concret , vous pouvez consulter la branche du repository de test pour cette version ou la plus récente si les améliorations son minimes: `https://github.com/Harlequelrah/elrahapi-testproject`
 
 Vous pouvez consulter la documentation technique pour découvrir toutes les fonctionnaliés :
 
