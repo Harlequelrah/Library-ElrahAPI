@@ -4,7 +4,7 @@ import sys
 import subprocess
 from colorama import Style , init , Fore
 from elrahapi.security.secret import define_algorithm_and_key
-import logging
+
 
 
 init(autoreset=True)
@@ -269,7 +269,7 @@ def main():
         startproject(name)
     elif command == "create_seed" and name:
         create_seed(name)
-    if command =="run_seed" and name:
+    elif command =="run_seed" and name:
         action_name= action or "up"
         action = True if action_name =="up" else False
         run_seed(seed_name=name,action=action)
