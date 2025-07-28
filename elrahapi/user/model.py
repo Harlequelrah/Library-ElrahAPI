@@ -42,7 +42,7 @@ class UserModel:
     def build_access_token_data(self,pk_name:str):
 
         data = {
-            "sub": getattr(self, pk_name),
+            "sub": str(getattr(self, pk_name)),
             "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active]
         }
         return data

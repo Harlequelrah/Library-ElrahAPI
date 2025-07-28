@@ -115,7 +115,6 @@ class AuthenticationManager:
         if ISSUER :
             to_encode.update({"iss": ISSUER})
         if AUDIENCE :
-            print("audience is not None",AUDIENCE)
             to_encode.update({"aud": AUDIENCE})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
