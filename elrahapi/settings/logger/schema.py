@@ -1,5 +1,5 @@
 from elrahapi.middleware import models
-class LogReadModel(models.LogReadModel):
+class LogReadModel(models.MetaLogReadModel):
     class setting:
         from_attributes=True
 

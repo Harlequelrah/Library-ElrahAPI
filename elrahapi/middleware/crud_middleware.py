@@ -48,14 +48,9 @@ async def save_log(
     subject=None
     if authentication is not None:
         auth_header = request.headers.get("Authorization")
-        print(auth_header)
         if auth_header is not None and auth_header.startswith("Bearer "):
             token = auth_header[len("Bearer "):]
-            print(f"{token,auth_header=} ")
-            try:
-                subject = authentication.get_sub_from_token(token=token)
-            except Exception as e:
-                print(f"{str(e)=}")
+            subject = authentication.get_sub_from_token(token=token)
 
     log = LogModel(
     process_time=process_time,

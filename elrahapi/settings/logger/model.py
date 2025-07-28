@@ -1,8 +1,7 @@
 from ..database import database
-from elrahapi.middleware.models import LogModel
+from elrahapi.middleware.models import MetaLogModel
 
-
-class Log(database.base, LogModel):
+class LogModel(database.base, MetaLogModel):
     __tablename__ = "logs"
 
 
