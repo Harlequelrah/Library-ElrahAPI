@@ -112,6 +112,8 @@ def startproject(project_name):
         for line in lines:
             if line.strip().startswith("PROJECT_NAME"):
                 f.write(f"PROJECT_NAME = {project_name}\n")
+            elif line.strip().startswith("ISSUER"):
+                f.write(f"ISSUER = {project_name}\n")
             else:
                 f.write(line)
     print(Fore.CYAN+f"The project {project_name} has been created successfully.")

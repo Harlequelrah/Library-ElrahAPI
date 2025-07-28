@@ -11,6 +11,7 @@ from sqlalchemy.sql import func
 from fastapi import status
 
 
+
 class UserModel:
     id = Column(Integer, primary_key=True)
     email = Column(String(256), unique=True, index=True)
@@ -39,9 +40,11 @@ class UserModel:
     MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
-    def build_access_token_data(self):
+    def build_access_token_data(self,pk_name:str):
+
         data = {
-            "sub": self.username,
+            "email": self.email,
+            "username": self.username,
             "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
             "privileges": [
                 user_privilege.privilege.name
