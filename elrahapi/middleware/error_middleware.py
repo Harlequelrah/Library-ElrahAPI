@@ -1,8 +1,7 @@
 import time
-from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.middleware.crud_middleware import save_log
-from elrahapi.websocket.connection_manager import ConnectionManager
+from elrahapi.middleware.middleware_helper import MiddlewareHelper
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.types import Receive, Scope, Send
@@ -13,15 +12,13 @@ class ErrorHandlingMiddleware:
     def __init__(
         self,
         app,
-        LogModel=None,
-        session_manager: SessionManager | None = None,
-        websocket_manager: ConnectionManager = None,
+        middleware_helper : MiddlewareHelper
     ):
         self.app = app
-        self.LogModel = LogModel
-        self.session_manager = session_manager
-        self.websocket_manager = websocket_manager
-        self.has_log = self.session_manager and self.LogModel
+        self.middelware_helper = middleware_helper
+        self.has_log = (
+            self.middelware_helper.session_manager and self.middelware_helper.LogModel
+        )
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] not in ("http"):
@@ -54,18 +51,17 @@ class ErrorHandlingMiddleware:
             await self._log_error(request, response, f"Unexpected error: {exc}")
             await response(scope, receive, send)
 
-
     def _create_json_response(self, status_code, content):
         return JSONResponse(status_code=status_code, content=content)
 
     async def _log_error(self, request, response, error):
         if self.has_log:
             await save_log(
+                    authentication=self.middelware_helper.authentication,
                     request=request,
-                    LogModel=self.LogModel,
-                    session_manager=self.session_manager,
+                    LogModel=self.middelware_helper.LogModel,
+                    session_manager=self.middelware_helper.session_manager,
                     response=response,
-                    websocket_manager=self.websocket_manager,
+                    websocket_manager=self.middelware_helper.websocket_manager,
                     error=error,
                 )
-

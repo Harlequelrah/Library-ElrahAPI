@@ -11,7 +11,6 @@ from sqlalchemy.sql import func
 from fastapi import status
 
 
-
 class UserModel:
     id = Column(Integer, primary_key=True)
     email = Column(String(256), unique=True, index=True)
@@ -43,22 +42,16 @@ class UserModel:
     def build_access_token_data(self,pk_name:str):
 
         data = {
-            "email": self.email,
-            "username": self.username,
-            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
-            "privileges": [
-                user_privilege.privilege.name
-                for user_privilege in self.user_privileges if user_privilege.is_active and user_privilege.privilege.is_active
-            ],
+            "sub": getattr(self, pk_name),
+            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active]
         }
         return data
 
-    def build_refresh_token_data(self):
+    def build_refresh_token_data(self,pk_name:str):
         data = {
-            "sub": self.username,
+            "sub": getattr(self, pk_name),
         }
         return data
-
 
     def try_login(self, is_success: bool):
         if is_success:

@@ -15,9 +15,10 @@ from elrahapi.exception.auth_exception import (
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
-from elrahapi.utility.utils import exec_stmt, validate_value
+from elrahapi.utility.utils import exec_stmt
 from jose import ExpiredSignatureError, JWTError, jwt
-from sqlalchemy import or_, select
+from sqlalchemy import  select
+from sqlalchemy.sql import or_
 from fastapi import Depends, status
 
 from elrahapi.exception.custom_http_exception import CustomHttpException
@@ -111,9 +112,10 @@ class AuthenticationManager:
             )
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
-        if ISSUER is not None:
+        if ISSUER :
             to_encode.update({"iss": ISSUER})
-        if AUDIENCE is not None:
+        if AUDIENCE :
+            print("audience is not None",AUDIENCE)
             to_encode.update({"aud": AUDIENCE})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
@@ -128,13 +130,14 @@ class AuthenticationManager:
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
             return payload
-        except ExpiredSignatureError:
+        except ExpiredSignatureError as e:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token has expired : {str(e)}"
             )
-        except JWTError:
+        except JWTError as e:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token : {str(e)}",
             )
 
     async def change_user_state(self, pk: Any, session: ElrahSession):
@@ -167,25 +170,17 @@ class AuthenticationManager:
             )
 
     async def get_user_by_sub(self, sub: str,session: ElrahSession):
-
         try:
-            # stmt = (
-            #     select(self.__authentication_models.sqlalchemy_model)
-            #     .where(
-            #         or_(
-            #             self.__authentication_models.sqlalchemy_model.username
-            #             == sub,
-            #             self.__authentication_models.sqlalchemy_model.email
-            #             == sub,
-            #         )
-            #     )
-            # )
-            pk = self.__authentication_models.get_pk()
-            stmt = (
-                select(self.__authentication_models.sqlalchemy_model)
-                .where(
-                    pk=sub
-                )
+            if sub.isdigit():
+                sub = int(sub)
+            pk_attr = self.__authentication_models.get_pk()
+            email_attr = self.__authentication_models.sqlalchemy_model.email
+            username_attr = self.__authentication_models.sqlalchemy_model.username
+            stmt = select(self.__authentication_models.sqlalchemy_model).where(
+                or_(
+                    pk_attr == sub,
+                    email_attr == sub,
+                    username_attr == sub)
             )
             result = await exec_stmt(
                 stmt=stmt,
@@ -230,6 +225,11 @@ class AuthenticationManager:
                 )
         finally:
             await self.session_manager.close_session(session=session)
+
+    def get_sub_from_token(self, token: str) -> str:
+        payload = self.validate_token(token)
+        sub: str = payload.get("sub")
+        return sub
 
     def check_authorization(
         self,
@@ -323,7 +323,7 @@ class AuthenticationManager:
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        return validate_value(value=sub)
+        return sub
 
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken
@@ -335,7 +335,7 @@ class AuthenticationManager:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(sub=sub, session=session)
             access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
-            data = user.build_access_token_data()
+            data = user.build_access_token_data(pk_name=self.__authentication_models.primary_key_name)
             access_token = self.create_token(
                 data=data, expires_delta=access_token_expiration,token_type=TokenType.ACCESS_TOKEN
             )

@@ -1,5 +1,6 @@
 import json
 import time
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.database.session_manager import SessionManager
 from fastapi import Request,status
 from starlette.responses import Response
@@ -19,23 +20,51 @@ async def get_response_and_process_time(request:Request,call_next=None,response:
         process_time=time.time() - start_time
     return [current_response,process_time]
 
+
 async def save_log(
-    request: Request,LogModel, session_manager:SessionManager ,call_next=None,error=None,response:Response=None,websocket_manager:ConnectionManager=None
+    request: Request,
+    LogModel,
+    session_manager: SessionManager,
+    call_next=None,
+    error=None,
+    response: Response = None,
+    websocket_manager: ConnectionManager = None,
+    authentication: AuthenticationManager | None = None,
 ):
-    if request.url.path in ["/openapi.json", "/docs", "/redoc", "/favicon.ico","/"]:
+    exclude_path = ["/openapi.json", "/docs", "/redoc", "/favicon.ico", "/"]
+
+    pass_next = False
+    for i in exclude_path :
+        if request.url.path.endswith(i):
+            pass_next = True
+    if pass_next :
         if call_next is None:
             return
-        else : return await call_next(request)
+        else:
+            return await call_next(request)
     response,process_time= await get_response_and_process_time(request,call_next,response)
     if error is None and (response.status_code <200 or response.status_code > 299)  :
         error = await read_response_body(response)
+    subject=None
+    if authentication is not None:
+        auth_header = request.headers.get("Authorization")
+        print(auth_header)
+        if auth_header is not None and auth_header.startswith("Bearer "):
+            token = auth_header[len("Bearer "):]
+            print(f"{token,auth_header=} ")
+            try:
+                subject = authentication.get_sub_from_token(token=token)
+            except Exception as e:
+                print(f"{str(e)=}")
+
     log = LogModel(
     process_time=process_time,
     status_code=response.status_code,
     url=str(request.url),
     method=request.method,
     error_message=error,
-    remote_address=str(request.client.host)
+    remote_address=str(request.client.host),
+    subject=subject
     )
     try :
         session = await session_manager.get_session()
@@ -81,7 +110,6 @@ async def read_response_body(response: Response)  -> str | None:
         # Si le corps n'est pas du JSON valide
         pass
     return None
-
 
 
 async def recreate_async_iterator(body: bytes):

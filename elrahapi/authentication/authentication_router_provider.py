@@ -129,13 +129,16 @@ class AuthenticationRouterProvider:
                         password=form_data.password,
                         sub=form_data.username,
                     )
-                    access_token_data = user.build_access_token_data()
-                    refresh_token_data = user.build_refresh_token_data()
+                    pk_name = self.authentication.authentication_models.primary_key_name
+                    access_token_data = user.build_access_token_data(
+                        pk_name=pk_name
+                    )
+                    refresh_token_data = user.build_refresh_token_data(pk_name=pk_name)
                     access_token = self.authentication.create_token(access_token_data,token_type=TokenType.ACCESS_TOKEN)
                     refresh_token = self.authentication.create_token(refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
                     return {
-                        "access_token": access_token["access_token"],
-                        "refresh_token": refresh_token["refresh_token"],
+                        TokenType.ACCESS_TOKEN.value: access_token[TokenType.ACCESS_TOKEN.value],
+                        TokenType.REFRESH_TOKEN.value: refresh_token[TokenType.REFRESH_TOKEN.value],
                         "token_type": "bearer",
                     }
 
@@ -201,13 +204,18 @@ class AuthenticationRouterProvider:
                         session=session,
                         password=usermodel.password,sub= sub
                     )
-                    access_token_data = user.build_access_token_data()
-                    refresh_token_data = user.build_refresh_token_data()
+                    pk_name = self.authentication.authentication_models.primary_key_name
+                    access_token_data = user.build_access_token_data(
+                        pk_name=pk_name
+                    )
+                    refresh_token_data = user.build_refresh_token_data(
+                        pk_name=pk_name
+                    )
                     access_token_data = self.authentication.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
                     refresh_token_data = self.authentication.create_token(data=refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
                     return {
-                        "access_token": access_token_data.get("access_token"),
-                        "refresh_token": refresh_token_data.get("refresh_token"),
+                        TokenType.ACCESS_TOKEN.value: access_token_data.get(TokenType.ACCESS_TOKEN.value),
+                        TokenType.REFRESH_TOKEN.value: refresh_token_data.get(TokenType.REFRESH_TOKEN.value),
                         "token_type": "bearer",
                     }
 
