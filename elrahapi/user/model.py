@@ -49,7 +49,7 @@ class UserModel:
 
     def build_refresh_token_data(self,pk_name:str):
         data = {
-            "sub": getattr(self, pk_name),
+            "sub": str(getattr(self, pk_name)),
         }
         return data
 

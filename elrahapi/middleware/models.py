@@ -21,7 +21,7 @@ class MetaLogModel:
     date_created = Column(DateTime, nullable=False, default=func.now())
     remote_address = Column(String(255), nullable=False)
     process_time = Column(Numeric(precision=10,scale=6), nullable=False)
-    subject = Column(String(50), nullable=True)
+
 
 
 
@@ -34,4 +34,3 @@ class MetaLogReadModel(BaseModel):
     date_created:datetime
     process_time:float
     remote_address:str
-    subject : str | None = None

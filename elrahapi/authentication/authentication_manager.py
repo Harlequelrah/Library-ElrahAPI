@@ -170,8 +170,8 @@ class AuthenticationManager:
 
     async def get_user_by_sub(self, sub: str,session: ElrahSession):
         try:
-            if sub.isdigit():
-                sub = int(sub)
+            # if sub.isdigit():
+            #     sub = int(sub)
             pk_attr = self.__authentication_models.get_pk()
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
@@ -228,6 +228,8 @@ class AuthenticationManager:
     def get_sub_from_token(self, token: str) -> str:
         payload = self.validate_token(token)
         sub: str = payload.get("sub")
+        if sub.isdigit():
+            sub = int(sub)
         return sub
 
     def check_authorization(
@@ -236,8 +238,7 @@ class AuthenticationManager:
         role_name: str | None = None,
     ) -> callable:
         async def auth_result(token: str = Depends(self.get_access_token)):
-            payload =  self.validate_token(token)
-            sub: str = payload.get("sub")
+            sub=self.get_sub_from_token(token=token)
             if role_name and sub:
                 return await self.is_authorized(
                     sub=sub,
@@ -328,8 +329,9 @@ class AuthenticationManager:
         self, session: ElrahSession, refresh_token_data: RefreshToken
     ):
         try :
-            payload =  self.validate_token(refresh_token_data.refresh_token)
-            sub = payload.get("sub")
+            # payload =  self.validate_token(refresh_token_data.refresh_token)
+            # sub = payload.get("sub")
+            sub = self.get_sub_from_token(token=refresh_token_data.refresh_token)
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(sub=sub, session=session)

@@ -51,7 +51,6 @@ async def save_log(
         if auth_header is not None and auth_header.startswith("Bearer "):
             token = auth_header[len("Bearer "):]
             subject = authentication.get_sub_from_token(token=token)
-
     log = LogModel(
     process_time=process_time,
     status_code=response.status_code,

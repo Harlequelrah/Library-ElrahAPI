@@ -150,7 +150,7 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
         is_activated=True,
         is_protected=True,
         summary="read one user ",
-        description="retrieve one user from credential :  email or username",
+        description="retrieve one user from sub :  email or username or pk",
     ),
     DefaultRoutesName.CHANGE_USER_STATE: RouteConfig(
         route_name=DefaultRoutesName.CHANGE_USER_STATE,
