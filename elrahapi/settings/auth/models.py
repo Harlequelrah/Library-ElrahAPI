@@ -18,6 +18,7 @@ class User( UserModel,database.base):
     __tablename__ = "users"
     user_privileges = relationship("UserPrivilege", back_populates="user")
     user_roles=relationship("UserRole",back_populates="user")
+    user_logs = relationship("LogModel",back_populates="user")
 
 class Role(RoleModel,database.base):
     __tablename__ = "roles"
