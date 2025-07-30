@@ -7,7 +7,7 @@ from elrahapi.authentication.authentication_namespace import (
     OAUTH2_SCHEME,
     REFRESH_TOKEN_EXPIRATION,
 )
-from elrahapi.authentication.token import AccessToken, RefreshToken
+from elrahapi.authentication.token import AccessToken, RefreshToken, TokenType
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
@@ -17,11 +17,17 @@ from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
 from elrahapi.utility.utils import exec_stmt
 from jose import ExpiredSignatureError, JWTError, jwt
-from sqlalchemy import or_, select
+from sqlalchemy import  select
+from sqlalchemy.sql import or_
 from fastapi import Depends, status
 
 from elrahapi.exception.custom_http_exception import CustomHttpException
+from dotenv import load_dotenv
+import os
+load_dotenv(".env")
 
+ISSUER = os.getenv("ISSUER")
+AUDIENCE = os.getenv("AUDIENCE")
 
 class AuthenticationManager:
 
@@ -91,39 +97,29 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def create_access_token(
-        self, data: dict, expires_delta: timedelta = None
-    ) -> AccessToken:
+    def create_token(self,
+        data: dict,
+        token_type: TokenType,
+        expires_delta: timedelta = None
+        )->AccessToken | RefreshToken :
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now() + expires_delta
         else:
+            milliseconds = self.__access_token_expiration if token_type == TokenType.ACCESS_TOKEN else self.__refresh_token_expiration
             expire = datetime.now() + timedelta(
-                milliseconds=self.__access_token_expiration
-            )
-        iat= datetime.now()
-        to_encode.update({"exp": expire,"iat": iat})
-        encode_jwt = jwt.encode(
-            to_encode, self.__secret_key, algorithm=self.__algorithm
-        )
-        return {"access_token": encode_jwt, "token_type": "bearer"}
-
-    def create_refresh_token(
-        self, data: dict, expires_delta: timedelta = None
-    ) -> RefreshToken:
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.now() + expires_delta
-        else:
-            expire = datetime.now() + timedelta(
-                milliseconds=self.__refresh_token_expiration
+                milliseconds=milliseconds
             )
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
+        if ISSUER :
+            to_encode.update({"iss": ISSUER})
+        if AUDIENCE :
+            to_encode.update({"aud": AUDIENCE})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
         )
-        return {"refresh_token": encode_jwt, "token_type": "bearer"}
+        return {token_type.value: encode_jwt, "token_type": "bearer"}
 
     def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
         self.validate_token(token)
@@ -133,13 +129,14 @@ class AuthenticationManager:
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
             return payload
-        except ExpiredSignatureError:
+        except ExpiredSignatureError as e:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token has expired : {str(e)}"
             )
-        except JWTError:
+        except JWTError as e:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token : {str(e)}",
             )
 
     async def change_user_state(self, pk: Any, session: ElrahSession):
@@ -173,16 +170,16 @@ class AuthenticationManager:
 
     async def get_user_by_sub(self, sub: str,session: ElrahSession):
         try:
-            stmt = (
-                select(self.__authentication_models.sqlalchemy_model)
-                .where(
-                    or_(
-                        self.__authentication_models.sqlalchemy_model.username
-                        == sub,
-                        self.__authentication_models.sqlalchemy_model.email
-                        == sub,
-                    )
-                )
+            # if sub.isdigit():
+            #     sub = int(sub)
+            pk_attr = self.__authentication_models.get_pk()
+            email_attr = self.__authentication_models.sqlalchemy_model.email
+            username_attr = self.__authentication_models.sqlalchemy_model.username
+            stmt = select(self.__authentication_models.sqlalchemy_model).where(
+                or_(
+                    pk_attr == sub,
+                    email_attr == sub,
+                    username_attr == sub)
             )
             result = await exec_stmt(
                 stmt=stmt,
@@ -228,14 +225,20 @@ class AuthenticationManager:
         finally:
             await self.session_manager.close_session(session=session)
 
+    def get_sub_from_token(self, token: str) -> str:
+        payload = self.validate_token(token)
+        sub: str = payload.get("sub")
+        if sub.isdigit():
+            sub = int(sub)
+        return sub
+
     def check_authorization(
         self,
         privilege_name: str | None = None,
         role_name: str | None = None,
     ) -> callable:
         async def auth_result(token: str = Depends(self.get_access_token)):
-            payload =  self.validate_token(token)
-            sub: str = payload.get("sub")
+            sub=self.get_sub_from_token(token=token)
             if role_name and sub:
                 return await self.is_authorized(
                     sub=sub,
@@ -326,15 +329,16 @@ class AuthenticationManager:
         self, session: ElrahSession, refresh_token_data: RefreshToken
     ):
         try :
-            payload =  self.validate_token(refresh_token_data.refresh_token)
-            sub = payload.get("sub")
+            # payload =  self.validate_token(refresh_token_data.refresh_token)
+            # sub = payload.get("sub")
+            sub = self.get_sub_from_token(token=refresh_token_data.refresh_token)
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(sub=sub, session=session)
             access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
-            data = user.build_access_token_data()
-            access_token = self.create_access_token(
-                data=data, expires_delta=access_token_expiration
+            data = user.build_access_token_data(pk_name=self.__authentication_models.primary_key_name)
+            access_token = self.create_token(
+                data=data, expires_delta=access_token_expiration,token_type=TokenType.ACCESS_TOKEN
             )
             return access_token
         except CustomHttpException as che:
@@ -364,7 +368,6 @@ class AuthenticationManager:
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
-
 
     async def change_password(
         self,session:ElrahSession, sub: str, current_password: str, new_password: str

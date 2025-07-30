@@ -34,6 +34,5 @@ user_seed = Seed(
 )
 
 if __name__ == "__main__":
-    print("user",sys.argv)
     session = database.session_manager.get_session_for_script()
     user_seed.run_seed(sys.argv, session)

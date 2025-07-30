@@ -79,7 +79,6 @@ def startproject(project_name):
 
     env_src_path = os.path.join(main_path_dir, ".env")
     env_dest_path = os.path.join(project_path, ".env")
-    print(f"{env_src_path,env_dest_path=}")
     shutil.copyfile(env_src_path, env_dest_path)
     print(f"The '.env' file has been copied to {env_dest_path}")
 
@@ -112,6 +111,8 @@ def startproject(project_name):
         for line in lines:
             if line.strip().startswith("PROJECT_NAME"):
                 f.write(f"PROJECT_NAME = {project_name}\n")
+            elif line.strip().startswith("ISSUER"):
+                f.write(f"ISSUER = {project_name}\n")
             else:
                 f.write(line)
     print(Fore.CYAN+f"The project {project_name} has been created successfully.")

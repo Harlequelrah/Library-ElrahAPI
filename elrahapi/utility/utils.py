@@ -38,9 +38,11 @@ def update_entity(existing_entity, update_entity: Type[BaseModel]):
 def validate_value(value: Any):
     if value is None:
         return None
-    elif value.lower() == "true":
+    elif isinstance(value, bool):
+        return value
+    elif value.lower() == "true" :
         value = True
-    elif value.lower() == "false":
+    elif value.lower() == "false" :
         value = False
     elif value.isdigit():
         value = int(value)
@@ -58,7 +60,7 @@ def get_pks(l : list,pk_name:str):
         pk_list.append(pk)
     return pk_list
 
-    pass
+
 def make_filter(
     stmt: Select,
     crud_models: CrudModels,

@@ -1,7 +1,7 @@
 from typing import Any
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.authentication.token import AccessToken, RefreshToken, Token
+from elrahapi.authentication.token import AccessToken, RefreshToken, Token, TokenType
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
@@ -129,19 +129,22 @@ class AuthenticationRouterProvider:
                         password=form_data.password,
                         sub=form_data.username,
                     )
-                    access_token_data = user.build_access_token_data()
-                    refresh_token_data = user.build_refresh_token_data()
-                    access_token = self.authentication.create_access_token(access_token_data)
-                    refresh_token = self.authentication.create_refresh_token(refresh_token_data)
+                    pk_name = self.authentication.authentication_models.primary_key_name
+                    access_token_data = user.build_access_token_data(
+                        pk_name=pk_name
+                    )
+                    refresh_token_data = user.build_refresh_token_data(pk_name=pk_name)
+                    access_token = self.authentication.create_token(access_token_data,token_type=TokenType.ACCESS_TOKEN)
+                    refresh_token = self.authentication.create_token(refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
                     return {
-                        "access_token": access_token["access_token"],
-                        "refresh_token": refresh_token["refresh_token"],
+                        TokenType.ACCESS_TOKEN.value: access_token[TokenType.ACCESS_TOKEN.value],
+                        TokenType.REFRESH_TOKEN.value: refresh_token[TokenType.REFRESH_TOKEN.value],
                         "token_type": "bearer",
                     }
 
             if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN:
 
-                @self.router.post(
+                @self.router.get(
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
@@ -158,8 +161,8 @@ class AuthenticationRouterProvider:
                         sub=current_user_sub,
                         session=session
                         )
-                    data = current_user.build_refresh_token_data()
-                    refresh_token = self.authentication.create_refresh_token(data)
+                    data = current_user.build_refresh_token_data(pk_name=self.authentication.authentication_models.primary_key_name)
+                    refresh_token = self.authentication.create_token(data=data,token_type=TokenType.REFRESH_TOKEN)
                     return refresh_token
 
             if config.route_name == DefaultRoutesName.REFRESH_TOKEN:
@@ -201,13 +204,18 @@ class AuthenticationRouterProvider:
                         session=session,
                         password=usermodel.password,sub= sub
                     )
-                    access_token_data = user.build_access_token_data()
-                    refresh_token_data = user.build_refresh_token_data()
-                    access_token_data = self.authentication.create_access_token(data=access_token_data)
-                    refresh_token_data = self.authentication.create_refresh_token(data=refresh_token_data)
+                    pk_name = self.authentication.authentication_models.primary_key_name
+                    access_token_data = user.build_access_token_data(
+                        pk_name=pk_name
+                    )
+                    refresh_token_data = user.build_refresh_token_data(
+                        pk_name=pk_name
+                    )
+                    access_token_data = self.authentication.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
+                    refresh_token_data = self.authentication.create_token(data=refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
                     return {
-                        "access_token": access_token_data.get("access_token"),
-                        "refresh_token": refresh_token_data.get("refresh_token"),
+                        TokenType.ACCESS_TOKEN.value: access_token_data.get(TokenType.ACCESS_TOKEN.value),
+                        TokenType.REFRESH_TOKEN.value: refresh_token_data.get(TokenType.REFRESH_TOKEN.value),
                         "token_type": "bearer",
                     }
 

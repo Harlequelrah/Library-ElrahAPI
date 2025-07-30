@@ -39,23 +39,19 @@ class UserModel:
     MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
-    def build_access_token_data(self):
+    def build_access_token_data(self,pk_name:str):
+
         data = {
-            "sub": self.username,
-            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active],
-            "privileges": [
-                user_privilege.privilege.name
-                for user_privilege in self.user_privileges if user_privilege.is_active and user_privilege.privilege.is_active
-            ],
+            "sub": str(getattr(self, pk_name)),
+            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active]
         }
         return data
 
-    def build_refresh_token_data(self):
+    def build_refresh_token_data(self,pk_name:str):
         data = {
-            "sub": self.username,
+            "sub": str(getattr(self, pk_name)),
         }
         return data
-
 
     def try_login(self, is_success: bool):
         if is_success:
