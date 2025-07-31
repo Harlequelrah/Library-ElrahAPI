@@ -112,7 +112,7 @@ class AuthenticationRouterProvider:
             if config.route_name == DefaultRoutesName.TOKEN_URL:
 
                 @self.router.post(
-                    response_model=Token,
+                    response_model=AccessToken,
                     path=config.route_path,
                     summary=config.summary if config.summary else None,
                     description=config.description if config.description else None,
@@ -129,18 +129,11 @@ class AuthenticationRouterProvider:
                         password=form_data.password,
                         sub=form_data.username,
                     )
-                    pk_name = self.authentication.authentication_models.primary_key_name
                     access_token_data = user.build_access_token_data(
-                        pk_name=pk_name
+                        authentication=self.authentication
                     )
-                    refresh_token_data = user.build_refresh_token_data(pk_name=pk_name)
                     access_token = self.authentication.create_token(access_token_data,token_type=TokenType.ACCESS_TOKEN)
-                    refresh_token = self.authentication.create_token(refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
-                    return {
-                        TokenType.ACCESS_TOKEN.value: access_token[TokenType.ACCESS_TOKEN.value],
-                        TokenType.REFRESH_TOKEN.value: refresh_token[TokenType.REFRESH_TOKEN.value],
-                        "token_type": "bearer",
-                    }
+                    return access_token
 
             if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN:
 
@@ -204,20 +197,17 @@ class AuthenticationRouterProvider:
                         session=session,
                         password=usermodel.password,sub= sub
                     )
-                    pk_name = self.authentication.authentication_models.primary_key_name
                     access_token_data = user.build_access_token_data(
-                        pk_name=pk_name
+                        authentication=self.authentication
                     )
                     refresh_token_data = user.build_refresh_token_data(
-                        pk_name=pk_name
+                        authentication=self.authentication
                     )
-                    access_token_data = self.authentication.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
-                    refresh_token_data = self.authentication.create_token(data=refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
-                    return {
-                        TokenType.ACCESS_TOKEN.value: access_token_data.get(TokenType.ACCESS_TOKEN.value),
-                        TokenType.REFRESH_TOKEN.value: refresh_token_data.get(TokenType.REFRESH_TOKEN.value),
-                        "token_type": "bearer",
-                    }
+                    login_token = self.authentication.build_login_token(
+                        access_token_data=access_token_data,
+                        refresh_token_data=refresh_token_data
+                    )
+                    return login_token
 
             if config.route_name == DefaultRoutesName.CHANGE_PASSWORD:
 

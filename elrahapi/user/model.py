@@ -1,5 +1,6 @@
 from argon2 import PasswordHasher
 from argon2 import exceptions as Ex
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.exception.auth_exception import (
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
 )
@@ -39,15 +40,27 @@ class UserModel:
     MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
-    def build_access_token_data(self,pk_name:str):
-
+    def build_access_token_data(self,authentication:AuthenticationManager):
+        pk_name = authentication.authentication_models.primary_key_name
         data = {
             "sub": str(getattr(self, pk_name)),
             "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active]
         }
         return data
 
-    def build_refresh_token_data(self,pk_name:str):
+    def build_refresh_token_data(
+        self,authentication: AuthenticationManager
+    ):
+        pk_name = authentication.authentication_models.primary_key_name
+        data = {
+            "sub": str(getattr(self, pk_name)),
+        }
+        return data
+
+    def build_temp_token_data(
+        self, authentication: AuthenticationManager
+    ):
+        pk_name = authentication.authentication_models.primary_key_name
         data = {
             "sub": str(getattr(self, pk_name)),
         }
