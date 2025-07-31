@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from elrahapi.utility.utils import get_env_int,validate_value
+from elrahapi.utility.utils import get_env_int, validate_value
 
 load_dotenv(".env")
 
@@ -16,5 +16,7 @@ IS_ASYNC_ENV = validate_value(os.getenv("IS_ASYNC_ENV"))
 USER_MAX_ATTEMPT_LOGIN: int | None = get_env_int("USER_MAX_ATTEMPT_LOGIN")
 ACCESS_TOKEN_EXPIRATION: int | None = get_env_int("ACCESS_TOKEN_EXPIRATION")
 REFRESH_TOKEN_EXPIRATION: int | None = get_env_int("REFRESH_TOKEN_EXPIRATION")
+TEMP_TOKEN_EXPIRATION: int | None = get_env_int("TEMP_TOKEN_EXPIRATION")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
+PREDICT_MODELS_PATH = os.getenv("PREDICT_MODELS_PATH")

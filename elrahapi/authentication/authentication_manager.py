@@ -6,8 +6,15 @@ from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
     OAUTH2_SCHEME,
     REFRESH_TOKEN_EXPIRATION,
+    TEMP_TOKEN_EXPIRATION,
 )
-from elrahapi.authentication.token import AccessToken, RefreshToken, TokenType
+from elrahapi.authentication.token import (
+    AccessToken,
+    RefreshToken,
+    TempToken,
+    Token,
+    TokenType,
+)
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
@@ -17,28 +24,30 @@ from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
 from elrahapi.utility.utils import exec_stmt
 from jose import ExpiredSignatureError, JWTError, jwt
-from sqlalchemy import  select
+from sqlalchemy import select
 from sqlalchemy.sql import or_
 from fastapi import Depends, status
 
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from dotenv import load_dotenv
 import os
+
 load_dotenv(".env")
 
 ISSUER = os.getenv("ISSUER")
 AUDIENCE = os.getenv("AUDIENCE")
 
+
 class AuthenticationManager:
 
     def __init__(
         self,
-        session_manager:SessionManager ,
+        session_manager: SessionManager,
         secret_key: str | None = None,
         algorithm: str | None = None,
         refresh_token_expiration: int | None = None,
         access_token_expiration: int | None = None,
-
+        temp_token_expiration: int | None = None,
     ):
         self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
@@ -50,6 +59,9 @@ class AuthenticationManager:
             access_token_expiration
             if access_token_expiration
             else ACCESS_TOKEN_EXPIRATION
+        )
+        self.__temp_token_expiration = (
+            temp_token_expiration if temp_token_expiration else TEMP_TOKEN_EXPIRATION
         )
         self.__algorithm, self.__secret_key = define_algorithm_and_key(
             secret_key,
@@ -97,24 +109,28 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def create_token(self,
-        data: dict,
-        token_type: TokenType,
-        expires_delta: timedelta = None
-        )->AccessToken | RefreshToken :
+    def get_token_duration(self, token_type: TokenType):
+        if token_type == TokenType.ACCESS_TOKEN:
+            return self.__access_token_expiration
+        elif token_type == TokenType.REFRESH_TOKEN:
+            return self.__refresh_token_expiration
+        else:
+            return self.__refresh_token_expiration
+
+    def create_token(
+        self, data: dict, token_type: TokenType, expires_delta: timedelta = None
+    ) -> AccessToken | RefreshToken | TempToken:
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.now() + expires_delta
         else:
-            milliseconds = self.__access_token_expiration if token_type == TokenType.ACCESS_TOKEN else self.__refresh_token_expiration
-            expire = datetime.now() + timedelta(
-                milliseconds=milliseconds
-            )
+            milliseconds = self.get_token_duration(token_type=token_type)
+            expire = datetime.now() + timedelta(milliseconds=milliseconds)
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
-        if ISSUER :
+        if ISSUER:
             to_encode.update({"iss": ISSUER})
-        if AUDIENCE :
+        if AUDIENCE:
             to_encode.update({"aud": AUDIENCE})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
@@ -131,7 +147,8 @@ class AuthenticationManager:
             return payload
         except ExpiredSignatureError as e:
             raise_custom_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token has expired : {str(e)}"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Token has expired : {str(e)}",
             )
         except JWTError as e:
             raise_custom_http_exception(
@@ -150,25 +167,24 @@ class AuthenticationManager:
             if user:
                 user.change_user_state()
                 await self.session_manager.commit_and_refresh(
-                    session=session,
-                    object=user
+                    session=session, object=user
                 )
             else:
                 detail = "User Not Found"
                 raise_custom_http_exception(
                     status_code=status.HTTP_404_NOT_FOUND, detail=detail
                 )
-        except CustomHttpException as che :
+        except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
             raise che
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
-            detail=f"Error while changing user state: {str(e)}"
+            detail = f"Error while changing user state: {str(e)}"
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    async def get_user_by_sub(self, sub: str,session: ElrahSession):
+    async def get_user_by_sub(self, sub: str, session: ElrahSession):
         try:
             # if sub.isdigit():
             #     sub = int(sub)
@@ -176,15 +192,9 @@ class AuthenticationManager:
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
             stmt = select(self.__authentication_models.sqlalchemy_model).where(
-                or_(
-                    pk_attr == sub,
-                    email_attr == sub,
-                    username_attr == sub)
+                or_(pk_attr == sub, email_attr == sub, username_attr == sub)
             )
-            result = await exec_stmt(
-                stmt=stmt,
-                session=session
-            )
+            result = await exec_stmt(stmt=stmt, session=session)
             user = result.scalar_one_or_none()
             if user is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -204,10 +214,10 @@ class AuthenticationManager:
         sub: str,
         privilege_name: str | None = None,
         role_name: str | None = None,
-        ) -> bool:
+    ) -> bool:
         try:
             session: ElrahSession = await self.session_manager.get_session()
-            user = await self.get_user_by_sub(sub=sub,session=session)
+            user = await self.get_user_by_sub(sub=sub, session=session)
             if role_name:
                 return user.has_role(role_name=role_name)
             elif privilege_name:
@@ -217,15 +227,14 @@ class AuthenticationManager:
             raise che
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
-            detail="Error while checking authorization: " + str(e)
+            detail = "Error while checking authorization: " + str(e)
             raise_custom_http_exception(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=detail
-                )
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
+            )
         finally:
             await self.session_manager.close_session(session=session)
 
-    def get_sub_from_token(self, token: str) -> str:
+    def get_sub_from_token(self, token: str) -> str|int:
         payload = self.validate_token(token)
         sub: str = payload.get("sub")
         if sub.isdigit():
@@ -238,72 +247,79 @@ class AuthenticationManager:
         role_name: str | None = None,
     ) -> callable:
         async def auth_result(token: str = Depends(self.get_access_token)):
-            sub=self.get_sub_from_token(token=token)
+            sub = self.get_sub_from_token(token=token)
             if role_name and sub:
                 return await self.is_authorized(
                     sub=sub,
                     role_name=role_name,
                 )
-            elif privilege_name and sub :
+            elif privilege_name and sub:
                 return await self.is_authorized(
                     sub=sub,
                     privilege_name=privilege_name,
                 )
-            elif (role_name and privilege_name) or (not role_name and not privilege_name):
+            elif (role_name and privilege_name) or (
+                not role_name and not privilege_name
+            ):
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Either role or privilege must be provided, not both"
+                    detail="Either role or privilege must be provided, not both",
                 )
             else:
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Sub must be provided , Maybe User is not authenticated"
+                    detail="Sub must be provided , Maybe User is not authenticated",
                 )
+
         return auth_result
 
     def check_authorizations(
         self,
         privileges_name: list[str] | None = None,
         roles_name: list[str] | None = None,
-    ) ->list[callable]:
+    ) -> list[callable]:
         authorizations = []
         for privilege_name in privileges_name:
             authorizations.append(
-                self.check_authorization(
-                    privilege_name=privilege_name
-                    )
+                self.check_authorization(privilege_name=privilege_name)
             )
         for role_name in roles_name:
-            authorizations.append(
-                self.check_authorization(role_name=role_name)
-            )
+            authorizations.append(self.check_authorization(role_name=role_name))
         return authorizations
 
+    def build_login_token(
+        self,
+        access_token_data:str,
+        refresh_token_data: str
+    )->Token:
+        access_token_data = self.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
+        refresh_token_data = self.create_token(data=refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
+        return {
+            TokenType.ACCESS_TOKEN.value: access_token_data.get(TokenType.ACCESS_TOKEN.value),
+            TokenType.REFRESH_TOKEN.value: refresh_token_data.get(TokenType.REFRESH_TOKEN.value),
+            "token_type": "bearer",
+            }
     async def authenticate_user(
         self,
         password: str,
         session: ElrahSession,
         sub: str | None = None,
     ):
-        try :
+        try:
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(session=session, sub=sub)
             if user:
                 if not user.check_password(password):
                     user.try_login(False)
-                    await  self.session_manager.commit_and_refresh(
-                        session=session,
-                        object=user
+                    await self.session_manager.commit_and_refresh(
+                        session=session, object=user
                     )
                     raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
                 if not user.is_active:
                     raise INACTIVE_USER_CUSTOM_HTTP_EXCEPTION
             user.try_login(True)
-            await self.session_manager.commit_and_refresh(
-                session=session,
-                object=user
-            )
+            await self.session_manager.commit_and_refresh(session=session, object=user)
             return user
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
@@ -319,7 +335,7 @@ class AuthenticationManager:
         self,
         token: str = Depends(OAUTH2_SCHEME),
     ):
-        payload =  self.validate_token(token)
+        payload = self.validate_token(token)
         sub: str = payload.get("sub")
         if sub is None:
             raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
@@ -328,17 +344,23 @@ class AuthenticationManager:
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken
     ):
-        try :
+        try:
             # payload =  self.validate_token(refresh_token_data.refresh_token)
             # sub = payload.get("sub")
             sub = self.get_sub_from_token(token=refresh_token_data.refresh_token)
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             user = await self.get_user_by_sub(sub=sub, session=session)
-            access_token_expiration = timedelta(milliseconds=self.__access_token_expiration)
-            data = user.build_access_token_data(pk_name=self.__authentication_models.primary_key_name)
+            access_token_expiration = timedelta(
+                milliseconds=self.__access_token_expiration
+            )
+            data = user.build_access_token_data(
+                pk_name=self.__authentication_models.primary_key_name
+            )
             access_token = self.create_token(
-                data=data, expires_delta=access_token_expiration,token_type=TokenType.ACCESS_TOKEN
+                data=data,
+                expires_delta=access_token_expiration,
+                token_type=TokenType.ACCESS_TOKEN,
             )
             return access_token
         except CustomHttpException as che:
@@ -351,13 +373,13 @@ class AuthenticationManager:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    async def is_existing_user(self,session:ElrahSession, sub: str):
-        user= await self.get_user_by_sub(sub=sub,session=session)
+    async def is_existing_user(self, session: ElrahSession, sub: str):
+        user = await self.get_user_by_sub(sub=sub, session=session)
         return user is not None
 
-    async def read_one_user(self,session:ElrahSession,sub: str):
+    async def read_one_user(self, session: ElrahSession, sub: str):
         try:
-            user= await self.get_user_by_sub(sub=sub,session=session)
+            user = await self.get_user_by_sub(sub=sub, session=session)
             return user
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
@@ -370,7 +392,7 @@ class AuthenticationManager:
             )
 
     async def change_password(
-        self,session:ElrahSession, sub: str, current_password: str, new_password: str
+        self, session: ElrahSession, sub: str, current_password: str, new_password: str
     ):
         current_user = await self.authenticate_user(
             password=current_password,
@@ -379,6 +401,5 @@ class AuthenticationManager:
         )
         current_user.password = new_password
         await self.session_manager.commit_and_refresh(
-            session=session,
-            object=current_user
+            session=session, object=current_user
         )
