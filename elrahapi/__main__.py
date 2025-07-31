@@ -217,7 +217,7 @@ def run_seed(seed_name,action:bool):
     env["PYTHONPATH"] = apps_dir
     subprocess.run(
         [
-            "python",
+            sys.executable,
             seeder_path,
             "up" if action else "down",
         ],
@@ -237,7 +237,7 @@ def run_seed_manager(action:str):
     env["PYTHONPATH"] = apps_dir
     subprocess.run(
         [
-            "python",
+            sys.executable,
             seeder_path,
             "up" if action else "down",
         ],
@@ -248,7 +248,7 @@ def run_seed_manager(action:str):
 def run():
     project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
-    subprocess.run(["python", main_entry])
+    subprocess.run([sys.executable, main_entry])
 
 
 def main():

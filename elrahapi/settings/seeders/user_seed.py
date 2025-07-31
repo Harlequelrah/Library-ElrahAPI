@@ -2,6 +2,7 @@ import sys
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import user_crud
 from settings.auth.schemas import UserCreateModel
+from settings.logger.model import LogModel
 from settings.database import database
 from log.seeders_logger import seeders_logger, SEEDERS_LOGS
 from settings.secret import SECRET_KEY # .env
