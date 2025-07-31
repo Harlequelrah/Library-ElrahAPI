@@ -51,6 +51,7 @@ async def save_log(
     )
     if error is None and (response.status_code < 200 or response.status_code > 299):
         error = await read_response_body(response)
+    session = await session_manager.get_session()
     try:
         subject = None
         if authentication is not None:
@@ -66,8 +67,7 @@ async def save_log(
             error_message=error,
             remote_address=str(request.client.host),
         )
-        setattr(log,authentication.authentication_models.primary_key_name,subject)
-        session = await session_manager.get_session()
+        setattr(log,LogModel.USER_FK_NAME,subject)
         session.add(log)
         await session_manager.commit_and_refresh(session=session, object=log)
         if error is not None and websocket_manager is not None:
@@ -77,7 +77,9 @@ async def save_log(
         return response
     except Exception as err:
         await session_manager.rollback_session(session)
+
         error_message = f"error : An unexpected error occurred during saving log , details : {str(err)}"
+        print(error_message)
         raise_custom_http_exception(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_message
         )
