@@ -1,6 +1,7 @@
 import sys
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import privilege_crud
+from settings.logger.model import LogModel
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from settings.database import database
 from log.seeders_logger import seeders_logger, SEEDERS_LOGS
@@ -28,7 +29,6 @@ data: list[PrivilegeCreateModel] = [
         name="CAN DO ACTION 4", description="Can do action 4", is_active=True
     ),
 ]
-
 
 
 privilege_seed = Seed(

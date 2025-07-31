@@ -1,4 +1,4 @@
-from settings.seeders.user_seed import user_seed
+from settings.seeders.user_seed import user_seed,LogModel
 from settings.seeders.role_seed import role_seed
 from settings.seeders.privilege_seed import privilege_seed
 from settings.seeders.user_role_seed import user_role_seed
