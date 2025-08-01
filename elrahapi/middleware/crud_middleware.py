@@ -54,7 +54,6 @@ async def save_log(
     if error is None and (response.status_code < 200 or response.status_code > 299):
         error = await read_response_body(response)
     session = await session_manager.get_session()
-    final_response:Response=None
     try:
         subject = None
         if authentication is not None:
@@ -77,22 +76,25 @@ async def save_log(
             message = f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
-        final_response=response
+        return response
     except CustomHttpException as che:
-        error_message = f"error : An unexpected error occurred during saving log , details : {str(che)}"
-        final_response = response.copy()
-        final_response["content"]={"error": "Unexpected error", "details":error_message}
+        await session_manager.rollback_session(session)
+        if   "/logout" in request.url.path :
+            return response
+        else:
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"error": "Custom HTTP error", "details": che.http_exception.detail},
+            )
     except Exception as err:
         await session_manager.rollback_session(session)
-        error_message = f"Custom HTTP error : An unexpected error occurred during saving log , details : {str(err)}"
-        final_response = response.copy()
-        final_response["content"] = {
-            "error": "Unexpected error",
-            "details": error_message,
-        }
+        error_message = f"error : An unexpected error occurred during saving log , details : {str(err)}"
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"error": "Unexpected error", "details": error_message},
+        )
     finally:
         await session_manager.close_session(session)
-        return final_response
 
 
 async def read_response_body(response: Response) -> str | None:
