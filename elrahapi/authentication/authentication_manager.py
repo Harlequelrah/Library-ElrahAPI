@@ -145,15 +145,20 @@ class AuthenticationManager:
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
             return payload
-        except ExpiredSignatureError as e:
+        except ExpiredSignatureError as experr:
             raise_custom_http_exception(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Token has expired : {str(e)}",
+                detail=f"Token has expired : {str(experr)}",
             )
-        except JWTError as e:
+        except JWTError as jwterr:
             raise_custom_http_exception(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Invalid token : {str(e)}",
+                detail=f"Invalid token : {str(jwterr)}",
+            )
+        except Exception as err:
+            raise_custom_http_exception(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error decoding token :  {str(err)}"
             )
 
     async def change_user_state(self, pk: Any, session: ElrahSession):
@@ -240,6 +245,7 @@ class AuthenticationManager:
         if sub.isdigit():
             sub = int(sub)
         return sub
+
 
     def check_authorization(
         self,
@@ -345,8 +351,6 @@ class AuthenticationManager:
         self, session: ElrahSession, refresh_token_data: RefreshToken
     ):
         try:
-            # payload =  self.validate_token(refresh_token_data.refresh_token)
-            # sub = payload.get("sub")
             sub = self.get_sub_from_token(token=refresh_token_data.refresh_token)
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION

@@ -3,7 +3,9 @@ import time
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.database.session_manager import SessionManager
 from fastapi import Request, status
+from fastapi.responses import JSONResponse
 from starlette.responses import Response
+from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.websocket.connection_manager import ConnectionManager
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 
@@ -52,12 +54,13 @@ async def save_log(
     if error is None and (response.status_code < 200 or response.status_code > 299):
         error = await read_response_body(response)
     session = await session_manager.get_session()
+    final_response:Response=None
     try:
         subject = None
         if authentication is not None:
             auth_header = request.headers.get("Authorization")
             if auth_header is not None and auth_header.startswith("Bearer "):
-                token = auth_header[len("Bearer ") :]
+                token = auth_header[len("Bearer "):]
                 subject = authentication.get_sub_from_token(token=token)
         log = LogModel(
             process_time=process_time,
@@ -74,17 +77,22 @@ async def save_log(
             message = f"An error occurred during the request with the status code {response.status_code}, please check the log {log.id} for more information"
             if websocket_manager is not None:
                 await websocket_manager.broadcast(message)
-        return response
+        final_response=response
+    except CustomHttpException as che:
+        error_message = f"error : An unexpected error occurred during saving log , details : {str(che)}"
+        final_response = response.copy()
+        final_response["content"]={"error": "Unexpected error", "details":error_message}
     except Exception as err:
         await session_manager.rollback_session(session)
-
-        error_message = f"error : An unexpected error occurred during saving log , details : {str(err)}"
-        print(error_message)
-        raise_custom_http_exception(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_message
-        )
+        error_message = f"Custom HTTP error : An unexpected error occurred during saving log , details : {str(err)}"
+        final_response = response.copy()
+        final_response["content"] = {
+            "error": "Unexpected error",
+            "details": error_message,
+        }
     finally:
         await session_manager.close_session(session)
+        return final_response
 
 
 async def read_response_body(response: Response) -> str | None:
