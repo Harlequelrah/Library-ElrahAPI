@@ -154,7 +154,7 @@ class AuthenticationRouterProvider:
                         sub=current_user_sub,
                         session=session
                         )
-                    data = current_user.build_refresh_token_data(pk_name=self.authentication.authentication_models.primary_key_name)
+                    data = current_user.build_refresh_token_data(authentication=self.authentication)
                     refresh_token = self.authentication.create_token(data=data,token_type=TokenType.REFRESH_TOKEN)
                     return refresh_token
 

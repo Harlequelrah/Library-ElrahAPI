@@ -359,7 +359,7 @@ class AuthenticationManager:
                 milliseconds=self.__access_token_expiration
             )
             data = user.build_access_token_data(
-                pk_name=self.__authentication_models.primary_key_name
+                authentication=self
             )
             access_token = self.create_token(
                 data=data,
