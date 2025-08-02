@@ -115,7 +115,7 @@ class AuthenticationManager:
         elif token_type == TokenType.REFRESH_TOKEN:
             return self.__refresh_token_expiration
         else:
-            return self.__refresh_token_expiration
+            return self.__temp_token_expiration
 
     def create_token(
         self, data: dict, token_type: TokenType, expires_delta: timedelta = None
