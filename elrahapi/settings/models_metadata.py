@@ -1,6 +1,6 @@
 # from .myapp1.models import metadata as myapp_metadata1
 # from .myapp2.models import metadata as myapp_metadata2
-from .auth.models import metadata as auth_metadata,database
+from .auth.models import metadata as auth_metadata
 from .logger.model import metadata as logger_metadata
 from sqlalchemy import MetaData
 target_metadata = MetaData()

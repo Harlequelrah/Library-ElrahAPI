@@ -9,7 +9,7 @@
 #     ForeignKey,
 #     Table,
 # )
-# from ..settings.database import database
+# from settings.database import database
 
 # from sqlalchemy.sql import func
 # from sqlalchemy.orm import relationship

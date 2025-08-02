@@ -248,7 +248,9 @@ def run_seed_manager(action:str):
 def run():
     project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
-    subprocess.run([sys.executable, main_entry])
+    env = os.environ.copy()
+    env["PYTHONPATH"] = get_apps_dir()
+    subprocess.run([sys.executable, main_entry],env=env)
 
 
 def main():
