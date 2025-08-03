@@ -1,4 +1,4 @@
-from typing import  Type
+from typing import Type
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     AuthorizationConfig,
@@ -11,11 +11,15 @@ from elrahapi.router.router_namespace import (
     USER_AUTH_CONFIG,
     TypeRelation,
     TypeRoute,
-    DefaultRouteConfig
+    DefaultRouteConfig,
 )
 from pydantic import BaseModel
 from fastapi import Depends
-from elrahapi.router.router_routes_name import RelationRoutesName, DefaultRoutesName,RoutesName
+from elrahapi.router.router_routes_name import (
+    RelationRoutesName,
+    DefaultRoutesName,
+    RoutesName,
+)
 
 
 def exclude_route(
@@ -63,14 +67,14 @@ def initialize_dependecies(
             for privilege in privileges:
                 config.privileges.append(privilege)
         if config.roles or config.privileges:
-            authorizations: list[callable] =  config.get_authorizations(
+            authorizations: list[callable] = config.get_authorizations(
                 authentication=authentication
             )
             dependencies: list[Depends] = [
                 Depends(authorization) for authorization in authorizations
             ]
         else:
-            dependencies = [Depends(authentication.get_access_token)]
+            dependencies = [Depends(authentication.get_access_token())]
     return dependencies
 
 
@@ -109,7 +113,9 @@ def set_response_model_config(
             None,
         )
         if response_model_config:
-            route_config.extend_response_model_config(response_model_config=response_model_config)
+            route_config.extend_response_model_config(
+                response_model_config=response_model_config
+            )
             final_routes_config.append(route_config)
     return final_routes_config
 
@@ -119,7 +125,7 @@ def format_init_data(
     read_with_relations: bool,
     authorizations: list[AuthorizationConfig] | None = None,
     exclude_routes_name: list[DefaultRoutesName] | None = None,
-    authentication: AuthenticationManager |  None = None,
+    authentication: AuthenticationManager | None = None,
     response_model_configs: list[ResponseModelConfig] | None = None,
     roles: list[str] | None = None,
     privileges: list[str] | None = None,
@@ -138,7 +144,7 @@ def format_init_data(
     )
     for route_config in formatted_data:
         if route_config.is_protected:
-            route_config.dependencies =  initialize_dependecies(
+            route_config.dependencies = initialize_dependecies(
                 config=route_config,
                 authentication=authentication,
                 roles=roles,
@@ -154,11 +160,11 @@ def format_init_data(
     )
     for route_config in formatted_data:
         response_model = set_response_model(
-                route_config=route_config,
-                read_with_relations=read_with_relations,
-                ReadPydanticModel=ReadPydanticModel,
-                FullReadPydanticModel=FullReadPydanticModel,
-            )
+            route_config=route_config,
+            read_with_relations=read_with_relations,
+            ReadPydanticModel=ReadPydanticModel,
+            FullReadPydanticModel=FullReadPydanticModel,
+        )
         route_config.response_model = response_model
     return formatted_data
 
@@ -166,8 +172,8 @@ def format_init_data(
 def set_response_model(
     route_config: RouteConfig,
     read_with_relations: bool,
-    ReadPydanticModel: Type[BaseModel] | None= None,
-    FullReadPydanticModel: Type[BaseModel] |  None = None,
+    ReadPydanticModel: Type[BaseModel] | None = None,
+    FullReadPydanticModel: Type[BaseModel] | None = None,
 ):
     if FullReadPydanticModel is None:
         return ReadPydanticModel
@@ -188,6 +194,3 @@ def is_verified_relation_rule(
     relation_route_name: RelationRoutesName,
 ):
     return relation_route_name in RELATION_RULES[type_relation]
-
-
-

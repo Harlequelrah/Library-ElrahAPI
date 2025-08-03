@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Any
+
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
-    OAUTH2_SCHEME,
     REFRESH_TOKEN_EXPIRATION,
     TEMP_TOKEN_EXPIRATION,
+    TOKEN_URL,
 )
 from elrahapi.authentication.token import (
     AccessToken,
@@ -48,6 +50,7 @@ class AuthenticationManager:
         refresh_token_expiration: int | None = None,
         access_token_expiration: int | None = None,
         temp_token_expiration: int | None = None,
+        security: OAuth2PasswordBearer|HTTPBearer|None=None
     ):
         self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
@@ -68,6 +71,7 @@ class AuthenticationManager:
             algorithm,
         )
         self.__session_manager: SessionManager = session_manager
+        self.security  = security if security  else OAuth2PasswordBearer(TOKEN_URL)
 
     @property
     def session_manager(self) -> SessionManager:
@@ -137,9 +141,31 @@ class AuthenticationManager:
         )
         return {token_type.value: encode_jwt, "token_type": "bearer"}
 
-    def get_access_token(self, token=Depends(OAUTH2_SCHEME)):
-        self.validate_token(token)
-        return token
+    # def get_access_token(self):
+    #     # get_token_func =
+    #     # print(f"{get_token_func,type(get_token_func)=}")
+    #     def get_token(get_token_func:callable=self.get_token()):
+    #         return Depends(get_token_func()())
+    #     # print("type",type(get_token))
+    #     return get_token
+    #     # return get_token()
+
+    def get_access_token(self) -> callable:
+        def get_oauth2passwordbearer_token(token: str = Depends(self.security)):
+            return token
+
+        def get_httpbearer_token(
+            credentials: HTTPAuthorizationCredentials = Depends(self.security)
+        ):
+            print(credentials)
+            return credentials.credentials
+        try:
+            if isinstance(self.security, OAuth2PasswordBearer):
+                return get_oauth2passwordbearer_token
+            else:
+                return get_httpbearer_token
+        except Exception as exc:
+            print(f"ex{str(exc)}")
 
     def validate_token(self, token: str):
         try:
@@ -246,13 +272,12 @@ class AuthenticationManager:
             sub = int(sub)
         return sub
 
-
     def check_authorization(
         self,
         privilege_name: str | None = None,
         role_name: str | None = None,
     ) -> callable:
-        async def auth_result(token: str = Depends(self.get_access_token)):
+        async def auth_result(token: str = Depends(self.get_access_token())):
             sub = self.get_sub_from_token(token=token)
             if role_name and sub:
                 return await self.is_authorized(
@@ -339,13 +364,14 @@ class AuthenticationManager:
 
     def get_current_user_sub(
         self,
-        token: str = Depends(OAUTH2_SCHEME),
     ):
-        payload = self.validate_token(token)
-        sub: str = payload.get("sub")
-        if sub is None:
-            raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        return sub
+        def get_sub(token: str = Depends(self.get_access_token())):
+            payload = self.validate_token(token)
+            sub: str = payload.get("sub")
+            if sub is None:
+                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+            return sub
+        return get_sub
 
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken

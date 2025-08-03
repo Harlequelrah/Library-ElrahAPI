@@ -11,7 +11,7 @@ from elrahapi.router.router_crud import format_init_data
 from elrahapi.router.router_namespace import USER_AUTH_CONFIG_ROUTES
 from elrahapi.router.router_routes_name import DefaultRoutesName
 from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginRequestModel
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from fastapi import APIRouter, Depends, status
 
@@ -109,7 +109,7 @@ class AuthenticationRouterProvider:
                         )
                     return current_user
 
-            if config.route_name == DefaultRoutesName.TOKEN_URL:
+            if config.route_name == DefaultRoutesName.TOKEN_URL and isinstance(self.authentication.security,OAuth2PasswordBearer):
 
                 @self.router.post(
                     response_model=AccessToken,
