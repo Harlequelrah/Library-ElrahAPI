@@ -132,7 +132,7 @@ class AuthenticationRouterProvider:
                     access_token_data = user.build_access_token_data(
                         authentication=self.authentication
                     )
-                    access_token = self.authentication.create_token(access_token_data,token_type=TokenType.ACCESS_TOKEN)
+                    access_token = self.authentication.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
                     return access_token
 
             if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN:

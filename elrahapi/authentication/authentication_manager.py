@@ -113,13 +113,14 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def get_token_duration(self, token_type: TokenType):
+    def get_token_duration(self, token_type: TokenType)->int:
         if token_type == TokenType.ACCESS_TOKEN:
-            return self.__access_token_expiration
+            duration= self.__access_token_expiration
         elif token_type == TokenType.REFRESH_TOKEN:
-            return self.__refresh_token_expiration
+            duration=self.__refresh_token_expiration
         else:
-            return self.__temp_token_expiration
+            duration= self.__temp_token_expiration
+        return int(duration)
 
     def create_token(
         self, data: dict, token_type: TokenType, expires_delta: timedelta = None
@@ -128,7 +129,7 @@ class AuthenticationManager:
         if expires_delta:
             expire = datetime.now() + expires_delta
         else:
-            milliseconds = self.get_token_duration(token_type=token_type)
+            milliseconds:int = self.get_token_duration(token_type=token_type)
             expire = datetime.now() + timedelta(milliseconds=milliseconds)
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
@@ -157,15 +158,11 @@ class AuthenticationManager:
         def get_httpbearer_token(
             credentials: HTTPAuthorizationCredentials = Depends(self.security)
         ):
-            print(credentials)
             return credentials.credentials
-        try:
-            if isinstance(self.security, OAuth2PasswordBearer):
-                return get_oauth2passwordbearer_token
-            else:
-                return get_httpbearer_token
-        except Exception as exc:
-            print(f"ex{str(exc)}")
+        if isinstance(self.security, OAuth2PasswordBearer):
+            return get_oauth2passwordbearer_token
+        else:
+            return get_httpbearer_token
 
     def validate_token(self, token: str):
         try:
