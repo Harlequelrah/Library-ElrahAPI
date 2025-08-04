@@ -3,7 +3,6 @@ from elrahapi.authentication.authentication_router_provider import (
 )
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
-from elrahapi.router.router_routes_name import DefaultRoutesName
 from ..secret import (
     USER_MAX_ATTEMPT_LOGIN,
     SECRET_KEY,
@@ -29,6 +28,4 @@ authentication.authentication_models = user_crud_models
 authentication_router_provider = AuthenticationRouterProvider(
     authentication=authentication,
 )
-authentication_router = authentication_router_provider.get_auth_router(
-    exclude_routes_name=DefaultRoutesName.LOGIN
-)
+authentication_router = authentication_router_provider.get_auth_router()
