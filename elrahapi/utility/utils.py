@@ -40,12 +40,13 @@ def validate_value(value: Any):
         return None
     elif isinstance(value, bool):
         return value
-    elif value.lower() == "true" :
-        value = True
-    elif value.lower() == "false" :
-        value = False
     elif value.isdigit():
-        value = int(value)
+        return int(value)
+    elif isinstance(value, str):
+        if value.lower() == "true":
+            return True
+        elif value.lower() == "false":
+            return False
     else:
         try:
             value = float(value)
@@ -53,10 +54,11 @@ def validate_value(value: Any):
             value = str(value)
     return value
 
-def get_pks(l : list,pk_name:str):
+
+def get_pks(l: list, pk_name: str):
     pk_list = []
-    for i in l :
-        pk = getattr(i,pk_name)
+    for i in l:
+        pk = getattr(i, pk_name)
         pk_list.append(pk)
     return pk_list
 
@@ -82,21 +84,18 @@ def get_env_int(env_key: str):
         if number.isdigit():
             return number
 
-def is_async_session(session:ElrahSession):
-    return isinstance(session,AsyncSession)
 
-async def exec_stmt(
-    stmt: Select,
-    session: ElrahSession,
-    with_scalars: bool = False
+def is_async_session(session: ElrahSession):
+    return isinstance(session, AsyncSession)
 
-):
-    if isinstance(session,AsyncSession):
+
+async def exec_stmt(stmt: Select, session: ElrahSession, with_scalars: bool = False):
+    if isinstance(session, AsyncSession):
         if with_scalars:
-            result=await session.scalars(stmt)
+            result = await session.scalars(stmt)
             return result.unique() if result else None
         else:
-            result= await session.execute(stmt)
+            result = await session.execute(stmt)
             return result.unique() if result else None
     else:
         if with_scalars:
@@ -105,7 +104,7 @@ async def exec_stmt(
             return session.execute(stmt)
 
 
-def get_entities_all_privilege_data(entities_names:list[str]) -> list[BaseModel]:
+def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel]:
     privileges: list[PrivilegeCreateModel] = []
     operations = [op.value.upper() for op in CREATE_ALL_PRIVILEGE_ROUTES_NAME]
     for entity_name in entities_names:

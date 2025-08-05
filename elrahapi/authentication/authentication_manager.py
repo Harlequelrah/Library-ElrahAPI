@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer,
+    OAuth2PasswordBearer,
+)
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.utility.types import ElrahSession
 from elrahapi.authentication.authentication_namespace import (
@@ -50,7 +54,7 @@ class AuthenticationManager:
         refresh_token_expiration: int | None = None,
         access_token_expiration: int | None = None,
         temp_token_expiration: int | None = None,
-        security: OAuth2PasswordBearer|HTTPBearer|None=None
+        security: OAuth2PasswordBearer | HTTPBearer | None = None,
     ):
         self.__authentication_models: CrudModels = None
         self.__refresh_token_expiration = (
@@ -71,7 +75,7 @@ class AuthenticationManager:
             algorithm,
         )
         self.__session_manager: SessionManager = session_manager
-        self.security  = security if security  else OAuth2PasswordBearer(TOKEN_URL)
+        self.security = security if security else OAuth2PasswordBearer(TOKEN_URL)
 
     @property
     def session_manager(self) -> SessionManager:
@@ -113,13 +117,13 @@ class AuthenticationManager:
     def refresh_token_expiration(self, refresh_token_expiration: int):
         self.__refresh_token_expiration = refresh_token_expiration
 
-    def get_token_duration(self, token_type: TokenType)->int:
+    def get_token_duration(self, token_type: TokenType) -> int:
         if token_type == TokenType.ACCESS_TOKEN:
-            duration= self.__access_token_expiration
+            duration = self.__access_token_expiration
         elif token_type == TokenType.REFRESH_TOKEN:
-            duration=self.__refresh_token_expiration
+            duration = self.__refresh_token_expiration
         else:
-            duration= self.__temp_token_expiration
+            duration = self.__temp_token_expiration
         return int(duration)
 
     def create_token(
@@ -129,7 +133,7 @@ class AuthenticationManager:
         if expires_delta:
             expire = datetime.now() + expires_delta
         else:
-            milliseconds:int = self.get_token_duration(token_type=token_type)
+            milliseconds: int = self.get_token_duration(token_type=token_type)
             expire = datetime.now() + timedelta(milliseconds=milliseconds)
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
@@ -156,9 +160,10 @@ class AuthenticationManager:
             return token
 
         def get_httpbearer_token(
-            credentials: HTTPAuthorizationCredentials = Depends(self.security)
+            credentials: HTTPAuthorizationCredentials = Depends(self.security),
         ):
             return credentials.credentials
+
         if isinstance(self.security, OAuth2PasswordBearer):
             return get_oauth2passwordbearer_token
         else:
@@ -181,7 +186,7 @@ class AuthenticationManager:
         except Exception as err:
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error decoding token :  {str(err)}"
+                detail=f"Error decoding token :  {str(err)}",
             )
 
     async def change_user_state(self, pk: Any, session: ElrahSession):
@@ -262,7 +267,7 @@ class AuthenticationManager:
         finally:
             await self.session_manager.close_session(session=session)
 
-    def get_sub_from_token(self, token: str) -> str|int:
+    def get_sub_from_token(self, token: str) -> str | int:
         payload = self.validate_token(token)
         sub: str = payload.get("sub")
         if sub.isdigit():
@@ -316,17 +321,24 @@ class AuthenticationManager:
         return authorizations
 
     def build_login_token(
-        self,
-        access_token_data:str,
-        refresh_token_data: str
-    )->Token:
-        access_token_data = self.create_token(data=access_token_data,token_type=TokenType.ACCESS_TOKEN)
-        refresh_token_data = self.create_token(data=refresh_token_data,token_type=TokenType.REFRESH_TOKEN)
+        self, access_token_data: str, refresh_token_data: str
+    ) -> Token:
+        access_token_data = self.create_token(
+            data=access_token_data, token_type=TokenType.ACCESS_TOKEN
+        )
+        refresh_token_data = self.create_token(
+            data=refresh_token_data, token_type=TokenType.REFRESH_TOKEN
+        )
         return {
-            TokenType.ACCESS_TOKEN.value: access_token_data.get(TokenType.ACCESS_TOKEN.value),
-            TokenType.REFRESH_TOKEN.value: refresh_token_data.get(TokenType.REFRESH_TOKEN.value),
+            TokenType.ACCESS_TOKEN.value: access_token_data.get(
+                TokenType.ACCESS_TOKEN.value
+            ),
+            TokenType.REFRESH_TOKEN.value: refresh_token_data.get(
+                TokenType.REFRESH_TOKEN.value
+            ),
             "token_type": "bearer",
-            }
+        }
+
     async def authenticate_user(
         self,
         password: str,
@@ -368,6 +380,7 @@ class AuthenticationManager:
             if sub is None:
                 raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
             return sub
+
         return get_sub
 
     async def refresh_token(
@@ -381,9 +394,7 @@ class AuthenticationManager:
             access_token_expiration = timedelta(
                 milliseconds=self.__access_token_expiration
             )
-            data = user.build_access_token_data(
-                authentication=self
-            )
+            data = user.build_access_token_data(authentication=self)
             access_token = self.create_token(
                 data=data,
                 expires_delta=access_token_expiration,
