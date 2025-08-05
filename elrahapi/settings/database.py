@@ -9,7 +9,6 @@ from .secret import (
     DATABASE_USERNAME,
     IS_ASYNC_ENV,
 )
-from sqlalchemy.ext.declarative import declarative_base
 
 database = DatabaseManager(
     database=DATABASE,
@@ -25,6 +24,4 @@ database = DatabaseManager(
 try:
     database.create_database_if_not_exists()
 finally:
-    Base = declarative_base()
     database.create_session_manager()
-    database.base = Base

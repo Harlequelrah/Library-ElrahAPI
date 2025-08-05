@@ -26,7 +26,6 @@ class DatabaseManager:
         self.__database_async_connector = database_async_connector
         self.database_name = database_name
         self.__database_server = database_server
-        self.__base: DeclarativeMeta | None = None
         self.__session_manager: SessionManager = None
         self.__is_async_env = (
             True if is_async_env is True and self.__database_async_connector else False
@@ -40,13 +39,7 @@ class DatabaseManager:
     def session_manager(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-    @property
-    def base(self):
-        return self.__base
-
-    @base.setter
-    def base(self, base: DeclarativeMeta):
-        self.__base = base
+    # @property
 
     @property
     def database_username(self):
@@ -189,16 +182,23 @@ class DatabaseManager:
             )
         self.__session_manager = session_manager
 
-    async def create_async_tables(self):
+    async def create_async_tables(self,target_metadata:MetaData):
         async with self.engine.begin() as conn:
-            await conn.run_sync(self.base.metadata.create_all)
+            await conn.run_sync(target_metadata.create_all)
+
+    def create_target_metadata(bases:list[DeclarativeMeta]):
+        target_metadata = MetaData()
+        for base in bases:
+            for table in base.metadata.tables.values():
+                table.tometadata(target_metadata)
+        return target_metadata
 
     def create_tables(self,target_metadata: MetaData):
         if self.is_async_env:
             try:
                 loop = asyncio.get_running_loop()
-                loop.create_task(self.create_async_tables())
+                loop.create_task(self.create_async_tables(target_metadata))
             except RuntimeError:
-                asyncio.run(self.create_async_tables())
+                asyncio.run(self.create_async_tables(target_metadata))
         else:
             target_metadata.create_all(bind=self.engine)

@@ -9,7 +9,9 @@
 #     ForeignKey,
 #     Table,
 # )
-# from settings.database import database
+# from sqlalchemy.ext.declarative import declarative_base
+
+# base = declarative_base()
 
 # from sqlalchemy.sql import func
 # from sqlalchemy.orm import relationship
@@ -20,6 +22,3 @@
 #     id = Column(Integer, primary_key=True)
 #     date_created = Column(DateTime, default=func.now())
 #     date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
-# metadata = database.base.metadata
-# database.target_metadata = metadata
-

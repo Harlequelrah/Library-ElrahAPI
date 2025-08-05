@@ -20,7 +20,7 @@ class UserModel:
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
     date_created = Column(DateTime, default=func.now())
-    date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
+    date_updated = Column(DateTime, default=func.now(), onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
 
@@ -40,26 +40,26 @@ class UserModel:
     MAX_ATTEMPT_LOGIN = None
     PasswordHasher = PasswordHasher()
 
-    def build_access_token_data(self,authentication:AuthenticationManager):
+    def build_access_token_data(self, authentication: AuthenticationManager):
         pk_name = authentication.authentication_models.primary_key_name
         data = {
             "sub": str(getattr(self, pk_name)),
-            "roles": [user_role.role.name for user_role in self.user_roles if user_role.is_active and user_role.role.is_active]
+            "roles": [
+                user_role.role.name
+                for user_role in self.user_roles
+                if user_role.is_active and user_role.role.is_active
+            ],
         }
         return data
 
-    def build_refresh_token_data(
-        self,authentication: AuthenticationManager
-    ):
+    def build_refresh_token_data(self, authentication: AuthenticationManager):
         pk_name = authentication.authentication_models.primary_key_name
         data = {
             "sub": str(getattr(self, pk_name)),
         }
         return data
 
-    def build_temp_token_data(
-        self, authentication: AuthenticationManager
-    ):
+    def build_temp_token_data(self, authentication: AuthenticationManager):
         pk_name = authentication.authentication_models.primary_key_name
         data = {
             "sub": str(getattr(self, pk_name)),

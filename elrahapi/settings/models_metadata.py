@@ -1,10 +1,9 @@
-# from .myapp1.models import metadata as myapp_metadata1
-# from .myapp2.models import metadata as myapp_metadata2
-from .auth.models import metadata as auth_metadata
-from .logger.model import metadata as logger_metadata
-from sqlalchemy import MetaData
-target_metadata = MetaData()
-# target_metadata = myapp_metadata1
-# target_metadata = myapp_metadata2
-target_metadata = auth_metadata
-target_metadata = logger_metadata
+# from .myapp1.models import base as myapp_base1
+# from .myapp2.models import base as myapp_base2
+from settings.database import database
+from .auth.models import base as auth_base
+from .logger.model import base as logger_base
+from sqlalchemy.orm.decl_api import DeclarativeMeta
+
+bases: list[DeclarativeMeta] = [auth_base, logger_base]
+target_metadata = database.create_target_metadata(bases=bases)
