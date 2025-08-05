@@ -53,18 +53,18 @@ async def save_log(
     )
     if error is None and (response.status_code < 200 or response.status_code > 299):
         error = await read_response_body(response)
-    session=None
+    session = None
     try:
         session = await session_manager.get_session()
         subject = None
         if authentication is not None:
             auth_header = request.headers.get("Authorization")
             if auth_header is not None and auth_header.startswith("Bearer "):
-                token = auth_header[len("Bearer "):]
+                token = auth_header[len("Bearer ") :]
                 try:
                     subject = authentication.get_sub_from_token(token=token)
                 except CustomHttpException as che:
-                    error=che.http_exception.detail
+                    error = che.http_exception.detail
         log = LogModel(
             process_time=process_time,
             status_code=response.status_code,
@@ -73,7 +73,7 @@ async def save_log(
             error_message=error,
             remote_address=str(request.client.host),
         )
-        setattr(log,LogModel.USER_FK_NAME,subject)
+        setattr(log, LogModel.USER_FK_NAME, subject)
         session.add(log)
         await session_manager.commit_and_refresh(session=session, object=log)
         if error is not None and websocket_manager is not None:
@@ -82,15 +82,15 @@ async def save_log(
                 await websocket_manager.broadcast(message)
         return response
     # except CustomHttpException as che:
-        # await session_manager.rollback_session(session)
-        # return response
-        # if   "/logout" in request.url.path :
-        #     return response
-        # else:
-        #     return JSONResponse(
-        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #         content={"error": "Custom HTTP error", "details": che.http_exception.detail},
-        #     )
+    # await session_manager.rollback_session(session)
+    # return response
+    # if   "/logout" in request.url.path :
+    #     return response
+    # else:
+    #     return JSONResponse(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         content={"error": "Custom HTTP error", "details": che.http_exception.detail},
+    #     )
     except Exception as err:
         await session_manager.rollback_session(session)
         error_message = f"error : An unexpected error occurred during saving log , details : {str(err)}"

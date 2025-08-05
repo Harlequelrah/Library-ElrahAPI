@@ -4,6 +4,7 @@ from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.decl_api import DeclarativeMeta
+from sqlalchemy.exc import InvalidRequestError
 
 
 class DatabaseManager:
@@ -182,23 +183,31 @@ class DatabaseManager:
             )
         self.__session_manager = session_manager
 
-    async def create_async_tables(self,target_metadata:MetaData):
+    async def create_async_tables(self, target_metadata: MetaData):
         async with self.engine.begin() as conn:
             await conn.run_sync(target_metadata.create_all)
 
-    def create_target_metadata(bases:list[DeclarativeMeta]):
+    def create_target_metadata(self, bases: list[DeclarativeMeta]):
         target_metadata = MetaData()
         for base in bases:
-            for table in base.metadata.tables.values():
+            for table in sorted(
+                base.metadata.tables.values(), key=lambda t: len(t.foreign_keys)
+            ):
                 table.tometadata(target_metadata)
         return target_metadata
 
-    def create_tables(self,target_metadata: MetaData):
+    def create_tables(self, target_metadata: MetaData):
         if self.is_async_env:
             try:
                 loop = asyncio.get_running_loop()
                 loop.create_task(self.create_async_tables(target_metadata))
             except RuntimeError:
                 asyncio.run(self.create_async_tables(target_metadata))
+            except Exception:
+                pass
         else:
-            target_metadata.create_all(bind=self.engine)
+            try:
+                target_metadata.create_all(bind=self.engine)
+            except Exception as e:
+                print(f"{str(e)}")
+                pass
