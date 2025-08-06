@@ -4,7 +4,7 @@ from elrahapi.router.router_namespace import (
 )
 from elrahapi.router.router_provider import CustomRouterProvider
 
-from ..settings.auth.configs import authentication
+from settings.auth.configs import authentication
 from .cruds import myapp_crud
 
 router_provider = CustomRouterProvider(

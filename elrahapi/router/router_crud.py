@@ -74,7 +74,7 @@ def initialize_dependecies(
                 Depends(authorization) for authorization in authorizations
             ]
         else:
-            dependencies = [Depends(authentication.get_access_token())]
+            dependencies = [Depends(authentication.get_access_token)]
     return dependencies
 
 

@@ -75,7 +75,35 @@ class AuthenticationManager:
             algorithm,
         )
         self.__session_manager: SessionManager = session_manager
-        self.security = security if security else OAuth2PasswordBearer(TOKEN_URL)
+        self.security = (
+            security if security else OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
+        )
+
+        def get_oauth2passwordbearer_token(token: str = Depends(self.security)):
+            self.validate_token(token)
+            return token
+
+        def get_httpbearer_token(
+            credentials: HTTPAuthorizationCredentials = Depends(self.security),
+        ):
+            token = credentials.credentials
+            self.validate_token(token=token)
+            return token
+
+        self.get_access_token: callable = (
+            get_oauth2passwordbearer_token
+            if isinstance(security, OAuth2PasswordBearer)
+            else get_httpbearer_token
+        )
+
+        def get_current_user_sub(token: str = Depends(self.get_access_token)):
+            payload = self.validate_token(token)
+            sub: str = payload.get("sub")
+            if sub is None:
+                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+            return sub
+
+        self.get_current_user_sub = get_current_user_sub
 
     @property
     def session_manager(self) -> SessionManager:
@@ -146,28 +174,35 @@ class AuthenticationManager:
         )
         return {token_type.value: encode_jwt, "token_type": "bearer"}
 
+        # def get_access_token(self):
+        #     # get_token_func =
+        #     # print(f"{get_token_func,type(get_token_func)=}")
+        #     def get_token(get_token_func:callable=self.get_token()):
+        #         return Depends(get_token_func()())
+        #     # print("type",type(get_token))
+        #     return get_token
+        #     # return get_token()
+
+    # def gt(credentials: str | HTTPAuthorizationCredentials):
+    #     return Depends(self.get_token()(credentials))
+    # def get_security(self):
+    #     if isinstance(self.security, OAuth2PasswordBearer):
+    #         return Depends()
+    #     else:
+    #         return Depends(get_httpbearer_token)
     # def get_access_token(self):
-    #     # get_token_func =
-    #     # print(f"{get_token_func,type(get_token_func)=}")
-    #     def get_token(get_token_func:callable=self.get_token()):
-    #         return Depends(get_token_func()())
-    #     # print("type",type(get_token))
-    #     return get_token
-    #     # return get_token()
+    #     def get_oauth2passwordbearer_token(token: str = Depends(self.security)):
+    #         return token
 
-    def get_access_token(self) -> callable:
-        def get_oauth2passwordbearer_token(token: str = Depends(self.security)):
-            return token
+    #     def get_httpbearer_token(
+    #         credentials: HTTPAuthorizationCredentials = Depends(self.security),
+    #     ):
+    #         return credentials.credentials
 
-        def get_httpbearer_token(
-            credentials: HTTPAuthorizationCredentials = Depends(self.security),
-        ):
-            return credentials.credentials
-
-        if isinstance(self.security, OAuth2PasswordBearer):
-            return get_oauth2passwordbearer_token
-        else:
-            return get_httpbearer_token
+    #     if isinstance(self.security, OAuth2PasswordBearer):
+    #         return Depends(get_oauth2passwordbearer_token)
+    #     else:
+    #         return Depends(get_httpbearer_token)
 
     def validate_token(self, token: str):
         try:
@@ -218,6 +253,7 @@ class AuthenticationManager:
             )
 
     async def get_user_by_sub(self, sub: str, session: ElrahSession):
+        # print("le sub est de type", type(sub))
         try:
             # if sub.isdigit():
             #     sub = int(sub)
@@ -279,7 +315,9 @@ class AuthenticationManager:
         privilege_name: str | None = None,
         role_name: str | None = None,
     ) -> callable:
-        async def auth_result(token: str = Depends(self.get_access_token())):
+        async def auth_result(
+            token: str = Depends(self.get_access_token),
+        ):
             sub = self.get_sub_from_token(token=token)
             if role_name and sub:
                 return await self.is_authorized(
@@ -371,15 +409,18 @@ class AuthenticationManager:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    def get_current_user_sub(
-        self,
-    ):
-        def get_sub(token: str = Depends(self.get_access_token())):
-            payload = self.validate_token(token)
-            sub: str = payload.get("sub")
-            if sub is None:
-                raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-            return sub
+        # def get_current_user_sub(
+        #     self,
+        #     token:str
+        # ):
+        # token: str = Depends(self.get_access_token)
+        # def get_sub():
+        #     print(f"{type(token)}")
+        #     payload = self.validate_token(token)
+        #     sub: str = payload.get("sub")
+        #     if sub is None:
+        #         raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
+        #     return sub
 
         return get_sub
 
