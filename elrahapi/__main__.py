@@ -2,9 +2,8 @@ import os
 import shutil
 import sys
 import subprocess
-from colorama import Style , init , Fore
+from colorama import Style, init, Fore
 from elrahapi.security.secret import define_algorithm_and_key
-
 
 
 init(autoreset=True)
@@ -36,12 +35,17 @@ def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"
         repline(env_file, algorithm_line, f"ALGORITHM = {algo}\n")
 
 
-def generate_secret_key(env_src_path:str | None =None,algorithm: str = "HS256") -> str:
-    if env_src_path is None :
+def generate_secret_key(
+    env_src_path: str | None = None, algorithm: str = "HS256"
+) -> str:
+    if env_src_path is None:
         project_folder = os.getcwd()
         env_src_path = os.path.join(project_folder, ".env")
     update_env_with_secret_and_algorithm(env_src_path, algorithm)
-    print(Fore.GREEN+"SECRET_KEY and ALGORITHM have been generated and added to the .env file")
+    print(
+        Fore.GREEN
+        + "SECRET_KEY and ALGORITHM have been generated and added to the .env file"
+    )
 
 
 def startproject(project_name):
@@ -58,7 +62,7 @@ def startproject(project_name):
         print(f"Error initializing the Git repository: {e}")
 
     subprocess.run(["alembic", "init", "alembic"], cwd=project_path)
-    print(Fore.GREEN+f"Alembic has been initialized in {project_path}")
+    print(Fore.GREEN + f"Alembic has been initialized in {project_path}")
 
     with open(f"{project_path}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
@@ -87,8 +91,6 @@ def startproject(project_name):
     shutil.copyfile(example_env_src_path, example_env_dest_path)
     print(f"The file '.env.example' has been copied to {example_env_dest_path}")
 
-
-
     main_project_files_path = os.path.join(main_path_dir, "main_project_files")
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
@@ -115,8 +117,9 @@ def startproject(project_name):
                 f.write(f"ISSUER = {project_name}\n")
             else:
                 f.write(line)
-    print(Fore.CYAN+f"The project {project_name} has been created successfully.")
+    print(Fore.CYAN + f"The project {project_name} has been created successfully.")
     generate_secret_key(env_src_path=env_dest_path)
+
 
 def create_seed(seed_name):
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -131,7 +134,12 @@ def create_seed(seed_name):
         print(Fore.RED + Style.BRIGHT + f"Seeder {seed_name} already exists.")
         return
     shutil.copyfile(seed_src_src, seed_file_dest)
-    print(Fore.GREEN + Style.BRIGHT + f"The seeder '{seed_name}_seed.py' file has been create to {seed_file_dest}")
+    print(
+        Fore.GREEN
+        + Style.BRIGHT
+        + f"The seeder '{seed_name}_seed.py' file has been create to {seed_file_dest}"
+    )
+
 
 def startapp(app_name):
     apps_dir_folder = get_apps_dir()
@@ -146,6 +154,7 @@ def startapp(app_name):
         print(Fore.CYAN + f"The application {app_name} has been created successfully.")
     else:
         print("The 'sqlapp' folder was not found.")
+
 
 def get_apps_dir():
     parent_dir = os.getcwd()
@@ -206,10 +215,10 @@ def get_seeders_log_file():
     return log_file
 
 
-def run_seed(seed_name,action:bool):
+def run_seed(seed_name, action: bool):
     seeders_dir = get_seeders_dir()
     apps_dir = get_apps_dir()
-    seeder_path = os.path.join(seeders_dir,f"{seed_name}_seed.py")
+    seeder_path = os.path.join(seeders_dir, f"{seed_name}_seed.py")
     if not os.path.exists(seeder_path):
         print(Fore.RED + Style.BRIGHT + f"seeder {seed_name} file not found")
         return
@@ -224,9 +233,10 @@ def run_seed(seed_name,action:bool):
         env=env,
     )
 
+
 # def seeders(one_seed:bool=True,seed_name):
 #     pass
-def run_seed_manager(action:str):
+def run_seed_manager(action: str):
     seeders_dir = get_seeders_dir()
     apps_dir = get_apps_dir()
     seeder_path = os.path.join(seeders_dir, "seed_manager_seed.py")
@@ -245,12 +255,20 @@ def run_seed_manager(action:str):
     )
 
 
+def create_tables():
+    apps_dir = get_apps_dir()
+    models_metadata_path = os.path.join(apps_dir, "settings/models_metadata.py")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = apps_dir
+    subprocess.run([sys.executable, models_metadata_path], env=env)
+
+
 def run():
     project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
     env = os.environ.copy()
     env["PYTHONPATH"] = get_apps_dir()
-    subprocess.run([sys.executable, main_entry],env=env)
+    subprocess.run([sys.executable, main_entry], env=env)
 
 
 def main():
@@ -258,9 +276,9 @@ def main():
         print("Usage: elrahapi <commande> <name> [<action>]")
         sys.exit(1)
     command = sys.argv[1]
-    name : str | None = None
-    action :str | None= None
-    if len(sys.argv) >2 :
+    name: str | None = None
+    action: str | None = None
+    if len(sys.argv) > 2:
         name = sys.argv[2]
     if len(sys.argv) > 3:
         action = sys.argv[3]
@@ -272,14 +290,16 @@ def main():
         startproject(name)
     elif command == "create_seed" and name:
         create_seed(name)
-    elif command =="run_seed" and name:
-        action_name= action or "up"
-        action = True if action_name =="up" else False
-        run_seed(seed_name=name,action=action)
+    elif command == "run_seed" and name:
+        action_name = action or "up"
+        action = True if action_name == "up" else False
+        run_seed(seed_name=name, action=action)
     elif command == "run_seed_manager":
         action_name = name or "up"
         action = True if action_name == "up" else False
         run_seed_manager(action=action)
+    elif command == "create_tables":
+        create_tables()
     elif command == "generate_secret_key":
         if name:
             generate_secret_key(algorithm=name)

@@ -96,9 +96,9 @@ ou si virtualenv est dejà installé au préalable
 
   - Configurer le alembic/env.py :
 
-    - Ajouter l'import : from myproject.settings.models_metadata import database ;
+    - Ajouter l'import : from myproject.settings.models_metadata import Base ;
 
-    - Passer les metadata à target_metadata : database.target_metadata=target_metadata ;
+    - Passer les metadata à target_metadata : database.target_metadata=Base.metadata ;
 
 ## **4.** `Demarrer le projet `
 
@@ -106,6 +106,12 @@ ou si virtualenv est dejà installé au préalable
 
 ```bash
   cd myproject
+```
+
+- Créer les tables :
+
+```bash
+  elrahapi create_tables
 ```
 
 - Démarrer le serveur :
@@ -138,7 +144,7 @@ ou si virtualenv est dejà installé au préalable
 
 - Créer les meta models dans `meta_models.py` si nécessaire ;
 
-- Ajouter les metadonnées dans models_metadata.py comme suite : `from .myapp.models import metadata as myapp_metadata`
+- Ajouter le model dans models_metadata.py comme suite : `from .myapp.models import Model`
 
 **`Note:`** :
 
@@ -458,22 +464,16 @@ app.include_router(app_myapp)
 ```python
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
-from .settings.logger.router import app_logger
-from .settings.logger.model import LogModel
-from .settings.database import database
+from elrahapi.middleware.middleware_helper import MiddlewareHelper
+from settings.logger.router import app_logger
+from settings.logger.model import LogModel
+from settings.database import database
 
 app = FastAPI()
 app.include_router(app_logger)
-app.add_middleware(
-    ErrorHandlingMiddleware,
-    LogModel=LogModel,
-    session_manager=database.session_manager
-)
-app.add_middleware(
-    LoggerMiddleware,
-    LogModel=LogModel,
-    session_manager=database.session_manager
-)
+middleware_helper = MiddlewareHelper(LogModel=LogModel, authentication=authentication)
+app.add_middleware(ErrorHandlingMiddleware, middleware_helper=middleware_helper)
+app.add_middleware(LoggerMiddleware, middleware_helper=middleware_helper)
 ```
 
 **Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
@@ -486,11 +486,10 @@ app.add_middleware(
 
 - Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
 
-
 ## **9.** `Utilisation des seeders`
 
 Deux classes principales servent au seeders .
-`Seed` pour un seed simple et `SeedManager` pour gérer  les opérations de plusieurs Seed simultanément.
+`Seed` pour un seed simple et `SeedManager` pour gérer les opérations de plusieurs Seed simultanément.
 
 Dans le repertoire `myproject/settings/seeders` du projet vous trouverez les seeders par défaut.
 
@@ -503,6 +502,7 @@ Dans le repertoire `seeders/log` il y a le ficher `seeders_logger.py` qui contie
 ```cmd
 elrahapi create_seed nomduseeder
 ```
+
 ex : nomduseeder peut être user , book ou item etc...
 
 **Note** : Ensuite mettez à jour les imports et le ficher
@@ -520,11 +520,12 @@ Sans précision c'est le mode up qui sera actif.
 ```cmd
 elrahapi run_seed nomduseeder
 ```
+
 ou
+
 ```cmd
 elrahapi run_seed nomduseeder down
 ```
-
 
 ### **9.2.1** `SeedManager`
 
@@ -536,7 +537,7 @@ elrahapi run_seed_manager up
 
 la variable `seeds_dict` est un dictionnaire qui contient les seeders et leurs noms.
 
-On peut toutes fois remplir `seeds_name`  avec des noms de seeders pour en exécuter que ceux là .
+On peut toutes fois remplir `seeds_name` avec des noms de seeders pour en exécuter que ceux là .
 
 En mode up les seeders sont exécutés dans l'ordre de leur nom dans le dictionnaire `seeds_dict` et dans l'ordre inverse en mode down .
 
@@ -563,7 +564,6 @@ entities_name:list[str]=[
 entities_data =  get_entities_all_privilege_data(entities_names=entities_name)
 data.extend(entities_data)
 ```
-
 
 ## **10.** `Utilisation de  ConnectionManager et de ChatManager`
 
@@ -645,7 +645,6 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
         )
 ```
 
-
 ## **12.** `Patterns ` :
 
 - TELEPHONE_PATTERN
@@ -671,19 +670,20 @@ Vous pouve générer une clé pour coder vos tokens JWT comme suit :
 ```cmd
 elrahapi generate_secret_key
 ```
+
 **Note** : par défaut l'algorithme est HS256
 
 ```cmd
 elrahapi generate_secret_key HS512
 ```
 
-**Note** : vous pouvez choisir entre  HS256 , HS384 et HS512 .
+**Note** : vous pouvez choisir entre HS256 , HS384 et HS512 .
 
 # V - **`Contact ou Support`**
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.1.9`
+La version actuelle est le `1.2.0.4`
 
 Vérifier la version en executant `pip show elrahapi`
 

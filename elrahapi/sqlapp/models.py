@@ -9,15 +9,14 @@
 #     ForeignKey,
 #     Table,
 # )
-# from sqlalchemy.ext.declarative import declarative_base
 
-# base = declarative_base()
+# from settings.database import Base
 
 # from sqlalchemy.sql import func
 # from sqlalchemy.orm import relationship
 
 
-# class Entity(database.base):
+# class Entity(Base):
 #     __tablename__ = 'entities'
 #     id = Column(Integer, primary_key=True)
 #     date_created = Column(DateTime, default=func.now())
