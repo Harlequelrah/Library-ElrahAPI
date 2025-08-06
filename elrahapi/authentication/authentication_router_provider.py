@@ -23,7 +23,6 @@ class AuthenticationRouterProvider:
         read_with_relations: bool | None = False,
         roles: list[str] | None = None,
         privileges: list[str] | None = None,
-        router: APIRouter | None = None,
     ):
         self.authentication = authentication
         self.roles = roles
@@ -31,7 +30,7 @@ class AuthenticationRouterProvider:
         self.read_with_relations = read_with_relations
         self.session_manager = authentication.session_manager
 
-        self.router = router if router else APIRouter(prefix="/auth", tags=["auth"])
+        self.router = APIRouter(prefix="/auth", tags=["auth"])
 
     def get_auth_router(
         self,
