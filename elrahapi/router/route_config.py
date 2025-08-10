@@ -1,4 +1,6 @@
-from typing import Any, Callable
+from typing import Any, Callable, Type
+
+from pydantic import BaseModel
 from elrahapi.router.router_routes_name import (
     RoutesName,
     READ_ROUTES_NAME,
@@ -63,11 +65,29 @@ class RouteConfig:
         else:
             return f"/{route_name.value}"
 
-    def extend_response_model_config(self, response_model_config: ResponseModelConfig):
+    def extend_response_model_config(
+        self,
+        response_model_config: ResponseModelConfig,
+        read_with_relations: bool,
+        ReadPydanticModel: Type[BaseModel] | None = None,
+        FullReadPydanticModel: Type[BaseModel] | None = None,
+    ):
+        self.read_with_relations = response_model_config.read_with_relations
         if response_model_config.response_model:
             self.response_model = response_model_config.response_model
-        if response_model_config.read_with_relations is not None:
-            self.read_with_relations = response_model_config.read_with_relations
+        else:
+            if FullReadPydanticModel is None:
+                self.response_model = ReadPydanticModel
+            else:
+                self.read_with_relations = (
+                    self.read_with_relations
+                    if self.read_with_relations is not None
+                    else read_with_relations
+                )
+                if self.read_with_relations:
+                    return FullReadPydanticModel
+                else:
+                    return ReadPydanticModel
 
     def extend_authorization_config(self, authorization_config: AuthorizationConfig):
         if authorization_config.roles:
