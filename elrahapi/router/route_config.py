@@ -1,7 +1,16 @@
 from typing import Any, Callable
-from elrahapi.router.router_routes_name import RoutesName,READ_ROUTES_NAME,DEFAULT_DETAIL_ROUTES_NAME
-from elrahapi.router.route_additional_config import AuthorizationConfig, ResponseModelConfig
+from elrahapi.router.router_routes_name import (
+    RoutesName,
+    READ_ROUTES_NAME,
+    DEFAULT_DETAIL_ROUTES_NAME,
+)
+from elrahapi.router.route_additional_config import (
+    AuthorizationConfig,
+    ResponseModelConfig,
+)
 from elrahapi.authentication.authentication_manager import AuthenticationManager
+
+
 class RouteConfig:
 
     def __init__(
@@ -37,10 +46,10 @@ class RouteConfig:
         return self.__read_with_relations
 
     @read_with_relations.setter
-    def read_with_relations(self, value: bool | None=None):
+    def read_with_relations(self, value: bool | None = None):
         if self.route_name not in READ_ROUTES_NAME and value is None:
-            self.__read_with_relations =  False
-        self.__read_with_relations= value
+            self.__read_with_relations = False
+        self.__read_with_relations = value
 
     def validate_route_path(
         self,
@@ -54,9 +63,9 @@ class RouteConfig:
         else:
             return f"/{route_name.value}"
 
-    def extend_response_model_config(self,response_model_config: ResponseModelConfig):
-        if response_model_config.reponse_model:
-            self.response_model = response_model_config.reponse_model
+    def extend_response_model_config(self, response_model_config: ResponseModelConfig):
+        if response_model_config.response_model:
+            self.response_model = response_model_config.response_model
         if response_model_config.read_with_relations is not None:
             self.read_with_relations = response_model_config.read_with_relations
 
@@ -70,5 +79,5 @@ class RouteConfig:
         self, authentication: AuthenticationManager
     ) -> list[callable]:
         return authentication.check_authorizations(
-                roles_name=self.roles, privileges_name=self.privileges
-            )
+            roles_name=self.roles, privileges_name=self.privileges
+        )

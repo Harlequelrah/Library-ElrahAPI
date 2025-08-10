@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from typing import  Type
+from typing import Type
 from elrahapi.router.router_routes_name import RoutesName
+
 
 class DefaultRouteConfig:
     def __init__(self, summary: str, description: str):
@@ -13,10 +14,10 @@ class ResponseModelConfig:
     def __init__(
         self,
         route_name: RoutesName,
-        read_with_relations: bool | None =None,
-        reponse_model: Type[BaseModel] | None = None,
+        read_with_relations: bool | None = None,
+        response_model: Type[BaseModel] | None = None,
     ):
-        self.reponse_model = reponse_model
+        self.response_model = response_model
         self.route_name = route_name
         self.read_with_relations = read_with_relations
 
