@@ -114,11 +114,11 @@ class DatabaseManager:
         if self.is_async_env:
             if self.database == "sqlite":
                 return "sqlite+aiosqlite://"
-            return f"{self.connector}+{self.database_async_connector}://{self.database_username}:{self.database_password}@{self.server}"
+            return f"{self.database_connector}+{self.database_async_connector}://{self.database_username}:{self.database_password}@{self.database_server}"
         else:
             if self.database == "sqlite":
                 return "sqlite://"
-            return f"{self.connector}://{self.database_username}:{self.database_password}@{self.server}"
+            return f"{self.database_connector}://{self.database_username}:{self.database_password}@{self.database_server}"
 
     def create_sync_db(self):
         engine = create_engine(self.database_url, pool_pre_ping=True)
@@ -136,7 +136,7 @@ class DatabaseManager:
             )
 
     def create_database_if_not_exists(self):
-        if self.database != "sqlite":
+        if self.database not in ["sqlite", "posgresql"]:
             if self.is_async_env:
                 try:
                     loop = asyncio.get_running_loop()
