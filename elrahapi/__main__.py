@@ -156,8 +156,6 @@ def startapp(app_name):
         print("The 'sqlapp' folder was not found.")
 
 
-
-
 def get_apps_dir():
     parent_dir = os.getcwd()
     env_path = os.path.join(parent_dir, ".env")
@@ -219,13 +217,11 @@ def get_seeders_log_file():
 
 def run_seed(seed_name, action: bool):
     seeders_dir = get_seeders_dir()
-    apps_dir = get_apps_dir()
     seeder_path = os.path.join(seeders_dir, f"{seed_name}_seed.py")
     if not os.path.exists(seeder_path):
         print(Fore.RED + Style.BRIGHT + f"seeder {seed_name} file not found")
         return
-    env = os.environ.copy()
-    env["PYTHONPATH"] = apps_dir
+    env = set_python_path()
     subprocess.run(
         [
             sys.executable,
@@ -236,17 +232,13 @@ def run_seed(seed_name, action: bool):
     )
 
 
-# def seeders(one_seed:bool=True,seed_name):
-#     pass
 def run_seed_manager(action: str):
     seeders_dir = get_seeders_dir()
-    apps_dir = get_apps_dir()
     seeder_path = os.path.join(seeders_dir, "seed_manager_seed.py")
     if not os.path.exists(seeder_path):
         print(Fore.RED + Style.BRIGHT + f"seeder seed_manager_seed file not found")
         return
-    env = os.environ.copy()
-    env["PYTHONPATH"] = apps_dir
+    env = set_python_path()
     subprocess.run(
         [
             sys.executable,
@@ -255,21 +247,26 @@ def run_seed_manager(action: str):
         ],
         env=env,
     )
+
+
+def set_python_path():
+    env = os.environ.copy()
+    path = os.pathsep.join([os.getcwd(), get_apps_dir(), get_settings_dir()])
+    env["PYTHONPATH"] = path
+    return env
 
 
 def create_tables():
     apps_dir = get_apps_dir()
     models_metadata_path = os.path.join(apps_dir, "settings/models_metadata.py")
-    env = os.environ.copy()
-    env["PYTHONPATH"] = apps_dir
+    env = set_python_path()
     subprocess.run([sys.executable, models_metadata_path], env=env)
 
 
 def run():
     project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
-    env = os.environ.copy()
-    env["PYTHONPATH"] = get_apps_dir()
+    env = set_python_path()
     subprocess.run([sys.executable, main_entry], env=env)
 
 
