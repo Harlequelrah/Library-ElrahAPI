@@ -253,16 +253,18 @@ class AuthenticationManager:
             )
 
     async def get_user_by_sub(self, sub: str, session: ElrahSession):
-        # print("le sub est de type", type(sub))
         try:
-            # if sub.isdigit():
-            #     sub = int(sub)
             pk_attr = self.__authentication_models.get_pk()
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
-            stmt = select(self.__authentication_models.sqlalchemy_model).where(
-                or_(pk_attr == sub, email_attr == sub, username_attr == sub)
-            )
+            if sub.isdigit():
+                stmt = select(self.__authentication_models.sqlalchemy_model).where(
+                    pk_attr == int(sub)
+                )
+            else:
+                stmt = select(self.__authentication_models.sqlalchemy_model).where(
+                    or_(pk_attr == sub, email_attr == sub, username_attr == sub)
+                )
             result = await exec_stmt(stmt=stmt, session=session)
             user = result.scalar_one_or_none()
             if user is None:

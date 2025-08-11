@@ -156,6 +156,8 @@ def startapp(app_name):
         print("The 'sqlapp' folder was not found.")
 
 
+
+
 def get_apps_dir():
     parent_dir = os.getcwd()
     env_path = os.path.join(parent_dir, ".env")
