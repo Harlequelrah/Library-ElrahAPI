@@ -101,7 +101,7 @@ def add_authorizations(
 def set_response_model_config(
     routes_config: list[RouteConfig],
     response_model_configs: list[ResponseModelConfig],
-    read_with_relations:bool,
+    read_with_relations: bool,
     ReadPydanticModel: Type[BaseModel] | None = None,
     FullReadPydanticModel: Type[BaseModel] | None = None,
 ):
@@ -122,7 +122,7 @@ def set_response_model_config(
                 ReadPydanticModel=ReadPydanticModel,
                 FullReadPydanticModel=FullReadPydanticModel,
             )
-            final_routes_config.append(route_config)
+        final_routes_config.append(route_config)
     return final_routes_config
 
 
@@ -169,9 +169,6 @@ def format_init_data(
         )
     )
     return formatted_data
-
-
-
 
 
 def is_verified_relation_rule(
