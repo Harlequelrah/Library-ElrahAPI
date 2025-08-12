@@ -252,12 +252,12 @@ class AuthenticationManager:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    async def get_user_by_sub(self, sub: str, session: ElrahSession):
+    async def get_user_by_sub(self, sub: str | int, session: ElrahSession):
         try:
             pk_attr = self.__authentication_models.get_pk()
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
-            if sub.isdigit():
+            if isinstance(sub, int) or sub.isdigit():
                 stmt = select(self.__authentication_models.sqlalchemy_model).where(
                     pk_attr == int(sub)
                 )
@@ -423,8 +423,7 @@ class AuthenticationManager:
         #     if sub is None:
         #         raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
         #     return sub
-
-        return get_sub
+        # return get_sub
 
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken
