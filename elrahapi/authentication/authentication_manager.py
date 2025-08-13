@@ -263,7 +263,7 @@ class AuthenticationManager:
                 )
             else:
                 stmt = select(self.__authentication_models.sqlalchemy_model).where(
-                    or_(pk_attr == sub, email_attr == sub, username_attr == sub)
+                    or_(email_attr == sub, username_attr == sub)
                 )
             result = await exec_stmt(stmt=stmt, session=session)
             user = result.scalar_one_or_none()
