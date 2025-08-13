@@ -27,7 +27,7 @@ class DefaultRoutesName(str, Enum):
     DELETE = "delete"
     READ_CURRENT_USER = "read-current-user"
     TOKEN_URL = "tokenUrl"
-    GET_REFRESH_TOKEN = "get-refresh-token"
+    # GET_REFRESH_TOKEN = "get-refresh-token"
     REFRESH_TOKEN = "refresh-token"
     LOGIN = "login"
     CHANGE_PASSWORD = "change-password"
