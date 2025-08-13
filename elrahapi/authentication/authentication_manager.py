@@ -257,7 +257,7 @@ class AuthenticationManager:
             pk_attr = self.__authentication_models.get_pk()
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
-            if sub.isdigit():
+            if isinstance(sub,str) and sub.isdigit():
                 sub = int(sub)
             if isinstance(sub, int):
                 stmt = select(self.__authentication_models.sqlalchemy_model).where(
