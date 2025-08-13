@@ -43,7 +43,7 @@ async def save_log(
     for i in exclude_path:
         if request.url.path.endswith(i):
             pass_next = True
-    if pass_next:
+    if pass_next or hasattr(request.state,"error"):
         if call_next is None:
             return
         else:
@@ -53,6 +53,7 @@ async def save_log(
     )
     if error is None and (response.status_code < 200 or response.status_code > 299):
         error = await read_response_body(response)
+        request.state.error = error
     session = None
     try:
         session = await session_manager.get_session()
