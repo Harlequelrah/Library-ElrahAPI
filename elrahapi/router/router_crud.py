@@ -98,13 +98,15 @@ def add_authorizations(
     return authorized_routes_config
 
 
-def set_response_model_config(
+def set_response_models(
     routes_config: list[RouteConfig],
-    response_model_configs: list[ResponseModelConfig],
-    read_with_relations:bool,
+    response_model_configs: list[ResponseModelConfig] | None,
+    read_with_relations: bool,
     ReadPydanticModel: Type[BaseModel] | None = None,
     FullReadPydanticModel: Type[BaseModel] | None = None,
 ):
+    if response_model_configs is None:
+        response_model_configs = []
     final_routes_config: list[RouteConfig] = []
     for route_config in routes_config:
         response_model_config = next(
@@ -115,14 +117,13 @@ def set_response_model_config(
             ),
             None,
         )
-        if response_model_config:
-            route_config.extend_response_model_config(
-                response_model_config=response_model_config,
-                read_with_relations=read_with_relations,
-                ReadPydanticModel=ReadPydanticModel,
-                FullReadPydanticModel=FullReadPydanticModel,
-            )
-            final_routes_config.append(route_config)
+        route_config.extend_response_model(
+            response_model_config=response_model_config,
+            read_with_relations=read_with_relations,
+            ReadPydanticModel=ReadPydanticModel,
+            FullReadPydanticModel=FullReadPydanticModel,
+        )
+        final_routes_config.append(route_config)
     return final_routes_config
 
 
@@ -157,21 +158,15 @@ def format_init_data(
                 privileges=privileges,
             )
 
-    formatted_data = (
-        formatted_data
-        if response_model_configs is None
-        else set_response_model_config(
-            read_with_relations=read_with_relations,
-            ReadPydanticModel=ReadPydanticModel,
-            FullReadPydanticModel=FullReadPydanticModel,
-            routes_config=formatted_data,
-            response_model_configs=response_model_configs,
-        )
+    formatted_data = set_response_models(
+        read_with_relations=read_with_relations,
+        ReadPydanticModel=ReadPydanticModel,
+        FullReadPydanticModel=FullReadPydanticModel,
+        routes_config=formatted_data,
+        response_model_configs=response_model_configs,
     )
+
     return formatted_data
-
-
-
 
 
 def is_verified_relation_rule(

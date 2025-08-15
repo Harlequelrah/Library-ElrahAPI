@@ -1463,7 +1463,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
   - **sortie** : **List[RouteConfig]**
 
-- `set_response_model_config` : permet de préparer les configurations de routage en ajoutant les models de reponses specifiques.
+- `set_response_models` : permet de préparer les configurations de routage en ajoutant les models de reponses specifiques.
 
   - **paramètres:**
 

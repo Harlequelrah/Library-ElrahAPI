@@ -2,6 +2,7 @@ from typing import Any, Callable, Type
 
 from pydantic import BaseModel
 from elrahapi.router.router_routes_name import (
+    DefaultRoutesName,
     RoutesName,
     READ_ROUTES_NAME,
     DEFAULT_DETAIL_ROUTES_NAME,
@@ -65,29 +66,38 @@ class RouteConfig:
         else:
             return f"/{route_name.value}"
 
-    def extend_response_model_config(
+    def extend_response_model(
         self,
-        response_model_config: ResponseModelConfig,
+        response_model_config: ResponseModelConfig | None,
         read_with_relations: bool,
         ReadPydanticModel: Type[BaseModel] | None = None,
         FullReadPydanticModel: Type[BaseModel] | None = None,
     ):
-        self.read_with_relations = response_model_config.read_with_relations
-        if response_model_config.response_model:
-            self.response_model = response_model_config.response_model
-        else:
-            if FullReadPydanticModel is None:
-                self.response_model = ReadPydanticModel
-            else:
-                self.read_with_relations = (
-                    self.read_with_relations
-                    if self.read_with_relations is not None
-                    else read_with_relations
-                )
+        response_model: Type[BaseModel] | None = None
+        if response_model_config is None:
+            if self.response_model is None:
                 if self.read_with_relations:
-                    return FullReadPydanticModel
+                    response_model = FullReadPydanticModel
                 else:
-                    return ReadPydanticModel
+                    response_model = ReadPydanticModel
+        else:
+            self.read_with_relations = response_model_config.read_with_relations
+            if response_model_config.response_model:
+                self.response_model = response_model_config.response_model
+            else:
+                if FullReadPydanticModel is None:
+                    self.response_model = ReadPydanticModel
+                else:
+                    self.read_with_relations = (
+                        self.read_with_relations
+                        if self.read_with_relations is not None
+                        else read_with_relations
+                    )
+                    if self.read_with_relations:
+                        response_model = FullReadPydanticModel
+                    else:
+                        response_model = ReadPydanticModel
+        self.response_model = response_model
 
     def extend_authorization_config(self, authorization_config: AuthorizationConfig):
         if authorization_config.roles:

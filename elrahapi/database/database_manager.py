@@ -136,15 +136,18 @@ class DatabaseManager:
             )
 
     def create_database_if_not_exists(self):
-        if self.database not in ["sqlite", "posgresql"]:
-            if self.is_async_env:
-                try:
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(self.create_async_db())
-                except RuntimeError:
-                    asyncio.run(self.create_async_db())
+        try:
+            if self.database not in ["sqlite", "posgresql"]:
+                if self.is_async_env:
+                    try:
+                        loop = asyncio.get_running_loop()
+                        loop.create_task(self.create_async_db())
+                    except RuntimeError:
+                        asyncio.run(self.create_async_db())
             else:
                 self.create_sync_db()
+        except Exception as exc:
+            print(f"Error creating database: {exc}")
 
     @property
     def sqlalchemy_url(self):
