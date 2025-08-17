@@ -174,36 +174,6 @@ class AuthenticationManager:
         )
         return {token_type.value: encode_jwt, "token_type": "bearer"}
 
-        # def get_access_token(self):
-        #     # get_token_func =
-        #     # print(f"{get_token_func,type(get_token_func)=}")
-        #     def get_token(get_token_func:callable=self.get_token()):
-        #         return Depends(get_token_func()())
-        #     # print("type",type(get_token))
-        #     return get_token
-        #     # return get_token()
-
-    # def gt(credentials: str | HTTPAuthorizationCredentials):
-    #     return Depends(self.get_token()(credentials))
-    # def get_security(self):
-    #     if isinstance(self.security, OAuth2PasswordBearer):
-    #         return Depends()
-    #     else:
-    #         return Depends(get_httpbearer_token)
-    # def get_access_token(self):
-    #     def get_oauth2passwordbearer_token(token: str = Depends(self.security)):
-    #         return token
-
-    #     def get_httpbearer_token(
-    #         credentials: HTTPAuthorizationCredentials = Depends(self.security),
-    #     ):
-    #         return credentials.credentials
-
-    #     if isinstance(self.security, OAuth2PasswordBearer):
-    #         return Depends(get_oauth2passwordbearer_token)
-    #     else:
-    #         return Depends(get_httpbearer_token)
-
     def validate_token(self, token: str):
         try:
             payload = jwt.decode(token, self.__secret_key, algorithms=self.__algorithm)
@@ -257,7 +227,7 @@ class AuthenticationManager:
             pk_attr = self.__authentication_models.get_pk()
             email_attr = self.__authentication_models.sqlalchemy_model.email
             username_attr = self.__authentication_models.sqlalchemy_model.username
-            if isinstance(sub,str) and sub.isdigit():
+            if isinstance(sub, str) and sub.isdigit():
                 sub = int(sub)
             if isinstance(sub, int):
                 stmt = select(self.__authentication_models.sqlalchemy_model).where(
@@ -412,20 +382,6 @@ class AuthenticationManager:
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
-
-        # def get_current_user_sub(
-        #     self,
-        #     token:str
-        # ):
-        # token: str = Depends(self.get_access_token)
-        # def get_sub():
-        #     print(f"{type(token)}")
-        #     payload = self.validate_token(token)
-        #     sub: str = payload.get("sub")
-        #     if sub is None:
-        #         raise INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION
-        #     return sub
-        # return get_sub
 
     async def refresh_token(
         self, session: ElrahSession, refresh_token_data: RefreshToken

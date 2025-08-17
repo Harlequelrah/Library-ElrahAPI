@@ -140,34 +140,6 @@ class AuthenticationRouterProvider:
                     )
                     return access_token
 
-            # if config.route_name == DefaultRoutesName.GET_REFRESH_TOKEN:
-
-            #     @self.router.get(
-            #         path=config.route_path,
-            #         summary=config.summary if config.summary else None,
-            #         description=config.description if config.description else None,
-            #         response_model=RefreshToken,
-            #         dependencies=config.dependencies,
-            #         operation_id=f"{config.route_name}_auth",
-            #         name=f"{config.route_name}_auth",
-            #     )
-            #     async def refresh_token(
-            #         current_user_sub: str = Depends(
-            #             self.authentication.get_current_user_sub
-            #         ),
-            #         session: ElrahSession = Depends(self.session_manager.yield_session),
-            #     ):
-            #         current_user = await self.authentication.get_user_by_sub(
-            #             sub=current_user_sub, session=session
-            #         )
-            #         data = current_user.build_refresh_token_data(
-            #             authentication=self.authentication
-            #         )
-            #         refresh_token = self.authentication.create_token(
-            #             data=data, token_type=TokenType.REFRESH_TOKEN
-            #         )
-            #         return refresh_token
-
             if config.route_name == DefaultRoutesName.REFRESH_TOKEN:
 
                 @self.router.post(
