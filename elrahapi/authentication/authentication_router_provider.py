@@ -73,7 +73,7 @@ class AuthenticationRouterProvider:
 
             if config.route_name == DefaultRoutesName.CHANGE_USER_STATE:
 
-                @self.router.get(
+                @self.router.put(
                     path=config.route_path,
                     status_code=status.HTTP_204_NO_CONTENT,
                     summary=config.summary if config.summary else None,
