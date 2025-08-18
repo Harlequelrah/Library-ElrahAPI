@@ -156,11 +156,10 @@ def startapp(app_name):
         print("The 'sqlapp' folder was not found.")
 
 
-def get_apps_dir():
+def get_project_name():
     parent_dir = os.getcwd()
     env_path = os.path.join(parent_dir, ".env")
     project_name = None
-
     if not os.path.exists(env_path):
         print("No .env file found in the current directory.")
         return
@@ -173,11 +172,21 @@ def get_apps_dir():
     if not project_name:
         print("PROJECT_NAME not found in .env file.")
         return
+    return project_name
 
+
+def get_apps_dir():
+    parent_dir = os.getcwd()
+    # env_path = os.path.join(parent_dir, ".env")
+    project_name = os.getenv("PROJECT_NAME")
+    if project_name is None:
+        project_name = get_project_name()
     apps_dir_folder = os.path.join(parent_dir, project_name)
+    print(apps_dir_folder)
     if not os.path.isdir(apps_dir_folder):
         print(f"Apps dirs '{apps_dir_folder}' not found.")
         return
+    print(apps_dir_folder)
 
     return apps_dir_folder
 
