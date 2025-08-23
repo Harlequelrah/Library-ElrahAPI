@@ -79,7 +79,10 @@ class RouteConfig:
                 if self.read_with_relations:
                     response_model = FullReadPydanticModel
                 else:
-                    response_model = ReadPydanticModel
+                    if read_with_relations:
+                        response_model = FullReadPydanticModel
+                    else:
+                        response_model = ReadPydanticModel
         else:
             self.read_with_relations = response_model_config.read_with_relations
             if response_model_config.response_model:

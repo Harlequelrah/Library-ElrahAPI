@@ -182,11 +182,11 @@ def get_apps_dir():
     if project_name is None:
         project_name = get_project_name()
     apps_dir_folder = os.path.join(parent_dir, project_name)
-    print(apps_dir_folder)
+    # print(apps_dir_folder)
     if not os.path.isdir(apps_dir_folder):
         print(f"Apps dirs '{apps_dir_folder}' not found.")
         return
-    print(apps_dir_folder)
+    # print(apps_dir_folder)
 
     return apps_dir_folder
 
