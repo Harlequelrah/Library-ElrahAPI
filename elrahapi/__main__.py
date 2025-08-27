@@ -242,20 +242,23 @@ def run_seed(seed_name, action: bool):
 
 
 def run_seed_manager(action: str):
-    seeders_dir = get_seeders_dir()
-    seeder_path = os.path.join(seeders_dir, "seed_manager_seed.py")
-    if not os.path.exists(seeder_path):
-        print(Fore.RED + Style.BRIGHT + f"seeder seed_manager_seed file not found")
-        return
-    env = set_python_path()
-    subprocess.run(
-        [
-            sys.executable,
-            seeder_path,
-            "up" if action else "down",
-        ],
-        env=env,
-    )
+    try:
+        seeders_dir = get_seeders_dir()
+        seeder_path = os.path.join(seeders_dir, "seed_manager_seed.py")
+        if not os.path.exists(seeder_path):
+            print(Fore.RED + Style.BRIGHT + f"seeder seed_manager_seed file not found")
+            return
+        env = set_python_path()
+        subprocess.run(
+            [
+                sys.executable,
+                seeder_path,
+                "up" if action else "down",
+            ],
+            env=env,
+        )
+    except Exception as e:
+        print(Fore.RED + Style.BRIGHT + f"Error running seed manager: {e}")
 
 
 def set_python_path():
@@ -266,10 +269,13 @@ def set_python_path():
 
 
 def create_tables():
-    apps_dir = get_apps_dir()
-    models_metadata_path = os.path.join(apps_dir, "settings/models_metadata.py")
-    env = set_python_path()
-    subprocess.run([sys.executable, models_metadata_path], env=env)
+    try:
+        apps_dir = get_apps_dir()
+        models_metadata_path = os.path.join(apps_dir, "settings/models_metadata.py")
+        env = set_python_path()
+        subprocess.run([sys.executable, models_metadata_path], env=env)
+    except Exception as e:
+        print(Fore.RED + Style.BRIGHT + f"Error creating tables: {e}")
 
 
 def run():

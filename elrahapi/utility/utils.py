@@ -77,12 +77,10 @@ def make_filter(
 
 
 def get_env_int(env_key: str):
-    number = os.getenv(env_key)
-    if number is None:
-        return number
-    else:
-        if number.isdigit():
-            return number
+    number = os.getenv(env_key, 0)
+    if number.isdigit():
+        number = int(number)
+    return number
 
 
 def is_async_session(session: ElrahSession):

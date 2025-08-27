@@ -21,6 +21,7 @@ class MetaAuthorization:
 class MetaAuthorizationBaseModel(BaseModel):
     is_active: bool
     name: str
+    description: str
 
 
 class MetaAuthorizationReadModel(MetaAuthorizationBaseModel):
