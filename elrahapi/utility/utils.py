@@ -1,4 +1,5 @@
 from typing import Any, Type
+from fastapi import Request
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
@@ -63,13 +64,10 @@ def get_pks(l: list, pk_name: str):
     return pk_list
 
 
-def make_filter(
-    stmt: Select,
-    crud_models: CrudModels,
-    filter: str | None = None,
-    value: str | None = None,
+def apply_filters(
+    stmt: Select, crud_models: CrudModels, filters: dict[str, Any]
 ) -> Select:
-    if filter and value:
+    for filter, value in filters.items():
         exist_filter = crud_models.get_attr(filter)
         validated_value = validate_value(value)
         stmt = stmt.where(exist_filter == validated_value)
@@ -87,19 +85,34 @@ def is_async_session(session: ElrahSession):
     return isinstance(session, AsyncSession)
 
 
-async def exec_stmt(stmt: Select, session: ElrahSession, with_scalars: bool = False):
+async def exec_stmt(
+    stmt: Select,
+    session: ElrahSession,
+    with_scalars: bool = False,
+    with_scalar: bool = False,
+):
     if isinstance(session, AsyncSession):
         if with_scalars:
             result = await session.scalars(stmt)
-            return result.unique() if result else None
+        elif with_scalar:
+            result = await session.scalar(stmt)
         else:
             result = await session.execute(stmt)
-            return result.unique() if result else None
     else:
         if with_scalars:
-            return session.scalars(stmt)
+            result = session.scalars(stmt)
+        elif with_scalar:
+            result = session.scalar(stmt)
         else:
-            return session.execute(stmt)
+            result = session.execute(stmt)
+    return result
+
+
+def get_filters(request: Request):
+    filters = dict(request.query_params)
+    filters.pop("skip", None)
+    filters.pop("limit", None)
+    return filters
 
 
 def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel]:

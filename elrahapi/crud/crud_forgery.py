@@ -6,10 +6,10 @@ from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.router.router_namespace import TypeRelation
-from elrahapi.utility.types import ElrahSession
+from elrahapi.utility.types import CountModel, ElrahSession
 from elrahapi.utility.utils import (
+    apply_filters,
     exec_stmt,
-    make_filter,
     map_list_to,
     update_entity,
 )
@@ -88,19 +88,72 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
+    async def get_total_count(self, session: ElrahSession) -> int:
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel)
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_daily_total_count(self, session: ElrahSession) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(self.SQLAlchemyModel)
+            .where(func.date(self.SQLAlchemyModel.date_created) == func.current_date())
+        )
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_seven_previous_day_total_count(self, session: ElrahSession) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(self.SQLAlchemyModel)
+            .where(
+                func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7
+            )
+        )
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_monthly_total_count(self, session: ElrahSession) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(self.SQLAlchemyModel)
+            .where(
+                func.extract("month", func.date(self.SQLAlchemyModel.date_created))
+                == func.extract("month", func.current_date()),
+            )
+        )
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
     async def count(
         self,
         session: ElrahSession,
-    ) -> int:
+    ) -> CountModel:
         try:
-            pk = self.crud_models.get_pk()
-            stmt = select(func.count(pk))
-            result = await exec_stmt(
-                session=session,
-                stmt=stmt,
+            total_count = await self.get_total_count(session=session)
+            daily_total_count = await self.get_daily_total_count(session=session)
+            seven_previous_day_total_count = (
+                await self.get_seven_previous_day_total_count(session=session)
             )
-            count = result.scalar_one()
-            return count
+            monthly_total_count = await self.get_monthly_total_count(session=session)
+            return CountModel(
+                total_count=total_count,
+                daily_total_count=daily_total_count,
+                seven_previous_day_total_count=seven_previous_day_total_count,
+                monthly_total_count=monthly_total_count,
+            )
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
@@ -111,13 +164,10 @@ class CrudForgery:
     async def read_all(
         self,
         session: ElrahSession,
-        filter: str | None = None,
-        second_model_filter: str | None = None,
-        second_model_filter_value: Any = None,
-        value: str | None = None,
         skip: int = 0,
         limit: int = None,
         relation: Any = None,
+        filters=dict[str, Any],
     ):
         try:
             stmt = select(self.SQLAlchemyModel)
@@ -142,15 +192,15 @@ class CrudForgery:
                         relation.second_entity_crud.crud_models.sqlalchemy_model,
                         reskey=pk,
                     )
-            stmt = make_filter(
-                crud_models=self.crud_models, stmt=stmt, filter=filter, value=value
+
+            stmt = apply_filters(
+                crud_models=self.crud_models, stmt=stmt, filters=filters
             )
             if relation:
-                stmt = make_filter(
+                stmt = apply_filters(
                     crud_models=relation.second_entity_crud.crud_models,
                     stmt=stmt,
-                    filter=second_model_filter,
-                    value=second_model_filter_value,
+                    filters=filters,
                 )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
@@ -265,4 +315,3 @@ class CrudForgery:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
-        

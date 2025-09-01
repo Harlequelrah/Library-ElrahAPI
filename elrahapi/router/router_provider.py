@@ -23,9 +23,11 @@ from elrahapi.router.router_namespace import (
     TypeRelation,
     TypeRoute,
 )
-from elrahapi.utility.types import ElrahSession
+from elrahapi.utility.types import CountModel, ElrahSession
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
+
+from elrahapi.utility.utils import get_filters
 
 
 class CustomRouterProvider:
@@ -186,14 +188,15 @@ class CustomRouterProvider:
                     dependencies=config.dependencies,
                     operation_id=f"{config.route_name}_{self.crud.entity_name}",
                     name=f"{config.route_name}_{self.crud.entity_name}",
+                    response_model=CountModel,
                 )
                 async def count(
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
                 ):
-                    count = await self.crud.count(session=session)
-                    return {"count": count}
+                    counts = await self.crud.count(session=session)
+                    return counts
 
             if config.route_name == DefaultRoutesName.READ_ONE:
 
@@ -226,10 +229,7 @@ class CustomRouterProvider:
                     name=f"{config.route_name}_{self.crud.entity_name}",
                 )
                 async def read_all(
-                    filter: str | None = None,
-                    value: Any | None = None,
-                    second_model_filter: str | None = None,
-                    second_model_filter_value: Any | None = None,
+                    request: Request,
                     skip: int = None,
                     limit: int = None,
                     relationship_name: str | None = None,
@@ -240,13 +240,11 @@ class CustomRouterProvider:
                     relation: Relationship | None = self.get_relationship(
                         relationship_name=relationship_name
                     )
+                    filters = get_filters(request=request)
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
-                        filter=filter,
-                        value=value,
-                        second_model_filter=second_model_filter,
-                        second_model_filter_value=second_model_filter_value,
+                        filters=filters,
                         relation=relation,
                         session=session,
                     )

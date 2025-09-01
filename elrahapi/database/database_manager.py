@@ -19,6 +19,7 @@ class DatabaseManager:
         database_server: str,
         database_async_connector: str,
         is_async_env=bool,
+        database_creation_script: str | None = None,
     ):
         self.__database = database
         self.__database_username = database_username
@@ -31,6 +32,9 @@ class DatabaseManager:
         self.__is_async_env = (
             True if is_async_env is True and self.__database_async_connector else False
         )
+        self.__create_database_if_not_exists_text = None
+        if database_creation_script:
+            self.__create_database_if_not_exists_text = text(database_creation_script)
 
     @property
     def session_manager(self):
@@ -124,28 +128,29 @@ class DatabaseManager:
         engine = create_engine(self.database_url, pool_pre_ping=True)
         conn = engine.connect()
         try:
-            conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}"))
+            conn.execute(self.__create_database_if_not_exists_text)
         finally:
             conn.close()
 
     async def create_async_db(self):
         engine = create_async_engine(self.database_url, pool_pre_ping=True)
         async with engine.begin() as conn:
-            await conn.execute(
-                text(f"CREATE DATABASE IF NOT EXISTS {self.database_name}")
-            )
+            await conn.execute(self.__create_database_if_not_exists_text)
 
     def create_database_if_not_exists(self):
         try:
-            if self.database not in ["sqlite", "posgresql"]:
+            if (
+                self.database != "sqlite"
+                and self.__create_database_if_not_exists_text is not None
+            ):
                 if self.is_async_env:
                     try:
                         loop = asyncio.get_running_loop()
                         loop.create_task(self.create_async_db())
                     except RuntimeError:
                         asyncio.run(self.create_async_db())
-            else:
-                self.create_sync_db()
+                else:
+                    self.create_sync_db()
         except Exception as exc:
             print(f"Error creating database: {exc}")
 
