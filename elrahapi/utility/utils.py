@@ -65,12 +65,16 @@ def get_pks(l: list, pk_name: str):
 
 
 def apply_filters(
-    stmt: Select, crud_models: CrudModels, filters: dict[str, Any]
+    stmt: Select,
+    crud_models: CrudModels,
+    filters: dict[str, Any],
 ) -> Select:
-    for filter, value in filters.items():
-        exist_filter = crud_models.get_attr(filter)
-        validated_value = validate_value(value)
-        stmt = stmt.where(exist_filter == validated_value)
+    conditions = [
+        crud_models.get_attr(f) == validate_value(v)
+        for f, v in filters.items()
+        if hasattr(crud_models.sqlalchemy_model, f)
+    ]
+    stmt = stmt.where(*conditions)
     return stmt
 
 

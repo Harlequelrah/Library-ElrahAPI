@@ -23,8 +23,8 @@ from elrahapi.router.router_namespace import (
     TypeRelation,
     TypeRoute,
 )
-from elrahapi.utility.types import CountModel, ElrahSession
-
+from elrahapi.utility.schemas import CountModel
+from elrahapi.utility.types import ElrahSession
 from fastapi import APIRouter, Depends, Request, status
 
 from elrahapi.utility.utils import get_filters
@@ -232,6 +232,7 @@ class CustomRouterProvider:
                     request: Request,
                     skip: int = None,
                     limit: int = None,
+                    with_deleted: bool = False,
                     relationship_name: str | None = None,
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
@@ -241,6 +242,8 @@ class CustomRouterProvider:
                         relationship_name=relationship_name
                     )
                     filters = get_filters(request=request)
+                    if with_deleted is False:
+                        filters["is_deleted"] = False
                     return await self.crud.read_all(
                         skip=skip,
                         limit=limit,
@@ -346,6 +349,25 @@ class CustomRouterProvider:
                 ):
                     return await self.crud.delete(session=session, pk=pk)
 
+            if config.route_name == DefaultRoutesName.SOFT_DELETE:
+
+                @self.router.delete(
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
+                    dependencies=config.dependencies,
+                    status_code=status.HTTP_204_NO_CONTENT,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
+                )
+                async def soft_delete(
+                    pk: Any,
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
+                ):
+                    return await self.crud.soft_delete(session=session, pk=pk)
+
             if config.route_name == DefaultRoutesName.BULK_DELETE:
 
                 @self.router.delete(
@@ -364,6 +386,27 @@ class CustomRouterProvider:
                     ),
                 ):
                     return await self.crud.bulk_delete(session=session, pk_list=pk_list)
+
+            if config.route_name == DefaultRoutesName.BULK_SOFT_DELETE:
+
+                @self.router.delete(
+                    path=config.route_path,
+                    summary=config.summary,
+                    description=config.description,
+                    dependencies=config.dependencies,
+                    status_code=status.HTTP_204_NO_CONTENT,
+                    operation_id=f"{config.route_name}_{self.crud.entity_name}",
+                    name=f"{config.route_name}_{self.crud.entity_name}",
+                )
+                async def bulk_soft_delete(
+                    pk_list: BulkDeleteModel,
+                    session: ElrahSession = Depends(
+                        self.crud.session_manager.yield_session
+                    ),
+                ):
+                    return await self.crud.bulk_soft_delete(
+                        session=session, pk_list=pk_list
+                    )
 
             if config.route_name == DefaultRoutesName.BULK_CREATE:
 

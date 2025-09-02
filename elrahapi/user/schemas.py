@@ -4,6 +4,7 @@ from datetime import datetime
 from elrahapi.authorization.user_role.meta_models import MetaUserRoleModel
 
 from elrahapi.authorization.user_privilege.meta_models import MetaUserPrivilegeModel
+from elrahapi.utility.schemas import AdditionalSchemaFields
 
 class UserBaseModel(BaseModel):
     email: EmailStr = Field(example="user@example.com")
@@ -16,7 +17,6 @@ class UserCreateModel:
     password: str = Field(example="m*td*pa**e")
 
 
-
 class UserPatchModel:
     email: EmailStr | None = Field(example="user@example.com",default=None)
     username: str | None = Field(example="Harlequelrah",default=None)
@@ -26,19 +26,16 @@ class UserPatchModel:
 class UserUpdateModel:
     pass
 
-class UserReadModel:
+
+class UserReadModel(AdditionalSchemaFields):
     id: int
     is_active: bool
-    attempt_login:int
-    date_created: datetime
-    date_updated: datetime
-
+    attempt_login: int
 
 
 class UserFullReadModel(UserReadModel):
     user_roles:list["MetaUserRoleModel"] = []
     user_privileges: list["MetaUserPrivilegeModel"]=[]
-
 
 
 class UserRequestModel(BaseModel):
@@ -59,7 +56,6 @@ class UserRequestModel(BaseModel):
 
 class UserLoginRequestModel(UserRequestModel):
     password: str
-
 
 
 class UserChangePasswordRequestModel(UserRequestModel):

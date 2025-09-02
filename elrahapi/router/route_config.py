@@ -2,6 +2,7 @@ from typing import Any, Callable, Type
 
 from pydantic import BaseModel
 from elrahapi.router.router_routes_name import (
+    DEFAULT_ROUTES_NAME,
     DefaultRoutesName,
     RoutesName,
     READ_ROUTES_NAME,
@@ -60,11 +61,13 @@ class RouteConfig:
         route_path: str | None = None,
     ):
         if route_path:
-            if route_name in DEFAULT_DETAIL_ROUTES_NAME and "{pk}" not in route_path:
-                return f"/{route_name.value}/{{pk}}"
             return route_path
-        else:
-            return f"/{route_name.value}"
+        if route_name in DEFAULT_ROUTES_NAME:
+            if route_name in DEFAULT_DETAIL_ROUTES_NAME:
+                return f"/{{pk}}"
+            else:
+                return ""
+        return f"/{route_name.value}"
 
     def extend_response_model(
         self,

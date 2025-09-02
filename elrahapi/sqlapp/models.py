@@ -21,3 +21,5 @@
 #     id = Column(Integer, primary_key=True)
 #     date_created = Column(DateTime, default=func.now())
 #     date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
+#     is_deleted = Column(Boolean, default=False)
+#     date_deleted = Column(DateTime, nullable=True)

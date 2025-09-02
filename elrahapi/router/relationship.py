@@ -18,7 +18,7 @@ from elrahapi.router.router_crud import (
 )
 from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.router.router_routes_name import RelationRoutesName
-from elrahapi.utility.utils import exec_stmt, make_filter, validate_value
+from elrahapi.utility.utils import exec_stmt, apply_filters, validate_value
 from pydantic import BaseModel
 from sqlalchemy import and_, select
 
@@ -484,7 +484,9 @@ class Relationship:
                 .join(e1_cm.sqlalchemy_model)
                 .where(e1_pk == pk1)
             )
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
+            stmt = apply_filters(
+                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
+            )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 session=session,
@@ -496,7 +498,9 @@ class Relationship:
             rel_model = self.relationship_crud.crud_models.sqlalchemy_model
             rel_key1, rel_key2 = self.get_relationship_keys()
             stmt = select(e2_cm.sqlalchemy_model).join(rel_model).where(rel_key1 == pk1)
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
+            stmt = apply_filters(
+                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
+            )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 session=session,
@@ -511,7 +515,9 @@ class Relationship:
                 .join(self.relation_table, e2_pk == rel_key2)
                 .join(e1_cm.sqlalchemy_model, rel_key1 == e1_pk)
             )
-            stmt = make_filter(crud_models=e2_cm, stmt=stmt, filter=filter, value=value)
+            stmt = apply_filters(
+                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
+            )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 session=session,

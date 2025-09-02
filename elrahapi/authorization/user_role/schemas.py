@@ -5,6 +5,7 @@ from pydantic import BaseModel,Field
 from elrahapi.user.schemas import UserBaseModel
 
 from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
+from elrahapi.utility.schemas import AdditionalSchemaFields
 
 
 
@@ -15,11 +16,11 @@ class UserRoleCreateModel(BaseModel):
     is_active: bool = Field(exemple=True,default=True)
 
 
-class UserRoleReadModel(UserRoleCreateModel):
+class UserRoleReadModel(UserRoleCreateModel,AdditionalSchemaFields):
     id : int
 
 
-class UserRoleFullReadModel(BaseModel):
+class UserRoleFullReadModel(BaseModel,AdditionalSchemaFields):
     id : int
     user : UserBaseModel
     role : MetaAuthorizationBaseModel

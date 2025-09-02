@@ -13,15 +13,14 @@
 # class EntityPatchModel(BaseModel):
 #     pass
 
-# class EntityReadModel(BaseModel):
+# class EntityReadModel():
 #     id : int
 #     date_created: datetime
-#     date_updated: datetime 
-#     class Config:
-#         from_attributes=True
+#     date_updated: datetime
+#     date_deleted: datetime | None = None
+#     is_deleted:bool
+#     config_model=ConfigDict(from_attributes=True)
 
 
 # class EntityFullReadModel(EntityReadModel):
-#     pass
-#     class Config:
-#         from_attributes=True
+    # config_model=ConfigDict(from_attributes=True)

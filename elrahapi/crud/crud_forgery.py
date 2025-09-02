@@ -1,12 +1,13 @@
 from typing import Any, Type
-
+from datetime import datetime
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.router.router_namespace import TypeRelation
-from elrahapi.utility.types import CountModel, ElrahSession
+from elrahapi.utility.schemas import CountModel
+from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import (
     apply_filters,
     exec_stmt,
@@ -14,7 +15,7 @@ from elrahapi.utility.utils import (
     update_entity,
 )
 from pydantic import BaseModel
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 
 from fastapi import status
 
@@ -285,15 +286,12 @@ class CrudForgery:
         try:
             pk_attr = self.crud_models.get_pk()
             delete_list = pk_list.delete_list
+            stmt = delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
             if self.session_manager.is_async_env:
-                await session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
-                )
+                await session.execute(stmt)
                 await session.commit()
             else:
-                session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
-                )
+                session.execute(stmt)
                 session.commit()
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
@@ -314,4 +312,43 @@ class CrudForgery:
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
+            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+
+    async def soft_delete(self, session: ElrahSession, pk: Any):
+        try:
+            await self.update(
+                session=session,
+                pk=pk,
+                update_obj=self.PatchPydanticModel(
+                    is_deleted=True, delete_date=datetime.now()
+                ),
+                is_full_update=False,
+            )
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while soft deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
+            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+
+    async def bulk_soft_delete(self, session: ElrahSession, pk_list: BulkDeleteModel):
+        try:
+            pk_attr = self.crud_models.get_pk()
+            delete_list = pk_list.delete_list
+            stmt = (
+                update(self.SQLAlchemyModel)
+                .where(pk_attr.in_(delete_list))
+                .values(is_deleted=True, delete_date=datetime.now())
+            )
+            if self.session_manager.is_async_env:
+                await session.execute(stmt)
+                await session.commit()
+            else:
+                session.execute(stmt)
+                session.commit()
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while bulk soft deleting {self.entity_name}s , details : {str(e)}"
+            print(detail)
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
