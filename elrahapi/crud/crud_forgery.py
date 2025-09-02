@@ -251,6 +251,7 @@ class CrudForgery:
         update_obj: Type[BaseModel],
         is_full_update: bool,
     ):
+        print("update called")
         valide_update = (
             isinstance(update_obj, self.UpdatePydanticModel) and is_full_update
         )
@@ -262,15 +263,19 @@ class CrudForgery:
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
+        if valide_patch:
+            print("is patch")
         try:
             existing_obj = await self.read_one(pk=pk, session=session)
             existing_obj = update_entity(
                 existing_entity=existing_obj, update_entity=update_obj
             )
+            print("before commit")
             await self.session_manager.commit_and_refresh(
                 session=session,
                 object=existing_obj,
             )
+            print("after commit")
             return existing_obj
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
@@ -316,14 +321,17 @@ class CrudForgery:
 
     async def soft_delete(self, session: ElrahSession, pk: Any):
         try:
+            print("soft delete called")
+            update_obj = self.PatchPydanticModel(
+                is_deleted=True, date_deleted=datetime.now()
+            )
             await self.update(
                 session=session,
                 pk=pk,
-                update_obj=self.PatchPydanticModel(
-                    is_deleted=True, delete_date=datetime.now()
-                ),
+                update_obj=update_obj,
                 is_full_update=False,
             )
+            print("end of try")
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
             raise che

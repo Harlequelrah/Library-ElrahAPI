@@ -2,15 +2,15 @@ from enum import Enum
 from typing import TypeAlias
 
 
-class RelationRoutesName(str,Enum):
-    CREATE_RELATION="create-relation"
-    DELETE_RELATION="delete-relation"
-    CREATE_BY_RELATION="create-by-relation"
-    DELETE_BY_RELATION="delete-by-relation"
-    UPDATE_BY_RELATION="update-by-relation"
-    PATCH_BY_RELATION="patch-by-relation"
-    READ_ALL_BY_RELATION="read-all-by-relation"
-    READ_ONE_BY_RELATION="read-one-by-relation"
+class RelationRoutesName(str, Enum):
+    CREATE_RELATION = "create-relation"
+    DELETE_RELATION = "delete-relation"
+    CREATE_BY_RELATION = "create-by-relation"
+    DELETE_BY_RELATION = "delete-by-relation"
+    UPDATE_BY_RELATION = "update-by-relation"
+    PATCH_BY_RELATION = "patch-by-relation"
+    READ_ALL_BY_RELATION = "read-all-by-relation"
+    READ_ONE_BY_RELATION = "read-one-by-relation"
 
 
 class DefaultRoutesName(str, Enum):
@@ -34,6 +34,7 @@ class DefaultRoutesName(str, Enum):
     LOGIN = "login"
     CHANGE_PASSWORD = "change-password"
     CHANGE_USER_STATE = "change-user-state"
+
 
 CREATE_ALL_PRIVILEGE_ROUTES_NAME: list[DefaultRoutesName] = [
     DefaultRoutesName.CREATE,
@@ -63,9 +64,10 @@ DEFAULT_DETAIL_ROUTES_NAME: list[DefaultRoutesName] = [
     DefaultRoutesName.READ_ONE,
     DefaultRoutesName.CHANGE_USER_STATE,
     DefaultRoutesName.PATCH,
+    DefaultRoutesName.SOFT_DELETE,
 ]
 
-DEFAULT_ROUTES_NAME : list[DefaultRoutesName] = [
+DEFAULT_ROUTES_NAME: list[DefaultRoutesName] = [
     DefaultRoutesName.CREATE,
     DefaultRoutesName.READ_ALL,
     DefaultRoutesName.READ_ONE,

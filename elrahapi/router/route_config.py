@@ -67,6 +67,10 @@ class RouteConfig:
                 return f"/{{pk}}"
             else:
                 return ""
+        else:
+            if route_name == DefaultRoutesName.SOFT_DELETE:
+                print("hello")
+                return f"/soft-delete/{{pk}}"
         return f"/{route_name.value}"
 
     def extend_response_model(
