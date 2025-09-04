@@ -1,7 +1,7 @@
 from elrahapi.router.router_provider import CustomRouterProvider
 from elrahapi.router.router_routes_name import DefaultRoutesName
-from .configs import authentication
-from .cruds import (
+from settings.auth.configs import authentication
+from settings.auth.cruds import (
     privilege_crud,
     role_crud,
     role_privilege_crud,
