@@ -69,7 +69,6 @@ class RouteConfig:
                 return ""
         else:
             if route_name == DefaultRoutesName.SOFT_DELETE:
-                print("hello")
                 return f"/soft-delete/{{pk}}"
         return f"/{route_name.value}"
 

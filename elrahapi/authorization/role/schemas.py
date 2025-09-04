@@ -3,8 +3,7 @@ from elrahapi.authorization.base_meta_model import (
     MetaAuthorizationReadModel,
 )
 from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime
-from elrahapi.authorization.role.meta_models import MetaRoleUsers
+from elrahapi.authorization.role.meta_models import RoleUserInRole
 
 
 class RoleBaseModel(BaseModel):
@@ -26,9 +25,6 @@ class RolePatchModel(BaseModel):
     description: str | None = Field(
         example="allow to manage all the system", default=None
     )
-    is_deleted: bool | None = Field(example=False, default=None)
-    date_deleted: datetime | None = Field(example=None, default=None)
-
 
 class RoleReadModel(MetaAuthorizationReadModel):
     model_config = ConfigDict(from_attributes=True)
@@ -36,6 +32,6 @@ class RoleReadModel(MetaAuthorizationReadModel):
 
 class RoleFullReadModel(MetaAuthorizationReadModel):
     role_privileges: list["MetaAuthorizationBaseModel"] = []
-    role_users: list["MetaRoleUsers"] = []
+    role_users: list["RoleUserInRole"] = []
 
     model_config = ConfigDict(from_attributes=True)

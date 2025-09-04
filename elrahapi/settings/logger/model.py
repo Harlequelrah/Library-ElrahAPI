@@ -1,7 +1,8 @@
-from sqlalchemy import Column, ForeignKey, Integer
-
-from sqlalchemy.orm import relationship
 from elrahapi.middleware.models import MetaLogModel
+from settings.database import Base
+from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import relationship
+
 
 class LogModel(Base, MetaLogModel):
     # USER_FK_NAME = "user_id"
@@ -10,5 +11,4 @@ class LogModel(Base, MetaLogModel):
     # user = relationship("User", back_populates="user_logs")
 
 
-# vous pouvez adapter à la classe selon vos besoin
-
+# vous pouvez adapter  la classe selon vos besoin

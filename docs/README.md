@@ -657,7 +657,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 #### **2.4.5.3. Sous module `meta_models`**
 
-- `MetaUserPrivilegeModel(BaseModel)` :
+- `UserInUserPrivilege(BaseModel)` :
 
   - privilege : **MetaAuthorizationBaseModel**
 
@@ -721,7 +721,7 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 #### **2.4.6.3. Sous module `meta_models`**
 
-- `MetaUserRoleModel(BaseModel)` :
+- `UserRoleInUser(BaseModel)` :
 
   - role : **MetaAuthorizationBaseModel**
 
@@ -982,9 +982,9 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
 - **`UserFullReadModel(UserReadModel)`**
 
-  - user_roles : **Optional[List[MetaUserRoleModel]]**
+  - user_roles : **Optional[List[UserRoleInUser]]**
 
-  - user_privileges : **Optional[List[MetaUserPrivilegeModel]]**
+  - user_privileges : **Optional[List[UserInUserPrivilege]]**
 
 - `UserRequestModel` :
 

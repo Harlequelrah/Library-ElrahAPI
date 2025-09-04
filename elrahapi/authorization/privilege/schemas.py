@@ -5,7 +5,7 @@ from elrahapi.authorization.base_meta_model import (
     MetaAuthorizationBaseModel,
 )
 
-from elrahapi.authorization.privilege.meta_models import MetaPrivilegeUsers
+from elrahapi.authorization.privilege.meta_models import PrivilegeUserInPrivilege
 
 
 class PrivilegeBaseModel(BaseModel):
@@ -35,5 +35,5 @@ class PrivilegeReadModel(MetaAuthorizationReadModel):
 
 class PrivilegeFullReadModel(MetaAuthorizationReadModel):
     privilege_roles: list["MetaAuthorizationBaseModel"] | None = []
-    privilege_users: list["MetaPrivilegeUsers"] | None = []
+    privilege_users: list["PrivilegeUserInPrivilege"] | None = []
     model_config = ConfigDict(from_attributes=True)

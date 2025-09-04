@@ -1,6 +1,6 @@
 from elrahapi.database.database_manager import DatabaseManager
 from sqlalchemy.orm import declarative_base
-from .secret import (
+from settings.secret import (
     DATABASE,
     DATABASE_ASYNC_CONNECTOR,
     DATABASE_CONNECTOR,

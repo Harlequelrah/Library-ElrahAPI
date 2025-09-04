@@ -25,9 +25,9 @@ from elrahapi.router.router_namespace import (
 )
 from elrahapi.utility.schemas import CountModel
 from elrahapi.utility.types import ElrahSession
-from fastapi import APIRouter, Depends, Request, status
-
 from elrahapi.utility.utils import get_filters
+
+from fastapi import APIRouter, Depends, Request, status
 
 
 class CustomRouterProvider:
@@ -194,8 +194,11 @@ class CustomRouterProvider:
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
+                    with_deleted: bool | None = None,
                 ):
-                    counts = await self.crud.count(session=session)
+                    counts = await self.crud.count(
+                        session=session, with_deleted=with_deleted
+                    )
                     return counts
 
             if config.route_name == DefaultRoutesName.READ_ONE:
@@ -232,7 +235,7 @@ class CustomRouterProvider:
                     request: Request,
                     skip: int = None,
                     limit: int = None,
-                    with_deleted: bool = False,
+                    with_deleted: bool | None = None,
                     relationship_name: str | None = None,
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
@@ -242,7 +245,7 @@ class CustomRouterProvider:
                         relationship_name=relationship_name
                     )
                     filters = get_filters(request=request)
-                    if with_deleted is False:
+                    if not with_deleted:
                         filters["is_deleted"] = False
                     return await self.crud.read_all(
                         skip=skip,

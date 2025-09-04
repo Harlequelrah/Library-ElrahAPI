@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 
+from elrahapi.user.schemas import UserInPrivilegeUser
 
-class MetaPrivilegeUsers(BaseModel):
-    user_id:int
+
+class PrivilegeUserInPrivilege(BaseModel):
+    user:UserInPrivilegeUser
     is_active:bool

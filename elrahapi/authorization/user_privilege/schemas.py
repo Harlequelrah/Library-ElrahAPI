@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from elrahapi.authorization.base_meta_model import MetaAuthorizationBaseModel
 
-from elrahapi.user.schemas import UserBaseModel
+from elrahapi.user.schemas import UserInUserPrivilege
 from elrahapi.utility.schemas import AdditionalSchemaFields
 
 
@@ -20,7 +20,7 @@ class UserPrivilegeReadModel(UserPrivilegeCreateModel, AdditionalSchemaFields):
 
 class UserPrivilegeFullReadModel(BaseModel, AdditionalSchemaFields):
     id: int
-    user: UserBaseModel
+    user: UserInUserPrivilege
     privilege: MetaAuthorizationBaseModel
     is_active: bool
     model_config = ConfigDict(from_attributes=True)

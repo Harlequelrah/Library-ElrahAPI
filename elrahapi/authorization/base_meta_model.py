@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import validates
-from sqlalchemy.sql import func
 from datetime import datetime
 
 from elrahapi.utility.models import AdditionalModelFields

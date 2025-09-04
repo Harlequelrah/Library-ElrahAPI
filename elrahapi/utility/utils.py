@@ -1,13 +1,18 @@
+import importlib
+import os
+import sys
 from typing import Any, Type
-from fastapi import Request
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from dotenv import load_dotenv
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.crud.crud_models import CrudModels
-import os
-from sqlalchemy.sql import Select
 from elrahapi.router.router_routes_name import CREATE_ALL_PRIVILEGE_ROUTES_NAME
 from elrahapi.utility.types import ElrahSession
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import Select
+
+from fastapi import Request
 
 
 def map_list_to(
@@ -37,21 +42,21 @@ def update_entity(existing_entity, update_entity: Type[BaseModel]):
 
 
 def validate_value(value: Any):
-    if value is None:
-        return None
-    elif isinstance(value, bool):
-        return value
-    elif value.isdigit():
-        return int(value)
-    elif isinstance(value, str):
+    # if isinstance(value, bool) or isinstance(value, int):
+    #     pass
+    # elif value.isdigit():
+    #     return int(value)
+    if isinstance(value, str):
         if value.lower() == "true":
-            return True
+            value = True
         elif value.lower() == "false":
-            return False
+            value = False
+        elif value.isdigit():
+            return int(value)
     else:
         try:
             value = float(value)
-        except ValueError:
+        except (ValueError, TypeError):
             value = str(value)
     return value
 
@@ -131,3 +136,22 @@ def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel
             )
             privileges.append(privilege)
     return privileges
+
+
+def add_settings_path(env: str | None = None):
+    load_dotenv() if env is None else load_dotenv(env)
+    project_name = os.getenv("PROJECT_NAME")
+    settings_path = f"{project_name}.settings"
+    sys.path.append(settings_path)
+
+
+def import_Base(env: str | None = None):
+    load_dotenv() if env is None else load_dotenv(env)
+    project_name = os.getenv("PROJECT_NAME")
+    settings_path = f"{project_name}.settings"
+    models_metadata_path = f"{settings_path}.models_metadata"
+    class_name = "Base"
+    settings = importlib.import_module(settings_path)
+    models_metadata = importlib.import_module(models_metadata_path)
+    Base = getattr(models_metadata, class_name)
+    return settings, models_metadata, Base

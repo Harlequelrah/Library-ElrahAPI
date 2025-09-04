@@ -1,5 +1,6 @@
-from typing import Any, Type
 from datetime import datetime
+from typing import Any, Type
+
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
@@ -8,12 +9,7 @@ from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.utility.schemas import CountModel
 from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import (
-    apply_filters,
-    exec_stmt,
-    map_list_to,
-    update_entity,
-)
+from elrahapi.utility.utils import apply_filters, exec_stmt, map_list_to, update_entity
 from pydantic import BaseModel
 from sqlalchemy import delete, func, select, update
 
@@ -89,49 +85,49 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def get_total_count(self, session: ElrahSession) -> int:
-        stmt = select(func.count()).select_from(self.SQLAlchemyModel)
+    async def get_total_count(self, session: ElrahSession, conditions: list) -> int:
+
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
         return await exec_stmt(
             session=session,
             stmt=stmt,
             with_scalar=True,
         )
 
-    async def get_daily_total_count(self, session: ElrahSession) -> int:
-        stmt = (
-            select(func.count())
-            .select_from(self.SQLAlchemyModel)
-            .where(func.date(self.SQLAlchemyModel.date_created) == func.current_date())
+    async def get_daily_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        conditions.append(
+            func.date(self.SQLAlchemyModel.date_created) == func.current_date()
         )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
         return await exec_stmt(
             session=session,
             stmt=stmt,
             with_scalar=True,
         )
 
-    async def get_seven_previous_day_total_count(self, session: ElrahSession) -> int:
-        stmt = (
-            select(func.count())
-            .select_from(self.SQLAlchemyModel)
-            .where(
-                func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7
-            )
+    async def get_seven_previous_day_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        conditions.append(
+            func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7
         )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
         return await exec_stmt(
             session=session,
             stmt=stmt,
             with_scalar=True,
         )
 
-    async def get_monthly_total_count(self, session: ElrahSession) -> int:
-        stmt = (
-            select(func.count())
-            .select_from(self.SQLAlchemyModel)
-            .where(
-                func.extract("month", func.date(self.SQLAlchemyModel.date_created))
-                == func.extract("month", func.current_date()),
-            )
+    async def get_monthly_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        conditions.append(
+            func.extract("month", func.date(self.SQLAlchemyModel.date_created))
+            == func.extract("month", func.current_date()),
         )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
         return await exec_stmt(
             session=session,
             stmt=stmt,
@@ -139,16 +135,26 @@ class CrudForgery:
         )
 
     async def count(
-        self,
-        session: ElrahSession,
+        self, session: ElrahSession, with_deleted: bool | None = None
     ) -> CountModel:
         try:
-            total_count = await self.get_total_count(session=session)
-            daily_total_count = await self.get_daily_total_count(session=session)
-            seven_previous_day_total_count = (
-                await self.get_seven_previous_day_total_count(session=session)
+            conditions = []
+            if not with_deleted:
+                conditions.append(self.SQLAlchemyModel.is_deleted == False)
+            total_count = await self.get_total_count(
+                session=session, conditions=conditions
             )
-            monthly_total_count = await self.get_monthly_total_count(session=session)
+            daily_total_count = await self.get_daily_total_count(
+                session=session, conditions=conditions
+            )
+            seven_previous_day_total_count = (
+                await self.get_seven_previous_day_total_count(
+                    session=session, conditions=conditions
+                )
+            )
+            monthly_total_count = await self.get_monthly_total_count(
+                session=session, conditions=conditions
+            )
             return CountModel(
                 total_count=total_count,
                 daily_total_count=daily_total_count,
@@ -321,17 +327,13 @@ class CrudForgery:
 
     async def soft_delete(self, session: ElrahSession, pk: Any):
         try:
-            print("soft delete called")
-            update_obj = self.PatchPydanticModel(
-                is_deleted=True, date_deleted=datetime.now()
-            )
-            await self.update(
+            existing_obj = await self.read_one(pk=pk, session=session)
+            existing_obj.is_deleted = True
+            existing_obj.date_deleted = datetime.now()
+            await self.session_manager.commit_and_refresh(
                 session=session,
-                pk=pk,
-                update_obj=update_obj,
-                is_full_update=False,
+                object=existing_obj,
             )
-            print("end of try")
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
             raise che

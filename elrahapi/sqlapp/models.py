@@ -10,7 +10,7 @@
 #     Table,
 # )
 
-# from settings.database import Base
+# from myproject.settings.database import Base
 
 # from sqlalchemy.sql import func
 # from sqlalchemy.orm import relationship
@@ -21,5 +21,5 @@
 #     id = Column(Integer, primary_key=True)
 #     date_created = Column(DateTime, default=func.now())
 #     date_updated = Column(DateTime,default=func.now(), onupdate=func.now())
-#     is_deleted = Column(Boolean, default=False)
+#     is_deleted = Column(Boolean, nullable=False,default=False)
 #     date_deleted = Column(DateTime, nullable=True)

@@ -32,7 +32,7 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Fournir une pile d'utilitaires ;
 
-- L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes .
+- L'utilisation de gestionnaire de websocket .
 
 # II - **`Installation`**
 
@@ -72,11 +72,9 @@ ou si virtualenv est dejà installé au préalable
 
 - Il est recommandé de créer un environnement virtuel pour chaque projet ;
 
-- **myproject** designe le nom de votre projet ;
-
-- **myapp** designe le nom d'une application ;
-
 - Après la creation du projet configurer l'environnement .
+
+**NB** : Pour la suite **myproject** designe le nom de votre projet et **myapp** designe le nom d'une application .
 
 ## **2.** `créer un projet`
 
@@ -96,9 +94,14 @@ ou si virtualenv est dejà installé au préalable
 
   - Configurer le alembic/env.py :
 
-    - Ajouter l'import : from myproject.settings.models_metadata import Base ;
-
-    - Passer les metadata à target_metadata : database.target_metadata=Base.metadata ;
+    - Ajouter l'import :
+      ```python
+      from testproject.settings.models_metadata import Base
+      ```
+    - Passer les metadata à target_metadata :
+      ```python
+      database.target_metadata=Base.metadata
+      ```
 
 ## **4.** `Demarrer le projet `
 
@@ -144,13 +147,24 @@ ou si virtualenv est dejà installé au préalable
 
 - Créer les meta models dans `meta_models.py` si nécessaire ;
 
-- Ajouter le model dans models_metadata.py comme suite : `from .myapp.models import Model`
+- Ajouter le model dans models_metadata.py comme suite :
+  ```python
+  from myproject.myapp.models import Model
+  ```
 
 **`Note:`** :
 
-Avec `SQLAlchemy` en asynchrone , si dans vos schémas vous retourner des relations d'un model , il faudra ajouter `lazy=joined` aux relationship des models SQLAlchemy .
+Avec `SQLAlchemy` en asynchrone , si dans vos schémas vous retourner des relations d'un model , il faudra ajouter `lazy=joined` aux relationship des models SQLAlchemy lorsque vous utilisez le `CrudForgery` ou le `CustomRouterProvider`.
 
-Pour les schémas pydantic l'on pourra d'abord créer ou non un EntityBaseModel dans `meta_models.py` pour le réutiliser au besoin dans les autres schémas .
+**`exemple : `**
+
+```python
+  class User( UserModel,Base):
+    user_privileges = relationship("UserPrivilege", back_populates="user",lazy="joined")
+    user_roles=relationship("UserRole",back_populates="user",lazy="joined")
+```
+
+Pour les schémas pydantic l'on pourra d'abord créer ou non un `EntityBaseModel` dans `meta_models.py` pour le réutiliser au besoin dans les autres schémas et `EntityInEntity2Model` peut servir à définir un modèle partiel de `Entity` dans le retour d'un schéma de `Entity2`
 
 Dans `schemas.py` il peut y avoir généralement :
 
@@ -167,13 +181,9 @@ Dans `schemas.py` il peut y avoir généralement :
 **`exemple : `**
 
 ```python
-  class User( UserModel,database.base):
-    user_privileges = relationship("UserPrivilege", back_populates="user",lazy="joined")
-    user_roles=relationship("UserRole",back_populates="user",lazy="joined")
-
   class UserFullReadModel(UserReadModel) :
-    user_roles:List["MetaUserRoleModel"] = []
-    user_privileges: List["MetaUserPrivilegeModel"]=[]
+    user_roles:List["UserRoleInUser"] = []
+    user_privileges: List["UserInUserPrivilege"]=[]
 ```
 
 ### **6.2.** `Créer les cruds`

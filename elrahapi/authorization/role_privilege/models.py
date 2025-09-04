@@ -1,8 +1,6 @@
-from sqlalchemy import Column, DateTime, Integer, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, ForeignKey, Boolean
 
 from elrahapi.utility.models import AdditionalModelFields
-from sqlalchemy.orm import validates
-from sqlalchemy.sql import func
 
 
 class RolePrivilegeModel(AdditionalModelFields):

@@ -1,15 +1,11 @@
-from elrahapi.authorization.role.models import RoleModel
-
-from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
-
 from elrahapi.authorization.privilege.models import PrivilegeModel
-
+from elrahapi.authorization.role.models import RoleModel
+from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
 from elrahapi.authorization.user_privilege.models import UserPrivilegeModel
-
 from elrahapi.authorization.user_role.models import UserRoleModel
-from dataBase import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, Table, String
 from elrahapi.user.model import UserModel
+from settings.database import Base
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
 
@@ -17,6 +13,7 @@ class User(UserModel, Base):
     __tablename__ = "users"
     user_privileges = relationship("UserPrivilege", back_populates="user")
     user_roles = relationship("UserRole", back_populates="user")
+    # user_logs = relationship("LogModel", back_populates="user")
 
 
 class Role(RoleModel, Base):
@@ -47,4 +44,3 @@ class UserRole(UserRoleModel, Base):
     __tablename__ = "user_roles"
     user = relationship("User", back_populates="user_roles")
     role = relationship("Role", back_populates="role_users")
-
