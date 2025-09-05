@@ -56,7 +56,6 @@ class CrudForgery:
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
-            print(detail)
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
@@ -257,7 +256,6 @@ class CrudForgery:
         update_obj: Type[BaseModel],
         is_full_update: bool,
     ):
-        print("update called")
         valide_update = (
             isinstance(update_obj, self.UpdatePydanticModel) and is_full_update
         )
@@ -269,19 +267,15 @@ class CrudForgery:
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
-        if valide_patch:
-            print("is patch")
         try:
             existing_obj = await self.read_one(pk=pk, session=session)
             existing_obj = update_entity(
                 existing_entity=existing_obj, update_entity=update_obj
             )
-            print("before commit")
             await self.session_manager.commit_and_refresh(
                 session=session,
                 object=existing_obj,
             )
-            print("after commit")
             return existing_obj
         except CustomHttpException as che:
             await self.session_manager.rollback_session(session=session)
@@ -307,7 +301,6 @@ class CrudForgery:
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
-            print(detail)
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
     async def delete(self, session: ElrahSession, pk: Any):
@@ -349,7 +342,7 @@ class CrudForgery:
             stmt = (
                 update(self.SQLAlchemyModel)
                 .where(pk_attr.in_(delete_list))
-                .values(is_deleted=True, delete_date=datetime.now())
+                .values(is_deleted=True, date_deleted=datetime.now())
             )
             if self.session_manager.is_async_env:
                 await session.execute(stmt)
@@ -360,5 +353,4 @@ class CrudForgery:
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk soft deleting {self.entity_name}s , details : {str(e)}"
-            print(detail)
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)

@@ -102,6 +102,11 @@ ou si virtualenv est dejà installé au préalable
       ```python
       database.target_metadata=Base.metadata
       ```
+    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
+
+
+
+
 
 ## **4.** `Demarrer le projet `
 

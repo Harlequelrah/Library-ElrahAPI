@@ -407,6 +407,7 @@ class CustomRouterProvider:
                         self.crud.session_manager.yield_session
                     ),
                 ):
+                    print("hello")
                     return await self.crud.bulk_soft_delete(
                         session=session, pk_list=pk_list
                     )
