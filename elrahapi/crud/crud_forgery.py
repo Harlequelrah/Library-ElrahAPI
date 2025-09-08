@@ -84,7 +84,9 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def get_total_count(self, session: ElrahSession, conditions: list) -> int:
+    async def get_total_count(
+        self, session: ElrahSession, conditions: list = []
+    ) -> int:
 
         stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
         return await exec_stmt(
@@ -96,10 +98,11 @@ class CrudForgery:
     async def get_daily_total_count(
         self, session: ElrahSession, conditions: list
     ) -> int:
-        conditions.append(
+        filtres: list = [c for c in conditions]
+        filtres.append(
             func.date(self.SQLAlchemyModel.date_created) == func.current_date()
         )
-        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
         return await exec_stmt(
             session=session,
             stmt=stmt,
@@ -109,10 +112,11 @@ class CrudForgery:
     async def get_seven_previous_day_total_count(
         self, session: ElrahSession, conditions: list
     ) -> int:
-        conditions.append(
-            func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7
+        filtres: list = [c for c in conditions]
+        filtres.append(
+            (func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7)
         )
-        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
         return await exec_stmt(
             session=session,
             stmt=stmt,
@@ -122,11 +126,12 @@ class CrudForgery:
     async def get_monthly_total_count(
         self, session: ElrahSession, conditions: list
     ) -> int:
-        conditions.append(
+        filtres: list = [c for c in conditions]
+        filtres.append(
             func.extract("month", func.date(self.SQLAlchemyModel.date_created))
             == func.extract("month", func.current_date()),
         )
-        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
         return await exec_stmt(
             session=session,
             stmt=stmt,
@@ -137,22 +142,22 @@ class CrudForgery:
         self, session: ElrahSession, with_deleted: bool | None = None
     ) -> CountModel:
         try:
-            conditions = []
+            base_conditions = []
             if not with_deleted:
-                conditions.append(self.SQLAlchemyModel.is_deleted == False)
+                base_conditions.append(self.SQLAlchemyModel.is_deleted == False)
             total_count = await self.get_total_count(
-                session=session, conditions=conditions
+                session=session, conditions=base_conditions
             )
             daily_total_count = await self.get_daily_total_count(
-                session=session, conditions=conditions
+                session=session, conditions=base_conditions
             )
             seven_previous_day_total_count = (
                 await self.get_seven_previous_day_total_count(
-                    session=session, conditions=conditions
+                    session=session, conditions=base_conditions
                 )
             )
             monthly_total_count = await self.get_monthly_total_count(
-                session=session, conditions=conditions
+                session=session, conditions=base_conditions
             )
             return CountModel(
                 total_count=total_count,

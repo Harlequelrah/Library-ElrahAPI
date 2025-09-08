@@ -102,10 +102,7 @@ ou si virtualenv est dejà installé au préalable
       ```python
       database.target_metadata=Base.metadata
       ```
-    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
-
-
-
+    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application u compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
 
 
 ## **4.** `Demarrer le projet `
@@ -218,7 +215,73 @@ myapp_crud = CrudForgery(
 )
 ```
 
-### **6.3.** `Configurer le fournisseur de routage de l'application`
+### **6.3.** `Descriptif des routes génériques `
+
+On dispose d'une multitude de routes génériques parmis lesquelles les `DefaultRoutesName` et `RelationRoutesName` .
+
+#### **6.3.1.** `DefaultRoutesName `
+
+- `DefaultRoutesName.COUNT` : Cette route retourne des statistiques de compte dont le nombre total de l'entité , le total pour aujourdhui , les sept derniers jours ou le mois passé.
+
+- `DefaultRoutesName.READ_ALL` : Cette route retourne une liste d'instances de l'entité .
+
+- `DefaultRoutesName.READ_ONE` : Cette route retourne une instance de l'entité à partir d'une valeur de clé primaire.
+
+- `DefaultRoutesName.READ_ONE_USER` : Cette route retourne une instance de l'entité utilisateur à partir d'une valeur de clé primaire , de l'email ou du nom d'utilisateur .
+
+- `DefaultRoutesName.READ_CURRENT_USER` : Cette route retourne une instance de l'entité utilisateur actuellement connecté .
+
+- `DefaultRoutesName.CREATE` : Cette route sert à la création d'une instance de l'entité .
+
+- `DefaultRoutesName.DELETE` : Cette route sert à la suppression définitive d'une instance de l'entité.
+
+- `DefaultRoutesName.SOFT_DELETE` : Cette route sert à la suppression logique d'une instance de l'entité.
+
+- `DefaultRoutesName.UPDATE` : Cette route sert à la mise à jour totale d'une instance de l'entité.
+
+- `DefaultRoutesName.PATCH` : Cette route sert à la mise à jour partielle d'une instance de l'entité.
+
+- `DefaultRoutesName.BULK_CREATE` : Cette route sert à la création multiple d'instances de l'entité .
+
+- `DefaultRoutesName.BULK_DELETE` : Cette route sert à la suppression définitive multiple d'instances de l'entité .
+
+- `DefaultRoutesName.BULK_SOFT_DELETE` : Cette route sert à la suppression logique multiple d'instances de l'entité .
+
+- `DefaultRoutesName.TOKEN_URL` : Cette route sert à l'authentification sur le swagger .
+
+- `DefaultRoutesName.LOGIN` : Cette route sert à l'authentification et permet d'obtenir un token d'accès et de rafraichissement .
+
+- `DefaultRoutesName.REFRESH_TOKEN` : Cette route sert à obtenir un nouveau token d'accès .
+
+- `DefaultRoutesName.CHANGE_PASSWORD` : Cette route permet à un utilisateur de modifier son mot de passe .
+
+- `DefaultRoutesName.CHANGE_PASSWORD` : Cette route permet d'activer ou de désactiver un utilisateur .
+
+#### **6.3.1.** `RelationRoutesName `
+
+- `RelationRoutesName.CREATE_RELATION` : cette route sert à la création d'une relation entre deux instances d'entités .
+
+**exemple** : On peut créer une `relation` entre une instance de l'entité `Utilisateur` et une instance de l'entité `Profile` .
+
+- `RelationRoutesName.DELETE_RELATION` : cette route sert à la suppression d'une une relation entre deux instances d'entités .
+
+- `RelationRoutesName.READ_ONE_BY_RELATION` : cette route retourne une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.READ_ALL_BY_RELATION` : cette route retourne une instance d'une autre entité à partir de sa relation avec l'entité .
+
+**exemple** : retourne tous les posts d'un utilisateur .
+
+- `RelationRoutesName.CREATE_BY_RELATION` : cette route permet la création d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.DELETE_BY_RELATION` : cette route permet la suppression définitive d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.SOFT_DELETE_BY_RELATION` : cette route permet la suppression logique d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.UPDATE` : cette route permet la mise à jour totale d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.PATCH` : cette route permet la mise à jour partielle d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+### **6.4.** `Configurer le fournisseur de routage de l'application`
 
 Configurer le CustomRouterProvider dans router.py
 
@@ -354,7 +417,7 @@ user_relation: Relationship = Relationship(
 )
 ```
 
-### **6.4.** `Configurer un router`
+### **6.5.** `Configurer un router`
 
 Les possibilités de configuration d'un routeur :
 

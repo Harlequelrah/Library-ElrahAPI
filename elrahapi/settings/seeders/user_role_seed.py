@@ -1,7 +1,6 @@
 import sys
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import user_role_crud
-from settings.logger.model import LogModel
 from elrahapi.authorization.user_role.schemas import UserRoleCreateModel
 from settings.database import database
 from log.seeders_logger import seeders_logger, SEEDERS_LOGS

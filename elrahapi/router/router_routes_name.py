@@ -6,6 +6,7 @@ class RelationRoutesName(str, Enum):
     CREATE_RELATION = "create-relation"
     DELETE_RELATION = "delete-relation"
     CREATE_BY_RELATION = "create-by-relation"
+    SOFT_DELETE_BY_RELATION = "soft-delete-by-relation"
     DELETE_BY_RELATION = "delete-by-relation"
     UPDATE_BY_RELATION = "update-by-relation"
     PATCH_BY_RELATION = "patch-by-relation"

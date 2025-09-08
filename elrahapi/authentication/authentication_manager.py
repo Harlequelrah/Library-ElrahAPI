@@ -93,7 +93,7 @@ class AuthenticationManager:
 
         self.get_access_token: callable = (
             get_oauth2passwordbearer_token
-            if isinstance(security, OAuth2PasswordBearer)
+            if isinstance(self.security, OAuth2PasswordBearer)
             else get_httpbearer_token
         )
 
