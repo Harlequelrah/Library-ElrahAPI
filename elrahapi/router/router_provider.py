@@ -558,6 +558,27 @@ class CustomRouterProvider:
                     )
 
                 if (
+                    route_config.route_name
+                    == RelationRoutesName.SOFT_DELETE_BY_RELATION
+                    and is_verified_relation_rule(
+                        type_relation=relation.type_relation,
+                        relation_route_name=route_config.route_name,
+                    )
+                ):
+                    self.router.add_api_route(
+                        endpoint=self.make_soft_delete_by_relation_route(
+                            relation=relation
+                        ),
+                        methods=["DELETE"],
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        status_code=status.HTTP_204_NO_CONTENT,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                    )
+                if (
                     route_config.route_name == RelationRoutesName.UPDATE_BY_RELATION
                     and is_verified_relation_rule(
                         type_relation=relation.type_relation,
@@ -642,22 +663,22 @@ class CustomRouterProvider:
         return delete_relation
 
     def make_read_all_by_relation_route(self, relation: Relationship):
+
         async def read_all_by_relation(
+            request: Request,
             pk1: Any,
-            filter: str | None = None,
-            value: Any | None = None,
             skip: int = None,
             limit: int = None,
             session: ElrahSession = Depends(self.crud.session_manager.yield_session),
         ):
+            filters = get_filters(request=request)
             return await relation.read_all_by_relation(
                 pk1=pk1,
-                filter=filter,
-                value=value,
                 limit=limit,
                 skip=skip,
                 entity_crud=self.crud,
                 session=session,
+                filters=filters,
             )
 
         return read_all_by_relation
@@ -697,6 +718,17 @@ class CustomRouterProvider:
             )
 
         return delete_by_relation
+
+    def make_soft_delete_by_relation_route(self, relation: Relationship):
+        async def soft_delete_by_relation(
+            pk1: Any,
+            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
+        ):
+            return await relation.soft_delete_by_relation(
+                pk1=pk1, entity_crud=self.crud, session=session
+            )
+
+        return soft_delete_by_relation
 
     def make_update_by_relation_route(self, relation: Relationship):
         async def update_by_relation(

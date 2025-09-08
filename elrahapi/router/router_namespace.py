@@ -30,6 +30,7 @@ RELATION_RULES: dict[TypeRelation, list[RelationRoutesName]] = {
         RelationRoutesName.DELETE_BY_RELATION,
         RelationRoutesName.UPDATE_BY_RELATION,
         RelationRoutesName.PATCH_BY_RELATION,
+        RelationRoutesName.SOFT_DELETE_BY_RELATION
     ],
     TypeRelation.ONE_TO_MANY: [
         RelationRoutesName.READ_ALL_BY_RELATION,

@@ -309,7 +309,7 @@ class AuthenticationManager:
             ):
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Either role or privilege must be provided, not both",
+                    detail="Either role or privilege must be provided, not both or any",
                 )
             else:
                 raise_custom_http_exception(

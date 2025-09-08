@@ -104,7 +104,6 @@ ou si virtualenv est dejà installé au préalable
       ```
     - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application u compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
 
-
 ## **4.** `Demarrer le projet `
 
 - Accéder au repertoire du projet :
@@ -299,7 +298,9 @@ Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 
 - **`Configuration avec authentification et autorisation`**
 
-Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter l'attribut authentication . Avec ce paramètre on peut aussi gérer les autorisation en ajoutant des roles et privileges directement qui seront utilisés par toutes les routes .
+Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter l'attribut authentication . Avec ce paramètre on peut aussi gérer les autorisation en ajoutant des roles et ou privileges directement qui seront utilisés par toutes les routes .
+
+**exemple**:
 
 ```python
    router_provider = CustomRouterProvider(
@@ -307,7 +308,16 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
     tags=["item"],
     crud=myapp_crud,
     authentication = authentication,
-    roles = ["ADMIN"],
+    roles = ["ADMIN"]
+)
+```
+
+```python
+   router_provider = CustomRouterProvider(
+    prefix="/items",
+    tags=["item"],
+    crud=myapp_crud,
+    authentication = authentication,
     privileges = [
     "CAN_CREATE_BOOK",
     "CAN_DELETE_CATEGORY"

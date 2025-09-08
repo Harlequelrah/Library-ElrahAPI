@@ -1,6 +1,6 @@
 from copy import deepcopy
 from typing import Any, Type
-from elrahapi.utility.types import ElrahSession
+
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
@@ -18,12 +18,13 @@ from elrahapi.router.router_crud import (
 )
 from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.router.router_routes_name import RelationRoutesName
-from elrahapi.utility.utils import exec_stmt, apply_filters, validate_value
+from elrahapi.utility.types import ElrahSession
+from elrahapi.utility.utils import apply_filters, exec_stmt, validate_value
 from pydantic import BaseModel
 from sqlalchemy import and_, select
+from sqlalchemy.sql.schema import Table
 
 from fastapi import status
-from sqlalchemy.sql.schema import Table
 
 
 class Relationship:
@@ -183,7 +184,20 @@ class Relationship:
                     ),
                 )
                 routes_configs.append(route_config)
-
+            if route_name == RelationRoutesName.SOFT_DELETE_BY_RELATION:
+                route_config = RouteConfig(
+                    route_name=route_name,
+                    route_path=path,
+                    summary=f"Soft Delete {second_entity_name}",
+                    description=f"Allow to soft delete {second_entity_name} by the relation",
+                    is_activated=True,
+                    is_protected=(
+                        True
+                        if route_name in default_protected_relation_routes_name
+                        else False
+                    ),
+                )
+                routes_configs.append(route_config)
             if route_name == RelationRoutesName.CREATE_BY_RELATION:
                 route_config = RouteConfig(
                     route_name=route_name,
@@ -422,6 +436,15 @@ class Relationship:
         entity_2 = None
         return await self.second_entity_crud.delete(session=session, pk=e2_pk)
 
+    async def soft_delete_by_relation(
+        self, session: ElrahSession, pk1: Any, entity_crud: CrudForgery
+    ):
+        entity_1 = await entity_crud.read_one(session=session, pk=pk1)
+        entity_2 = getattr(entity_1, self.relationship_name)
+        e2_pk = getattr(entity_2, self.second_entity_crud.primary_key_name)
+        entity_2 = None
+        return await self.second_entity_crud.soft_delete(session=session, pk=e2_pk)
+
     async def read_one_by_relation(
         self, session: ElrahSession, pk1: Any, entity_crud: CrudForgery
     ):
@@ -469,10 +492,9 @@ class Relationship:
         session: ElrahSession,
         entity_crud: CrudForgery,
         pk1: Any,
-        filter: str | None = None,
-        value: Any | None = None,
         skip: int = 0,
         limit: int = None,
+        filters=dict[str, Any],
     ):
         e2_cm: CrudModels = self.second_entity_crud.crud_models
         e1_cm = entity_crud.crud_models
@@ -484,9 +506,7 @@ class Relationship:
                 .join(e1_cm.sqlalchemy_model)
                 .where(e1_pk == pk1)
             )
-            stmt = apply_filters(
-                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
-            )
+            stmt = apply_filters(crud_models=e2_cm, stmt=stmt, filters=filters)
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 session=session,
@@ -499,7 +519,9 @@ class Relationship:
             rel_key1, rel_key2 = self.get_relationship_keys()
             stmt = select(e2_cm.sqlalchemy_model).join(rel_model).where(rel_key1 == pk1)
             stmt = apply_filters(
-                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
+                crud_models=e2_cm,
+                stmt=stmt,
+                filters=filters,
             )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
@@ -516,7 +538,9 @@ class Relationship:
                 .join(e1_cm.sqlalchemy_model, rel_key1 == e1_pk)
             )
             stmt = apply_filters(
-                crud_models=e2_cm, stmt=stmt, filter=filter, value=value
+                crud_models=e2_cm,
+                stmt=stmt,
+                filters=filters,
             )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
