@@ -34,7 +34,6 @@ class ManyToOneRelationship(BaseRelationship):
         super().__init__(
             relationship_name=relationship_name,
             second_entity_crud=second_entity_crud,
-            second_entity_fk_name=None,
             relations_routes_configs=relations_routes_configs,
             default_public_relation_routes_name=default_public_relation_routes_name,
             default_protected_relation_routes_name=default_protected_relation_routes_name,

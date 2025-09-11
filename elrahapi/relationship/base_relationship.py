@@ -27,14 +27,12 @@ class BaseRelationship(ABC):
         relationship_name: str,
         second_entity_crud: CrudForgery,
         relations_routes_configs: list[RouteConfig] | None = None,
-        second_entity_fk_name: str | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
         default_public_relation_routes_name: list[RelationRoutesName] | None = None,
         default_protected_relation_routes_name: list[RelationRoutesName] | None = None,
     ):
         self.relationship_name = relationship_name
-        self.second_entity_fk_name = second_entity_fk_name
         self.relationship_name = relationship_name
         self.second_entity_crud = second_entity_crud
         self.relations_routes_configs = relations_routes_configs or []
@@ -50,14 +48,6 @@ class BaseRelationship(ABC):
 
     def get_second_model_key(self):
         return self.second_entity_crud.crud_models.get_pk()
-
-    def add_fk(self, obj: Type[BaseModel], fk: Any):
-        if self.second_entity_fk_name is not None:
-            validated_fk = validate_value(value=fk)
-            new_obj = obj.model_copy(update={self.second_entity_fk_name: validated_fk})
-            return new_obj
-        return obj
-
     def is_verified_relation_rule(
         self,
         relation_route_name: RelationRoutesName,

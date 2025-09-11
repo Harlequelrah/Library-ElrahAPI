@@ -31,7 +31,6 @@ class OneToOneRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
-        second_entity_fk_name: str,
         relations_routes_configs: list[RouteConfig] | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
@@ -41,7 +40,6 @@ class OneToOneRelationship(BaseRelationship):
         super().__init__(
             relationship_name=relationship_name,
             second_entity_crud=second_entity_crud,
-            second_entity_fk_name=second_entity_fk_name,
             relations_routes_configs=relations_routes_configs,
             default_public_relation_routes_name=default_public_relation_routes_name,
             default_protected_relation_routes_name=default_protected_relation_routes_name,
@@ -154,13 +152,17 @@ class OneToOneRelationship(BaseRelationship):
             update_obj: Type[BaseModel],
             session: ElrahSession = Depends(self.yield_session),
         ):
-            update_obj = self.add_fk(obj=update_obj, fk=pk1)
-            entity = await entity_crud.read_one(session=session, pk=pk1)
-            entity_2 = getattr(entity, self.relationship_name)
+            entity_1 = await entity_crud.read_one(session=session, pk=pk1)
+            entity_2 = getattr(entity_1, self.relationship_name)
             pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
-            return await self.second_entity_crud.update(
+            entity_2 = await self.second_entity_crud.update(
                 session=session, pk=pk2, update_obj=update_obj, is_full_update=True
             )
+            setattr(entity_1, self.relationship_name)
+            await entity_crud.session_manager.commit_and_refresh(
+                session=session, object=entity_1
+            )
+            return entity_2
 
         return endpoint
 
@@ -173,12 +175,15 @@ class OneToOneRelationship(BaseRelationship):
             update_obj: Type[BaseModel],
             session: ElrahSession = Depends(self.yield_session),
         ):
-            update_obj = self.add_fk(obj=update_obj, fk=pk1)
-            entity = await entity_crud.read_one(session=session, pk=pk1)
-            entity_2 = getattr(entity, self.relationship_name)
+            entity_1 = await entity_crud.read_one(session=session, pk=pk1)
+            entity_2 = getattr(entity_1, self.relationship_name)
             pk2 = getattr(entity_2, self.second_entity_crud.primary_key_name)
-            return await self.second_entity_crud.update(
+            entity_2 = await self.second_entity_crud.update(
                 session=session, pk=pk2, update_obj=update_obj, is_full_update=False
             )
+            await entity_crud.session_manager.commit_and_refresh(
+                session=session, object=entity_1
+            )
+            return entity_2
 
         return endpoint
