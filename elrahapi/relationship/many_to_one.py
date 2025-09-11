@@ -25,7 +25,6 @@ class ManyToOneRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
-        second_entity_fk_name: str | None = None,
         relations_routes_configs: list[RouteConfig] | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
@@ -35,7 +34,7 @@ class ManyToOneRelationship(BaseRelationship):
         super().__init__(
             relationship_name=relationship_name,
             second_entity_crud=second_entity_crud,
-            second_entity_fk_name=second_entity_fk_name,
+            second_entity_fk_name=None,
             relations_routes_configs=relations_routes_configs,
             default_public_relation_routes_name=default_public_relation_routes_name,
             default_protected_relation_routes_name=default_protected_relation_routes_name,

@@ -31,8 +31,8 @@ class OneToOneRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
+        second_entity_fk_name: str,
         relations_routes_configs: list[RouteConfig] | None = None,
-        second_entity_fk_name: str | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
         default_public_relation_routes_name: list[RelationRoutesName] | None = None,
@@ -92,7 +92,6 @@ class OneToOneRelationship(BaseRelationship):
                 raise_custom_http_exception(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=detail
                 )
-            create_obj = self.add_fk(obj=create_obj, fk=pk1)
             new_obj = await self.second_entity_crud.create(
                 session=session, create_obj=create_obj
             )

@@ -32,8 +32,8 @@ class ManyToManyTableRelationship(BaseRelationship):
         second_entity_crud: CrudForgery,
         relationship_key1_name: str,
         relationship_key2_name: str,
-        second_entity_fk_name: str,
         relation_table: Table,
+        second_entity_fk_name: str | None = None,
         relations_routes_configs: list[RouteConfig] | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
@@ -116,7 +116,6 @@ class ManyToManyTableRelationship(BaseRelationship):
             create_obj: self.second_entity_crud.CreatePydanticModel,
             session: ElrahSession = Depends(self.yield_session),
         ):
-            create_obj = self.add_fk(obj=create_obj, fk=pk1)
             new_obj = await self.second_entity_crud.create(
                 session=session, create_obj=create_obj
             )
