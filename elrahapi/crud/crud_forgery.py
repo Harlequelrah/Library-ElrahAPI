@@ -197,10 +197,15 @@ class CrudForgery:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    async def read_one(self, session: ElrahSession, pk: Any):
+    async def read_one(
+        self, session: ElrahSession, pk: Any, with_deleted: bool = False
+    ):
         try:
             pk_attr = self.crud_models.get_pk()
-            stmt = select(self.SQLAlchemyModel).where(pk_attr == pk)
+            conditions = [pk_attr == pk]
+            if not with_deleted:
+                conditions.append(self.SQLAlchemyModel.is_deleted == False)
+            stmt = select(self.SQLAlchemyModel).where(*conditions)
             result = await exec_stmt(
                 session=session,
                 stmt=stmt,

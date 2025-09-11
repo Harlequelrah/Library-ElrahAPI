@@ -5,7 +5,6 @@ from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.relationship.base_relationship import BaseRelationship
-from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
@@ -211,11 +210,14 @@ class CustomRouterProvider:
                 )
                 async def read_one(
                     pk: Any,
+                    with_deleted: bool | None = None,
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
                 ):
-                    return await self.crud.read_one(session=session, pk=pk)
+                    return await self.crud.read_one(
+                        session=session, pk=pk, with_deleted=with_deleted
+                    )
 
             if config.route_name == DefaultRoutesName.READ_ALL:
 

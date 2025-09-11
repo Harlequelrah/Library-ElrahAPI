@@ -96,10 +96,17 @@ class ManyToManyClassRelationship(BaseRelationship):
 
         return endpoint
 
-    async def read_one_relation_crud(self, pk1: Any, pk2: Any, session: ElrahSession):
+    async def read_one_relation_crud(
+        self, pk1: Any, pk2: Any, session: ElrahSession, with_deleted: bool = False
+    ):
         rel_key1, rel_key2 = self.get_relationship_keys()
+        conditions = [rel_key1 == pk1, rel_key2 == pk2]
+        if not with_deleted:
+            conditions.append(
+                self.relationship_crud.SQLAlchemyModel.is_deleted == False
+            )
         stmt = select(self.relationship_crud.crud_models.sqlalchemy_model).where(
-            and_(rel_key1 == pk1, rel_key2 == pk2)
+            *conditions
         )
         result = await exec_stmt(
             stmt=stmt,
@@ -115,9 +122,14 @@ class ManyToManyClassRelationship(BaseRelationship):
 
     def read_one_relation(self, entity_crud: CrudForgery):
         async def endpoint(
-            pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
+            pk1: Any,
+            pk2: Any,
+            with_deleted: bool | None = None,
+            session: ElrahSession = Depends(self.yield_session),
         ):
-            return await self.read_one_relation_crud(pk1=pk1, pk2=pk2, session=session)
+            return await self.read_one_relation_crud(
+                pk1=pk1, pk2=pk2, session=session, with_deleted=with_deleted
+            )
 
         return endpoint
 

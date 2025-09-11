@@ -48,6 +48,7 @@ class BaseRelationship(ABC):
 
     def get_second_model_key(self):
         return self.second_entity_crud.crud_models.get_pk()
+
     def is_verified_relation_rule(
         self,
         relation_route_name: RelationRoutesName,
@@ -152,7 +153,7 @@ class BaseRelationship(ABC):
             if route_name == RelationRoutesName.SOFT_DELETE_BY_RELATION:
                 route_config = RouteConfig(
                     route_name=route_name,
-                    route_path=path,
+                    route_path=path + "/soft-delete",
                     summary=f"Soft Delete {self.relationship_name}",
                     description=f"Allow to soft delete {second_entity_name} by the relation",
                     is_activated=True,

@@ -43,9 +43,10 @@ class ManyToOneRelationship(BaseRelationship):
 
     def read_one_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
-            pk1: Any, session: ElrahSession = Depends(self.yield_session)
+            pk1: Any, session: ElrahSession = Depends(self.yield_session),
+            with_deleted:bool|None=None
         ):
-            e1 = await entity_crud.read_one(session=session, pk=pk1)
+            e1 = await entity_crud.read_one(session=session, pk=pk1,with_deleted=with_deleted)
             e2 = getattr(e1, self.relationship_name)
             if e2 is None:
                 detail = f"{self.relationship_name} not found for {entity_crud.entity_name} with pk {pk1}"
