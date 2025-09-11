@@ -44,7 +44,7 @@ class ManyToOneRelationship(BaseRelationship):
             relations_responses_model_configs=relations_responses_model_configs,
         )
 
-    async def read_one_by_relation(self, entity_crud: CrudForgery):
+    def read_one_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, session: ElrahSession = Depends(self.yield_session)
         ):

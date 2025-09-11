@@ -49,7 +49,7 @@ class OneToOneRelationship(BaseRelationship):
             relations_responses_model_configs=relations_responses_model_configs,
         )
 
-    async def create_relation(self, entity_crud: CrudForgery):
+    def create_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any,
             pk2: Any,
@@ -64,7 +64,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_relation(self, entity_crud: CrudForgery):
+    def delete_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, session: ElrahSession = Depends(self.yield_session)
         ):
@@ -76,7 +76,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def create_by_relation(
+    def create_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -104,7 +104,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_by_relation(self, entity_crud: CrudForgery):
+    def delete_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any,
             session: ElrahSession = Depends(self.yield_session),
@@ -117,7 +117,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def soft_delete_by_relation(self, entity_crud: CrudForgery):
+    def soft_delete_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any,
             session: ElrahSession = Depends(self.yield_session),
@@ -130,7 +130,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def read_one_by_relation(self, entity_crud: CrudForgery):
+    def read_one_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any,
             session: ElrahSession = Depends(self.yield_session),
@@ -146,7 +146,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def update_by_relation(
+    def update_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -165,7 +165,7 @@ class OneToOneRelationship(BaseRelationship):
 
         return endpoint
 
-    async def patch_by_relation(
+    def patch_by_relation(
         self,
         entity_crud: CrudForgery,
     ):

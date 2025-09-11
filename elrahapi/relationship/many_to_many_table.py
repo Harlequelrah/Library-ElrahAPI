@@ -61,7 +61,7 @@ class ManyToManyTableRelationship(BaseRelationship):
         rel_key2 = getattr(columns, self.relationship_key2_name)
         return rel_key1, rel_key2
 
-    async def create_relation(self, entity_crud: CrudForgery):
+    def create_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
@@ -75,7 +75,7 @@ class ManyToManyTableRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_relation(
+    def delete_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -101,7 +101,7 @@ class ManyToManyTableRelationship(BaseRelationship):
 
         return endpoint
 
-    async def create_by_relation(
+    def create_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -122,7 +122,7 @@ class ManyToManyTableRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_by_relation(self, entity_crud: CrudForgery):
+    def delete_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
@@ -133,7 +133,7 @@ class ManyToManyTableRelationship(BaseRelationship):
 
         return endpoint
 
-    async def read_all_by_relation(
+    def read_all_by_relation(
         self,
         entity_crud: CrudForgery,
     ):

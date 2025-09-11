@@ -13,7 +13,6 @@ from elrahapi.router.route_config import (
 from elrahapi.router.router_crud import (
     add_authorizations,
     initialize_dependecies,
-    is_verified_relation_rule,
     set_response_models,
 )
 from elrahapi.router.router_namespace import TypeRelation

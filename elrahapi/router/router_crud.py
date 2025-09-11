@@ -1,4 +1,5 @@
 from typing import Type
+
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_config import (
     AuthorizationConfig,
@@ -7,19 +8,18 @@ from elrahapi.router.route_config import (
 )
 from elrahapi.router.router_namespace import (
     DEFAULT_ROUTES_CONFIGS,
-    RELATION_RULES,
     USER_AUTH_CONFIG,
-    TypeRelation,
-    TypeRoute,
     DefaultRouteConfig,
+    TypeRoute,
 )
-from pydantic import BaseModel
-from fastapi import Depends
 from elrahapi.router.router_routes_name import (
-    RelationRoutesName,
     DefaultRoutesName,
+    RelationRoutesName,
     RoutesName,
 )
+from pydantic import BaseModel
+
+from fastapi import Depends
 
 
 def exclude_route(
@@ -167,5 +167,3 @@ def format_init_data(
     )
 
     return formatted_data
-
-

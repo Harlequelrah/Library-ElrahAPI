@@ -12,10 +12,10 @@ from elrahapi.router.route_additional_config import (
 from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import apply_filters, exec_stmt
+from elrahapi.utility.utils import apply_filters, exec_stmt, get_filters
 from sqlalchemy import and_, select
 
-from fastapi import Depends, status
+from fastapi import Depends, Request, status
 
 
 class ManyToManyClassRelationship(BaseRelationship):
@@ -29,8 +29,8 @@ class ManyToManyClassRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
-        relationship_key1_name: str | None = None,
-        relationship_key2_name: str | None = None,
+        relationship_key1_name: str,
+        relationship_key2_name: str,
         relationship_crud: CrudForgery | None = None,
         relations_routes_configs: list[RouteConfig] | None = None,
         second_entity_fk_name: str | None = None,
@@ -42,7 +42,6 @@ class ManyToManyClassRelationship(BaseRelationship):
         super().__init__(
             second_entity_crud=second_entity_crud,
             relationship_name=relationship_name,
-            second_entity_crud=second_entity_crud,
             second_entity_fk_name=second_entity_fk_name,
             relations_routes_configs=relations_routes_configs,
             default_public_relation_routes_name=default_public_relation_routes_name,
@@ -64,18 +63,19 @@ class ManyToManyClassRelationship(BaseRelationship):
         return rel_key1, rel_key2
 
     def init_default_routes(self):
-        full_routes_configs = (
-            self.default_public_relation_routes_name
-            + self.default_protected_relation_routes_name
-        )
         routes_configs: list[RouteConfig] = super().init_default_routes()
         copied_routes_configs = deepcopy(routes_configs)
-        if RelationRoutesName.READ_ONE_RELATION in copied_routes_configs:
+        if (
+            RelationRoutesName.READ_ONE_RELATION
+            in self.default_public_relation_routes_name
+            + self.default_protected_relation_routes_name
+        ):
+            e2_name = self.second_entity_crud.entity_name
             route_config = RouteConfig(
                 route_name=RelationRoutesName.READ_ONE_RELATION,
-                route_path=f"/{{pk1}}/{self.second_entity_name}s/{{pk2}}",
-                summary=f"Read relation with {self.second_entity_crud.entity_name}",
-                description=f"Allow to read relation with {self.second_entity_crud.entity_name}",
+                route_path=f"/{{pk1}}/{e2_name}s/{{pk2}}",
+                summary=f"Read relation with {e2_name}",
+                description=f"Allow to read relation with {e2_name}",
                 is_activated=True,
                 is_protected=(
                     True
@@ -83,44 +83,47 @@ class ManyToManyClassRelationship(BaseRelationship):
                     in self.default_protected_relation_routes_name
                     else False
                 ),
-                response_model=self.second_entity_crud.crud_models.read_model,
+                response_model=self.relationship_crud.crud_models.read_model,
             )
             copied_routes_configs.append(route_config)
         return copied_routes_configs
 
-    async def delete_relation(self, entity_crud: CrudForgery):
+    def delete_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
-            rel = await self.read_one_relation(session=session, pk1=pk1, pk2=pk2)
+            rel = await self.read_one_relation_crud(session=session, pk1=pk1, pk2=pk2)
             rel_pk = getattr(rel, self.relationship_crud.primary_key_name)
             return await self.relationship_crud.delete(session=session, pk=rel_pk)
 
         return endpoint
 
-    async def read_one_relation(self):
+    async def read_one_relation_crud(self, pk1: Any, pk2: Any, session: ElrahSession):
+        rel_key1, rel_key2 = self.get_relationship_keys()
+        stmt = select(self.relationship_crud.crud_models.sqlalchemy_model).where(
+            and_(rel_key1 == pk1, rel_key2 == pk2)
+        )
+        result = await exec_stmt(
+            stmt=stmt,
+            session=session,
+        )
+        rel = result.scalar_one_or_none()
+        if rel is None:
+            detail = f"Relation of {self.relationship_name} with IDs ({pk1},{pk2}) is not found "
+            raise_custom_http_exception(
+                status_code=status.HTTP_404_NOT_FOUND, detail=detail
+            )
+        return rel
+
+    def read_one_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
-            rel_key1, rel_key2 = self.get_relationship_keys()
-            stmt = select(self.relationship_crud.crud_models.sqlalchemy_model).where(
-                and_(rel_key1 == pk1, rel_key2 == pk2)
-            )
-            result = await exec_stmt(
-                stmt=stmt,
-                session=session,
-            )
-            rel = result.scalar_one_or_none()
-            if rel is None:
-                detail = f"Relation of {self.relationship_name} with IDs ({pk1},{pk2}) is not found "
-                raise_custom_http_exception(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=detail
-                )
-            return rel
+            return await self.read_one_relation_crud(pk1=pk1, pk2=pk2, session=session)
 
         return endpoint
 
-    async def delete_by_relation(self, entity_crud: CrudForgery):
+    def delete_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
@@ -131,17 +134,18 @@ class ManyToManyClassRelationship(BaseRelationship):
 
         return endpoint
 
-    async def read_all_by_relation(
+    def read_all_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
         async def endpoint(
+            request: Request,
             pk1: Any,
             skip: int = 0,
             limit: int = None,
-            filters=dict[str, Any],
             session: ElrahSession = Depends(self.yield_session),
         ):
+            filters = get_filters(request=request)
             e2_cm: CrudModels = self.second_entity_crud.crud_models
             rel_model = self.relationship_crud.crud_models.sqlalchemy_model
             rel_key1, rel_key2 = self.get_relationship_keys()

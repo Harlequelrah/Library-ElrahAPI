@@ -49,7 +49,7 @@ class OneToManyRelationship(BaseRelationship):
             relations_responses_model_configs=relations_responses_model_configs,
         )
 
-    async def create_relation(
+    def create_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -68,7 +68,7 @@ class OneToManyRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_relation(
+    def delete_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -93,7 +93,7 @@ class OneToManyRelationship(BaseRelationship):
 
         return endpoint
 
-    async def create_by_relation(
+    def create_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -114,7 +114,7 @@ class OneToManyRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_by_relation(
+    def delete_by_relation(
         self,
         entity_crud: CrudForgery,
     ):
@@ -130,7 +130,7 @@ class OneToManyRelationship(BaseRelationship):
 
         return endpoint
 
-    async def read_all_by_relation(
+    def read_all_by_relation(
         self,
         entity_crud: CrudForgery,
     ):

@@ -12,7 +12,6 @@ from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_crud import (
     add_authorizations,
     initialize_dependecies,
-    is_verified_relation_rule,
     set_response_models,
 )
 from elrahapi.router.router_routes_name import RelationRoutesName
@@ -227,13 +226,9 @@ class BaseRelationship(ABC):
     def purge_relations(self, routes_configs: list[RouteConfig]):
         purged_routes_configs: list[RouteConfig] = []
         for route_config in routes_configs:
-            if (
-                is_verified_relation_rule(
-                    type_relation=self.type_relation,
+            if self.is_verified_relation_rule(
                     relation_route_name=route_config.route_name,
-                )
-                and route_config.is_activated
-            ):
+            ) and route_config.is_activated :
                 purged_routes_configs.append(route_config)
         return purged_routes_configs
 
