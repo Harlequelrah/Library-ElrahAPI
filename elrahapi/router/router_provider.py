@@ -594,6 +594,21 @@ class CustomRouterProvider:
                         operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                         name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
                     )
-
+                if (
+                    route_config.route_name == RelationRoutesName.READ_ONE_RELATION
+                    and relation.is_verified_relation_rule(
+                        relation_route_name=route_config.route_name,
+                    )
+                ):
+                    self.router.add_api_route(
+                        endpoint=relation.read_one_relation(entity_crud=self.crud),
+                        methods=["GET"],
+                        path=route_config.route_path,
+                        dependencies=route_config.dependencies,
+                        response_model=route_config.response_model,
+                        summary=route_config.summary,
+                        description=route_config.description,
+                        operation_id=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                        name=f"{relation.relationship_name}_{route_config.route_name}_{self.crud.entity_name}",
+                    )
         return self.router
-

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any
 
 from elrahapi.crud.crud_forgery import CrudForgery
@@ -62,6 +63,31 @@ class ManyToManyClassRelationship(BaseRelationship):
         )
         return rel_key1, rel_key2
 
+    def init_default_routes(self):
+        full_routes_configs = (
+            self.default_public_relation_routes_name
+            + self.default_protected_relation_routes_name
+        )
+        routes_configs: list[RouteConfig] = super().init_default_routes()
+        copied_routes_configs = deepcopy(routes_configs)
+        if RelationRoutesName.READ_ONE_RELATION in copied_routes_configs:
+            route_config = RouteConfig(
+                route_name=RelationRoutesName.READ_ONE_RELATION,
+                route_path=f"/{{pk1}}/{self.second_entity_name}s/{{pk2}}",
+                summary=f"Read relation with {self.second_entity_crud.entity_name}",
+                description=f"Allow to read relation with {self.second_entity_crud.entity_name}",
+                is_activated=True,
+                is_protected=(
+                    True
+                    if RelationRoutesName.READ_ONE_RELATION
+                    in self.default_protected_relation_routes_name
+                    else False
+                ),
+                response_model=self.second_entity_crud.crud_models.read_model,
+            )
+            copied_routes_configs.append(route_config)
+        return copied_routes_configs
+
     async def delete_relation(self, entity_crud: CrudForgery):
         async def endpoint(
             pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
@@ -104,7 +130,6 @@ class ManyToManyClassRelationship(BaseRelationship):
             return await self.second_entity_crud.delete(session=session, pk=pk2)
 
         return endpoint
-    
 
     async def read_all_by_relation(
         self,

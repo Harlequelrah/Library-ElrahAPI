@@ -76,17 +76,16 @@ class BaseRelationship(ABC):
 
     def init_default_routes(
         self,
-        default_public_relation_routes_name: list[RelationRoutesName],
-        default_protected_relation_routes_name: list[RelationRoutesName],
     ):
         self.check_relation_rules()
-        full_routes_configs = (
-            default_public_relation_routes_name + default_protected_relation_routes_name
+        all_routes_configs = (
+            self.default_public_relation_routes_name
+            + self.default_protected_relation_routes_name
         )
         routes_configs: list[RouteConfig] = []
         second_entity_name = self.second_entity_crud.entity_name
         path = f"/{{pk1}}/{second_entity_name}"
-        for route_name in full_routes_configs:
+        for route_name in all_routes_configs:
             if route_name == RelationRoutesName.READ_ALL_BY_RELATION:
                 route_config = RouteConfig(
                     route_name=route_name,
@@ -97,7 +96,7 @@ class BaseRelationship(ABC):
                     response_model=self.second_entity_crud.crud_models.read_model,
                     is_protected=(
                         False
-                        if route_name in default_public_relation_routes_name
+                        if route_name in self.default_public_relation_routes_name
                         else True
                     ),
                 )
@@ -112,7 +111,7 @@ class BaseRelationship(ABC):
                     response_model=self.second_entity_crud.crud_models.read_model,
                     is_protected=(
                         False
-                        if route_name in default_public_relation_routes_name
+                        if route_name in self.default_public_relation_routes_name
                         else True
                     ),
                 )
@@ -127,7 +126,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                 )
@@ -141,7 +140,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                 )
@@ -156,7 +155,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                 )
@@ -170,7 +169,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                 )
@@ -184,7 +183,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                     response_model=self.second_entity_crud.crud_models.read_model,
@@ -200,7 +199,7 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                     response_model=self.second_entity_crud.crud_models.read_model,
@@ -216,12 +215,13 @@ class BaseRelationship(ABC):
                     is_activated=True,
                     is_protected=(
                         True
-                        if route_name in default_protected_relation_routes_name
+                        if route_name in self.default_protected_relation_routes_name
                         else False
                     ),
                     response_model=self.second_entity_crud.crud_models.read_model,
                 )
                 routes_configs.append(route_config)
+
         return routes_configs
 
     def purge_relations(self, routes_configs: list[RouteConfig]):
@@ -243,22 +243,7 @@ class BaseRelationship(ABC):
         roles: list[str] | None = None,
         privileges: list[str] | None = None,
     ):
-        routes_configs: list[RouteConfig] = []
-        if (
-            self.default_protected_relation_routes_name
-            or self.default_public_relation_routes_name
-        ):
-            default_routes_configs = self.init_default_routes(
-                default_public_relation_routes_name=self.default_public_relation_routes_name,
-                default_protected_relation_routes_name=self.default_protected_relation_routes_name,
-            )
-            if not self.relations_routes_configs:
-                routes_configs = default_routes_configs
-            else:
-                routes_configs = (
-                    deepcopy(self.relations_routes_configs) + default_routes_configs
-                )
-
+        routes_configs = self.init_default_routes() + self.relations_routes_configs
         purged_routes_configs = self.purge_relations(routes_configs)
         purged_routes_configs = (
             add_authorizations(
