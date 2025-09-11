@@ -25,15 +25,14 @@ class ManyToOneRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
-        relations_routes_configs: list[RouteConfig] | None = None,
         second_entity_fk_name: str | None = None,
+        relations_routes_configs: list[RouteConfig] | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
         relations_responses_model_configs: ResponseModelConfig | None = None,
         default_public_relation_routes_name: list[RelationRoutesName] | None = None,
         default_protected_relation_routes_name: list[RelationRoutesName] | None = None,
     ):
         super().__init__(
-            second_entity_crud=second_entity_crud,
             relationship_name=relationship_name,
             second_entity_crud=second_entity_crud,
             second_entity_fk_name=second_entity_fk_name,
