@@ -74,8 +74,8 @@ class ManyToManyClassRelationship(BaseRelationship):
             route_config = RouteConfig(
                 route_name=RelationRoutesName.READ_ONE_RELATION,
                 route_path=f"/{{pk1}}/{e2_name}s/{{pk2}}",
-                summary=f"Read relation with {e2_name}",
-                description=f"Allow to read relation with {e2_name}",
+                summary=f"Read one {self.relationship_name} relation",
+                description=f"Allow to read relation with {e2_name} ",
                 is_activated=True,
                 is_protected=(
                     True

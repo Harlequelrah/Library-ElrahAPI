@@ -66,7 +66,7 @@ class BaseRelationship(ABC):
 
     def check_relation_rules(self):
         for route_config in self.relations_routes_configs:
-            if not is_verified_relation_rule(
+            if not self.is_verified_relation_rule(
                 relation_route_name=route_config.route_name,
             ):
                 raise ValueError(
@@ -89,7 +89,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path + "s",
-                    summary=f"Retrive all {second_entity_name}s",
+                    summary=f"Retrive {self.relationship_name}",
                     description=f"Allow to retrive all {second_entity_name}s from the relation",
                     is_activated=True,
                     response_model=self.second_entity_crud.crud_models.read_model,
@@ -104,8 +104,8 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Retrive {second_entity_name}",
-                    description=f"Allow to retrive {second_entity_name}s from the relation",
+                    summary=f"Retrive one of {self.relationship_name}",
+                    description=f"Allow to retrive  one {second_entity_name} from the relation",
                     is_activated=True,
                     response_model=self.second_entity_crud.crud_models.read_model,
                     is_protected=(
@@ -120,8 +120,8 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path + f"s/{{pk2}}",
-                    summary=f"Link with {second_entity_name}",
-                    description=f"Allow to link entity with {second_entity_name}",
+                    summary=f"Create one {self.relationship_name} relation",
+                    description=f"Allow to link with {second_entity_name}",
                     is_activated=True,
                     is_protected=(
                         True
@@ -134,8 +134,8 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path + f"s/{{pk2}}",
-                    summary=f"Unlink with {second_entity_name}",
-                    description=f"Allow to unlink entity with {second_entity_name}",
+                    summary=f"delete one {self.relationship_name} relation",
+                    description=f"Allow to unlink with {second_entity_name}",
                     is_activated=True,
                     is_protected=(
                         True
@@ -149,7 +149,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Delete {second_entity_name}",
+                    summary=f"Delete {self.relationship_name}",
                     description=f"Allow to delete {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
@@ -163,7 +163,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Soft Delete {second_entity_name}",
+                    summary=f"Soft Delete {self.relationship_name}",
                     description=f"Allow to soft delete {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
@@ -177,7 +177,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Create {second_entity_name}",
+                    summary=f"Create {self.relationship_name}",
                     description=f"Allow to create {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
@@ -193,7 +193,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Update {second_entity_name}",
+                    summary=f"Update {self.relationship_name}",
                     description=f"Allow to update {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
@@ -209,7 +209,7 @@ class BaseRelationship(ABC):
                 route_config = RouteConfig(
                     route_name=route_name,
                     route_path=path,
-                    summary=f"Patch {second_entity_name}",
+                    summary=f"Patch {self.relationship_name}",
                     description=f"Allow to patch {second_entity_name} by the relation",
                     is_activated=True,
                     is_protected=(
@@ -226,9 +226,12 @@ class BaseRelationship(ABC):
     def purge_relations(self, routes_configs: list[RouteConfig]):
         purged_routes_configs: list[RouteConfig] = []
         for route_config in routes_configs:
-            if self.is_verified_relation_rule(
+            if (
+                self.is_verified_relation_rule(
                     relation_route_name=route_config.route_name,
-            ) and route_config.is_activated :
+                )
+                and route_config.is_activated
+            ):
                 purged_routes_configs.append(route_config)
         return purged_routes_configs
 
