@@ -1,11 +1,8 @@
 from enum import Enum
-from elrahapi.router.router_routes_name import (
-    DefaultRoutesName,
-    RelationRoutesName,
-)
-from elrahapi.router.route_additional_config import DefaultRouteConfig
 
+from elrahapi.router.route_additional_config import DefaultRouteConfig
 from elrahapi.router.route_config import RouteConfig
+from elrahapi.router.router_routes_name import DefaultRoutesName, RelationRoutesName
 
 
 class TypeRoute(str, Enum):
@@ -21,35 +18,11 @@ class TypeRelation(str, Enum):
     MANY_TO_ONE = "Many To One"
 
 
-RELATION_RULES: dict[TypeRelation, list[RelationRoutesName]] = {
-    TypeRelation.ONE_TO_ONE: [
-        RelationRoutesName.READ_ONE_BY_RELATION,
-        RelationRoutesName.CREATE_RELATION,
-        RelationRoutesName.DELETE_RELATION,
-        RelationRoutesName.CREATE_BY_RELATION,
-        RelationRoutesName.DELETE_BY_RELATION,
-        RelationRoutesName.UPDATE_BY_RELATION,
-        RelationRoutesName.PATCH_BY_RELATION,
-        RelationRoutesName.SOFT_DELETE_BY_RELATION
-    ],
-    TypeRelation.ONE_TO_MANY: [
-        RelationRoutesName.READ_ALL_BY_RELATION,
-        RelationRoutesName.CREATE_RELATION,
-        RelationRoutesName.DELETE_RELATION,
-        RelationRoutesName.CREATE_BY_RELATION,
-    ],
-    TypeRelation.MANY_TO_ONE: [RelationRoutesName.READ_ONE_BY_RELATION],
-    TypeRelation.MANY_TO_MANY_TABLE: [
-        RelationRoutesName.READ_ALL_BY_RELATION,
-        RelationRoutesName.CREATE_RELATION,
-        RelationRoutesName.DELETE_RELATION,
-        RelationRoutesName.CREATE_BY_RELATION,
-    ],
-    TypeRelation.MANY_TO_MANY_CLASS: [
-        RelationRoutesName.READ_ALL_BY_RELATION,
-        RelationRoutesName.DELETE_RELATION,
-    ],
-}
+
+
+
+
+
 DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DefaultRouteConfig] = {
     DefaultRoutesName.COUNT: DefaultRouteConfig(
         "Get count of entities", "Retrieve the total count of entities"

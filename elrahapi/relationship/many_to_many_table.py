@@ -13,12 +13,12 @@ from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import apply_filters, exec_stmt, get_filters
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import Table, select
 
 from fastapi import Depends, Request, status
 
 
-class OneToManyRelationship(BaseRelationship):
+class ManyToManyTableRelationship(BaseRelationship):
     RELATION_RULES = [
         RelationRoutesName.READ_ALL_BY_RELATION,
         RelationRoutesName.CREATE_RELATION,
@@ -30,6 +30,9 @@ class OneToManyRelationship(BaseRelationship):
         self,
         relationship_name: str,
         second_entity_crud: CrudForgery,
+        relationship_key1_name: str | None = None,
+        relationship_key2_name: str | None = None,
+        relation_table: Table | None = None,
         relations_routes_configs: list[RouteConfig] | None = None,
         second_entity_fk_name: str | None = None,
         relations_authorizations_configs: AuthorizationConfig | None = None,
@@ -48,15 +51,19 @@ class OneToManyRelationship(BaseRelationship):
             relations_authorizations_configs=relations_authorizations_configs,
             relations_responses_model_configs=relations_responses_model_configs,
         )
+        self.relationship_key1_name = relationship_key1_name
+        self.relationship_key2_name = relationship_key2_name
+        self.relation_table = relation_table
 
-    async def create_relation(
-        self,
-        entity_crud: CrudForgery,
-    ):
+    def get_relationship_keys(self):
+        columns = self.relation_table.c
+        rel_key1 = getattr(columns, self.relationship_key1_name)
+        rel_key2 = getattr(columns, self.relationship_key2_name)
+        return rel_key1, rel_key2
+
+    async def create_relation(self, entity_crud: CrudForgery):
         async def endpoint(
-            pk1: Any,
-            pk2: Any,
-            session: ElrahSession = Depends(self.yield_session),
+            pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
             entity_1 = await entity_crud.read_one(session=session, pk=pk1)
             entity_2 = await self.second_entity_crud.read_one(session=session, pk=pk2)
@@ -72,6 +79,7 @@ class OneToManyRelationship(BaseRelationship):
         self,
         entity_crud: CrudForgery,
     ):
+
         async def endpoint(
             pk1: Any,
             pk2: Any,
@@ -114,14 +122,9 @@ class OneToManyRelationship(BaseRelationship):
 
         return endpoint
 
-    async def delete_by_relation(
-        self,
-        entity_crud: CrudForgery,
-    ):
+    async def delete_by_relation(self, entity_crud: CrudForgery):
         async def endpoint(
-            pk1: Any,
-            pk2: Any,
-            session: ElrahSession = Depends(self.yield_session),
+            pk1: Any, pk2: Any, session: ElrahSession = Depends(self.yield_session)
         ):
             self.delete_relation(
                 session=session, entity_crud=entity_crud, pk1=pk1, pk2=pk2
@@ -145,9 +148,12 @@ class OneToManyRelationship(BaseRelationship):
             e2_cm: CrudModels = self.second_entity_crud.crud_models
             e1_cm = entity_crud.crud_models
             e1_pk = e1_cm.get_pk()
+            e2_pk = e2_cm.get_pk()
+            rel_key1, rel_key2 = self.get_relationship_keys()
             stmt = (
                 select(e2_cm.sqlalchemy_model)
-                .join(e1_cm.sqlalchemy_model)
+                .join(self.relation_table, e2_pk == rel_key2)
+                .join(e1_cm.sqlalchemy_model, rel_key1 == e1_pk)
                 .where(e1_pk == pk1)
             )
             stmt = apply_filters(crud_models=e2_cm, stmt=stmt, filters=filters)

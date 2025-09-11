@@ -12,6 +12,7 @@ class RelationRoutesName(str, Enum):
     PATCH_BY_RELATION = "patch-by-relation"
     READ_ALL_BY_RELATION = "read-all-by-relation"
     READ_ONE_BY_RELATION = "read-one-by-relation"
+    READ_ONE_RELATION = "read-one-relation"
 
 
 class DefaultRoutesName(str, Enum):

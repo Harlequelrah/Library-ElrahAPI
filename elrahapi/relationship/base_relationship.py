@@ -1,17 +1,27 @@
+from abc import ABC
 from copy import deepcopy
 from typing import Any, Type
 
-from pydantic import BaseModel
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.router.route_additional_config import AuthorizationConfig, ResponseModelConfig
+from elrahapi.router.route_additional_config import (
+    AuthorizationConfig,
+    ResponseModelConfig,
+)
 from elrahapi.router.route_config import RouteConfig
-from elrahapi.router.router_crud import add_authorizations, initialize_dependecies, is_verified_relation_rule, set_response_models
+from elrahapi.router.router_crud import (
+    add_authorizations,
+    initialize_dependecies,
+    is_verified_relation_rule,
+    set_response_models,
+)
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.utils import validate_value
+from pydantic import BaseModel
 
 
-class BaseRelationship:
+class BaseRelationship(ABC):
+    RELATION_RULES = []
 
     def __init__(
         self,
@@ -37,6 +47,7 @@ class BaseRelationship:
         )
         self.relations_authorizations_configs = relations_authorizations_configs or []
         self.relations_responses_model_configs = relations_responses_model_configs or []
+        self.yield_session = second_entity_crud.session_manager.yield_session
 
     def get_second_model_key(self):
         return self.second_entity_crud.crud_models.get_pk()
@@ -48,11 +59,16 @@ class BaseRelationship:
             return new_obj
         return obj
 
+    def is_verified_relation_rule(
+        self,
+        relation_route_name: RelationRoutesName,
+    ):
+        return relation_route_name in self.RELATION_RULES
+
     def check_relation_rules(self):
         for route_config in self.relations_routes_configs:
             if not is_verified_relation_rule(
                 relation_route_name=route_config.route_name,
-                type_relation=self.type_relation,
             ):
                 raise ValueError(
                     f" Route operation {route_config.route_name} not allowed for the relation type {self.type_relation}"

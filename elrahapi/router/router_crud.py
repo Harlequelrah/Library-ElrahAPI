@@ -169,8 +169,3 @@ def format_init_data(
     return formatted_data
 
 
-def is_verified_relation_rule(
-    type_relation: TypeRelation,
-    relation_route_name: RelationRoutesName,
-):
-    return relation_route_name in RELATION_RULES[type_relation]

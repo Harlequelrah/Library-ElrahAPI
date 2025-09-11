@@ -4,17 +4,14 @@ from typing import Any
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.bulk_models import BulkDeleteModel
 from elrahapi.crud.crud_forgery import CrudForgery
+from elrahapi.relationship.base_relationship import BaseRelationship
 from elrahapi.router.relationship import Relationship
 from elrahapi.router.route_config import (
     AuthorizationConfig,
     ResponseModelConfig,
     RouteConfig,
 )
-from elrahapi.router.router_crud import (
-    format_init_data,
-    get_single_route,
-    is_verified_relation_rule,
-)
+from elrahapi.router.router_crud import format_init_data, get_single_route
 from elrahapi.router.router_namespace import (
     ROUTES_PROTECTED_CONFIG,
     ROUTES_PUBLIC_CONFIG,
@@ -41,7 +38,7 @@ class CustomRouterProvider:
         privileges: list[str] | None = None,
         authentication: AuthenticationManager | None = None,
         read_with_relations: bool = False,
-        relations: list[Relationship] | None = None,
+        relations: list[BaseRelationship] | None = None,
     ):
         self.relations = relations or []
         self.authentication: AuthenticationManager = (
@@ -236,14 +233,10 @@ class CustomRouterProvider:
                     skip: int = None,
                     limit: int = None,
                     with_deleted: bool | None = None,
-                    relationship_name: str | None = None,
                     session: ElrahSession = Depends(
                         self.crud.session_manager.yield_session
                     ),
                 ):
-                    relation: Relationship | None = self.get_relationship(
-                        relationship_name=relationship_name
-                    )
                     filters = get_filters(request=request)
                     if not with_deleted:
                         filters["is_deleted"] = False
@@ -251,7 +244,6 @@ class CustomRouterProvider:
                         skip=skip,
                         limit=limit,
                         filters=filters,
-                        relation=relation,
                         session=session,
                     )
 
@@ -443,14 +435,13 @@ class CustomRouterProvider:
             for route_config in routes_configs:
                 if (
                     route_config.route_name == RelationRoutesName.CREATE_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
                         path=route_config.route_path,
-                        endpoint=self.make_create_relation_route(relation=relation),
+                        endpoint=relation.create_relation(entity_crud=self.crud),
                         methods=["POST"],
                         dependencies=route_config.dependencies,
                         summary=route_config.summary,
@@ -462,13 +453,12 @@ class CustomRouterProvider:
                     )
                 if (
                     route_config.route_name == RelationRoutesName.DELETE_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_delete_relation_route(relation=relation),
+                        endpoint=relation.delete_relation(entity_crud=self.crud),
                         methods=["DELETE"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -480,15 +470,12 @@ class CustomRouterProvider:
                     )
                 if (
                     route_config.route_name == RelationRoutesName.READ_ALL_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_read_all_by_relation_route(
-                            relation=relation
-                        ),
+                        endpoint=relation.read_all_by_relation(entity_crud=self.crud),
                         methods=["GET"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -500,15 +487,12 @@ class CustomRouterProvider:
                     )
                 if (
                     route_config.route_name == RelationRoutesName.READ_ONE_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_read_one_by_relation_route(
-                            relation=relation
-                        ),
+                        endpoint=relation.read_one_by_relation(entity_crud=self.crud),
                         methods=["GET"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -520,13 +504,12 @@ class CustomRouterProvider:
                     )
                 if (
                     route_config.route_name == RelationRoutesName.CREATE_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_create_by_relation_route(relation=relation),
+                        endpoint=relation.create_by_relation(entity_crud=self.crud),
                         methods=["POST"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -540,13 +523,12 @@ class CustomRouterProvider:
 
                 if (
                     route_config.route_name == RelationRoutesName.DELETE_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_delete_by_relation_route(relation=relation),
+                        endpoint=relation.delete_by_relation(entity_crud=self.crud),
                         methods=["DELETE"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -560,14 +542,13 @@ class CustomRouterProvider:
                 if (
                     route_config.route_name
                     == RelationRoutesName.SOFT_DELETE_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_soft_delete_by_relation_route(
-                            relation=relation
+                        endpoint=relation.soft_delete_by_relation(
+                            entity_crud=self.crud
                         ),
                         methods=["DELETE"],
                         path=route_config.route_path,
@@ -580,13 +561,12 @@ class CustomRouterProvider:
                     )
                 if (
                     route_config.route_name == RelationRoutesName.UPDATE_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_update_by_relation_route(relation=relation),
+                        endpoint=relation.update_by_relation(entity_crud=self.crud),
                         methods=["PUT"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -599,13 +579,12 @@ class CustomRouterProvider:
 
                 if (
                     route_config.route_name == RelationRoutesName.PATCH_BY_RELATION
-                    and is_verified_relation_rule(
-                        type_relation=relation.type_relation,
+                    and relation.is_verified_relation_rule(
                         relation_route_name=route_config.route_name,
                     )
                 ):
                     self.router.add_api_route(
-                        endpoint=self.make_patch_by_relation_route(relation=relation),
+                        endpoint=relation.patch_by_relation(entity_crud=self.crud),
                         methods=["PATCH"],
                         path=route_config.route_path,
                         dependencies=route_config.dependencies,
@@ -618,138 +597,3 @@ class CustomRouterProvider:
 
         return self.router
 
-    def get_relationship(self, relationship_name: str):
-        relation: Relationship | None = next(
-            (
-                relation
-                for relation in self.relations
-                if relation.relationship_name == relationship_name
-            ),
-            None,
-        )
-        if relation and relation.type_relation not in [
-            TypeRelation.MANY_TO_MANY_CLASS,
-            TypeRelation.MANY_TO_MANY_TABLE,
-            TypeRelation.ONE_TO_MANY,
-        ]:
-            relation = None
-        return relation
-
-    def make_create_relation_route(
-        self,
-        relation: Relationship,
-    ):
-        async def create_relation(
-            pk1: Any,
-            pk2: Any,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.create_relation(
-                session=session, entity_crud=self.crud, pk1=pk1, pk2=pk2
-            )
-
-        return create_relation
-
-    def make_delete_relation_route(self, relation: Relationship):
-        async def delete_relation(
-            pk1: Any,
-            pk2: Any,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.delete_relation(
-                session=session, entity_crud=self.crud, pk1=pk1, pk2=pk2
-            )
-
-        return delete_relation
-
-    def make_read_all_by_relation_route(self, relation: Relationship):
-
-        async def read_all_by_relation(
-            request: Request,
-            pk1: Any,
-            skip: int = None,
-            limit: int = None,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            filters = get_filters(request=request)
-            return await relation.read_all_by_relation(
-                pk1=pk1,
-                limit=limit,
-                skip=skip,
-                entity_crud=self.crud,
-                session=session,
-                filters=filters,
-            )
-
-        return read_all_by_relation
-
-    def make_read_one_by_relation_route(self, relation: Relationship):
-        async def read_one_by_relation(
-            pk1: Any,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.read_one_by_relation(
-                session=session, entity_crud=self.crud, pk1=pk1
-            )
-
-        return read_one_by_relation
-
-    def make_create_by_relation_route(self, relation: Relationship):
-
-        async def create_by_relation(
-            pk1: Any,
-            create_obj: relation.second_entity_crud.crud_models.create_model,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-
-            return await relation.create_by_relation(
-                pk1=pk1, create_obj=create_obj, entity_crud=self.crud, session=session
-            )
-
-        return create_by_relation
-
-    def make_delete_by_relation_route(self, relation: Relationship):
-        async def delete_by_relation(
-            pk1: Any,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.delete_by_relation(
-                pk1=pk1, entity_crud=self.crud, session=session
-            )
-
-        return delete_by_relation
-
-    def make_soft_delete_by_relation_route(self, relation: Relationship):
-        async def soft_delete_by_relation(
-            pk1: Any,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.soft_delete_by_relation(
-                pk1=pk1, entity_crud=self.crud, session=session
-            )
-
-        return soft_delete_by_relation
-
-    def make_update_by_relation_route(self, relation: Relationship):
-        async def update_by_relation(
-            pk1: Any,
-            update_obj: relation.second_entity_crud.crud_models.update_model,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.update_by_relation(
-                pk1=pk1, update_obj=update_obj, entity_crud=self.crud, session=session
-            )
-
-        return update_by_relation
-
-    def make_patch_by_relation_route(self, relation: Relationship):
-        async def patch_by_relation(
-            pk1: Any,
-            patch_obj: relation.second_entity_crud.crud_models.patch_model,
-            session: ElrahSession = Depends(self.crud.session_manager.yield_session),
-        ):
-            return await relation.patch_by_relation(
-                pk1=pk1, patch_obj=patch_obj, entity_crud=self.crud, session=session
-            )
-
-        return patch_by_relation

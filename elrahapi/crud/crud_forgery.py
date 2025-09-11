@@ -6,7 +6,6 @@ from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.router.router_namespace import TypeRelation
 from elrahapi.utility.schemas import CountModel
 from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import apply_filters, exec_stmt, map_list_to, update_entity
@@ -177,42 +176,13 @@ class CrudForgery:
         session: ElrahSession,
         skip: int = 0,
         limit: int = None,
-        relation: Any = None,
         filters=dict[str, Any],
     ):
         try:
             stmt = select(self.SQLAlchemyModel)
-            pk = self.crud_models.get_pk()
-            if relation:
-                reskey = relation.get_second_model_key()
-                if relation.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
-                    relkey1, relkey2 = relation.get_relationship_keys()
-                    stmt = stmt.join(
-                        relation.relationship_crud.crud_models.sqlalchemy_model,
-                        relkey1 == pk,
-                    )
-                    stmt = stmt.join(
-                        relation.second_entity_crud.crud_models.sqlalchemy_model,
-                        reskey == relkey2,
-                    )
-                elif relation.type_relation in [
-                    TypeRelation.MANY_TO_MANY_TABLE,
-                    TypeRelation.ONE_TO_MANY,
-                ]:
-                    stmt = stmt.join(
-                        relation.second_entity_crud.crud_models.sqlalchemy_model,
-                        reskey=pk,
-                    )
-
             stmt = apply_filters(
                 crud_models=self.crud_models, stmt=stmt, filters=filters
             )
-            if relation:
-                stmt = apply_filters(
-                    crud_models=relation.second_entity_crud.crud_models,
-                    stmt=stmt,
-                    filters=filters,
-                )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 stmt=stmt,
