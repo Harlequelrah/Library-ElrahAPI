@@ -1,17 +1,18 @@
 from typing import Any, Callable, Type
 
-from pydantic import BaseModel
-from elrahapi.router.router_routes_name import (
-    DefaultRoutesName,
-    RoutesName,
-    READ_ROUTES_NAME,
-    DEFAULT_DETAIL_ROUTES_NAME,
-)
+from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.router.route_additional_config import (
     AuthorizationConfig,
     ResponseModelConfig,
 )
-from elrahapi.authentication.authentication_manager import AuthenticationManager
+from elrahapi.router.router_routes_name import (
+    DEFAULT_DETAIL_ROUTES_NAME,
+    DEFAULT_ROUTES_NAME,
+    READ_ROUTES_NAME,
+    DefaultRoutesName,
+    RoutesName,
+)
+from pydantic import BaseModel
 
 
 class RouteConfig:
@@ -60,11 +61,23 @@ class RouteConfig:
         route_path: str | None = None,
     ):
         if route_path:
-            if route_name in DEFAULT_DETAIL_ROUTES_NAME and "{pk}" not in route_path:
-                return f"/{route_name.value}/{{pk}}"
             return route_path
+        if route_name in DEFAULT_ROUTES_NAME:
+            if route_name in DEFAULT_DETAIL_ROUTES_NAME:
+                return f"/{{pk}}"
+            else:
+                return ""
         else:
-            return f"/{route_name.value}"
+            if route_name == DefaultRoutesName.SOFT_DELETE:
+                return f"/soft-delete/{{pk}}"
+            elif route_name in [
+                DefaultRoutesName.BULK_CREATE,
+                DefaultRoutesName.BULK_DELETE,
+            ]:
+                return f"/bulk"
+            elif route_name == DefaultRoutesName.BULK_SOFT_DELETE:
+                return f"/bulk/soft-delete"
+        return f"/{route_name.value}"
 
     def extend_response_model(
         self,

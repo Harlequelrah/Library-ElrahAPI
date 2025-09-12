@@ -11,16 +11,16 @@ from sqlalchemy.sql import func
 
 from fastapi import status
 
+from elrahapi.utility.models import AdditionalModelFields
 
-class UserModel:
+
+class UserModel(AdditionalModelFields):
     id = Column(Integer, primary_key=True)
     email = Column(String(256), unique=True, index=True)
     username = Column(String(256), unique=True, index=True)
     password = Column(String(1024), nullable=False)
     lastname = Column(String(256), nullable=False)
     firstname = Column(String(256), nullable=False)
-    date_created = Column(DateTime, default=func.now())
-    date_updated = Column(DateTime, default=func.now(), onupdate=func.now())
     is_active = Column(Boolean, default=True)
     attempt_login = Column(Integer, default=0)
 
@@ -93,6 +93,8 @@ class UserModel:
             if (
                 user_role.is_active
                 and role.is_active
+                and not role.is_deleted
+                and not user_role.is_deleted
                 and role.name == role_name.upper()
             ):
                 return True
@@ -104,8 +106,10 @@ class UserModel:
             privilege = user_privilege.privilege
             if (
                 user_privilege.is_active
+                and not user_privilege.is_deleted
                 and privilege.is_active
                 and privilege.name == privilege_name.upper()
+                and not privilege.is_deleted
             ):
                 return True
         else:
@@ -113,14 +117,17 @@ class UserModel:
 
     def has_privilege(self, privilege_name: str):
         for user_role in self.user_roles:
-            for user_privilege in user_role.role.role_privileges:
-                privilege = user_privilege.privilege
-                if (
-                    privilege.name == privilege_name.upper()
-                    and privilege.is_active
-                    and user_privilege.is_active
-                ):
-                    return True
+            if user_role.is_active and not user_role.is_deleted:
+                for user_privilege in user_role.role.role_privileges:
+                    privilege = user_privilege.privilege
+                    if (
+                        privilege.name == privilege_name.upper()
+                        and privilege.is_active
+                        and not privilege.is_deleted
+                        and user_privilege.is_active
+                        and not user_privilege.is_deleted
+                    ):
+                        return True
         if self.has_permission(privilege_name=privilege_name):
             return True
         else:

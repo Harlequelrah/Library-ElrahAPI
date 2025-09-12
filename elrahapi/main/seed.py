@@ -1,7 +1,6 @@
 import sys
 from elrahapi.database.seed_manager import Seed
 from myapp.cruds import myapp_crud
-from settings.logger.model import LogModel
 from myapp.schemas import EntityCreateModel
 from settings.database import database
 from log.seeders_logger import seeders_logger, SEEDERS_LOGS

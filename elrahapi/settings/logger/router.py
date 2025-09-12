@@ -1,7 +1,7 @@
 from elrahapi.router.router_namespace import DefaultRoutesName, TypeRoute
 from elrahapi.router.router_provider import CustomRouterProvider
-from .crud import logCrud
-from ..auth.configs import authentication
+from logger.crud import logCrud
+from settings.auth.configs import authentication
 router_provider = CustomRouterProvider(
     prefix="/logs",
     tags=["logs"],

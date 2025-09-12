@@ -1,20 +1,20 @@
 import sys
-from elrahapi.database.seed_manager import Seed
-from settings.auth.cruds import privilege_crud
-from settings.logger.model import LogModel
+
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
+from elrahapi.database.seed_manager import Seed
+from log.seeders_logger import SEEDERS_LOGS, seeders_logger
+from settings.auth.cruds import privilege_crud
 from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[PrivilegeCreateModel] = [
     PrivilegeCreateModel(
-        name="ADMIN_ONLY", description="Admin special privilege", is_active=True
+        name="CAN_DO_SPECIAL_1", description="Special privilege 1", is_active=True
     ),
     PrivilegeCreateModel(
-        name="MANAGER_ONLY", description="Manager special privilege", is_active=True
+        name="CAN_DO_SPECIAL_2", description="Special privilege 2", is_active=True
     ),
     PrivilegeCreateModel(
-        name="SECRETARY_ONLY", description="Secretary special privilege", is_active=True
+        name="CAN_DO_SPECIAL_3", description="Special privilege 3", is_active=True
     ),
     PrivilegeCreateModel(
         name="CAN DO ACTION 1", description="Can do action 1", is_active=True

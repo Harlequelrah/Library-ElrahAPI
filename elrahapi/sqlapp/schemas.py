@@ -1,4 +1,5 @@
-# from pydantic import BaseModel, Field
+# from pydantic import BaseModel, ConfigDict, Field
+
 # from datetime import datetime
 # from decimal import Decimal
 
@@ -13,15 +14,14 @@
 # class EntityPatchModel(BaseModel):
 #     pass
 
-# class EntityReadModel(BaseModel):
+# class EntityReadModel(EntityBaseModel):
 #     id : int
 #     date_created: datetime
-#     date_updated: datetime 
-#     class Config:
-#         from_attributes=True
+#     date_updated: datetime
+#     date_deleted: datetime | None = None
+#     is_deleted:bool
+#     model_config=ConfigDict(from_attributes=True)
 
 
 # class EntityFullReadModel(EntityReadModel):
-#     pass
-#     class Config:
-#         from_attributes=True
+#     model_config=ConfigDict(from_attributes=True)

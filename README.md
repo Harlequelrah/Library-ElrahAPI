@@ -32,7 +32,7 @@ ElrahAPI permet notament dans le cadre d'un développement avec FASTAPI de :
 
 - Fournir une pile d'utilitaires ;
 
-- L'utilisation de gestionnaire de websocket pour particulièrement envoyer les erreurs des requêtes .
+- L'utilisation de gestionnaire de websocket .
 
 # II - **`Installation`**
 
@@ -72,11 +72,9 @@ ou si virtualenv est dejà installé au préalable
 
 - Il est recommandé de créer un environnement virtuel pour chaque projet ;
 
-- **myproject** designe le nom de votre projet ;
-
-- **myapp** designe le nom d'une application ;
-
 - Après la creation du projet configurer l'environnement .
+
+**NB** : Pour la suite **myproject** designe le nom de votre projet et **myapp** designe le nom d'une application .
 
 ## **2.** `créer un projet`
 
@@ -96,9 +94,15 @@ ou si virtualenv est dejà installé au préalable
 
   - Configurer le alembic/env.py :
 
-    - Ajouter l'import : from myproject.settings.models_metadata import Base ;
-
-    - Passer les metadata à target_metadata : database.target_metadata=Base.metadata ;
+    - Ajouter l'import :
+      ```python
+      from testproject.settings.models_metadata import Base
+      ```
+    - Passer les metadata à target_metadata :
+      ```python
+      database.target_metadata=Base.metadata
+      ```
+    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application u compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
 
 ## **4.** `Demarrer le projet `
 
@@ -144,13 +148,24 @@ ou si virtualenv est dejà installé au préalable
 
 - Créer les meta models dans `meta_models.py` si nécessaire ;
 
-- Ajouter le model dans models_metadata.py comme suite : `from .myapp.models import Model`
+- Ajouter le model dans models_metadata.py comme suite :
+  ```python
+  from myproject.myapp.models import Model
+  ```
 
 **`Note:`** :
 
-Avec `SQLAlchemy` en asynchrone , si dans vos schémas vous retourner des relations d'un model , il faudra ajouter `lazy=joined` aux relationship des models SQLAlchemy .
+Avec `SQLAlchemy` en asynchrone , si dans vos schémas vous retourner des relations d'un model , il faudra ajouter `lazy=joined` aux relationship des models SQLAlchemy lorsque vous utilisez le `CrudForgery` ou le `CustomRouterProvider`.
 
-Pour les schémas pydantic l'on pourra d'abord créer ou non un EntityBaseModel dans `meta_models.py` pour le réutiliser au besoin dans les autres schémas .
+**`exemple : `**
+
+```python
+  class User( UserModel,Base):
+    user_privileges = relationship("UserPrivilege", back_populates="user",lazy="joined")
+    user_roles=relationship("UserRole",back_populates="user",lazy="joined")
+```
+
+Pour les schémas pydantic l'on pourra d'abord créer ou non un `EntityBaseModel` dans `meta_models.py` pour le réutiliser au besoin dans les autres schémas et `EntityInEntity2Model` peut servir à définir un modèle partiel de `Entity` dans le retour d'un schéma de `Entity2`
 
 Dans `schemas.py` il peut y avoir généralement :
 
@@ -167,13 +182,9 @@ Dans `schemas.py` il peut y avoir généralement :
 **`exemple : `**
 
 ```python
-  class User( UserModel,database.base):
-    user_privileges = relationship("UserPrivilege", back_populates="user",lazy="joined")
-    user_roles=relationship("UserRole",back_populates="user",lazy="joined")
-
   class UserFullReadModel(UserReadModel) :
-    user_roles:List["MetaUserRoleModel"] = []
-    user_privileges: List["MetaUserPrivilegeModel"]=[]
+    user_roles:List["UserRoleInUser"] = []
+    user_privileges: List["UserInUserPrivilege"]=[]
 ```
 
 ### **6.2.** `Créer les cruds`
@@ -203,11 +214,77 @@ myapp_crud = CrudForgery(
 )
 ```
 
-### **6.3.** `Configurer le fournisseur de routage de l'application`
+### **6.3.** `Descriptif des routes génériques `
+
+On dispose d'une multitude de routes génériques parmis lesquelles les `DefaultRoutesName` et `RelationRoutesName` .
+
+#### **6.3.1.** `DefaultRoutesName `
+
+- `DefaultRoutesName.COUNT` : Cette route retourne des statistiques de compte dont le nombre total de l'entité , le total pour aujourdhui , les sept derniers jours ou le mois passé.
+
+- `DefaultRoutesName.READ_ALL` : Cette route retourne une liste d'instances de l'entité .
+
+- `DefaultRoutesName.READ_ONE` : Cette route retourne une instance de l'entité à partir d'une valeur de clé primaire.
+
+- `DefaultRoutesName.READ_ONE_USER` : Cette route retourne une instance de l'entité utilisateur à partir d'une valeur de clé primaire , de l'email ou du nom d'utilisateur .
+
+- `DefaultRoutesName.READ_CURRENT_USER` : Cette route retourne une instance de l'entité utilisateur actuellement connecté .
+
+- `DefaultRoutesName.CREATE` : Cette route sert à la création d'une instance de l'entité .
+
+- `DefaultRoutesName.DELETE` : Cette route sert à la suppression définitive d'une instance de l'entité.
+
+- `DefaultRoutesName.SOFT_DELETE` : Cette route sert à la suppression logique d'une instance de l'entité.
+
+- `DefaultRoutesName.UPDATE` : Cette route sert à la mise à jour totale d'une instance de l'entité.
+
+- `DefaultRoutesName.PATCH` : Cette route sert à la mise à jour partielle d'une instance de l'entité.
+
+- `DefaultRoutesName.BULK_CREATE` : Cette route sert à la création multiple d'instances de l'entité .
+
+- `DefaultRoutesName.BULK_DELETE` : Cette route sert à la suppression définitive multiple d'instances de l'entité .
+
+- `DefaultRoutesName.BULK_SOFT_DELETE` : Cette route sert à la suppression logique multiple d'instances de l'entité .
+
+- `DefaultRoutesName.TOKEN_URL` : Cette route sert à l'authentification sur le swagger .
+
+- `DefaultRoutesName.LOGIN` : Cette route sert à l'authentification et permet d'obtenir un token d'accès et de rafraichissement .
+
+- `DefaultRoutesName.REFRESH_TOKEN` : Cette route sert à obtenir un nouveau token d'accès .
+
+- `DefaultRoutesName.CHANGE_PASSWORD` : Cette route permet à un utilisateur de modifier son mot de passe .
+
+- `DefaultRoutesName.CHANGE_PASSWORD` : Cette route permet d'activer ou de désactiver un utilisateur .
+
+#### **6.3.1.** `RelationRoutesName `
+
+- `RelationRoutesName.CREATE_RELATION` : cette route sert à la création d'une relation entre deux instances d'entités .
+
+**exemple** : On peut créer une `relation` entre une instance de l'entité `Utilisateur` et une instance de l'entité `Profile` .
+
+- `RelationRoutesName.DELETE_RELATION` : cette route sert à la suppression d'une une relation entre deux instances d'entités .
+
+- `RelationRoutesName.READ_ONE_BY_RELATION` : cette route retourne une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.READ_ALL_BY_RELATION` : cette route retourne une instance d'une autre entité à partir de sa relation avec l'entité .
+
+**exemple** : retourne tous les posts d'un utilisateur .
+
+- `RelationRoutesName.CREATE_BY_RELATION` : cette route permet la création d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.DELETE_BY_RELATION` : cette route permet la suppression définitive d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.SOFT_DELETE_BY_RELATION` : cette route permet la suppression logique d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.UPDATE` : cette route permet la mise à jour totale d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+- `RelationRoutesName.PATCH` : cette route permet la mise à jour partielle d'une instance d'une autre entité à partir de sa relation avec l'entité .
+
+### **6.4.** `Configurer le fournisseur de routage de l'application`
 
 Configurer le CustomRouterProvider dans router.py
 
-- **`Configuration de base`**
+#### **6.4.1** `Configuration de base`
 
 Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 
@@ -219,9 +296,11 @@ Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 )
 ```
 
-- **`Configuration avec authentification et autorisation`**
+#### **6.4.2** `Configuration avec authentification et autorisation`
 
-Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter l'attribut authentication . Avec ce paramètre on peut aussi gérer les autorisation en ajoutant des roles et privileges directement qui seront utilisés par toutes les routes .
+Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter l'attribut authentication . Avec ce paramètre on peut aussi gérer les autorisation en ajoutant des roles et ou privileges directement qui seront utilisés par toutes les routes .
+
+**exemple**:
 
 ```python
    router_provider = CustomRouterProvider(
@@ -229,7 +308,16 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
     tags=["item"],
     crud=myapp_crud,
     authentication = authentication,
-    roles = ["ADMIN"],
+    roles = ["ADMIN"]
+)
+```
+
+```python
+   router_provider = CustomRouterProvider(
+    prefix="/items",
+    tags=["item"],
+    crud=myapp_crud,
+    authentication = authentication,
     privileges = [
     "CAN_CREATE_BOOK",
     "CAN_DELETE_CATEGORY"
@@ -237,7 +325,7 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
 )
 ```
 
-- **`Configuration des models de réponse`** :
+#### **6.4.3** `Configuration des models de réponse`
 
 La configuration des relations se fait par le paramètre `read_with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
 
@@ -250,7 +338,7 @@ La configuration des relations se fait par le paramètre `read_with_relations` p
 )
 ```
 
-- **`Configuration des relations`** :
+#### **6.4.4** `Configuration des relations`
 
 Cette configuration se fait par le paramètre `relations` qui définit une liste d'instance de `Relationship`.
 
@@ -268,78 +356,139 @@ Cette configuration se fait par le paramètre `relations` qui définit une liste
 )
 ```
 
-**`exemples de relations `** :
+**Note** : RELATION_RULES est un attribut de liste correspondant aux routes possibles une relation .
 
-**Note** : RELATION_RULES est un dictionnaire où la clé est le type de relation et la valeur une liste des routes permises .
+##### **6.4.4.1** `ManyToManyClassRelationship`: Relation plusieurs à plusieurs avec une classe `SQLAlchemy` intermédiaire
 
-- Relation plusieurs à plusieurs avec une classe `SQLAlchemy` intermédiaire :
+- **RELATION_RULES** :
 
 ```python
-user_role_relation: Relationship = Relationship(
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.READ_ONE_RELATION,
+    ]
+```
+
+- **exemple** :
+
+```python
+from elrahapi.relationship.many_to_many_class import ManyToManyClassRelationship
+user_role_relation = ManyToManyClassRelationship(
     relationship_name="user_roles",
     second_entity_crud=role_crud,
     relationship_crud=user_role_crud,
-    type_relation=TypeRelation.MANY_TO_MANY_CLASS,
     relationship_key1_name="user_id",
     relationship_key2_name="role_id",
-    default_public_relation_routes_name=[
-      RelationRoutesName.READ_ALL_BY_RELATION,
+    default_public_relation_routes_name=ManyToManyClassRelationship.RELATION_RULES,
+)
+```
+
+##### **6.4.4.2** `ManyToManyTableRelationship`: Relation plusieurs à plusieurs avec table `Table` intermédiaire
+
+- **RELATION_RULES** :
+
+```python
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+    ]
+```
+
+- **exemple** :
+
+```python
+from elrahapi.relationship.many_to_many_table import ManyToManyTableRelationship
+task_assign_user_relation =       ManyToManyTableRelationship(
+    relationship_name="assigned_users",
+    second_entity_crud=user_crud,
+    relation_table=task_assign_user_association,
+    relationship_key1_name="task_id",
+    relationship_key2_name="user_id",
+    default_protected_relation_routes_name=[
+      RelationRoutesName.CREATE_RELATION,
       RelationRoutesName.DELETE_RELATION,
     ],
 )
 ```
 
-- Relation plusieurs à plusieurs avec table `Table` intermédiaire :
+##### **6.4.4.3** `OneToOneRelationship`: Relation un à un
+
+- **RELATION_RULES** :
 
 ```python
-tag_relation: Relationship = Relationship(
-    relation_table=post_tag_table,
-    relationship_name="tags",
-    second_entity_crud=tag_crud,
-    relationship_key1_name="post_id",
-    relationship_key2_name="tag_id",
-    type_relation=TypeRelation.MANY_TO_MANY_TABLE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_MANY_TABLE],
-)
+    RELATION_RULES = [
+        RelationRoutesName.READ_ONE_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+        RelationRoutesName.UPDATE_BY_RELATION,
+        RelationRoutesName.PATCH_BY_RELATION,
+        RelationRoutesName.SOFT_DELETE_BY_RELATION,
+        RelationRoutesName.DELETE_BY_RELATION,
+    ]
 ```
 
-- Relation un à un :
+**exemple** :
 
 ```python
-profile_relation: Relationship = Relationship(
+from elrahapi.relationship.one_to_one import OneToOneRelationship
+profile_relation = OneToOneRelationship(
     relationship_name="profile",
     second_entity_crud=profile_crud,
-    type_relation=TypeRelation.ONE_TO_ONE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_ONE],
+    default_public_relation_routes_name=OneToOneRelationship.RELATION_RULES,
 )
 ```
 
-- Relation un à plusieurs :
+##### **6.4.4.4** `OneToManyRelationship`: Relation un à plusieurs
+
+- **RELATION_RULES** :
 
 ```python
-post_relation: Relationship = Relationship(
-    relationship_name="posts",
-    second_entity_crud=post_crud,
-    second_entity_fk_name="user_id",
-    type_relation=TypeRelation.ONE_TO_MANY,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_MANY],
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+    ]
+```
+
+**exemple** :
+
+```python
+from elrahapi.relationship.one_to_many import OneToManyRelationship
+user_task_relation = OneToManyRelationship(
+    relationship_name="user_tasks",
+    second_entity_crud=task_crud,
+    default_public_relation_routes_name=OneToManyRelationship.RELATION_RULES,
+)
 )
 ```
 
-**Note** : second_entity_fk_name est facultatif et permet d'attribuer cette valeur automatiquement dans la création , mise à jour partielle , mise à jour totale de l'entité secondaire . Il faut tout de même avoir ce champ dans les schémas correspondant ,et il pourra désormais etre optionel .
+##### **6.4.4.5** `ManyToOneRelationship`: Relation plusieurs à un
 
-- Relation plusieurs à un :
+- **RELATION_RULES** :
 
 ```python
-user_relation: Relationship = Relationship(
+    RELATION_RULES = [RelationRoutesName.READ_ONE_BY_RELATION]
+```
+
+**exemple** :
+
+```python
+from elrahapi.relationship.many_to_one import ManyToOneRelationship
+user_relation = ManyToOneRelationship(
     relationship_name="user",
     second_entity_crud=user_crud,
-    type_relation=TypeRelation.MANY_TO_ONE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_ONE],
+    default_public_relation_routes_name=ManyToOneRelationship.RELATION_RULES,
 )
 ```
 
-### **6.4.** `Configurer un router`
+**Note** : Les paramètres `relations_routes_configs` , `relations_authorizations_configs` et `relations_responses_model_configs` peuvent eventuellement être utilisés .
+
+### **6.5.** `Configurer un router`
 
 Les possibilités de configuration d'un routeur :
 
@@ -683,7 +832,7 @@ elrahapi generate_secret_key HS512
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.2.0.4`
+La version actuelle est le `1.2.1.2`
 
 Vérifier la version en executant `pip show elrahapi`
 
@@ -695,5 +844,3 @@ Vous pouvez consulter la documentation technique pour découvrir toutes les fonc
 docs/
 ├── README.md
 ```
-
-**Note** : `la documentation technique n'est pas à jour`.

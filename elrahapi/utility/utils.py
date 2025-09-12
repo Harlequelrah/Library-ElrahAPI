@@ -1,12 +1,17 @@
+import importlib
+import os
 from typing import Any, Type
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from dotenv import load_dotenv
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.crud.crud_models import CrudModels
-import os
-from sqlalchemy.sql import Select
 from elrahapi.router.router_routes_name import CREATE_ALL_PRIVILEGE_ROUTES_NAME
 from elrahapi.utility.types import ElrahSession
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import Select
+
+from fastapi import Request
 
 
 def map_list_to(
@@ -24,7 +29,6 @@ def map_list_to(
         ]
     except Exception as e:
         raise ValueError(f"Error mapping list to SQLAlchemy class: {e}") from e
-        # print(f"Error mapping list to SQLAlchemy class: {e}")
 
 
 def update_entity(existing_entity, update_entity: Type[BaseModel]):
@@ -36,21 +40,17 @@ def update_entity(existing_entity, update_entity: Type[BaseModel]):
 
 
 def validate_value(value: Any):
-    if value is None:
-        return None
-    elif isinstance(value, bool):
-        return value
-    elif value.isdigit():
-        return int(value)
-    elif isinstance(value, str):
+    if isinstance(value, str):
         if value.lower() == "true":
-            return True
+            value = True
         elif value.lower() == "false":
-            return False
+            value = False
+        elif value.isdigit():
+            return int(value)
     else:
         try:
             value = float(value)
-        except ValueError:
+        except (ValueError, TypeError):
             value = str(value)
     return value
 
@@ -63,16 +63,17 @@ def get_pks(l: list, pk_name: str):
     return pk_list
 
 
-def make_filter(
+def apply_filters(
     stmt: Select,
     crud_models: CrudModels,
-    filter: str | None = None,
-    value: str | None = None,
+    filters: dict[str, Any],
 ) -> Select:
-    if filter and value:
-        exist_filter = crud_models.get_attr(filter)
-        validated_value = validate_value(value)
-        stmt = stmt.where(exist_filter == validated_value)
+    conditions = [
+        crud_models.get_attr(f) == validate_value(v)
+        for f, v in filters.items()
+        if hasattr(crud_models.sqlalchemy_model, f)
+    ]
+    stmt = stmt.where(*conditions)
     return stmt
 
 
@@ -87,19 +88,34 @@ def is_async_session(session: ElrahSession):
     return isinstance(session, AsyncSession)
 
 
-async def exec_stmt(stmt: Select, session: ElrahSession, with_scalars: bool = False):
+async def exec_stmt(
+    stmt: Select,
+    session: ElrahSession,
+    with_scalars: bool = False,
+    with_scalar: bool = False,
+):
     if isinstance(session, AsyncSession):
         if with_scalars:
             result = await session.scalars(stmt)
-            return result.unique() if result else None
+        elif with_scalar:
+            result = await session.scalar(stmt)
         else:
             result = await session.execute(stmt)
-            return result.unique() if result else None
     else:
         if with_scalars:
-            return session.scalars(stmt)
+            result = session.scalars(stmt)
+        elif with_scalar:
+            result = session.scalar(stmt)
         else:
-            return session.execute(stmt)
+            result = session.execute(stmt)
+    return result
+
+
+def get_filters(request: Request):
+    filters = dict(request.query_params)
+    filters.pop("skip", None)
+    filters.pop("limit", None)
+    return filters
 
 
 def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel]:
@@ -114,3 +130,14 @@ def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel
             )
             privileges.append(privilege)
     return privileges
+
+def import_Base(env: str | None = None):
+    load_dotenv() if env is None else load_dotenv(env)
+    project_name = os.getenv("PROJECT_NAME")
+    settings_path = f"{project_name}.settings"
+    models_metadata_path = f"{settings_path}.models_metadata"
+    class_name = "Base"
+    settings = importlib.import_module(settings_path)
+    models_metadata = importlib.import_module(models_metadata_path)
+    Base = getattr(models_metadata, class_name)
+    return settings, models_metadata, Base

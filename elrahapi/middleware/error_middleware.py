@@ -1,23 +1,23 @@
 import time
+
 from elrahapi.exception.custom_http_exception import CustomHttpException as CHE
 from elrahapi.middleware.crud_middleware import save_log
 from elrahapi.middleware.middleware_helper import MiddlewareHelper
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.types import Receive, Scope, Send
+
 from fastapi import Request
 
 
 class ErrorHandlingMiddleware:
-    def __init__(
-        self,
-        app,
-        middleware_helper : MiddlewareHelper
-    ):
+    def __init__(self, app, middleware_helper: MiddlewareHelper | None=None):
         self.app = app
-        self.middelware_helper = middleware_helper
+        self.middleware_helper = middleware_helper
         self.has_log = (
-            self.middelware_helper.session_manager and self.middelware_helper.LogModel
+            self.middleware_helper is not None
+            and self.middleware_helper.session_manager
+            and self.middleware_helper.LogModel
         )
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
@@ -57,11 +57,11 @@ class ErrorHandlingMiddleware:
     async def _log_error(self, request, response, error):
         if self.has_log:
             await save_log(
-                    authentication=self.middelware_helper.authentication,
-                    request=request,
-                    LogModel=self.middelware_helper.LogModel,
-                    session_manager=self.middelware_helper.session_manager,
-                    response=response,
-                    websocket_manager=self.middelware_helper.websocket_manager,
-                    error=error,
-                )
+                authentication=self.middleware_helper.authentication,
+                request=request,
+                LogModel=self.middleware_helper.LogModel,
+                session_manager=self.middleware_helper.session_manager,
+                response=response,
+                websocket_manager=self.middleware_helper.websocket_manager,
+                error=error,
+            )

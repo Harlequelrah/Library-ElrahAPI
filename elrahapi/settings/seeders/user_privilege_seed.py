@@ -1,10 +1,10 @@
 import sys
-from elrahapi.database.seed_manager import Seed
-from settings.auth.cruds import user_privilege_crud
-from settings.logger.model import LogModel
+
 from elrahapi.authorization.user_privilege.schemas import UserPrivilegeCreateModel
+from elrahapi.database.seed_manager import Seed
+from log.seeders_logger import SEEDERS_LOGS, seeders_logger
+from settings.auth.cruds import user_privilege_crud
 from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[UserPrivilegeCreateModel] = [
     UserPrivilegeCreateModel(
@@ -21,7 +21,7 @@ data: list[UserPrivilegeCreateModel] = [
         user_id=3,
         privilege_id=3,
         is_active=True,
-    )
+    ),
 ]
 
 user_privilege_seed = Seed(

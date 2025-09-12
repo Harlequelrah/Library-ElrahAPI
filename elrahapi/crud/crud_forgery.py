@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Type
 
 from elrahapi.crud.bulk_models import BulkDeleteModel
@@ -5,16 +6,11 @@ from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from elrahapi.router.router_namespace import TypeRelation
+from elrahapi.utility.schemas import CountModel
 from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import (
-    exec_stmt,
-    make_filter,
-    map_list_to,
-    update_entity,
-)
+from elrahapi.utility.utils import apply_filters, exec_stmt, map_list_to, update_entity
 from pydantic import BaseModel
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 
 from fastapi import status
 
@@ -59,7 +55,6 @@ class CrudForgery:
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk creating {self.entity_name} , details : {str(e)}"
-            print(detail)
             raise_custom_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
@@ -88,19 +83,87 @@ class CrudForgery:
                 status_code=status.HTTP_400_BAD_REQUEST, detail=detail
             )
 
-    async def count(
-        self,
-        session: ElrahSession,
+    async def get_total_count(
+        self, session: ElrahSession, conditions: list = []
     ) -> int:
+
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*conditions)
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_daily_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        filtres: list = [c for c in conditions]
+        filtres.append(
+            func.date(self.SQLAlchemyModel.date_created) == func.current_date()
+        )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_seven_previous_day_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        filtres: list = [c for c in conditions]
+        filtres.append(
+            (func.date(self.SQLAlchemyModel.date_created) >= func.current_date() - 7)
+        )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def get_monthly_total_count(
+        self, session: ElrahSession, conditions: list
+    ) -> int:
+        filtres: list = [c for c in conditions]
+        filtres.append(
+            func.extract("month", func.date(self.SQLAlchemyModel.date_created))
+            == func.extract("month", func.current_date()),
+        )
+        stmt = select(func.count()).select_from(self.SQLAlchemyModel).where(*filtres)
+        return await exec_stmt(
+            session=session,
+            stmt=stmt,
+            with_scalar=True,
+        )
+
+    async def count(
+        self, session: ElrahSession, with_deleted: bool | None = None
+    ) -> CountModel:
         try:
-            pk = self.crud_models.get_pk()
-            stmt = select(func.count(pk))
-            result = await exec_stmt(
-                session=session,
-                stmt=stmt,
+            base_conditions = []
+            if not with_deleted:
+                base_conditions.append(self.SQLAlchemyModel.is_deleted == False)
+            total_count = await self.get_total_count(
+                session=session, conditions=base_conditions
             )
-            count = result.scalar_one()
-            return count
+            daily_total_count = await self.get_daily_total_count(
+                session=session, conditions=base_conditions
+            )
+            seven_previous_day_total_count = (
+                await self.get_seven_previous_day_total_count(
+                    session=session, conditions=base_conditions
+                )
+            )
+            monthly_total_count = await self.get_monthly_total_count(
+                session=session, conditions=base_conditions
+            )
+            return CountModel(
+                total_count=total_count,
+                daily_total_count=daily_total_count,
+                seven_previous_day_total_count=seven_previous_day_total_count,
+                monthly_total_count=monthly_total_count,
+            )
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while counting {self.entity_name}s , details : {str(e)}"
@@ -111,47 +174,15 @@ class CrudForgery:
     async def read_all(
         self,
         session: ElrahSession,
-        filter: str | None = None,
-        second_model_filter: str | None = None,
-        second_model_filter_value: Any = None,
-        value: str | None = None,
         skip: int = 0,
         limit: int = None,
-        relation: Any = None,
+        filters=dict[str, Any],
     ):
         try:
             stmt = select(self.SQLAlchemyModel)
-            pk = self.crud_models.get_pk()
-            if relation:
-                reskey = relation.get_second_model_key()
-                if relation.type_relation == TypeRelation.MANY_TO_MANY_CLASS:
-                    relkey1, relkey2 = relation.get_relationship_keys()
-                    stmt = stmt.join(
-                        relation.relationship_crud.crud_models.sqlalchemy_model,
-                        relkey1 == pk,
-                    )
-                    stmt = stmt.join(
-                        relation.second_entity_crud.crud_models.sqlalchemy_model,
-                        reskey == relkey2,
-                    )
-                elif relation.type_relation in [
-                    TypeRelation.MANY_TO_MANY_TABLE,
-                    TypeRelation.ONE_TO_MANY,
-                ]:
-                    stmt = stmt.join(
-                        relation.second_entity_crud.crud_models.sqlalchemy_model,
-                        reskey=pk,
-                    )
-            stmt = make_filter(
-                crud_models=self.crud_models, stmt=stmt, filter=filter, value=value
+            stmt = apply_filters(
+                crud_models=self.crud_models, stmt=stmt, filters=filters
             )
-            if relation:
-                stmt = make_filter(
-                    crud_models=relation.second_entity_crud.crud_models,
-                    stmt=stmt,
-                    filter=second_model_filter,
-                    value=second_model_filter_value,
-                )
             stmt = stmt.offset(skip).limit(limit)
             results = await exec_stmt(
                 stmt=stmt,
@@ -166,10 +197,15 @@ class CrudForgery:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
 
-    async def read_one(self, session: ElrahSession, pk: Any):
+    async def read_one(
+        self, session: ElrahSession, pk: Any, with_deleted: bool = False
+    ):
         try:
             pk_attr = self.crud_models.get_pk()
-            stmt = select(self.SQLAlchemyModel).where(pk_attr == pk)
+            conditions = [pk_attr == pk]
+            if not with_deleted:
+                conditions.append(self.SQLAlchemyModel.is_deleted == False)
+            stmt = select(self.SQLAlchemyModel).where(*conditions)
             result = await exec_stmt(
                 session=session,
                 stmt=stmt,
@@ -235,20 +271,16 @@ class CrudForgery:
         try:
             pk_attr = self.crud_models.get_pk()
             delete_list = pk_list.delete_list
+            stmt = delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
             if self.session_manager.is_async_env:
-                await session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
-                )
+                await session.execute(stmt)
                 await session.commit()
             else:
-                session.execute(
-                    delete(self.SQLAlchemyModel).where(pk_attr.in_(delete_list))
-                )
+                session.execute(stmt)
                 session.commit()
         except Exception as e:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while bulk deleting {self.entity_name}s , details : {str(e)}"
-            print(detail)
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
 
     async def delete(self, session: ElrahSession, pk: Any):
@@ -265,4 +297,40 @@ class CrudForgery:
             await self.session_manager.rollback_session(session=session)
             detail = f"Error occurred while deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
             raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
-        
+
+    async def soft_delete(self, session: ElrahSession, pk: Any):
+        try:
+            existing_obj = await self.read_one(pk=pk, session=session)
+            existing_obj.is_deleted = True
+            existing_obj.date_deleted = datetime.now()
+            await self.session_manager.commit_and_refresh(
+                session=session,
+                object=existing_obj,
+            )
+        except CustomHttpException as che:
+            await self.session_manager.rollback_session(session=session)
+            raise che
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while soft deleting {self.entity_name} with {self.primary_key_name} {pk} , details : {str(e)}"
+            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)
+
+    async def bulk_soft_delete(self, session: ElrahSession, pk_list: BulkDeleteModel):
+        try:
+            pk_attr = self.crud_models.get_pk()
+            delete_list = pk_list.delete_list
+            stmt = (
+                update(self.SQLAlchemyModel)
+                .where(pk_attr.in_(delete_list))
+                .values(is_deleted=True, date_deleted=datetime.now())
+            )
+            if self.session_manager.is_async_env:
+                await session.execute(stmt)
+                await session.commit()
+            else:
+                session.execute(stmt)
+                session.commit()
+        except Exception as e:
+            await self.session_manager.rollback_session(session=session)
+            detail = f"Error occurred while bulk soft deleting {self.entity_name}s , details : {str(e)}"
+            raise_custom_http_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail)

@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 from starlette.responses import Response
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.websocket.connection_manager import ConnectionManager
-from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 
 
 async def get_response_and_process_time(

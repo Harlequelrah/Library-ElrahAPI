@@ -1,11 +1,11 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
     name="elrahapi",
-    version="1.2.1.1",
+    version="1.2.1.2",
     packages=find_packages(),
     description="Package de développement d'API basé FastAPI",
     long_description=long_description,

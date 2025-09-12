@@ -1,6 +1,5 @@
 import sys
 from elrahapi.database.seed_manager import Seed
-from settings.logger.model import LogModel
 from settings.auth.cruds import role_privilege_crud
 from elrahapi.authorization.role_privilege.schemas import RolePrivilegeCreateModel
 from settings.database import database

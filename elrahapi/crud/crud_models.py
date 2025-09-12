@@ -1,4 +1,4 @@
-from typing import  Type
+from typing import Type
 from fastapi import status
 from pydantic import BaseModel
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
@@ -90,10 +90,9 @@ class CrudModels:
         self.__PatchModel = model
 
     def get_pk(self):
-        return  self.get_attr(self.__primary_key_name)
+        return self.get_attr(self.__primary_key_name)
 
-
-    def get_attr(self,attr_name:str):
+    def get_attr(self, attr_name: str):
         try:
             return getattr(self.__SQLAlchemyModel, attr_name)
         except Exception as e:
@@ -101,4 +100,3 @@ class CrudModels:
             raise_custom_http_exception(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail
             )
-

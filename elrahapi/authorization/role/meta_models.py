@@ -1,5 +1,8 @@
 from pydantic import BaseModel
 
-class MetaRoleUsers(BaseModel):
-    user_id:int
-    is_active:bool
+from elrahapi.user.schemas import UserInRoleUser
+
+
+class RoleUserInRole(BaseModel):
+    user:UserInRoleUser
+    is_active: bool

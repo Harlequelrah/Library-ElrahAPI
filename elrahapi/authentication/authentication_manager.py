@@ -1,13 +1,8 @@
+import os
 from datetime import datetime, timedelta
 from typing import Any
 
-from fastapi.security import (
-    HTTPAuthorizationCredentials,
-    HTTPBearer,
-    OAuth2PasswordBearer,
-)
-from elrahapi.database.session_manager import SessionManager
-from elrahapi.utility.types import ElrahSession
+from dotenv import load_dotenv
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
     REFRESH_TOKEN_EXPIRATION,
@@ -22,21 +17,26 @@ from elrahapi.authentication.token import (
     TokenType,
 )
 from elrahapi.crud.crud_models import CrudModels
+from elrahapi.database.session_manager import SessionManager
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
 )
+from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.security.secret import define_algorithm_and_key
+from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import exec_stmt
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBearer,
+    OAuth2PasswordBearer,
+)
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.sql import or_
-from fastapi import Depends, status
 
-from elrahapi.exception.custom_http_exception import CustomHttpException
-from dotenv import load_dotenv
-import os
+from fastapi import Depends, status
 
 load_dotenv(".env")
 
@@ -48,6 +48,7 @@ class AuthenticationManager:
 
     def __init__(
         self,
+        authentication_models: CrudModels,
         session_manager: SessionManager,
         secret_key: str | None = None,
         algorithm: str | None = None,
@@ -56,7 +57,7 @@ class AuthenticationManager:
         temp_token_expiration: int | None = None,
         security: OAuth2PasswordBearer | HTTPBearer | None = None,
     ):
-        self.__authentication_models: CrudModels = None
+        self.__authentication_models: CrudModels = authentication_models
         self.__refresh_token_expiration = (
             refresh_token_expiration
             if refresh_token_expiration
@@ -92,7 +93,7 @@ class AuthenticationManager:
 
         self.get_access_token: callable = (
             get_oauth2passwordbearer_token
-            if isinstance(security, OAuth2PasswordBearer)
+            if isinstance(self.security, OAuth2PasswordBearer)
             else get_httpbearer_token
         )
 
@@ -308,7 +309,7 @@ class AuthenticationManager:
             ):
                 raise_custom_http_exception(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Either role or privilege must be provided, not both",
+                    detail="Either role or privilege must be provided, not both or any",
                 )
             else:
                 raise_custom_http_exception(

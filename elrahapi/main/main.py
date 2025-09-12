@@ -1,9 +1,9 @@
-from fastapi import FastAPI
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 
-# from myapp.router import app_myapp
+# from myapp.router import myapp_router
 from settings.database import database
 
+from fastapi import FastAPI
 
 app = FastAPI(root_path="/api")
 
@@ -13,7 +13,7 @@ async def hello():
     return {"message": "hello"}
 
 
-# app.include_router(app_myapp)
+# app.include_router(myapp_router)
 app.add_middleware(
     ErrorHandlingMiddleware,
 )
