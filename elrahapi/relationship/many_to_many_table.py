@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
@@ -12,7 +12,6 @@ from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import apply_filters, exec_stmt, get_filters
-from pydantic import BaseModel
 from sqlalchemy import Table, select
 
 from fastapi import Depends, Request, status

@@ -284,7 +284,7 @@ On dispose d'une multitude de routes génériques parmis lesquelles les `Default
 
 Configurer le CustomRouterProvider dans router.py
 
-- **`Configuration de base`**
+#### **6.4.1** `Configuration de base`
 
 Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 
@@ -296,7 +296,7 @@ Il faut au préalable s'assurer importer le crud depuis `myapp/cruds`
 )
 ```
 
-- **`Configuration avec authentification et autorisation`**
+#### **6.4.2** `Configuration avec authentification et autorisation`
 
 Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées faut s'assurer d'ajouter l'attribut authentication . Avec ce paramètre on peut aussi gérer les autorisation en ajoutant des roles et ou privileges directement qui seront utilisés par toutes les routes .
 
@@ -325,7 +325,7 @@ Pour utiliser les méthodes qui peuvent prendre en compte des routes protégées
 )
 ```
 
-- **`Configuration des models de réponse`** :
+#### **6.4.3** `Configuration des models de réponse`
 
 La configuration des relations se fait par le paramètre `read_with_relations` par défaut à False qui détermine si les models de réponses doivent inclure ou non les relations c'est à dire si `EntityReadModel` sera utilisé ou `EntityFullReadModel`
 
@@ -338,7 +338,7 @@ La configuration des relations se fait par le paramètre `read_with_relations` p
 )
 ```
 
-- **`Configuration des relations`** :
+#### **6.4.4** `Configuration des relations`
 
 Cette configuration se fait par le paramètre `relations` qui définit une liste d'instance de `Relationship`.
 
@@ -356,76 +356,137 @@ Cette configuration se fait par le paramètre `relations` qui définit une liste
 )
 ```
 
-**`exemples de relations `** :
+**Note** : RELATION_RULES est un attribut de liste correspondant aux routes possibles une relation .
 
-**Note** : RELATION_RULES est un dictionnaire où la clé est le type de relation et la valeur une liste des routes permises .
+##### **6.4.4.1** `ManyToManyClassRelationship`: Relation plusieurs à plusieurs avec une classe `SQLAlchemy` intermédiaire
 
-- Relation plusieurs à plusieurs avec une classe `SQLAlchemy` intermédiaire :
+- **RELATION_RULES** :
 
 ```python
-user_role_relation: Relationship = Relationship(
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.READ_ONE_RELATION,
+    ]
+```
+
+- **exemple** :
+
+```python
+from elrahapi.relationship.many_to_many_class import ManyToManyClassRelationship
+user_role_relation = ManyToManyClassRelationship(
     relationship_name="user_roles",
     second_entity_crud=role_crud,
     relationship_crud=user_role_crud,
-    type_relation=TypeRelation.MANY_TO_MANY_CLASS,
     relationship_key1_name="user_id",
     relationship_key2_name="role_id",
-    default_public_relation_routes_name=[
-      RelationRoutesName.READ_ALL_BY_RELATION,
+    default_public_relation_routes_name=ManyToManyClassRelationship.RELATION_RULES,
+)
+```
+
+##### **6.4.4.2** `ManyToManyTableRelationship`: Relation plusieurs à plusieurs avec table `Table` intermédiaire
+
+- **RELATION_RULES** :
+
+```python
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+    ]
+```
+
+- **exemple** :
+
+```python
+from elrahapi.relationship.many_to_many_table import ManyToManyTableRelationship
+task_assign_user_relation =       ManyToManyTableRelationship(
+    relationship_name="assigned_users",
+    second_entity_crud=user_crud,
+    relation_table=task_assign_user_association,
+    relationship_key1_name="task_id",
+    relationship_key2_name="user_id",
+    default_protected_relation_routes_name=[
+      RelationRoutesName.CREATE_RELATION,
       RelationRoutesName.DELETE_RELATION,
     ],
 )
 ```
 
-- Relation plusieurs à plusieurs avec table `Table` intermédiaire :
+##### **6.4.4.3** `OneToOneRelationship`: Relation un à un
+
+- **RELATION_RULES** :
 
 ```python
-tag_relation: Relationship = Relationship(
-    relation_table=post_tag_table,
-    relationship_name="tags",
-    second_entity_crud=tag_crud,
-    relationship_key1_name="post_id",
-    relationship_key2_name="tag_id",
-    type_relation=TypeRelation.MANY_TO_MANY_TABLE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_MANY_TABLE],
-)
+    RELATION_RULES = [
+        RelationRoutesName.READ_ONE_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+        RelationRoutesName.UPDATE_BY_RELATION,
+        RelationRoutesName.PATCH_BY_RELATION,
+        RelationRoutesName.SOFT_DELETE_BY_RELATION,
+        RelationRoutesName.DELETE_BY_RELATION,
+    ]
 ```
 
-- Relation un à un :
+**exemple** :
 
 ```python
-profile_relation: Relationship = Relationship(
+from elrahapi.relationship.one_to_one import OneToOneRelationship
+profile_relation = OneToOneRelationship(
     relationship_name="profile",
     second_entity_crud=profile_crud,
-    type_relation=TypeRelation.ONE_TO_ONE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_ONE],
+    default_public_relation_routes_name=OneToOneRelationship.RELATION_RULES,
 )
 ```
 
-- Relation un à plusieurs :
+##### **6.4.4.4** `OneToManyRelationship`: Relation un à plusieurs
+
+- **RELATION_RULES** :
 
 ```python
-post_relation: Relationship = Relationship(
-    relationship_name="posts",
-    second_entity_crud=post_crud,
-    second_entity_fk_name="user_id",
-    type_relation=TypeRelation.ONE_TO_MANY,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.ONE_TO_MANY],
+    RELATION_RULES = [
+        RelationRoutesName.READ_ALL_BY_RELATION,
+        RelationRoutesName.CREATE_RELATION,
+        RelationRoutesName.DELETE_RELATION,
+        RelationRoutesName.CREATE_BY_RELATION,
+    ]
+```
+
+**exemple** :
+
+```python
+from elrahapi.relationship.one_to_many import OneToManyRelationship
+user_task_relation = OneToManyRelationship(
+    relationship_name="user_tasks",
+    second_entity_crud=task_crud,
+    default_public_relation_routes_name=OneToManyRelationship.RELATION_RULES,
+)
 )
 ```
 
-**Note** : second_entity_fk_name est facultatif et permet d'attribuer cette valeur automatiquement dans la création , mise à jour partielle , mise à jour totale de l'entité secondaire . Il faut tout de même avoir ce champ dans les schémas correspondant ,et il pourra désormais etre optionel .
+##### **6.4.4.5** `ManyToOneRelationship`: Relation plusieurs à un
 
-- Relation plusieurs à un :
+- **RELATION_RULES** :
 
 ```python
-user_relation: Relationship = Relationship(
+    RELATION_RULES = [RelationRoutesName.READ_ONE_BY_RELATION]
+```
+
+**exemple** :
+
+```python
+from elrahapi.relationship.many_to_one import ManyToOneRelationship
+user_relation = ManyToOneRelationship(
     relationship_name="user",
     second_entity_crud=user_crud,
-    type_relation=TypeRelation.MANY_TO_ONE,
-    default_public_relation_routes_name=RELATION_RULES[TypeRelation.MANY_TO_ONE],
+    default_public_relation_routes_name=ManyToOneRelationship.RELATION_RULES,
 )
 ```
+
+**Note** : Les paramètres `relations_routes_configs` , `relations_authorizations_configs` et `relations_responses_model_configs` peuvent eventuellement être utilisés .
 
 ### **6.5.** `Configurer un router`
 
@@ -771,7 +832,7 @@ elrahapi generate_secret_key HS512
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.2.0.4`
+La version actuelle est le `1.2.1.2`
 
 Vérifier la version en executant `pip show elrahapi`
 
@@ -783,5 +844,3 @@ Vous pouvez consulter la documentation technique pour découvrir toutes les fonc
 docs/
 ├── README.md
 ```
-
-**Note** : `la documentation technique n'est pas à jour`.

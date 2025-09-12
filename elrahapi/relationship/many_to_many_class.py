@@ -13,7 +13,7 @@ from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
 from elrahapi.utility.utils import apply_filters, exec_stmt, get_filters
-from sqlalchemy import and_, select
+from sqlalchemy import  select
 
 from fastapi import Depends, Request, status
 

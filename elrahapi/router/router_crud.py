@@ -14,7 +14,6 @@ from elrahapi.router.router_namespace import (
 )
 from elrahapi.router.router_routes_name import (
     DefaultRoutesName,
-    RelationRoutesName,
     RoutesName,
 )
 from pydantic import BaseModel

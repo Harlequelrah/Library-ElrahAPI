@@ -1,6 +1,5 @@
 import importlib
 import os
-import sys
 from typing import Any, Type
 
 from dotenv import load_dotenv
@@ -30,7 +29,6 @@ def map_list_to(
         ]
     except Exception as e:
         raise ValueError(f"Error mapping list to SQLAlchemy class: {e}") from e
-        # print(f"Error mapping list to SQLAlchemy class: {e}")
 
 
 def update_entity(existing_entity, update_entity: Type[BaseModel]):
@@ -42,10 +40,6 @@ def update_entity(existing_entity, update_entity: Type[BaseModel]):
 
 
 def validate_value(value: Any):
-    # if isinstance(value, bool) or isinstance(value, int):
-    #     pass
-    # elif value.isdigit():
-    #     return int(value)
     if isinstance(value, str):
         if value.lower() == "true":
             value = True
@@ -136,14 +130,6 @@ def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel
             )
             privileges.append(privilege)
     return privileges
-
-
-def add_settings_path(env: str | None = None):
-    load_dotenv() if env is None else load_dotenv(env)
-    project_name = os.getenv("PROJECT_NAME")
-    settings_path = f"{project_name}.settings"
-    sys.path.append(settings_path)
-
 
 def import_Base(env: str | None = None):
     load_dotenv() if env is None else load_dotenv(env)

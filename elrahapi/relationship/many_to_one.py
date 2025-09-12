@@ -1,7 +1,6 @@
-from typing import Any, Type
+from typing import Any
 
 from elrahapi.crud.crud_forgery import CrudForgery
-from elrahapi.crud.crud_models import CrudModels
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.relationship.base_relationship import BaseRelationship
 from elrahapi.router.route_additional_config import (
@@ -11,10 +10,6 @@ from elrahapi.router.route_additional_config import (
 from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
-from elrahapi.utility.utils import apply_filters, exec_stmt
-from pydantic import BaseModel
-from sqlalchemy import select
-
 from fastapi import Depends, status
 
 

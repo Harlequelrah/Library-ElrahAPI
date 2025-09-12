@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Any, Type
+from typing import Any
 
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
@@ -12,7 +12,6 @@ from elrahapi.router.route_config import RouteConfig
 from elrahapi.router.router_crud import exclude_route
 from elrahapi.router.router_routes_name import RelationRoutesName
 from elrahapi.utility.types import ElrahSession
-from pydantic import BaseModel
 
 from fastapi import Depends, status
 

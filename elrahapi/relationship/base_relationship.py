@@ -1,6 +1,4 @@
 from abc import ABC
-from copy import deepcopy
-from typing import Any, Type
 
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.crud.crud_forgery import CrudForgery
@@ -15,8 +13,6 @@ from elrahapi.router.router_crud import (
     set_response_models,
 )
 from elrahapi.router.router_routes_name import RelationRoutesName
-from elrahapi.utility.utils import validate_value
-from pydantic import BaseModel
 
 
 class BaseRelationship(ABC):
