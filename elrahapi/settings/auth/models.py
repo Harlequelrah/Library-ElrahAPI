@@ -8,7 +8,6 @@ from settings.database import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 
-from settings.logger.model import LogModel
 
 class User(UserModel, Base):
     __tablename__ = "users"

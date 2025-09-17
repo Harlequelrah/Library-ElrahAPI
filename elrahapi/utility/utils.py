@@ -77,16 +77,6 @@ def apply_filters(
     return stmt
 
 
-def get_env_int(env_key: str):
-    number = os.getenv(env_key, 0)
-    if number.isdigit():
-        number = int(number)
-    return number
-
-
-def is_async_session(session: ElrahSession):
-    return isinstance(session, AsyncSession)
-
 
 async def exec_stmt(
     stmt: Select,
@@ -131,13 +121,3 @@ def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel
             privileges.append(privilege)
     return privileges
 
-def import_Base(env: str | None = None):
-    load_dotenv() if env is None else load_dotenv(env)
-    project_name = os.getenv("PROJECT_NAME")
-    settings_path = f"{project_name}.settings"
-    models_metadata_path = f"{settings_path}.models_metadata"
-    class_name = "Base"
-    settings = importlib.import_module(settings_path)
-    models_metadata = importlib.import_module(models_metadata_path)
-    Base = getattr(models_metadata, class_name)
-    return settings, models_metadata, Base

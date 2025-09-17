@@ -47,6 +47,18 @@ nomduprojet/
 │           ├── model.py
 │           ├── router.py
 │           ├── schema.py
+│       ├── seeders/
+│           ├── log/
+│               ├── __init__.py
+│               ├── seeders.log
+│               └── seeders_logger.py
+│           ├── __init__.py
+│           ├── privilege_seed.py
+│           ├── role_privilege_seed.py
+│           ├── role_seed.py
+│           ├── seed_manager_seed.py
+│           ├── user_role_seed.py
+│           └── user_seed.py
 ```
 
 ## **1.2. `Commande de lancement de l'application`**
@@ -104,7 +116,7 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
     - `detail` : **str**
 
-### **2.1.3. Sous module `custom_http_exception`**
+### \*\*2.1.3. Sous module `custom_http_exception`
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 
@@ -116,7 +128,7 @@ Ce module contient des utilitaires comme des fonctions , des variables , des cla
 
 Ce sous module contient des quelques fonctions utiles .
 
-- `update_entity` : mets à jour les champs d'une entité objet .
+- **`update_entity`**: mets à jour les champs d'une entité objet .
 
   - **paramètres** :
 
@@ -124,9 +136,9 @@ Ce sous module contient des quelques fonctions utiles .
 
     - update_entity : **Type[BaseModel]** l'entité pour mettre : l'entité pour la mise à jour .
 
-  - **sortie** : **existing_entity**
+  - **sortie** : **existing_entity** , l'entité mise à jour.
 
-- `validate_value` : permet valider une valeur pour s'assurer qu'il est conforme à son type.
+- **`validate_value`** : permet valider une valeur pour s'assurer qu'il est conforme à son type.
 
   - **paramètres** :
 
@@ -140,31 +152,119 @@ Ce sous module contient des quelques fonctions utiles .
   myvalue= validate_value("True") # retourne True
   ```
 
-- **create_database_if_not_exists** : créer la base de donnée si elle n'existe pas .
+- **`map_list_to`** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe sqlalchemy .
 
   - **paramètres** :
 
-    - database_url : **str** , l'url de la base de donnée dans le nom de la base de donnée .
-
-    - database_name : **str** , le nom de la base de donnée
-
-- **map_list_to** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe sqlalchemy .
-
-  - **paramètres** :
-
-    - obj_list : **List[BaseModel]** , la liste d'objet à mapper
+    - obj_list : **list[BaseModel]** , la liste d'objet à mapper
 
     - obj_sqlalchemy_class : **type** , la classe sqlalchemy
 
     - obj_pydantic_class : **Type[BaseModel]** , la classe pydantic
 
+  - **sortie** : **list[obj_sqlalchemy_class]**
+
+- **`get_pks`** : retourne une liste des valeurs des clés primaires d'une liste d'instance d'une entité .
+
+  - **paramètres** :
+
+    - l : **list** , la liste d'instances
+
+    - pk_name : **str** , le nom de la clé primaire
+
+  - **sortie** : **list**
+
+- **`get_filters`** : récupère les paramètres de requête dans un dictionnaire .
+
+  - **paramètres** :
+
+    - request: **Request**
+
+  - **sortie** : **dict[str, Any]**
+
+- **`apply_filters`** : renvoie une requête **Select** filtrée par les valeurs d'un dictionnaire _filters_.
+
+  - **paramètres** :
+
+    - stmt: **Select**
+
+    - crud_models: **CrudModels**
+
+    - filters: **dict[str, Any]**
+
+  - **sortie** : **Select**
+
+- **`exec_stmt`** : execute une requête **Select** en prennant en compte les sessions synchrones et asynchrones.
+
+  - **paramètres** :
+
+    - stmt: **Select**
+
+    - session: **ElrahSession**
+
+    - with_scalar: **bool** , pour la méthode scalar
+
+    - with_scalars: **bool** , pour la méthode scalars
+
+  - **sortie** : Le résultat
+
+**Note** : Si with*scalar et with_scalars sont à False la méthode execute* sera utilisée .
+
+- **`get_entities_all_privilege_data`** : renvoie une liste de nom de `PrivilegeCreateModel` pour une liste de noms d'entités.
+
+  - **paramètres** :
+
+    - entities_names: **list[str]**
+
+  - **sortie** : **list[BaseModel]**
+
 ### **2.2.2. Sous module `patterns`**
 
 Ce sous module comporte quelques regex utilisables comme pattern dans les schemas de validations pydantic
 
-- `*TELEPHONE_PATTERN*`
+- `TELEPHONE_PATTERN` : pour les numéros de téléphone
 
-- `*URL_PATTERN*`
+- `URL_PATTERN` : pour les urls
+
+### **2.2.3. Sous module `types`**
+
+Ce sous module comporte certaines types réutilisables .
+
+- **`ElrahSession`** : un alias pour représenter une session synchrone ou asynchrone
+
+### **2.2.3. Sous module `schemas`**
+
+Ce sous module comporte des schémas pydantic réutilisables .
+
+- **`CountModel`** , un schéma de retour des statistiques de `DefaultRoutesName.COUNT` :
+
+  - total_count: int
+
+  - daily_total_count: int
+
+  - seven_previous_day_total_count: int
+
+  - monthly_total_count: int
+
+- ## **`AdditionalSchemaFields`** , Un schéma utilitaire avec des champs additionels :
+
+  - date_created: **datetime**
+
+  - date_updated: **datetime**
+
+  - date_deleted: **datetime | None**
+
+  - is_deleted: **bool**
+
+### **2.2.4. Sous module `models`**
+
+    - date_created :  **Column(DateTime)**
+
+    - date_updated :  **Column(DateTime)**
+
+    - is_deleted :  **Column(Boolean)**
+
+    - date_deleted : **Column(DateTime)**
 
 ## **2.3. Module `authentication`**
 
@@ -324,9 +424,9 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
   - **paramètres** :
 
-    - privileges_name: **Optional[List[str]]**
+    - privileges_name: **Optional[list[str]]**
 
-    - roles_name : **Optional[List[str]]**
+    - roles_name : **Optional[list[str]]**
 
   - **sortie** : **callable**
 
@@ -397,9 +497,9 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
   - read_with_relations : **Optional[bool]**
 
-  - roles : **Optional[List[str]]**
+  - roles : **Optional[list[str]]**
 
-  - privileges : **Optional[List[str]]**
+  - privileges : **Optional[list[str]]**
 
   - router : **APIRouter**
 
@@ -413,25 +513,84 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
 
       - read_with_relations : **Optional[bool]**
 
-      - roles : **Optional[List[str]]**
+      - roles : **Optional[list[str]]**
 
-      - privileges : **Optional[List[str]]**
+      - privileges : **Optional[list[str]]**
 
   - `get_auth_router ` : renvoie un router configurable pour l'authentification
 
     - **paramètres** :
 
-      - init_data : **List[RouteConfig]** = `USER_AUTH_CONFIG_ROUTES`
+      - init_data : **list[RouteConfig]** = `USER_AUTH_CONFIG_ROUTES`
 
-      - authorizations : **Optional[List[AuthorizationConfig]]**
+      - authorizations : **Optional[list[AuthorizationConfig]]**
 
-      - exclude_routes_name: **Optional[List[DefaultRoutesName]]**
+      - exclude_routes_name: **Optional[list[DefaultRoutesName]]**
 
-      - response_model_configs : **Optional[List[ResponseModelConfig]]**
+      - response_model_configs : **Optional[list[ResponseModelConfig]]**
 
     - **sortie** : APIRouter
+    -
 
-## **2.4. Module `authorization`**
+## **2.4 Sous module `otp_setup`**
+
+Ce module comporte des utilitaires pour OTP .
+
+### **2.4.1 Sous module `schemas`**
+
+Ce sous module comporte des schemas pour OTP .
+
+- `OTPVerification` :
+
+  - otp : **str**
+
+  - temp_token : **str**
+
+### **2.4.2 Sous module `otp_auth`**
+
+Ce sous module comporte les classes `OTPAuthManager` et `OTPAuthRouterProvider`
+
+- `OTPAuthManager`
+
+- **méthodes**
+
+  - `__init__` :
+
+    - **paramètres** :
+
+      - secret_key : **Optional[str]**
+
+      - redis: **Redis**
+
+      - smtp_email: **str**
+
+      - smtp_password: **str**
+
+      - session_manager : **SessionManager**
+
+      - algorithm : **Optional[str]**
+
+      - access_token_expiration : **Optional[int]**
+
+      - refresh_token_expiration : **Optional[int]**
+
+      - temp_token_expiration : **int | None**
+
+      - security: **OAuth2PasswordBearer | HTTPBearer | None**
+
+- `generate_otp` : une méthode qui genère un code OTP que vous pouvez adapter à vos besoins.
+
+  - **sortie** : code OTP
+
+- `send_otp_mail` : une méthode qui envoie un code OTP par email que vous pouvez adapter à vos besoins.
+
+  - **paramètres** :
+
+    - user_email : **str**
+
+    - otp : **str**
+
+## **2.5. Module `authorization`**
 
 Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 
@@ -495,9 +654,9 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `RoleFullReadModel(MetaAuthorizationReadModel)`
 
-  - role_privileges : **List[MetaAuthorizationBaseModel]**
+  - role_privileges : **list[MetaAuthorizationBaseModel]**
 
-  - role_users : **List[MetaRoleUsers]**
+  - role_users : **list[MetaRoleUsers]**
 
 #### **2.4.2.3. Sous module `meta_models`**
 
@@ -543,9 +702,9 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `PrivilegeFullReadModel(PrivilegeReadModel)` :
 
-  - privilege_roles : **Optional[List[MetaAuthorizationBaseModel]]**
+  - privilege_roles : **Optional[list[MetaAuthorizationBaseModel]]**
 
-  - privilege_users : **Optional[List[MetaPrivilegeUsers]]**
+  - privilege_users : **Optional[list[MetaPrivilegeUsers]]**
 
 #### **2.4.3.3 Sous module `meta_models`**
 
@@ -914,7 +1073,7 @@ Ce sous module comporte le model `User` utilisé dans le système d'authentifica
 
   - **paramètres** :
 
-    - roles_name : **List[str]**
+    - roles_name : **list[str]**
 
   - **sortie** : **bool**
 
@@ -982,9 +1141,9 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 
 - **`UserFullReadModel(UserReadModel)`**
 
-  - user_roles : **Optional[List[UserRoleInUser]]**
+  - user_roles : **Optional[list[UserRoleInUser]]**
 
-  - user_privileges : **Optional[List[UserInUserPrivilege]]**
+  - user_privileges : **Optional[list[UserInUserPrivilege]]**
 
 - `UserRequestModel` :
 
@@ -1010,7 +1169,7 @@ Ce module comporte certaines classes et methodes pour interagir avec des websock
 
 ### **2.7.1. Sous module `connectionManager`**
 
-Contient la classe ConnectionManager pour gérer une connextion avec un websocket .
+Contient la classe ConnectionManager pour gérer une connexion avec un websocket .
 
 **methodes**:
 
@@ -1070,9 +1229,9 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
   - **paramètres** :
 
-    - `create_ob_list`: **List[CreatePydanticModel]**
+    - `create_ob_list`: **list[CreatePydanticModel]**
 
-  - **sortie** : **List[SQLAlchemyModel]**
+  - **sortie** : **list[SQLAlchemyModel]**
 
 - **`count`** :
 
@@ -1096,7 +1255,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 
     - `relation`: **Optional[Relationship]**
 
-  - **sortie** : **List[SQLAlchemyModel]**
+  - **sortie** : **list[SQLAlchemyModel]**
 
 - **`read_one`** :
 
@@ -1210,11 +1369,11 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - `is_protected`: **bool** , default : `False`
 
-    - `roles` : **Optional[List[str]]**
+    - `roles` : **Optional[list[str]]**
 
-    - `privileges` : **Optional[List[str]]**
+    - `privileges` : **Optional[list[str]]**
 
-    - `dependencies` : **Optional[List[Callable[...,Any]]]**
+    - `dependencies` : **Optional[list[Callable[...,Any]]]**
 
     - `read_with_relations` : Optional[bool]
 
@@ -1226,7 +1385,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - authentication : **Authentication**
 
-  - **sortie** : **List[callable]**
+  - **sortie** : **list[callable]**
 
 - `validate_route_path` : permet de gérer les valeurs de route_path en fonction de route_name
 
@@ -1246,9 +1405,9 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 
     - route_name : **DefaultRoutesName**
 
-    - roles : **List[str]**
+    - roles : **list[str]**
 
-    - privileges : **List[str]**
+    - privileges : **list[str]**
 
 - **`ResponseModelConfig`**
 
@@ -1270,13 +1429,13 @@ Ce sous module comporte des Constantes et classes réutilisables dans le context
 
 - **`DEFAULT_ROUTES_CONFIGS`** : **dict[DefaultRoutesName,DEFAULT,ROUTE_CONFIG]** , contient une configuration de base pour définir les routes par défaut .
 
-- **`ROUTES_PUBLIC_CONFIG`** : **List[RouteConfig]** ,contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
+- **`ROUTES_PUBLIC_CONFIG`** : **list[RouteConfig]** ,contient une liste de RouteConfig pour les routes par défaut publics ou non protégés .
 
-- **`ROUTES_PROTECTED_CONFIG`**: **List[RouteConfig]** , contient une liste de RouteConfig pour les routes par défaut protégés .
+- **`ROUTES_PROTECTED_CONFIG`**: **list[RouteConfig]** , contient une liste de RouteConfig pour les routes par défaut protégés .
 
 - **`USER_AUTH_CONFIG`** : **dict[DefaultRoutesName,RouteConfig]** , contient un dictionnaire de nom de route et de RouteConfig pour les routes par défaut liés à l'authentification d'un utilisateur .
 
-- **`USER_AUTH_CONFIG_ROUTES`** : **List[RouteConfig]** , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
+- **`USER_AUTH_CONFIG_ROUTES`** : **list[RouteConfig]** , contient toutes les RouteConfig définit par `USER_AUTH_CONFIG_ROUTES`
 
 ### **2.9.3. Sous module `router_default_routes_name`**
 
@@ -1299,63 +1458,63 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
     - `prefix`: **str**
 
-    - `tags`: **List[str]**
+    - `tags`: **list[str]**
 
     - `authentication` : **Optional[AuthenticationManager]**
 
     - `crud` : **CrudForgery**
 
-    - `roles` : **Optional[List[str]]**
+    - `roles` : **Optional[list[str]]**
 
-    - `privileges `: **Optional[List[str]]**
+    - `privileges `: **Optional[list[str]]**
 
     - `read_with_relations` : **bool**
 
-    - `relations` : **Optional[List[Relationship]]**
+    - `relations` : **Optional[list[Relationship]]**
 
 - **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
 
   - **paramètres**:
 
-  - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+  - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-  - response_model_configs: Optional[List[ResponseModelConfig]]
+  - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`get_protected_router`** : renvoie un routeur avec la configuration de `ROUTES_PROTECTED_AUTH_CONFIG`
 
   - **paramètres**:
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - authorizations: **Optional[List[AuthorizationConfig]]**
+    - authorizations: **Optional[list[AuthorizationConfig]]**
 
-    - response_model_configs: Optional[List[ResponseModelConfig]]
+    - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`get_custom_router_init_data`** : renvoie une liste de configurations de routes personnalisés
 
   - **paramètres** :
 
-    - init_data : **Optional[List[RouteConfig]]**
+    - init_data : **Optional[list[RouteConfig]]**
 
-    - route_names : **Optional[List[DefaultRoutesName]]**
+    - route_names : **Optional[list[DefaultRoutesName]]**
 
     - `is_protected`: **TypeRoute** , default : `TypeRoute.PUBLIC`
 
-  - **sortie** : List[RouteConfig]
+  - **sortie** : list[RouteConfig]
 
 - **`get_custom_public_router`** : retourne un routeur personnalisé
 
   - **paramètres** :
 
-    - init_data : **Optional[List[RouteConfig]]**
+    - init_data : **Optional[list[RouteConfig]]**
 
-    - routes_name : **Optional[List[DefaultRoutesName]]**
+    - routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - authorizations: **Optional[List[AuthorizationConfig]]**
+    - authorizations: **Optional[list[AuthorizationConfig]]**
 
-    - response_model_configs: Optional[List[ResponseModelConfig]]
+    - response_model_configs: Optional[list[ResponseModelConfig]]
 
     - type_route : **TypeRoute**
 
@@ -1365,27 +1524,27 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 
   - **paramètres**:
 
-    - init_data: **Optional[List[RouteConfig]]**
+    - init_data: **Optional[list[RouteConfig]]**
 
-    - public_routes_name : **Optional[List[DefaultRoutesName]]**
+    - public_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - protected_routes_name : **Optional[List[DefaultRoutesName]]**
+    - protected_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - response_model_configs: Optional[List[ResponseModelConfig]]
+    - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`initialize_router`** : initialise un routeur avec une configuration .
 
   - **paramètres**:
 
-    - init_data : **List[RouteConfig]**
+    - init_data : **list[RouteConfig]**
 
-    - authorizations: **Optional[List[AuthorizationConfig]]**
+    - authorizations: **Optional[list[AuthorizationConfig]]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-    - response_model_configs: Optional[List[ResponseModelConfig]]
+    - response_model_configs: Optional[list[ResponseModelConfig]]
 
 ### **2.9.5. Sous module `router_crud`**
 
@@ -1395,11 +1554,11 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
   - **paramètres:**
 
-    - routes : **List[RouteConfig]**
+    - routes : **list[RouteConfig]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
-  - **sortie** : **List[RouteConfig]**
+  - **sortie** : **list[RouteConfig]**
 
 - `get_single_route` : permet d'avoir une configuration par défaut d'une route particulière .
 
@@ -1409,7 +1568,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - type_route : **Optional[TypeRoute]= TypeRoute.PROTECTED**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
   - **sortie** : **RouteConfig**
 
@@ -1421,57 +1580,57 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 
     - authentication : **Authentication**
 
-    - roles : **Optional[List[str]]**
+    - roles : **Optional[list[str]]**
 
-    - privileges : **Optional[List[str]]**
+    - privileges : **Optional[list[str]]**
 
-  - **sortie** : **List[Depends]**
+  - **sortie** : **list[Depends]**
 
 - `add_authorizations` : permet d'ajouter des authorizations à des configurations de routes.
 
   - **paramètres:**
 
-    - route_config : **List[RouteConfig]**
+    - route_config : **list[RouteConfig]**
 
-    - authorizations : **List[AuthorizationConfig]**
+    - authorizations : **list[AuthorizationConfig]**
 
-  - **sortie** : **List[RouteConfig]**
+  - **sortie** : **list[RouteConfig]**
 
 - `format_init_data` : permet de preparer les configurations de routage en excluant des routes et en ajoutant les authorizations.
 
   - **paramètres:**
 
-    - init_data : **List[RouteConfig]**
+    - init_data : **list[RouteConfig]**
 
     - read_with_relations: **bool**
 
-    - authorizations : **List[AuthorizationConfig]**
+    - authorizations : **list[AuthorizationConfig]**
 
-    - exclude_routes_name : **Optional[List[DefaultRoutesName]]**
+    - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
     - authentication: **Optional[AuthenticationManager]**
 
-    - response_model_configs: **Optional[List[ResponseModelConfig]]**
+    - response_model_configs: **Optional[list[ResponseModelConfig]]**
 
-    - roles: **Optional[List[str]]**
+    - roles: **Optional[list[str]]**
 
-    - privileges: **Optional[List[str]] = None**
+    - privileges: **Optional[list[str]] = None**
 
     - ReadPydanticModel: **Optional[Type[BaseModel]]**
 
     - FullReadPydanticModel: **Optional[Type[BaseModel]]**
 
-  - **sortie** : **List[RouteConfig]**
+  - **sortie** : **list[RouteConfig]**
 
 - `set_response_models` : permet de préparer les configurations de routage en ajoutant les models de reponses specifiques.
 
   - **paramètres:**
 
-    - routes_config : **List[RouteConfig]**
+    - routes_config : **list[RouteConfig]**
 
-    - response_model_configs : **List[ResponseModelConfig]**
+    - response_model_configs : **list[ResponseModelConfig]**
 
-  - **sortie** : **List[RouteConfig]**
+  - **sortie** : **list[RouteConfig]**
 
 - `set_response_model` : permet d'ajouter un model de reponse à une route .
 
@@ -1523,7 +1682,7 @@ Ce sous module définit des utilitaires pour la sécurité
 
 - `ALGORITHMS_KEY_SIZES` : **dict[str,int]** , un dictionnaire d'algorithmes et de longueur de clé pour définir aléatoirement ces paramètres si ils ne sont pas fournis
 
-- `ALGORITHMS` : **List[str]** , une liste des algorithms de **ALGORITHMS_KEY_SIZES**
+- `ALGORITHMS` : **list[str]** , une liste des algorithms de **ALGORITHMS_KEY_SIZES**
 
 - **define_algorithm_and_key** : permet de définir l'algorithme et la clé utilisée pour signé les tokens
 

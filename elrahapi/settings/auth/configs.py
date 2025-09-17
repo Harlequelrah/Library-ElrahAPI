@@ -3,7 +3,7 @@ from elrahapi.authentication.authentication_router_provider import (
     AuthenticationRouterProvider,
 )
 from settings.database import database
-from .secret import (
+from settings.secret import (
     ACCESS_TOKEN_EXPIRATION,
     ALGORITHM,
     REFRESH_TOKEN_EXPIRATION,

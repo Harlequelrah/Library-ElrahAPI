@@ -102,7 +102,7 @@ ou si virtualenv est dejà installé au préalable
       ```python
       database.target_metadata=Base.metadata
       ```
-    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application u compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
+    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application y compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
 
 ## **4.** `Demarrer le projet `
 
@@ -620,12 +620,14 @@ from settings.database import database
 
 app = FastAPI()
 app.include_router(app_logger)
-middleware_helper = MiddlewareHelper(LogModel=LogModel, authentication=authentication)
+middleware_helper = MiddlewareHelper(LogModel=LogModel,
+session_manager= database.session_manager,
+authentication=authentication)
 app.add_middleware(ErrorHandlingMiddleware, middleware_helper=middleware_helper)
 app.add_middleware(LoggerMiddleware, middleware_helper=middleware_helper)
 ```
 
-**Note**: `Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.`
+**Note**: Si vous utilisez `ErrorHandlingMiddleware` et `LoggerMiddleware` vous pouvez définir le `middleware_helper` dans le `settings.logger.router` . Il est recommandé d'utiliser l'ordre des middlewares comme dans l'exemple et de configurer aussi le middleware d'erreur pour avoir les logs des erreurs aussi.
 
 ## **8.** `Configurer l'authentification`:
 
@@ -763,7 +765,40 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
 
 **`Note:`** : Pour en savoir plus , vous pouvez consulter : `https://github.com/Harlequelrah/learning_websocket`
 
-## **11.** `Utilisation de certaines fonctions utiles` :
+
+## **11.** `Utilisation du module otp_setup` :
+
+Module pour gérer l'authentification par otp.
+Dans `otp_setup/schemas` vous disposez d'un schéma `OTPVerification` pour retourner l'OTP et le token temporaire .
+Dans le sous module `otp_setup/otp_auth` vous disposez de `OTPAuthManager` qui hérite de `AuthenticationManager` et `OTPAuthRouterProvider` qui hérite de `AuthenticationRouterProvider`.
+
+`SMTP_EMAIL` correspond à l'email à utiliser pour expédier les emails , `SMTP_PASSWORD` un mot de passe d'application  et ``OTP_EXPIRE_TIME`` à la durée de validité de l'OTP en milliseconde.
+
+**exemple**
+```python
+from elrahapi.otp_setup import OTPAuthManager,OTPAuthRouterProvider
+from redis import Redis
+r= Redis.from_url(REDIS_URL, decode_responses=True)
+authentication = OTPAuthManager(
+    secret_key=SECRET_KEY,
+    algorithm=ALGORITHM,
+    access_token_expiration=ACCESS_TOKEN_EXPIRATION,
+    refresh_token_expiration=REFRESH_TOKEN_EXPIRATION,
+    temp_token_expiration=TEMP_TOKEN_EXPIRATION,
+    session_manager=database.session_manager,
+    authentication_models=user_crud_models,
+    redis=r,
+    smtp_email: SMTP_EMAIL,
+    smtp_password: SMTP_PASSWORD,
+    opt_expire_time= OTP_EXPIRE_TIME,
+)
+authentication_router_provider = AuthenticationRouterProvider(
+    authentication=authentication,
+)
+```
+
+
+## **12.** `Utilisation de certaines fonctions utiles` :
 
 - `raise_custom_http_exception` : permet de lever un CustomHttpException
 
@@ -794,7 +829,7 @@ async def chat_websocket(websocket:WebSocket,room_name:str,sub:str=Query(...)):
         )
 ```
 
-## **12.** `Patterns ` :
+## **13.** `Patterns ` :
 
 - TELEPHONE_PATTERN
 
@@ -812,7 +847,7 @@ class Test(BaseModel):
     )
 ```
 
-## **13.** `Generation de clé` :
+## **14.** `Generation de clé` :
 
 Vous pouve générer une clé pour coder vos tokens JWT comme suit :
 
