@@ -1,12 +1,14 @@
 import json
 import time
+
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.database.session_manager import SessionManager
-from fastapi import Request, status
-from fastapi.responses import JSONResponse
-from starlette.responses import Response
 from elrahapi.exception.custom_http_exception import CustomHttpException
 from elrahapi.websocket.connection_manager import ConnectionManager
+from fastapi.responses import JSONResponse
+from starlette.responses import Response
+
+from fastapi import Request, status
 
 
 async def get_response_and_process_time(
@@ -42,7 +44,7 @@ async def save_log(
     for i in exclude_path:
         if request.url.path.endswith(i):
             pass_next = True
-    if pass_next or hasattr(request.state,"error"):
+    if pass_next or hasattr(request.state, "error"):
         if call_next is None:
             return
         else:
@@ -73,7 +75,8 @@ async def save_log(
             error_message=error,
             remote_address=str(request.client.host),
         )
-        setattr(log, LogModel.USER_FK_NAME, subject)
+        if hasattr(LogModel, "USER_FK_NAME"):
+            setattr(log, LogModel.USER_FK_NAME, subject)
         session.add(log)
         await session_manager.commit_and_refresh(session=session, object=log)
         if error is not None and websocket_manager is not None:
