@@ -9,23 +9,23 @@ from elrahapi.authorization.privilege.meta_models import PrivilegeUserInPrivileg
 
 
 class PrivilegeBaseModel(BaseModel):
-    name: str = Field(example="can_add_privilege")
-    description: str = Field(example="allow privilege creation for privilege")
+    name: str = Field(examples=["can_add_privilege"])
+    description: str = Field(examples=["allow privilege creation for privilege"])
 
 
 class PrivilegeCreateModel(PrivilegeBaseModel):
-    is_active: bool = Field(default=True, example=True)
+    is_active: bool = Field(default=True, examples=[True])
 
 
 class PrivilegeUpdateModel(PrivilegeBaseModel):
-    is_active: bool = Field(example=True)
+    is_active: bool = Field(examples=[True])
 
 
 class PrivilegePatchModel(BaseModel):
-    name: str | None = Field(example="can_add_privilege", default=None)
-    is_active: bool | None = Field(default=None, example=True)
+    name: str | None = Field(examples=["can_add_privilege"], default=None)
+    is_active: bool | None = Field(default=None, examples=[True])
     description: str | None = Field(
-        example="allow privilege creation for privilege", default=None
+        examples=["allow privilege creation for privilege"], default=None
     )
 
 
