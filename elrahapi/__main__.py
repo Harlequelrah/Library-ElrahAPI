@@ -1,15 +1,15 @@
 import os
 import shutil
-import sys
 import subprocess
-from colorama import Style, init, Fore
-from elrahapi.security.secret import define_algorithm_and_key
+import sys
 
+from colorama import Fore, Style, init
+from elrahapi.security.secret import define_algorithm_and_key
 
 init(autoreset=True)
 
 
-def repline(file, line, line_content):
+def replace_line(file, line, line_content):
     with open(file, "r") as ficher:
         a = ficher.readlines()
     with open(file, "w") as ficher:
@@ -30,9 +30,9 @@ def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"
         if line.strip().startswith("ALGORITHM"):
             algorithm_line = idx + 1
     if secret_key_line:
-        repline(env_file, secret_key_line, f"SECRET_KEY = {key}\n")
+        replace_line(env_file, secret_key_line, f"SECRET_KEY = {key}\n")
     if algorithm_line:
-        repline(env_file, algorithm_line, f"ALGORITHM = {algo}\n")
+        replace_line(env_file, algorithm_line, f"ALGORITHM = {algo}\n")
 
 
 def generate_secret_key(
