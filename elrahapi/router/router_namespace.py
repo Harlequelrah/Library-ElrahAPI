@@ -18,11 +18,6 @@ class TypeRelation(str, Enum):
     MANY_TO_ONE = "Many To One"
 
 
-
-
-
-
-
 DEFAULT_ROUTES_CONFIGS: dict[DefaultRoutesName, DefaultRouteConfig] = {
     DefaultRoutesName.COUNT: DefaultRouteConfig(
         "Get count of entities", "Retrieve the total count of entities"
@@ -133,7 +128,7 @@ USER_AUTH_CONFIG: dict[DefaultRoutesName, RouteConfig] = {
     ),
     DefaultRoutesName.CHANGE_USER_STATE: RouteConfig(
         route_name=DefaultRoutesName.CHANGE_USER_STATE,
-        route_path="/change-user-state",
+        route_path="/change-user-state/{pk}",
         is_activated=True,
         is_protected=True,
         summary="change user state ",

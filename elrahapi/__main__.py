@@ -100,6 +100,10 @@ def startproject(project_name):
     else:
         print("The source folder 'main_project_files' was not found.")
 
+    source_tests_path = os.path.join(script_dir, "tests")
+    if os.path.exists(source_tests_path):
+        shutil.copytree(source_tests_path, os.path.join(project_path, "tests"), dirs_exist_ok=True)
+        print("The 'tests' folder has been copied successfully.")
     if os.path.exists(source_settings_path):
         shutil.copytree(source_settings_path, settings_path, dirs_exist_ok=True)
         print("The 'settings' folder has been copied successfully.")

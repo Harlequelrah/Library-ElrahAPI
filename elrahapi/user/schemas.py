@@ -7,21 +7,21 @@ from elrahapi.utility.schemas import AdditionalSchemaFields
 
 
 class UserBaseModel(BaseModel):
-    email: EmailStr = Field(example="user@example.com")
-    username: str = Field(example="Harlequelrah")
-    lastname: str = Field(example="SMITH")
-    firstname: str = Field(example="jean-francois")
+    email: EmailStr = Field(examples=["user@example.com"])
+    username: str = Field(examples=["Harlequelrah"])
+    lastname: str = Field(examples=["SMITH"])
+    firstname: str = Field(examples=["jean-francois"])
 
 
 class UserCreateModel:
-    password: str = Field(example="m*td*pa**e")
+    password: str = Field(examples=["m*td*pa**e"])
 
 
 class UserPatchModel:
-    email: EmailStr | None = Field(example="user@example.com", default=None)
-    username: str | None = Field(example="Harlequelrah", default=None)
-    lastname: str | None = Field(example="SMITH", default=None)
-    firstname: str | None = Field(example="jean-francois", default=None)
+    email: EmailStr | None = Field(examples=["user@example.com"], default=None)
+    username: str | None = Field(examples=["Harlequelrah"], default=None)
+    lastname: str | None = Field(examples=["SMITH"], default=None)
+    firstname: str | None = Field(examples=["jean-francois"], default=None)
 
 
 class UserUpdateModel:

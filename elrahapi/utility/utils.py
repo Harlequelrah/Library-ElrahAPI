@@ -1,8 +1,7 @@
-import importlib
+
 import os
 from typing import Any, Type
-
-from dotenv import load_dotenv
+from datetime import datetime
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.router.router_routes_name import CREATE_ALL_PRIVILEGE_ROUTES_NAME
@@ -77,7 +76,6 @@ def apply_filters(
     return stmt
 
 
-
 async def exec_stmt(
     stmt: Select,
     session: ElrahSession,
@@ -121,3 +119,17 @@ def get_entities_all_privilege_data(entities_names: list[str]) -> list[BaseModel
             privileges.append(privilege)
     return privileges
 
+def update_expected_value_dates(expected_value: dict) -> dict:
+        current_date = datetime.now().replace(microsecond=0).isoformat()
+        expected_value.update(
+            {
+                "date_created": current_date,
+                "date_updated": current_date,
+            }
+        )
+        return expected_value
+
+def exclude_dates_from_json(expected_value: dict) -> dict:
+    expected_value.pop("date_created", None)
+    expected_value.pop("date_updated", None)
+    return expected_value

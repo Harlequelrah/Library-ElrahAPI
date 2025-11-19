@@ -1,4 +1,4 @@
-# IV - **`Documentation`**
+# **`Documentation`**
 
 Ce package contient plusieurs modules utiles pour accélérer et modulariser le dévéloppement avec FASTAPI. Voici un aperçu de leurs fonctionnalités.
 
