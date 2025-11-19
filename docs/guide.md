@@ -6,7 +6,9 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
 
 - Il est recommandé de créer un environnement virtuel pour chaque projet ;
 
-- Après la creation du projet configurer l'environnement .
+- Après la création du projet configurer l'environnement .
+
+- Adapter le nom du projet au votre dans le repertoire `tests`
 
 **NB** : Pour la suite **myproject** designe le nom de votre projet et **myapp** designe le nom d'une application .
 

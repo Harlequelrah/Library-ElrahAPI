@@ -1,5 +1,5 @@
 from typing import Any
-from elrahapi.utility.types import ElrahSession
+
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.token import AccessToken, RefreshToken, Token, TokenType
 from elrahapi.router.route_config import (
@@ -11,6 +11,7 @@ from elrahapi.router.router_crud import format_init_data
 from elrahapi.router.router_namespace import USER_AUTH_CONFIG_ROUTES
 from elrahapi.router.router_routes_name import DefaultRoutesName
 from elrahapi.user.schemas import UserChangePasswordRequestModel, UserLoginRequestModel
+from elrahapi.utility.types import ElrahSession
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from fastapi import APIRouter, Depends, status

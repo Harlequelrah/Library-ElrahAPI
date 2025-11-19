@@ -67,6 +67,9 @@ class RouteConfig:
                 return f"/{{pk}}"
             else:
                 return ""
+        elif route_name == DefaultRoutesName.CHANGE_USER_STATE:
+            print("here")
+            return f"/change-user-state/{{pk}}"
         else:
             if route_name == DefaultRoutesName.SOFT_DELETE:
                 return f"/soft-delete/{{pk}}"

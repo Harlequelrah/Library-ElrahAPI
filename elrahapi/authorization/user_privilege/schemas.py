@@ -10,7 +10,7 @@ from elrahapi.utility.schemas import AdditionalSchemaFields
 class UserPrivilegeCreateModel(BaseModel):
     user_id: int = Field(examples=[1])
     privilege_id: int = Field(examples=[2])
-    is_active: bool = Field(exemple=True, default=True)
+    is_active: bool = Field(examples=[True], default=True)
 
 
 class UserPrivilegeReadModel(UserPrivilegeCreateModel, AdditionalSchemaFields):
@@ -29,10 +29,10 @@ class UserPrivilegeFullReadModel(BaseModel, AdditionalSchemaFields):
 class UserPrivilegePatchModel(BaseModel):
     user_id: int | None = Field(examples=[1], default=None)
     privilege_id: int | None = Field(examples=[2], default=None)
-    is_active: bool | None = Field(exemple=True, default=None)
+    is_active: bool | None = Field(examples=[True], default=None)
 
 
 class UserPrivilegeUpdateModel(BaseModel):
     user_id: int = Field(examples=[1])
     privilege_id: int = Field(examples=[2])
-    is_active: bool = Field(exemple=True)
+    is_active: bool = Field(examples=[True])

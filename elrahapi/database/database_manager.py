@@ -12,21 +12,23 @@ class DatabaseManager:
     def __init__(
         self,
         database: str,
-        database_username: str,
-        database_password: str,
-        database_connector: str,
         database_name: str,
-        database_server: str,
-        database_async_connector: str,
-        is_async_env=bool,
+        database_server: str = "",
+        database_async_connector: str = "",
+        database_username: str = "",
+        database_password: str = "",
+        is_async_env: bool = False,
+        database_connector: str = "",
+        env: str = "dev",
         database_creation_script: str | None = None,
     ):
+        self.__env = env
         self.__database = database
         self.__database_username = database_username
         self.__database_password = database_password
         self.__database_connector = database_connector
         self.__database_async_connector = database_async_connector
-        self.database_name = database_name
+        self.__database_name = self.setup_database_name(database_name)
         self.__database_server = database_server
         self.__session_manager: SessionManager = None
         self.__is_async_env = (
@@ -44,7 +46,22 @@ class DatabaseManager:
     def session_manager(self, session_manager: SessionManager):
         self.__session_manager = session_manager
 
-    # @property
+    @property
+    def env(self):
+        return self.__env
+
+    @env.setter
+    def env(self, env: str):
+        self.__env = env
+
+    def setup_database_name(self, database_name) -> str:
+        if self.__env == "test":
+            return "test_database"
+        else:
+            if self.__database == "sqlite" and not database_name:
+                return "database"
+            else:
+                return database_name
 
     @property
     def database_username(self):
@@ -92,10 +109,7 @@ class DatabaseManager:
 
     @database_name.setter
     def database_name(self, database_name: str):
-        if self.database == "sqlite" and not database_name:
-            self.__database_name = "database"
-        else:
-            self.__database_name = database_name
+        self.__database_name = database_name
 
     @property
     def database_server(self):
@@ -116,13 +130,14 @@ class DatabaseManager:
     @property
     def database_url(self) -> str:
         if self.is_async_env:
-            if self.database == "sqlite":
+            if self.__database == "sqlite":
                 return "sqlite+aiosqlite://"
             return f"{self.database_connector}+{self.database_async_connector}://{self.database_username}:{self.database_password}@{self.database_server}"
         else:
-            if self.database == "sqlite":
+            if self.__database == "sqlite":
                 return "sqlite://"
-            return f"{self.database_connector}://{self.database_username}:{self.database_password}@{self.database_server}"
+            else:
+                return f"{self.database_connector}://{self.database_username}:{self.database_password}@{self.database_server}"
 
     def create_sync_db(self):
         engine = create_engine(self.database_url, pool_pre_ping=True)
@@ -140,7 +155,7 @@ class DatabaseManager:
     def create_database_if_not_exists(self):
         try:
             if (
-                self.database != "sqlite"
+                self.__database != "sqlite"
                 and self.__create_database_if_not_exists_text is not None
             ):
                 if self.is_async_env:
@@ -157,14 +172,14 @@ class DatabaseManager:
     @property
     def sqlalchemy_url(self):
         db = f"{self.database_url}/{self.database_name}"
-        if self.database != "sqlite":
+        if self.__database != "sqlite":
             return db
         else:
             return f"{db}.db"
 
     @property
     def engine(self):
-        if self.is_async_env:
+        if self.__is_async_env:
             engine = create_async_engine(self.sqlalchemy_url, pool_pre_ping=True)
         else:
             engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
@@ -194,6 +209,9 @@ class DatabaseManager:
     async def create_async_tables(self, target_metadata: MetaData):
         async with self.engine.begin() as conn:
             await conn.run_sync(target_metadata.create_all)
+
+    def drop_tables(self, target_metadata: MetaData):
+        target_metadata.drop_all(bind=self.engine)
 
     def create_target_metadata(self, bases: list[DeclarativeMeta]):
         target_metadata = MetaData()
