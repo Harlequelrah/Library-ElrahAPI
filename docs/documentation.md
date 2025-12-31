@@ -116,7 +116,7 @@ ce sous module contient des fonction utilitaires pour les exceptions
 
     - `detail` : **str**
 
-### \*\*2.1.3. Sous module `custom_http_exception`
+### **2.1.3. Sous module `custom_http_exception`**
 
 - `CustomHttpException` : génère une exception personnalisé qui definit une exception de type HTTPExeption.
 

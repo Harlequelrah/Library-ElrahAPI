@@ -1,8 +1,6 @@
-import os
 from datetime import datetime, timedelta
 from typing import Any
 
-from dotenv import load_dotenv
 from elrahapi.authentication.authentication_namespace import (
     ACCESS_TOKEN_EXPIRATION,
     REFRESH_TOKEN_EXPIRATION,
@@ -18,6 +16,7 @@ from elrahapi.authentication.token import (
 )
 from elrahapi.crud.crud_models import CrudModels
 from elrahapi.database.session_manager import SessionManager
+from elrahapi.elrahsettings.models import ElrahSettings
 from elrahapi.exception.auth_exception import (
     INACTIVE_USER_CUSTOM_HTTP_EXCEPTION,
     INVALID_CREDENTIALS_CUSTOM_HTTP_EXCEPTION,
@@ -38,11 +37,6 @@ from sqlalchemy.sql import or_
 
 from fastapi import Depends, status
 
-load_dotenv(".env")
-
-ISSUER = os.getenv("ISSUER")
-AUDIENCE = os.getenv("AUDIENCE")
-
 
 class AuthenticationManager:
 
@@ -50,30 +44,29 @@ class AuthenticationManager:
         self,
         authentication_models: CrudModels,
         session_manager: SessionManager,
-        secret_key: str | None = None,
-        algorithm: str | None = None,
-        refresh_token_expiration: int | None = None,
-        access_token_expiration: int | None = None,
-        temp_token_expiration: int | None = None,
+        settings: ElrahSettings,
         security: OAuth2PasswordBearer | HTTPBearer | None = None,
     ):
+        self.__settings = settings
         self.__authentication_models: CrudModels = authentication_models
         self.__refresh_token_expiration = (
-            refresh_token_expiration
-            if refresh_token_expiration
+            settings.refresh_token_expiration
+            if settings.refresh_token_expiration
             else REFRESH_TOKEN_EXPIRATION
         )
         self.__access_token_expiration = (
-            access_token_expiration
-            if access_token_expiration
+            settings.access_token_expiration
+            if settings.access_token_expiration
             else ACCESS_TOKEN_EXPIRATION
         )
         self.__temp_token_expiration = (
-            temp_token_expiration if temp_token_expiration else TEMP_TOKEN_EXPIRATION
+            settings.temp_token_expiration
+            if settings.temp_token_expiration
+            else TEMP_TOKEN_EXPIRATION
         )
         self.__algorithm, self.__secret_key = define_algorithm_and_key(
-            secret_key,
-            algorithm,
+            settings.secret_key,
+            settings.algorithm,
         )
         self.__session_manager: SessionManager = session_manager
         self.security = (
@@ -109,6 +102,10 @@ class AuthenticationManager:
     @property
     def session_manager(self) -> SessionManager:
         return self.__session_manager
+
+    @property
+    def settings(self):
+        return self.__settings
 
     @session_manager.setter
     def session_manager(self, session_manager: SessionManager):
@@ -166,10 +163,10 @@ class AuthenticationManager:
             expire = datetime.now() + timedelta(milliseconds=milliseconds)
         iat = datetime.now()
         to_encode.update({"exp": expire, "iat": iat})
-        if ISSUER:
-            to_encode.update({"iss": ISSUER})
-        if AUDIENCE:
-            to_encode.update({"aud": AUDIENCE})
+        if self.__settings.issuer:
+            to_encode.update({"iss": self.__settings.issuer})
+        if self.__settings.audience:
+            to_encode.update({"aud": self.__settings.audience})
         encode_jwt = jwt.encode(
             to_encode, self.__secret_key, algorithm=self.__algorithm
         )
