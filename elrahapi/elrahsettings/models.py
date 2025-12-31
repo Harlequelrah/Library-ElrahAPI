@@ -1,4 +1,5 @@
-from pydantic import BaseSettings, ConfigDict
+from pydantic import field_validator
+from pydantic_settings import BaseSettings
 
 
 class ElrahSettings(BaseSettings):
@@ -24,4 +25,17 @@ class ElrahSettings(BaseSettings):
 
     @property
     def debug(self) -> bool:
-        return self.environment == "development"
+        return self.env == "development"
+
+    @field_validator(
+        "user_max_attempt_login",
+        "access_token_expiration",
+        "refresh_token_expiration",
+        "temp_token_expiration",
+        mode="before",
+    )
+    @classmethod
+    def set_empty_string_to_none(cls, v):
+        if v == "":
+            return None
+        return v
