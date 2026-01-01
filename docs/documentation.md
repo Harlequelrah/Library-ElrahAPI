@@ -1709,3 +1709,34 @@ Ce sous module définit la classe SessionManager pour gérer les sessions
   - `yield_session` : renvoie une session
 
     - sortie : `Session`
+
+
+#### 2.11. Module `elrahsettings`
+Un module qui definit une classe pour les variables d'environnements et autres configurations
+
+
+##### 2.11. Sous Module `models`
+
+- `attributs` :
+
+  - `project_name`:str
+  - `databse`:str
+  - `env` : str
+  - `database_username`:str
+  -  `database_password`: str
+  -  `database_connector`: str
+  -  `database_name`: str
+  -  `database_async_connector`: str
+  -  `database_server`: str
+  -  `is_async_env`: bool | None
+  -  `user_max_attempt_login`: int | None
+  -  `access_token_expiration`: int | None
+  -  `refresh_token_expiration`: int | None
+  -  `temp_token_expiration`: int | None
+  -  `secret_key`: str
+  -  `algorithm`: str
+  -  `seeders_logs`: str 
+  -  `issuer`: str
+  -  `audience`: str
+
+
