@@ -1,14 +1,14 @@
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
-from myapp.models import Entity  # remplacer par l'entité SQLAlchemy
-from myapp.schemas import (  # remplacer par les modèles Pydantic
+from myproject.myapp.models import Entity  # remplacer par l'entité SQLAlchemy
+from myproject.myapp.schemas import (  # remplacer par les modèles Pydantic
     EntityCreateModel,
     EntityFullReadModel,
     EntityPatchModel,
     EntityReadModel,
     EntityUpdateModel,
 )
-from settings.database import database
+from myproject.settings.database import database_manager
 
 myapp_crud_models = CrudModels(
     entity_name="myapp",
@@ -21,5 +21,5 @@ myapp_crud_models = CrudModels(
     FullReadModel=EntityFullReadModel,  # Optionel
 )
 myapp_crud = CrudForgery(
-    crud_models=myapp_crud_models, session_manager=database.session_manager
+    crud_models=myapp_crud_models, session_manager=database_manager.session_manager
 )

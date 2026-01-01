@@ -1,9 +1,8 @@
 import logging
-import os
-from dotenv import load_dotenv
-load_dotenv(".env")
-# from  .secret  import SEEDERS_LOGS
-SEEDERS_LOGS = os.getenv("SEEDERS_LOGS", "seeders.log")
+
+from myproject.settings.secret import settings
+
+SEEDERS_LOGS = settings.seeders_logs
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

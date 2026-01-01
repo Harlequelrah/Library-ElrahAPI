@@ -1,9 +1,9 @@
 import sys
 from elrahapi.database.seed_manager import Seed
-from settings.auth.cruds import role_crud
+from myproject.settings.auth.cruds import role_crud
 from elrahapi.authorization.role.schemas import RoleCreateModel
-from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
+from myproject.settings.database import database
+from myproject.settings.log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[RoleCreateModel] = [
     RoleCreateModel(name="ADMIN", description="Administre le système", is_active=True),

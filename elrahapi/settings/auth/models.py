@@ -4,7 +4,7 @@ from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
 from elrahapi.authorization.user_privilege.models import UserPrivilegeModel
 from elrahapi.authorization.user_role.models import UserRoleModel
 from elrahapi.user.model import UserModel
-from settings.database import Base
+from myproject.settings.database import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 

@@ -56,5 +56,5 @@ role_privilege_seed = Seed(
 )
 
 if __name__ == "__main__":
-    session = database.session_manager.get_session_for_script()
+    session = database_manager.session_manager.get_session_for_script()
     role_privilege_seed.run_seed(sys.argv, session)

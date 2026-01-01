@@ -5,34 +5,27 @@ from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-
+from elrahapi.elrahsettings.models import ElrahSettings
 
 class DatabaseManager:
 
     def __init__(
         self,
-        database: str,
-        database_name: str,
-        database_server: str = "",
-        database_async_connector: str = "",
-        database_username: str = "",
-        database_password: str = "",
-        is_async_env: bool = False,
-        database_connector: str = "",
-        env: str = "dev",
+        settings: ElrahSettings,
         database_creation_script: str | None = None,
     ):
-        self.__env = env
-        self.__database = database
-        self.__database_username = database_username
-        self.__database_password = database_password
-        self.__database_connector = database_connector
-        self.__database_async_connector = database_async_connector
-        self.__database_name = self.setup_database_name(database_name)
-        self.__database_server = database_server
+        self.__settings = settings
+        self.__env = settings.env
+        self.__database = settings.database
+        self.__database_username = settings.database_username
+        self.__database_password = settings.database_password
+        self.__database_connector = settings.database_connector
+        self.__database_async_connector = settings.database_async_connector
+        self.__database_name = self.setup_database_name(settings.database_name)
+        self.__database_server = settings.database_server
         self.__session_manager: SessionManager = None
         self.__is_async_env = (
-            True if is_async_env is True and self.__database_async_connector else False
+            True if settings.is_async_env is True and self.__database_async_connector else False
         )
         self.__create_database_if_not_exists_text = None
         if database_creation_script:
@@ -41,6 +34,10 @@ class DatabaseManager:
     @property
     def session_manager(self):
         return self.__session_manager
+
+    @property
+    def settings(self):
+        return self.__settings
 
     @session_manager.setter
     def session_manager(self, session_manager: SessionManager):

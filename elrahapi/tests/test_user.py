@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from elrahapi.testclass.elrahtest import ElrahTest
 
-from ..my.settings.models_metadata import Base, database
+from ..myproject.settings.models_metadata import Base, database
 
 
 class TestUser(ElrahTest):

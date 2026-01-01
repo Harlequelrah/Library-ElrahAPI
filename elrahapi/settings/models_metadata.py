@@ -1,12 +1,12 @@
-from settings.logger.model import LogModel
-from settings.auth.models import (
+from myproject.settings.logger.model import LogModel
+from myproject.settings.auth.models import (
     Role,
     RolePrivilege,
     User,
     UserPrivilege,
     UserRole,
 )
-from settings.database import Base, database  # à importer en dernier
+from myproject.settings.database import Base, database_manager  # à importer en dernier
 
 
-database.create_tables(target_metadata=Base.metadata)
+database_manager.create_tables(target_metadata=Base.metadata)
