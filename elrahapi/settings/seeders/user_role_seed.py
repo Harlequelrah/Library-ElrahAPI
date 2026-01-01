@@ -2,8 +2,8 @@ import sys
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import user_role_crud
 from elrahapi.authorization.user_role.schemas import UserRoleCreateModel
-from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
+from myproject.settings.database import database_manager
+from myproject.settings.log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[UserRoleCreateModel] = [
     UserRoleCreateModel(
@@ -31,5 +31,5 @@ user_role_seed = Seed(
 )
 
 if __name__ == "__main__":
-    session = database.session_manager.get_session_for_script()
+    session = database_manager.session_manager.get_session_for_script()
     user_role_seed.run_seed(sys.argv, session)

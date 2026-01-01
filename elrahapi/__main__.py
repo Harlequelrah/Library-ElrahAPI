@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 from colorama import Fore, Style, init
 from elrahapi.security.secret import define_algorithm_and_key
@@ -102,7 +103,9 @@ def startproject(project_name):
 
     source_tests_path = os.path.join(script_dir, "tests")
     if os.path.exists(source_tests_path):
-        shutil.copytree(source_tests_path, os.path.join(project_path, "tests"), dirs_exist_ok=True)
+        shutil.copytree(
+            source_tests_path, os.path.join(project_path, "tests"), dirs_exist_ok=True
+        )
         print("The 'tests' folder has been copied successfully.")
     if os.path.exists(source_settings_path):
         shutil.copytree(source_settings_path, settings_path, dirs_exist_ok=True)
@@ -156,6 +159,7 @@ def startapp(app_name):
     if os.path.exists(sqlapp_path):
         shutil.copytree(sqlapp_path, app_path, dirs_exist_ok=True)
         print(Fore.CYAN + f"The application {app_name} has been created successfully.")
+        clean_app(app_name, app_path)
     else:
         print("The 'sqlapp' folder was not found.")
 
@@ -282,6 +286,34 @@ def create_tables():
         print(Fore.RED + Style.BRIGHT + f"Error creating tables: {e}")
 
 
+def clean_app(app_name: str, app_path: str):
+    app_folder = Path(app_path)
+    project_name = get_project_name()
+    for py_file in app_folder.rglob("*.py"):
+        with open(py_file, "r") as file:
+            lines = file.readlines()
+        with open(py_file, "w") as file:
+            for line in lines:
+                file.write(line.replace("myproject", project_name))
+    for py_file in app_folder.rglob("*.py"):
+        with open(py_file, "r") as file:
+            lines = file.readlines()
+        with open(py_file, "w") as file:
+            for line in lines:
+                file.write(line.replace("myapp", app_name))
+
+
+def clean_project():
+    project_name = get_project_name()
+    project_folder = Path(os.getcwd())
+    for py_file in project_folder.rglob("*.py"):
+        with open(py_file, "r") as file:
+            lines = file.readlines()
+        with open(py_file, "w") as file:
+            for line in lines:
+                file.write(line.replace("myproject", project_name))
+
+
 def run():
     project_folder = os.getcwd()
     main_entry = os.path.join(project_folder, "__main__.py")
@@ -306,6 +338,7 @@ def main():
         startapp(name)
     elif command == "startproject" and name:
         startproject(name)
+        clean_project()
     elif command == "create_seed" and name:
         create_seed(name)
     elif command == "run_seed" and name:

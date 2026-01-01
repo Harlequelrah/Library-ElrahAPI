@@ -1,12 +1,12 @@
 from elrahapi.database.database_manager import DatabaseManager
 from sqlalchemy.orm import declarative_base
 
-from .secret import settings
+from myproject.settings.secret import settings
 
-database = DatabaseManager(settings=settings)
+database_manager = DatabaseManager(settings=settings)
 
 try:
-    database.create_database_if_not_exists()
+    database_manager.create_database_if_not_exists()
 finally:
-    database.create_session_manager()
+    database = database_manager.create_session_manager()
     Base = declarative_base()
