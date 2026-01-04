@@ -1,8 +1,11 @@
-from sqlalchemy import Boolean, Column, DateTime, func
+from datetime import datetime
+
+from sqlalchemy import func
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class AdditionalModelFields:
-    date_created = Column(DateTime, default=func.now())
-    date_updated = Column(DateTime, default=func.now(), onupdate=func.now())
-    is_deleted = Column(Boolean, default=False, nullable=False)
-    date_deleted = Column(DateTime, nullable=True)
+    date_created: datetime = mapped_column(default=func.now())
+    date_updated: datetime = mapped_column(default=func.now(), onupdate=func.now())
+    is_deleted: Mapped[bool] = mapped_column(default=False)
+    date_deleted: Mapped[datetime | None] = mapped_column(default=None)

@@ -9,6 +9,7 @@ from elrahapi.authentication.authentication_router_provider import (
 )
 from elrahapi.authentication.token import FullTempToken, TempToken, TokenType
 from elrahapi.database.session_manager import SessionManager
+from elrahapi.elrahsettings.models import ElrahSettings
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.router.route_additional_config import (
     AuthorizationConfig,
@@ -31,29 +32,22 @@ class OTPAuthManager(AuthenticationManager):
         self,
         session_manager: SessionManager,
         redis: Redis,
-        smtp_email: str,
-        smtp_password: str,
-        opt_expire_time: int,
-        secret_key: str | None = None,
-        algorithm: str | None = None,
-        refresh_token_expiration: int | None = None,
-        access_token_expiration: int | None = None,
-        temp_token_expiration: int | None = None,
+        settings :ElrahSettings,
         security: OAuth2PasswordBearer | HTTPBearer | None = None,
     ):
         super().__init__(
             session_manager=session_manager,
-            secret_key=secret_key,
-            algorithm=algorithm,
-            refresh_token_expiration=refresh_token_expiration,
-            access_token_expiration=access_token_expiration,
-            temp_token_expiration=temp_token_expiration,
+            secret_key=settings.secret_key,
+            algorithm=settings.algorithm,
+            refresh_token_expiration=settings.refresh_token_expiration,
+            access_token_expiration=settings.access_token_expiration,
+            temp_token_expiration=settings.temp_token_expiration,
             security=security,
         )
         self.redis = redis
-        self.otp_expire_time=opt_expire_time
-        self.smtp_email=smtp_email
-        self.smtp_password=smtp_password
+        self.otp_expire_time=settings.otp_expire_time
+        self.smtp_email=settings.smtp_email
+        self.smtp_password=settings.smtp_password
 
     def generate_otp(self) -> str:
         otp = str(random.randint(100000, 999999))
