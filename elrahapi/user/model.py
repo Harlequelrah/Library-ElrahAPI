@@ -5,24 +5,23 @@ from elrahapi.exception.auth_exception import (
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
 )
 from elrahapi.exception.exceptions_utils import raise_custom_http_exception
+from elrahapi.utility.models import AdditionalModelFields
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import Mapped, mapped_column, validates
 from sqlalchemy.sql import func
 
 from fastapi import status
 
-from elrahapi.utility.models import AdditionalModelFields
-
 
 class UserModel(AdditionalModelFields):
-    id = Column(Integer, primary_key=True)
-    email = Column(String(256), unique=True, index=True)
-    username = Column(String(256), unique=True, index=True)
-    password = Column(String(1024), nullable=False)
-    lastname = Column(String(256), nullable=False)
-    firstname = Column(String(256), nullable=False)
-    is_active = Column(Boolean, default=True)
-    attempt_login = Column(Integer, default=0)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(unique=True, index=True)
+    username: Mapped[str] = mapped_column(unique=True, index=True)
+    password: Mapped[str] = mapped_column(String(1024))
+    lastname: Mapped[str]
+    firstname: Mapped[str]
+    is_active: Mapped[bool] = mapped_column(default=True)
+    attempt_login: Mapped[int] = mapped_column(default=0)
 
     @validates("password")
     def validate_password(self, key, password):

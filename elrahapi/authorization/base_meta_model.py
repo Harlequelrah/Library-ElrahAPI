@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, Integer, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates,mapped_column,Mapped
 from datetime import datetime
 
 from elrahapi.utility.models import AdditionalModelFields
 
 
 class MetaAuthorization(AdditionalModelFields):
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
-    description = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
+    id : Mapped[int] = mapped_column( primary_key=True)
+    name:Mapped[str] = mapped_column(String(50), unique=True)
+    description:Mapped[str]
+    is_active:Mapped[bool] = mapped_column( default=True)
 
     @validates("name")
     def validate_name(self, key, value):

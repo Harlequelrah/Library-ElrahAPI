@@ -17,16 +17,14 @@ setup(
     license="LGPL-3.0-only",
     python_requires=">=3.10",
     install_requires=[
-        "fastapi[standard]>=0.112.0",
+        "fastapi[standard]>=0.128.0",
         "alembic>=1.13.3",
         "argon2-cffi>=23.1.0",
-        "pydantic-settings>=2.12.0",
         "python-jose[cryptography]>=3.3.0",
         "black>=24.10.0",
         "sqlalchemy>=2.0.38",
         "sqlalchemy-utils>=0.41.2",
         "aiosqlite>=0.21.0",
-        "colorama>=0.4.6",
     ],
     entry_points={"console_scripts": ["elrahapi=elrahapi.__main__:main"]},
 )
