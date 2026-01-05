@@ -185,7 +185,6 @@ class DatabaseManager:
     def create_session_manager(self):
         if self.is_async_env:
             sessionLocal = sessionmaker(
-                autocommit=False,
                 autoflush=False,
                 bind=self.engine,
                 expire_on_commit=True,
@@ -195,9 +194,7 @@ class DatabaseManager:
                 session_maker=sessionLocal, is_async_env=True
             )
         else:
-            sessionLocal = sessionmaker(
-                autocommit=False, autoflush=False, bind=self.engine
-            )
+            sessionLocal = sessionmaker(autoflush=False, bind=self.engine)
             session_manager = SessionManager(
                 session_maker=sessionLocal, is_async_env=False
             )
