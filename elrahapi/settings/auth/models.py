@@ -6,41 +6,49 @@ from elrahapi.authorization.user_role.models import UserRoleModel
 from elrahapi.user.model import UserModel
 from myproject.settings.database import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, relationship
 
 
 class User(UserModel, Base):
     __tablename__ = "users"
-    user_privileges = relationship("UserPrivilege", back_populates="user")
-    user_roles = relationship("UserRole", back_populates="user")
+    user_privileges: Mapped[list["UserPrivilege"]] = relationship(back_populates="user")
+    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="user")
     # user_logs = relationship(LogModel, back_populates="user")
 
 
 class Role(RoleModel, Base):
     __tablename__ = "roles"
-    role_privileges = relationship("RolePrivilege", back_populates="role")
-    role_users = relationship("UserRole", back_populates="role")
+    role_privileges: Mapped[list["RolePrivilege"]] = relationship(
+        "RolePrivilege", back_populates="role"
+    )
+    role_users: Mapped[list["UserRole"]] = relationship(
+        "UserRole", back_populates="role"
+    )
 
 
 class RolePrivilege(RolePrivilegeModel, Base):
     __tablename__ = "role_privileges"
-    role = relationship("Role", back_populates="role_privileges")
-    privilege = relationship("Privilege", back_populates="privilege_roles")
+    role: Mapped["Role"] = relationship(back_populates="role_privileges")
+    privilege: Mapped["Privilege"] = relationship(back_populates="privilege_roles")
 
 
 class Privilege(PrivilegeModel, Base):
     __tablename__ = "privileges"
-    privilege_roles = relationship("RolePrivilege", back_populates="privilege")
-    privilege_users = relationship("UserPrivilege", back_populates="privilege")
+    privilege_roles: Mapped[list["RolePrivilege"]] = relationship(
+        back_populates="privilege"
+    )
+    privilege_users: Mapped[list["UserPrivilege"]] = relationship(
+        back_populates="privilege"
+    )
 
 
 class UserPrivilege(UserPrivilegeModel, Base):
     __tablename__ = "user_privileges"
-    user = relationship("User", back_populates="user_privileges")
-    privilege = relationship("Privilege", back_populates="privilege_users")
+    user: Mapped["User"] = relationship(back_populates="user_privileges")
+    privilege: Mapped["Privilege"] = relationship(back_populates="privilege_users")
 
 
 class UserRole(UserRoleModel, Base):
     __tablename__ = "user_roles"
-    user = relationship("User", back_populates="user_roles")
-    role = relationship("Role", back_populates="role_users")
+    user: Mapped["User"] = relationship(back_populates="user_roles")
+    role: Mapped["Role"] = relationship(back_populates="role_users")
