@@ -1,14 +1,14 @@
 from elrahapi.middleware.models import MetaLogModel
 from myproject.settings.database import Base
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship,Mapped,mapped_column
 
 
 class LogModel(Base, MetaLogModel):
     # USER_FK_NAME = "user_id"
     __tablename__ = "logs"
-    # user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    # user = relationship("User", back_populates="user_logs")
+    # user_id:Mapped[int|None] = mapped_column(ForeignKey("users.id"))
+    # user: Mapped["User"] = relationship( back_populates="user_logs")
 
 
 # vous pouvez adapter  la classe selon vos besoin
