@@ -1,5 +1,5 @@
 import uvicorn
-from myproject.settings.secret import settings
+from myproject.settings.config.env_config import settings
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -1,5 +1,4 @@
-from argon2 import PasswordHasher
-from argon2 import exceptions as Ex
+from argon2 import PasswordHasher,exceptions as Ex
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.exception.auth_exception import (
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,

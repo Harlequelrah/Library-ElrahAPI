@@ -1,7 +1,6 @@
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 
 # from myapp.router import myapp_router
-from myproject.settings.database import database
 
 from fastapi import FastAPI
 

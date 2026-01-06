@@ -8,7 +8,7 @@ from myproject.myapp.schemas import (  # remplacer par les modèles Pydantic
     EntityReadModel,
     EntityUpdateModel,
 )
-from myproject.settings.database import database_manager
+from myproject.settings.config.database_config import database_manager
 
 myapp_crud_models = CrudModels(
     entity_name="myapp",

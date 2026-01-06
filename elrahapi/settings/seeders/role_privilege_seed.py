@@ -2,8 +2,8 @@ import sys
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import role_privilege_crud
 from elrahapi.authorization.role_privilege.schemas import RolePrivilegeCreateModel
-from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
+from myproject.settings.config.database_config import database_manager
+from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 
 data: list[RolePrivilegeCreateModel] = [
     RolePrivilegeCreateModel(

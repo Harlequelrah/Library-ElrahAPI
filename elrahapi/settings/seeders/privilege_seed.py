@@ -1,10 +1,9 @@
 import sys
-
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.database.seed_manager import Seed
-from log.seeders_logger import SEEDERS_LOGS, seeders_logger
+from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from myproject.settings.auth.cruds import privilege_crud
-from myproject.settings.database import database_manager
+from myproject.settings.config.database_config import database_manager
 
 data: list[PrivilegeCreateModel] = [
     PrivilegeCreateModel(

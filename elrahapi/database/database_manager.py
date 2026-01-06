@@ -1,11 +1,12 @@
 import asyncio
 
 from elrahapi.database.session_manager import SessionManager
+from elrahapi.elrahsettings.models import ElrahSettings
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from elrahapi.elrahsettings.models import ElrahSettings
+
 
 class DatabaseManager:
 
@@ -15,7 +16,7 @@ class DatabaseManager:
         database_creation_script: str | None = None,
     ):
         self.__settings = settings
-        self.__env = settings.env
+        self.__environment = settings.environment
         self.__database = settings.database
         self.__database_username = settings.database_username
         self.__database_password = settings.database_password
@@ -23,36 +24,29 @@ class DatabaseManager:
         self.__database_async_connector = settings.database_async_connector
         self.__database_name = self.setup_database_name(settings.database_name)
         self.__database_server = settings.database_server
-        self.__session_manager: SessionManager = None
         self.__is_async_env = (
-            True if settings.is_async_env is True and self.__database_async_connector else False
+            True
+            if settings.is_async_env is True and self.__database_async_connector
+            else False
         )
         self.__create_database_if_not_exists_text = None
         if database_creation_script:
             self.__create_database_if_not_exists_text = text(database_creation_script)
 
     @property
-    def session_manager(self):
-        return self.__session_manager
-
-    @property
     def settings(self):
         return self.__settings
 
-    @session_manager.setter
-    def session_manager(self, session_manager: SessionManager):
-        self.__session_manager = session_manager
-
     @property
-    def env(self):
-        return self.__env
+    def environment(self):
+        return self.__environment
 
-    @env.setter
-    def env(self, env: str):
-        self.__env = env
+    @environment.setter
+    def environment(self, environment: str):
+        self.__environment = environment
 
     def setup_database_name(self, database_name) -> str:
-        if self.__env == "test":
+        if self.__environment == "test":
             return "test_database"
         else:
             if self.__database == "sqlite" and not database_name:
@@ -182,7 +176,7 @@ class DatabaseManager:
             engine = create_engine(self.sqlalchemy_url, pool_pre_ping=True)
         return engine
 
-    def create_session_manager(self):
+    def create_session_manager(self) -> SessionManager:
         if self.is_async_env:
             sessionLocal = sessionmaker(
                 autoflush=False,
@@ -198,7 +192,7 @@ class DatabaseManager:
             session_manager = SessionManager(
                 session_maker=sessionLocal, is_async_env=False
             )
-        self.__session_manager = session_manager
+        return session_manager
 
     async def create_async_tables(self, target_metadata: MetaData):
         async with self.engine.begin() as conn:

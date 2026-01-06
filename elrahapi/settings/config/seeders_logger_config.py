@@ -1,6 +1,6 @@
 import logging
 
-from myproject.settings.secret import settings
+from .env_config import settings
 
 SEEDERS_LOGS = settings.seeders_logs
 logging.basicConfig(

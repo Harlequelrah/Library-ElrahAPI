@@ -50,7 +50,7 @@ from myproject.settings.auth.schemas import (
     UserReadModel,
     UserUpdateModel,
 )
-from myproject.settings.database import database_manager
+from myproject.settings.config.database_config import session_manager
 
 user_crud_models = CrudModels(
     entity_name="user",
@@ -121,28 +121,28 @@ user_role_crud_models = CrudModels(
 
 user_privilege_crud = CrudForgery(
     crud_models=user_privilege_crud_models,
-    session_manager=database_manager.session_manager,
+    session_manager=session_manager,
 )
 
 
 user_crud = CrudForgery(
-    crud_models=user_crud_models, session_manager=database_manager.session_manager
+    crud_models=user_crud_models, session_manager=session_manager
 )
 
 role_crud = CrudForgery(
-    crud_models=role_crud_models, session_manager=database_manager.session_manager
+    crud_models=role_crud_models, session_manager=session_manager
 )
 
 privilege_crud = CrudForgery(
-    crud_models=privilege_crud_models, session_manager=database_manager.session_manager
+    crud_models=privilege_crud_models, session_manager=session_manager
 )
 
 role_privilege_crud = CrudForgery(
     crud_models=role_privilege_crud_models,
-    session_manager=database_manager.session_manager,
+    session_manager=session_manager,
 )
 
 
 user_role_crud = CrudForgery(
-    crud_models=user_role_crud_models, session_manager=database_manager.session_manager
+    crud_models=user_role_crud_models, session_manager=session_manager
 )

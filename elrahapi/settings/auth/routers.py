@@ -1,6 +1,5 @@
 from elrahapi.router.router_provider import CustomRouterProvider
 from elrahapi.router.router_routes_name import DefaultRoutesName
-from myproject.settings.auth.configs import authentication
 from myproject.settings.auth.cruds import (
     privilege_crud,
     role_crud,
@@ -9,6 +8,7 @@ from myproject.settings.auth.cruds import (
     user_privilege_crud,
     user_role_crud,
 )
+from myproject.settings.config.auth_config import authentication
 
 user_router_provider = CustomRouterProvider(
     prefix="/users",

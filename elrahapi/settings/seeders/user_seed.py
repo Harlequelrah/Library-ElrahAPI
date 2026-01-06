@@ -1,10 +1,10 @@
 import sys
 
 from elrahapi.database.seed_manager import Seed
-from myproject.settings.log.seeders_logger import SEEDERS_LOGS, seeders_logger
 from myproject.settings.auth.cruds import user_crud
 from myproject.settings.auth.schemas import UserCreateModel
-from myproject.settings.database import database_manager
+from myproject.settings.config.database_config import database_manager
+from myproject.settings.log.seeders_logger import SEEDERS_LOGS, seeders_logger
 from myproject.settings.secret import SECRET_KEY  # .env
 
 data: list[UserCreateModel] = [
