@@ -1,9 +1,11 @@
-from elrahapi.exception.exceptions_utils import raise_custom_http_exception
-from sqlalchemy.orm import Session, sessionmaker
-from typing import Any
-from fastapi import status
 import asyncio
+from typing import Any
+
+from elrahapi.exception.exceptions_utils import raise_custom_http_exception
 from elrahapi.utility.types import ElrahSession
+from sqlalchemy.orm import Session, sessionmaker
+
+from fastapi import status
 
 
 class SessionManager:
@@ -19,8 +21,8 @@ class SessionManager:
         return self.__is_async_env
 
     @is_async_env.setter
-    def is_async_env(self,is_async_env:bool):
-        self.__is_async_env=is_async_env
+    def is_async_env(self, is_async_env: bool):
+        self.__is_async_env = is_async_env
 
     @property
     def session_maker(self) -> sessionmaker[Session]:
@@ -35,13 +37,14 @@ class SessionManager:
             await session.rollback()
         else:
             session.rollback()
-    async def close_session(self,session:ElrahSession):
+
+    async def close_session(self, session: ElrahSession):
         if self.is_async_env:
             await session.close()
         else:
             session.close()
 
-    async def delete_and_commit(self,session: ElrahSession, object: Any):
+    async def delete_and_commit(self, session: ElrahSession, object: Any):
         if self.is_async_env:
             await session.delete(object)
             await session.commit()
@@ -49,7 +52,7 @@ class SessionManager:
             session.delete(object)
             session.commit()
 
-    async def commit_and_refresh(self,session:ElrahSession,object:Any):
+    async def commit_and_refresh(self, session: ElrahSession, object: Any):
         if self.is_async_env:
             await session.commit()
             await session.refresh(object)
@@ -68,8 +71,8 @@ class SessionManager:
             )
 
     def get_session_for_script(self):
-        try :
-            loop=asyncio.get_running_loop()
+        try:
+            loop = asyncio.get_running_loop()
             return loop.run_until_complete(self.get_session())
         except RuntimeError:
             return asyncio.run(self.get_session())
@@ -77,21 +80,25 @@ class SessionManager:
     async def yield_session(self):
         if self.is_async_env:
             async for session in self.get_async_db():
-                try :
+                try:
                     yield session
                 except GeneratorExit:
                     pass
                     # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
-        else :
+                finally:
+                    await session.close()
+        else:
             for session in self.get_sync_db():
-                try :
+                try:
                     yield session
                 except GeneratorExit:
                     pass
                     # print(f"GeneratorExit caught in yield_session, session will not be closed , session ID: {id(session)}")
+                finally:
+                    session.close()
 
     def get_sync_db(self):
-        session= self.__session_maker()
+        session = self.__session_maker()
         yield session
 
     async def get_async_db(self):
