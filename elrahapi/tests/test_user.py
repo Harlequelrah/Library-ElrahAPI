@@ -3,27 +3,28 @@ from datetime import datetime
 import pytest
 from elrahapi.testclass.elrahtest import ElrahTest
 
-from ..myproject.settings.models_metadata import Base, database
+from myproject.settings.database.base import Base
+from myproject.settings.config.database_config import database_manager
 
 
 class TestUser(ElrahTest):
 
     @classmethod
     def setup_class(cls):
-        database.env = "test"
+        database_manager.env = "test"
 
     @classmethod
     def teardown_class(cls):
-        database.env = "dev"
+        database_manager.env = "development"
 
     def setup_method(self, method):
         try:
-            database.create_tables(target_metadata=Base.metadata)
+            database_manager.create_tables(target_metadata=Base.metadata)
         except Exception as e:
             print(f"Error during table creation: {e}")
 
     def teardown_method(self, method):
-        database.drop_tables(target_metadata=Base.metadata)
+        database_manager.drop_tables(target_metadata=Base.metadata)
 
     def test_should_create_user(self, client, fake_user, expected_user_value: dict):
         response = client.post("/users", json=fake_user)

@@ -1,15 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import MetaData
-
-from elrahapi.authentication.token import AccessToken, RefreshToken
-from fastapi.testclient import TestClient
-
-from fastapi import APIRouter, FastAPI
-
-from elrahapi.database.database_manager import DatabaseManager
-
-
 class ElrahTest:
 
     @classmethod

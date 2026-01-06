@@ -216,7 +216,7 @@ def get_seeders_dir():
     if not settings_dir:
         print(Fore.RED + Style.BRIGHT + "Settings directory not found")
         return None
-    seeders_dir = os.path.join(settings_dir, "seeders")
+    seeders_dir = os.path.join(settings_dir, "database/seeders")
     if not os.path.exists(seeders_dir):
         print(Fore.RED + Style.BRIGHT + "Seeders directory not found")
         return None

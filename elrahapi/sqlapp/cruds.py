@@ -8,7 +8,7 @@ from myproject.myapp.schemas import (  # remplacer par les modèles Pydantic
     EntityReadModel,
     EntityUpdateModel,
 )
-from myproject.settings.config.database_config import database_manager
+from myproject.settings.config.database_config import session_manager
 
 myapp_crud_models = CrudModels(
     entity_name="myapp",
@@ -21,5 +21,5 @@ myapp_crud_models = CrudModels(
     FullReadModel=EntityFullReadModel,  # Optionel
 )
 myapp_crud = CrudForgery(
-    crud_models=myapp_crud_models, session_manager=database_manager.session_manager
+    crud_models=myapp_crud_models, session_manager=session_manager
 )
