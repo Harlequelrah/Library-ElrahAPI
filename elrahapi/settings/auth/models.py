@@ -1,10 +1,10 @@
+from app.settings.config.database.base import Base
 from elrahapi.authorization.privilege.models import PrivilegeModel
 from elrahapi.authorization.role.models import RoleModel
 from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
 from elrahapi.authorization.user_privilege.models import UserPrivilegeModel
 from elrahapi.authorization.user_role.models import UserRoleModel
 from elrahapi.user.model import UserModel
-from myproject.settings.config.database.base import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import Mapped, relationship
 

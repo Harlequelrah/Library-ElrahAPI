@@ -1,9 +1,10 @@
 import sys
+
+from app.settings.auth.cruds import privilege_crud
+from app.settings.config.database_config import session_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel
 from elrahapi.database.seed_manager import Seed
-from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
-from myproject.settings.auth.cruds import privilege_crud
-from myproject.settings.config.database_config import session_manager
 
 data: list[PrivilegeCreateModel] = [
     PrivilegeCreateModel(
@@ -38,4 +39,5 @@ privilege_seed = Seed(
 )
 if __name__ == "__main__":
     session = session_manager.get_session_for_script()
+    privilege_seed.run_seed(sys.argv, session)
     privilege_seed.run_seed(sys.argv, session)

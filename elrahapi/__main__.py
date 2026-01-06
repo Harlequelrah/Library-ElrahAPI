@@ -11,9 +11,9 @@ init(autoreset=True)
 
 
 def replace_line(file, line, line_content):
-    with open(file, "r") as ficher:
+    with open(file, "r", encoding="utf-8") as ficher:
         a = ficher.readlines()
-    with open(file, "w") as ficher:
+    with open(file, "w", encoding="utf-8") as ficher:
         ficher.writelines(a[0 : line - 1])
         ficher.write(line_content)
         ficher.writelines(a[line:])
@@ -21,7 +21,7 @@ def replace_line(file, line, line_content):
 
 def update_env_with_secret_and_algorithm(env_file: str, algorithm: str = "HS256"):
     algo, key = define_algorithm_and_key(algorithm=algorithm)
-    with open(env_file, "r") as f:
+    with open(env_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
     secret_key_line = None
     algorithm_line = None
@@ -52,7 +52,7 @@ def generate_secret_key(
 def startproject(project_name):
     project_path = os.path.join(os.getcwd(), project_name)
     os.makedirs(project_path, exist_ok=True)
-    apps_dir = os.path.join(project_path, project_name)
+    apps_dir = os.path.join(project_path, "app")
     os.makedirs(apps_dir, exist_ok=True)
 
     # Initialise le dépôt Git
@@ -112,11 +112,13 @@ def startproject(project_name):
         print("The 'settings' folder has been copied successfully.")
     else:
         print("The source folder 'settings' was not found.")
-    with open(os.path.join(project_path, "requirements.txt"), "w") as f:
+    with open(
+        os.path.join(project_path, "requirements.txt"), "w", encoding="utf-8"
+    ) as f:
         subprocess.run(["pip", "freeze"], stdout=f)
-    with open(env_dest_path, "r") as f:
+    with open(env_dest_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
-    with open(env_dest_path, "w") as f:
+    with open(env_dest_path, "w", encoding="utf-8") as f:
         for line in lines:
             if line.strip().startswith("PROJECT_NAME"):
                 f.write(f"PROJECT_NAME = {project_name}\n")
@@ -159,7 +161,7 @@ def startapp(app_name):
     if os.path.exists(sqlapp_path):
         shutil.copytree(sqlapp_path, app_path, dirs_exist_ok=True)
         print(Fore.CYAN + f"The application {app_name} has been created successfully.")
-        clean_app(app_name, app_path)
+        clear_app(app_name, app_path)
     else:
         print("The 'sqlapp' folder was not found.")
 
@@ -189,12 +191,10 @@ def get_apps_dir():
     project_name = os.getenv("PROJECT_NAME")
     if project_name is None:
         project_name = get_project_name()
-    apps_dir_folder = os.path.join(parent_dir, project_name)
-    # print(apps_dir_folder)
+    apps_dir_folder = os.path.join(parent_dir, "app")
     if not os.path.isdir(apps_dir_folder):
         print(f"Apps dirs '{apps_dir_folder}' not found.")
         return
-    # print(apps_dir_folder)
 
     return apps_dir_folder
 
@@ -286,32 +286,14 @@ def create_tables():
         print(Fore.RED + Style.BRIGHT + f"Error creating tables: {e}")
 
 
-def clean_app(app_name: str, app_path: str):
+def clear_app(app_name: str, app_path: str):
     app_folder = Path(app_path)
-    project_name = get_project_name()
     for py_file in app_folder.rglob("*.py"):
-        with open(py_file, "r") as file:
+        with open(py_file, "r", encoding="utf-8") as file:
             lines = file.readlines()
-        with open(py_file, "w") as file:
-            for line in lines:
-                file.write(line.replace("myproject", project_name))
-    for py_file in app_folder.rglob("*.py"):
-        with open(py_file, "r") as file:
-            lines = file.readlines()
-        with open(py_file, "w") as file:
+        with open(py_file, "w", encoding="utf-8") as file:
             for line in lines:
                 file.write(line.replace("myapp", app_name))
-
-
-def clean_project():
-    project_name = get_project_name()
-    project_folder = Path(os.getcwd())
-    for py_file in project_folder.rglob("*.py"):
-        with open(py_file, "r") as file:
-            lines = file.readlines()
-        with open(py_file, "w") as file:
-            for line in lines:
-                file.write(line.replace("myproject", project_name))
 
 
 def run():
@@ -338,7 +320,6 @@ def main():
         startapp(name)
     elif command == "startproject" and name:
         startproject(name)
-        clean_project()
     elif command == "create_seed" and name:
         create_seed(name)
     elif command == "run_seed" and name:

@@ -1,10 +1,9 @@
 from datetime import datetime
 
 import pytest
+from app.settings.config.database_config import database_manager
+from app.settings.database.base import Base
 from elrahapi.testclass.elrahtest import ElrahTest
-
-from myproject.settings.database.base import Base
-from myproject.settings.config.database_config import database_manager
 
 
 class TestUser(ElrahTest):

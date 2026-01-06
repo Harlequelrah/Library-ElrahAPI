@@ -1,10 +1,10 @@
 import sys
 
+from app.myapp.cruds import myapp_crud
+from app.myapp.schemas import EntityCreateModel
+from app.settings.config.database_config import database_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.database.seed_manager import Seed
-from myproject.myapp.cruds import myapp_crud
-from myproject.myapp.schemas import EntityCreateModel
-from myproject.settings.config.database_config import database_manager
-from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 
 data: list[EntityCreateModel] = []
 

@@ -1,13 +1,13 @@
 import sys
 
+from app.settings.config.database_config import session_manager
+from app.settings.database.seeders.privilege_seed import privilege_seed
+from app.settings.database.seeders.role_privilege_seed import role_privilege_seed
+from app.settings.database.seeders.role_seed import role_seed
+from app.settings.database.seeders.user_privilege_seed import user_privilege_seed
+from app.settings.database.seeders.user_role_seed import user_role_seed
+from app.settings.database.seeders.user_seed import LogModel, user_seed
 from elrahapi.database.seed_manager import SeedManager
-from myproject.settings.config.database_config import session_manager
-from myproject.settings.database.seeders.privilege_seed import privilege_seed
-from myproject.settings.database.seeders.role_privilege_seed import role_privilege_seed
-from myproject.settings.database.seeders.role_seed import role_seed
-from myproject.settings.database.seeders.user_privilege_seed import user_privilege_seed
-from myproject.settings.database.seeders.user_role_seed import user_role_seed
-from myproject.settings.database.seeders.user_seed import LogModel, user_seed
 
 seeds_dict = {
     "user_seed": user_seed,

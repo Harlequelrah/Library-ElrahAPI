@@ -1,7 +1,7 @@
+from app.myapp.cruds import myapp_crud
+from app.settings.config.auth_config import authentication
 from elrahapi.router.router_namespace import DefaultRoutesName, TypeRoute
 from elrahapi.router.router_provider import CustomRouterProvider
-from myproject.myapp.cruds import myapp_crud
-from myproject.settings.config.auth_config import authentication
 
 router_provider = CustomRouterProvider(
     prefix="/items",

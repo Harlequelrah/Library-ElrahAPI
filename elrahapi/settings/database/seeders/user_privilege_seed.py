@@ -1,10 +1,10 @@
 import sys
 
+from app.settings.auth.cruds import user_privilege_crud
+from app.settings.config.database_config import session_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.authorization.user_privilege.schemas import UserPrivilegeCreateModel
 from elrahapi.database.seed_manager import Seed
-from myproject.settings.auth.cruds import user_privilege_crud
-from myproject.settings.config.database_config import session_manager
-from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 
 data: list[UserPrivilegeCreateModel] = [
     UserPrivilegeCreateModel(

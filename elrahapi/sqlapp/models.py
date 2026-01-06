@@ -1,6 +1,6 @@
 # from datetime import datetime
 
-# from myproject.settings.config.database.base import Base
+# from app.settings.config.database.base import Base
 # from sqlalchemy.orm import Mapped, mapped_column, relationship
 # from sqlalchemy.sql import func
 

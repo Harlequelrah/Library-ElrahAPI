@@ -1,11 +1,11 @@
 import sys
 
+from app.settings.auth.cruds import user_crud
+from app.settings.auth.schemas import UserCreateModel
+from app.settings.config.database_config import session_manager
+from app.settings.config.env_settings import settings
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.database.seed_manager import Seed
-from myproject.settings.auth.cruds import user_crud
-from myproject.settings.auth.schemas import UserCreateModel
-from myproject.settings.config.database_config import session_manager
-from myproject.settings.config.env_settings import settings
-from myproject.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 
 data: list[UserCreateModel] = [
     UserCreateModel(
