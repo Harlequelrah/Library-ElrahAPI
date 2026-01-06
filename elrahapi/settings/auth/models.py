@@ -1,4 +1,4 @@
-from app.settings.config.database.base import Base
+from app.settings.database.base import Base
 from elrahapi.authorization.privilege.models import PrivilegeModel
 from elrahapi.authorization.role.models import RoleModel
 from elrahapi.authorization.role_privilege.models import RolePrivilegeModel
