@@ -1,4 +1,4 @@
-from app.settings.config.database.base import Base
+from app.settings.database.base import Base
 from elrahapi.middleware.models import MetaLogModel
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship

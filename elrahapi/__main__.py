@@ -279,7 +279,7 @@ def set_python_path():
 def create_tables():
     try:
         apps_dir = get_apps_dir()
-        models_metadata_path = os.path.join(apps_dir, "settings/models_metadata.py")
+        models_metadata_path = os.path.join(apps_dir, "settings/database/models_metadata.py")
         env = set_python_path()
         subprocess.run([sys.executable, models_metadata_path], env=env)
     except Exception as e:

@@ -45,6 +45,7 @@ class DatabaseManager:
     def environment(self, environment: str):
         self.__environment = environment
 
+
     def setup_database_name(self, database_name) -> str:
         if self.__environment == "test":
             return "test_database"
@@ -100,7 +101,7 @@ class DatabaseManager:
 
     @database_name.setter
     def database_name(self, database_name: str):
-        self.__database_name = database_name
+        self.__database_name = self.setup_database_name(database_name)
 
     @property
     def database_server(self):

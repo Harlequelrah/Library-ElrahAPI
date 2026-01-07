@@ -10,11 +10,11 @@ class TestUser(ElrahTest):
 
     @classmethod
     def setup_class(cls):
-        database_manager.env = "test"
+        database_manager.create_database_if_not_exists()
 
     @classmethod
     def teardown_class(cls):
-        database_manager.env = "development"
+        pass
 
     def setup_method(self, method):
         try:
@@ -27,11 +27,9 @@ class TestUser(ElrahTest):
 
     def test_should_create_user(self, client, fake_user, expected_user_value: dict):
         response = client.post("/users", json=fake_user)
-        expected_user_value = self._update_expected_value(
-            expected_value=expected_user_value
-        )
         assert response.status_code == 201
-        assert response.json() == expected_user_value
+        clean_response = self.exclude_dates_from_dict(response.json())
+        assert clean_response == expected_user_value
 
     def test_should_get_user_after_creation(
         self,

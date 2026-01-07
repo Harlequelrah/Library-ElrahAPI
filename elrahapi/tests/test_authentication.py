@@ -11,14 +11,15 @@ class TestAuthentication(ElrahTest):
 
     @classmethod
     def setup_class(cls):
-        database_manager.environment = "test"
+        database_manager.create_database_if_not_exists()
 
     @classmethod
     def teardown_class(cls):
-        database_manager.environment = "development"
+        pass
 
     def setup_method(self, method):
         try:
+
             database_manager.create_tables(target_metadata=Base.metadata)
         except Exception as e:
             print(f"Error during table creation: {e}")
