@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 class ElrahSettings(BaseSettings):
     project_name: str
     database: str
-    env: str = "development"
+    environment: str = "development"
     database_username: str
     database_password: str
     database_connector: str
@@ -25,7 +25,7 @@ class ElrahSettings(BaseSettings):
 
     @property
     def debug(self) -> bool:
-        return self.env == "development"
+        return self.environment == "development"
 
     @field_validator(
         "user_max_attempt_login",

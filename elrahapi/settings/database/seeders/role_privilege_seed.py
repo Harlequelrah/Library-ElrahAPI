@@ -1,9 +1,10 @@
 import sys
+
+from app.settings.config.database_config import session_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
+from elrahapi.authorization.role_privilege.schemas import RolePrivilegeCreateModel
 from elrahapi.database.seed_manager import Seed
 from settings.auth.cruds import role_privilege_crud
-from elrahapi.authorization.role_privilege.schemas import RolePrivilegeCreateModel
-from settings.database import database
-from log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[RolePrivilegeCreateModel] = [
     RolePrivilegeCreateModel(
@@ -56,5 +57,6 @@ role_privilege_seed = Seed(
 )
 
 if __name__ == "__main__":
-    session = database_manager.session_manager.get_session_for_script()
+    session = session_manager.get_session_for_script()
+    role_privilege_seed.run_seed(sys.argv, session)
     role_privilege_seed.run_seed(sys.argv, session)

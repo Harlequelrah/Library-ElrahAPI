@@ -1,37 +1,35 @@
 from datetime import datetime
 
 import pytest
+from app.settings.config.database_config import database_manager
+from app.settings.database.base import Base
 from elrahapi.testclass.elrahtest import ElrahTest
-
-from ..myproject.settings.models_metadata import Base, database
 
 
 class TestUser(ElrahTest):
 
     @classmethod
     def setup_class(cls):
-        database.env = "test"
+        database_manager.create_database_if_not_exists()
 
     @classmethod
     def teardown_class(cls):
-        database.env = "dev"
+        pass
 
     def setup_method(self, method):
         try:
-            database.create_tables(target_metadata=Base.metadata)
+            database_manager.create_tables(target_metadata=Base.metadata)
         except Exception as e:
             print(f"Error during table creation: {e}")
 
     def teardown_method(self, method):
-        database.drop_tables(target_metadata=Base.metadata)
+        database_manager.drop_tables(target_metadata=Base.metadata)
 
     def test_should_create_user(self, client, fake_user, expected_user_value: dict):
         response = client.post("/users", json=fake_user)
-        expected_user_value = self._update_expected_value(
-            expected_value=expected_user_value
-        )
         assert response.status_code == 201
-        assert response.json() == expected_user_value
+        clean_response = self.exclude_dates_from_dict(response.json())
+        assert clean_response == expected_user_value
 
     def test_should_get_user_after_creation(
         self,

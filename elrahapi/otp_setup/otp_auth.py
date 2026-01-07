@@ -1,8 +1,6 @@
 import random
 import smtplib
 from email.message import EmailMessage
-
-from elrahapi import database
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.authentication.authentication_router_provider import (
     AuthenticationRouterProvider,
@@ -22,7 +20,6 @@ from elrahapi.user.schemas import UserLoginRequestModel
 from elrahapi.utility.types import ElrahSession
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from redis import Redis
-
 from fastapi import Depends, status
 
 
@@ -110,7 +107,7 @@ class OTPAuthRouterProvider(AuthenticationRouterProvider):
         @authentication_router.post("/login", response_model=FullTempToken)
         async def login(
             usermodel: UserLoginRequestModel,
-            session: ElrahSession = Depends(database.session_manager.yield_session),
+            session: ElrahSession = Depends(self.authentication.session_manager.yield_session),
         ):
             otp = self.authentication.generate_otp()
             login_sub = usermodel.sub

@@ -1,7 +1,7 @@
+from app.settings.database.base import Base
 from elrahapi.middleware.models import MetaLogModel
-from myproject.settings.database import Base
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship,Mapped,mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class LogModel(Base, MetaLogModel):

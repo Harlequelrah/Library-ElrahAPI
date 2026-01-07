@@ -1,5 +1,4 @@
 
-import os
 from typing import Any, Type
 from datetime import datetime
 from elrahapi.authorization.privilege.schemas import PrivilegeCreateModel

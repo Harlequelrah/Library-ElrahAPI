@@ -1,16 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import MetaData
-
-from elrahapi.authentication.token import AccessToken, RefreshToken
-from fastapi.testclient import TestClient
-
-from fastapi import APIRouter, FastAPI
-
-from elrahapi.database.database_manager import DatabaseManager
-
-
 class ElrahTest:
+
+
+    @classmethod
+    def exclude_dates_from_dict(cls, data_dict: dict) -> dict:
+        keys_to_exclude = ["date_created", "date_updated","date_deleted"]
+        return {
+            key: value
+            for key, value in data_dict.items()
+            if key not in keys_to_exclude
+        }
 
     @classmethod
     def _add_token_to_headers(cls, token: dict, token_type: str) -> dict:

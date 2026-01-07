@@ -1,7 +1,4 @@
-from elrahapi.router.router_provider import CustomRouterProvider
-from elrahapi.router.router_routes_name import DefaultRoutesName
-from myproject.settings.auth.configs import authentication
-from myproject.settings.auth.cruds import (
+from app.settings.auth.cruds import (
     privilege_crud,
     role_crud,
     role_privilege_crud,
@@ -9,6 +6,12 @@ from myproject.settings.auth.cruds import (
     user_privilege_crud,
     user_role_crud,
 )
+from app.settings.config.auth_config import authentication
+from elrahapi.authentication.authentication_router_provider import (
+    AuthenticationRouterProvider,
+)
+from elrahapi.router.router_provider import CustomRouterProvider
+from elrahapi.router.router_routes_name import DefaultRoutesName
 
 user_router_provider = CustomRouterProvider(
     prefix="/users",
@@ -68,7 +71,10 @@ user_router = user_router_provider.get_mixed_router(
         DefaultRoutesName.READ_ALL,
     ],
 )
-
+authentication_router_provider = AuthenticationRouterProvider(
+    authentication=authentication,
+)
+authentication_router = authentication_router_provider.get_auth_router()
 user_privilege_router = user_privilege_router_provider.get_protected_router()
 user_role_router = user_role_router_provider.get_protected_router()
 role_router = role_router_provider.get_protected_router()

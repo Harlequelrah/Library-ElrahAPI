@@ -1,9 +1,10 @@
 import sys
-from elrahapi.database.seed_manager import Seed
-from myproject.settings.auth.cruds import role_crud
+
+from app.settings.auth.cruds import role_crud
+from app.settings.config.database_config import session_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.authorization.role.schemas import RoleCreateModel
-from myproject.settings.database import database
-from myproject.settings.log.seeders_logger import seeders_logger, SEEDERS_LOGS
+from elrahapi.database.seed_manager import Seed
 
 data: list[RoleCreateModel] = [
     RoleCreateModel(name="ADMIN", description="Administre le système", is_active=True),
@@ -16,5 +17,5 @@ role_seed = Seed(
 )
 
 if __name__ == "__main__":
-    session = database.session_manager.get_session_for_script()
+    session = session_manager.get_session_for_script()
     role_seed.run_seed(sys.argv, session)

@@ -1,3 +1,19 @@
+from app.settings.auth.models import (
+    Privilege,
+    Role,
+    RolePrivilege,
+    User,
+    UserPrivilege,
+    UserRole,
+)
+from app.settings.auth.schemas import (
+    UserCreateModel,
+    UserFullReadModel,
+    UserPatchModel,
+    UserReadModel,
+    UserUpdateModel,
+)
+from app.settings.config.database_config import session_manager
 from elrahapi.authorization.privilege.schemas import (
     PrivilegeCreateModel,
     PrivilegeFullReadModel,
@@ -35,22 +51,6 @@ from elrahapi.authorization.user_role.schemas import (
 )
 from elrahapi.crud.crud_forgery import CrudForgery
 from elrahapi.crud.crud_models import CrudModels
-from myproject.settings.auth.models import (
-    Privilege,
-    Role,
-    RolePrivilege,
-    User,
-    UserPrivilege,
-    UserRole,
-)
-from myproject.settings.auth.schemas import (
-    UserCreateModel,
-    UserFullReadModel,
-    UserPatchModel,
-    UserReadModel,
-    UserUpdateModel,
-)
-from myproject.settings.database import database_manager
 
 user_crud_models = CrudModels(
     entity_name="user",
@@ -121,28 +121,24 @@ user_role_crud_models = CrudModels(
 
 user_privilege_crud = CrudForgery(
     crud_models=user_privilege_crud_models,
-    session_manager=database_manager.session_manager,
+    session_manager=session_manager,
 )
 
 
-user_crud = CrudForgery(
-    crud_models=user_crud_models, session_manager=database_manager.session_manager
-)
+user_crud = CrudForgery(crud_models=user_crud_models, session_manager=session_manager)
 
-role_crud = CrudForgery(
-    crud_models=role_crud_models, session_manager=database_manager.session_manager
-)
+role_crud = CrudForgery(crud_models=role_crud_models, session_manager=session_manager)
 
 privilege_crud = CrudForgery(
-    crud_models=privilege_crud_models, session_manager=database_manager.session_manager
+    crud_models=privilege_crud_models, session_manager=session_manager
 )
 
 role_privilege_crud = CrudForgery(
     crud_models=role_privilege_crud_models,
-    session_manager=database_manager.session_manager,
+    session_manager=session_manager,
 )
 
 
 user_role_crud = CrudForgery(
-    crud_models=user_role_crud_models, session_manager=database_manager.session_manager
+    crud_models=user_role_crud_models, session_manager=session_manager
 )

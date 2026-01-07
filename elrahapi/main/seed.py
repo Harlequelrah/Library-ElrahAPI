@@ -1,9 +1,10 @@
 import sys
+
+from app.myapp.cruds import myapp_crud
+from app.myapp.schemas import EntityCreateModel
+from app.settings.config.database_config import database_manager
+from app.settings.config.seeders_logger_config import SEEDERS_LOGS, seeders_logger
 from elrahapi.database.seed_manager import Seed
-from myproject.myapp.cruds import myapp_crud
-from myproject.myapp.schemas import EntityCreateModel
-from myproject.settings.database import database
-from myproject.settings.log.seeders_logger import seeders_logger, SEEDERS_LOGS
 
 data: list[EntityCreateModel] = []
 
@@ -12,5 +13,5 @@ myapp_seed = Seed(
 )
 
 if __name__ == "__main__":
-    session = database.session_manager.get_session_for_script()
+    session = database_manager.session_manager.get_session_for_script()
     myapp_seed.run_seed(sys.argv, session)
