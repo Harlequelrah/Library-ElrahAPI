@@ -8,8 +8,6 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
 
 - Après la création du projet configurer l'environnement .
 
-- Adapter le nom du projet au votre dans le repertoire `tests`
-
 **NB** : Pour la suite **myproject** designe le nom de votre projet et **myapp** designe le nom d'une application .
 
 ## **2.** `créer un projet`
@@ -32,13 +30,12 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
 
     - Ajouter l'import :
       ```python
-      from testproject.settings.models_metadata import Base
+      from app.settings.database.base import Base
       ```
     - Passer les metadata à target_metadata :
       ```python
       database.target_metadata=Base.metadata
       ```
-    - Corriger les import : Dans `settings/models_metadata.py` et dans les fichiers `models` de chaque application y compris `logger` et `auth` importer les modèles , Base , database à partir du projet comme suite `from myproject.`
 
 ## **4.** `Demarrer le projet `
 
@@ -86,7 +83,7 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
 
 - Ajouter le model dans models_metadata.py comme suite :
   ```python
-  from myproject.myapp.models import Model
+  from app.myapp.models import Model
   ```
 
 **`Note:`** :
@@ -119,8 +116,8 @@ Dans `schemas.py` il peut y avoir généralement :
 
 ```python
   class UserFullReadModel(UserReadModel) :
-    user_roles:List["UserRoleInUser"] = []
-    user_privileges: List["UserInUserPrivilege"]=[]
+    user_roles:list["UserRoleInUser"] = []
+    user_privileges: list["UserInUserPrivilege"]=[]
 ```
 
 ### **6.2.** `Créer les cruds`
@@ -146,7 +143,7 @@ myapp_crud_models = CrudModels(
 )
 myapp_crud = CrudForgery(
     crud_models=myapp_crud_models,
-    session_manager=database.session_manager
+    session_manager=session_manager
 )
 ```
 
@@ -431,7 +428,7 @@ Les possibilités de configuration d'un routeur :
 - **`Créér des configurations de routes`**
 
 ```python
-  custom_init_data: List[RouteConfig] = [
+  custom_init_data: list[RouteConfig] = [
     RouteConfig(
       route_name=DefaultRoutesName.CREATE,
       is_activated=True,
@@ -470,7 +467,7 @@ user_relation: Relationship = Relationship(
 - **`Création des configurations d'authorizations de routes`**
 
 ```python
-  custom_authorizations : List[AuthorizationConfig] = [
+  custom_authorizations : list[AuthorizationConfig] = [
   AuthorizationConfig(route_name=DefaultRoutesName.DELETE,roles=["ADMIN","MANAGER"]),
   AuthorizationConfig(route_name=DefaultRoutesName.UPDATE,privileges=["CAN_UPDATE_ENTITY"]
   ]
@@ -479,7 +476,7 @@ user_relation: Relationship = Relationship(
 - **`Création des configurations de model de réponse pour les routes`**
 
 ```python
-  custom_response_models : List[ResponseModelConfig] = [
+  custom_response_models : list[ResponseModelConfig] = [
   ResponseModelConfig(route_name=DefaultRoutesName.READ_ONE,response_model=MyModel),
   ResponseModelConfig(route_name=DefaultRoutesName.READ_ALL,read_with_relations=True
   ]
@@ -550,14 +547,14 @@ app.include_router(app_myapp)
 from elrahapi.middleware.log_middleware import LoggerMiddleware
 from elrahapi.middleware.error_middleware import ErrorHandlingMiddleware
 from elrahapi.middleware.middleware_helper import MiddlewareHelper
-from settings.logger.router import app_logger
-from settings.logger.model import LogModel
-from settings.database import database
+from app.settings.logger.router import app_logger
+from app.settings.logger.model import LogModel
+from app.settings.config.database_config import session_manager
 
 app = FastAPI()
 app.include_router(app_logger)
 middleware_helper = MiddlewareHelper(LogModel=LogModel,
-session_manager= database.session_manager,
+session_manager= session_manager,
 authentication=authentication)
 app.add_middleware(ErrorHandlingMiddleware, middleware_helper=middleware_helper)
 app.add_middleware(LoggerMiddleware, middleware_helper=middleware_helper)
@@ -567,22 +564,20 @@ app.add_middleware(LoggerMiddleware, middleware_helper=middleware_helper)
 
 ## **8.** `Configurer l'authentification`:
 
-- Configurer au besoin `myproject/settings/auth`
+- Configurer au besoin `app/settings/auth`
 
-- Ajouter au besoin les routers du `myproject/settings/auth/routers` au `myproject/main.py`
-
-- Ajouter au besoin le router pour l'authentification du `myproject/settings/auth/configs` au `myproject/main.py`
+- Ajouter au besoin les routers du `app/settings/auth/routers` au `myproject/main.py`
 
 ## **9.** `Utilisation des seeders`
 
 Deux classes principales servent au seeders .
 `Seed` pour un seed simple et `SeedManager` pour gérer les opérations de plusieurs Seed simultanément.
 
-Dans le repertoire `myproject/settings/seeders` du projet vous trouverez les seeders par défaut.
+Dans le repertoire `app/settings/database/seeders` du projet vous trouverez les seeders par défaut.
 
 Vous pouvez voir des fichers seeders `Seed` comme `user_seed.py` et ``SeedManager` comme `seed_manager_seed.py`.
 
-Dans le repertoire `seeders/log` il y a le ficher `seeders_logger.py` qui contient un logger pour enregistrer les logs des seeders dans le fichier `seeders.log`.
+Dans le repertoire `app/settings/config` il y a le ficher `seeders_logger_config.py` qui contient un logger pour enregistrer les logs des seeders dans le fichier `seeders.log`.
 
 ### **9.1.** `Creer un seeder`
 
@@ -714,19 +709,13 @@ Dans le sous module `otp_setup/otp_auth` vous disposez de `OTPAuthManager` qui h
 ```python
 from elrahapi.otp_setup import OTPAuthManager,OTPAuthRouterProvider
 from redis import Redis
-r= Redis.from_url(REDIS_URL, decode_responses=True)
+from app.settings.config.database_config import session_manager
+from app.settings.config.env_config import settings
+r= Redis.from_url(settings.redis_url, decode_responses=True)
 authentication = OTPAuthManager(
-    secret_key=SECRET_KEY,
-    algorithm=ALGORITHM,
-    access_token_expiration=ACCESS_TOKEN_EXPIRATION,
-    refresh_token_expiration=REFRESH_TOKEN_EXPIRATION,
-    temp_token_expiration=TEMP_TOKEN_EXPIRATION,
-    session_manager=database.session_manager,
-    authentication_models=user_crud_models,
+    settings=settings
+    session_manager=session_manager,
     redis=r,
-    smtp_email: SMTP_EMAIL,
-    smtp_password: SMTP_PASSWORD,
-    opt_expire_time= OTP_EXPIRE_TIME,
 )
 authentication_router_provider = AuthenticationRouterProvider(
     authentication=authentication,

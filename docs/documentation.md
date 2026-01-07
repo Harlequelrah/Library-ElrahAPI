@@ -18,6 +18,8 @@ elrahapi startproject nomduprojet
 nomduprojet/
 ├── __init__.py
 ├── .gitignore
+├── pytest.ini
+├── tests/
 ├── alembic/
 ├── README.md
 ├── .env
@@ -25,40 +27,51 @@ nomduprojet/
 ├── alembic.ini
 ├── requirements.txt
 ├── __main__.py
-├── nomduprojet/
+├── app/
 │   ├── __init__.py
 │   ├── main.py
 │   ├── settings/
-│       ├── __init__.py
-│       ├── database.py
-│       ├── secret.py
-│       ├── models_metadata.py
-│       ├── auth/
-│           ├── __init__.py
-│           ├── configs.py
-│           ├── models.py
-│           ├── cruds.py
-│           ├── meta_models.py
-│           ├── routers.py
-│           ├── schemas.py
-│       ├── logger/
-│           ├── __init__.py
-│           ├── crud.py
-│           ├── model.py
-│           ├── router.py
-│           ├── schema.py
-│       ├── seeders/
-│           ├── log/
-│               ├── __init__.py
-│               ├── seeders.log
-│               └── seeders_logger.py
-│           ├── __init__.py
-│           ├── privilege_seed.py
-│           ├── role_privilege_seed.py
-│           ├── role_seed.py
-│           ├── seed_manager_seed.py
-│           ├── user_role_seed.py
-│           └── user_seed.py
+```
+
+**`repertoire settings`** :
+
+```
+├── auth
+│   ├── __init__.py
+│   ├── cruds.py
+│   ├── meta_models.py
+│   ├── models.py
+│   ├── routers.py
+│   └── schemas.py
+├── config
+│   ├── __init__.py
+│   ├── auth_config.py
+│   ├── database_config.py
+│   ├── env_config.py
+│   └── seeders_logger_config.py
+├── database
+│   ├── seeders
+│   │   ├── __init__.py
+│   │   ├── privilege_seed.py
+│   │   ├── role_privilege_seed.py
+│   │   ├── role_seed.py
+│   │   ├── seed_manager_seed.py
+│   │   ├── user_privilege_seed.py
+│   │   ├── user_role_seed.py
+│   │   └── user_seed.py
+│   ├── __init__.py
+│   ├── base.py
+│   └── models_metadata.py
+├── logger
+│   ├── __init__.py
+│   ├── crud.py
+│   ├── model.py
+│   ├── router.py
+│   └── schema.py
+├── seeders
+│   └── log
+│       └── __init__.py
+└── __init__.py
 ```
 
 ## **1.2. `Commande de lancement de l'application`**
@@ -258,13 +271,13 @@ Ce sous module comporte des schémas pydantic réutilisables .
 
 ### **2.2.4. Sous module `models`**
 
-    - date_created :  **Column(DateTime)**
+    - date_created :  **mapped_column(DateTime)**
 
-    - date_updated :  **Column(DateTime)**
+    - date_updated :  **mapped_column(DateTime)**
 
-    - is_deleted :  **Column(Boolean)**
+    - is_deleted :  **mapped_column(Boolean)**
 
-    - date_deleted : **Column(DateTime)**
+    - date_deleted : **mapped_column(DateTime)**
 
 ## **2.3. Module `authentication`**
 
@@ -336,33 +349,18 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 
 - `database_name` : **str** , le nom de la base de donnée
 
-**methodes**
+- `settings` : **ElrahSettings**
+  **methodes**
 
 - `__init__` :
 
   - **paramètres** :
 
-    - database_username : **str**
+    - `settings` : **ElrahSettings** , le schéma pour les configurations de variables d'environnement.
 
-    - database_password : **str**
+    - `authentication_models` : **CrudModels** , definit les classes et attributs pour l'authentification
 
-    - connector : **str**
-
-    - server : **str**
-
-    - database_name : **str**
-
-    - secret_key : **Optional[str]**
-
-    - algorithm : **Optional[str]**
-
-    - access_token_expiration : **Optional[int]**
-
-    - refresh_token_expiration : **Optional[int]**
-
-- `get_session` : retourne une session
-
-  - **sortie** : `Session`
+    - security : **OAuth2PasswordBearer | HTTPBearer | None**
 
 - `authenticate_user` : authentifie un utilisateur
 
@@ -558,23 +556,11 @@ Ce sous module comporte les classes `OTPAuthManager` et `OTPAuthRouterProvider`
 
     - **paramètres** :
 
-      - secret_key : **Optional[str]**
-
       - redis: **Redis**
-
-      - smtp_email: **str**
-
-      - smtp_password: **str**
 
       - session_manager : **SessionManager**
 
-      - algorithm : **Optional[str]**
-
-      - access_token_expiration : **Optional[int]**
-
-      - refresh_token_expiration : **Optional[int]**
-
-      - temp_token_expiration : **int | None**
+      - settings : **ElrahSettings**
 
       - security: **OAuth2PasswordBearer | HTTPBearer | None**
 
@@ -600,13 +586,13 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
 
 - `MetaAuthorization` : classe pour définir les models SQLAlchemy Role et Privilege
 
-  - id : **Column(Integer)**
+  - id : **mapped_column(Integer)**
 
-  - name : **Column(String)**
+  - name : **mapped_column(String)**
 
-  - description : **Column(String)**
+  - description : **mapped_column(String)**
 
-  - is_active : **Column(Boolean)**
+  - is_active : **mapped_column(Boolean)**
 
 - `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
 
@@ -722,11 +708,11 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `RolePrivilegeModel`
 
-  - id : **Column(Integer)**
+  - id : **mapped_column(Integer)**
 
-  - role_id : **Column(Integer)**
+  - role_id : **mapped_column(Integer)**
 
-  - privilege_id : **Column(Integer)**
+  - privilege_id : **mapped_column(Integer)**
 
 #### **2.4.4.2. Sous module `schemas`**
 
@@ -768,13 +754,13 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserPrivilegeModel`
 
-  - id : **Column(Integer)**
+  - id : **mapped_column(Integer)**
 
-  - user_id : **Column(Integer)**
+  - user_id : **mapped_column(Integer)**
 
-  - privilege_id : **Column(Integer)**
+  - privilege_id : **mapped_column(Integer)**
 
-  - is_active : **Column(Boolean)**
+  - is_active : **mapped_column(Boolean)**
 
 #### **2.4.5.2 Sous module `schemas`**
 
@@ -830,13 +816,13 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 
 - `UserRoleModel`
 
-  - id : **Column(Integer)**
+  - id : **mapped_column(Integer)**
 
-  - user_id : **Column(Integer)**
+  - user_id : **mapped_column(Integer)**
 
-  - role_id : **Column(Integer)**
+  - role_id : **mapped_column(Integer)**
 
-  - is_active : **Column(Boolean)**
+  - is_active : **mapped_column(Boolean)**
 
 #### **2.4.6.2 Sous module `schemas`**
 
@@ -898,21 +884,21 @@ Ce sous module définit les modèles de Log : `LogModel` et `LogReadModel` pour 
 
 **Attributs prédéfinis**:
 
-- id : **Column(Integer)**
+- id : **mapped_column(Integer)**
 
-- status_code :**Column(Integer)**
+- status_code :**mapped_column(Integer)**
 
-- method : **Column(String)**
+- method : **mapped_column(String)**
 
-- url : **Column(String)**
+- url : **mapped_column(String)**
 
-- error_message : **Column(Text)**
+- error_message : **mapped_column(Text)**
 
-- date_created : **Column(DateTime)**
+- date_created : **mapped_column(DateTime)**
 
-- process_time : **Column(Numeric)**
+- process_time : **mapped_column(Numeric)**
 
-- remote_adress: **Column(String)**
+- remote_adress: **mapped_column(String)**
 
 `LogReadModel`:
 
@@ -1026,23 +1012,23 @@ Ce sous module comporte le model `User` utilisé dans le système d'authentifica
 
 `Attributs`:
 
-- id : **Column(Integer)**
+- id : **mapped_column(Integer)**
 
-- email : **Column(String)**
+- email : **mapped_column(String)**
 
-- username : **Column(String)**
+- username : **mapped_column(String)**
 
-- password : **Column(String)**
+- password : **mapped_column(String)**
 
-- lastname : **Column(String)**
+- lastname : **mapped_column(String)**
 
-- date_created : **Column(DateTime)**
+- date_created : **mapped_column(DateTime)**
 
-- date_updated : **Column(DateTime)**
+- date_updated : **mapped_column(DateTime)**
 
-- is_active : **Column(Boolean)**
+- is_active : **mapped_column(Boolean)**
 
-- attempt_login : **Column(Integer)**
+- attempt_login : **mapped_column(Integer)**
 
 - MAX_ATTEMPT_LOGIN = None ou definit dans le fichier .env
 
@@ -1710,12 +1696,11 @@ Ce sous module définit la classe SessionManager pour gérer les sessions
 
     - sortie : `Session`
 
-
 #### 2.11. Module `elrahsettings`
+
 Un module qui definit une classe pour les variables d'environnements et autres configurations
 
-
-##### 2.11. Sous Module `models`
+##### 2.11.1 Sous Module `models`
 
 - `attributs` :
 
@@ -1723,20 +1708,134 @@ Un module qui definit une classe pour les variables d'environnements et autres c
   - `databse`:str
   - `env` : str
   - `database_username`:str
-  -  `database_password`: str
-  -  `database_connector`: str
-  -  `database_name`: str
-  -  `database_async_connector`: str
-  -  `database_server`: str
-  -  `is_async_env`: bool | None
-  -  `user_max_attempt_login`: int | None
-  -  `access_token_expiration`: int | None
-  -  `refresh_token_expiration`: int | None
-  -  `temp_token_expiration`: int | None
-  -  `secret_key`: str
-  -  `algorithm`: str
-  -  `seeders_logs`: str 
-  -  `issuer`: str
-  -  `audience`: str
+  - `database_password`: str
+  - `database_connector`: str
+  - `database_name`: str
+  - `database_async_connector`: str
+  - `database_server`: str
+  - `is_async_env`: bool | None
+  - `user_max_attempt_login`: int | None
+  - `access_token_expiration`: int | None
+  - `refresh_token_expiration`: int | None
+  - `temp_token_expiration`: int | None
+  - `secret_key`: str
+  - `algorithm`: str
+  - `seeders_logs`: str
+  - `issuer`: str
+  - `audience`: str
+  - `redis_url` : str
 
+#### 2.12. Module `testclass`
 
+Un module qui definit une classe les tests
+
+##### 2.12.1 Sous Module `elrahtest`
+
+Une classe avec des méthodes de classe pour les tests.
+
+- `methodes` :
+
+  - `exclude_dates_from_dict` : pour exclure les dates d'un dict
+  - `_add_token_to_headers` : pour ajouter les headers à un token
+  - `_update_expected_value` : pour ajouter les dates à un dictionnaires
+
+**note** : on parle des dates (date_created , date_update et date_deleted)
+
+#### 2.13. Module `database`
+
+Ce module comporte des classes et utilitaire pour la gestion de base données et de sessions.
+
+##### 2.13.1 Sous Module `database_constants`
+
+Ce sous module contient des constantes utilitaires .
+
+- MYSQL_CREATE_DATABASE_IF_NOT_EXISTS : script de creation d'une base de donnée mysql
+
+##### 2.13.2 Sous Module `database_manager`
+
+La classe principale pour la gestion de la base de données `DatabaseManager`
+
+- `__init__.py` :
+
+  - paramètres :
+    - settings: **ElrahSettings**
+    - database_creation_script: **str | None = None**
+
+- `create_database_if_not_exists`:crée la base donnée si elle n'existe pas.
+
+- `create_session_manager` : crée un gestionnaire de session
+
+- `drop_tables` : supprime les tables de la bd
+
+- `create_tables` : crée les tables de la base de données
+
+- `create_sync_db` : crée une base de donnée en environnement synchrone
+
+- `create_async_db` : crée une base de donnée en environnement asynchrone
+
+##### 2.13.3 Sous Module `session_manager`
+
+Ce sous module comporte le gestionnaire de session
+
+- `__init__.py` :
+
+  - paramètres :
+    - is_async_env : **bool**
+    - session_maker: **sessionmaker**
+
+- `rollback_session`: rollback une session.
+
+- `close_session` : ferme une session
+
+- `delete_and_commit` : supprime un objet et valide
+
+- `commit_and_refresh` :valide une modification et refresh un objet
+
+- `get_session` : retourne une session
+
+- `get_session_for_script` : retourne une session à utilisation dans un script python
+
+- `yield_session` : génère une session
+
+- `get_sync_db` : génère une session synchrone
+
+- `get_async_db` : génère une session asynchrone
+
+##### 2.13.4 Sous Module `seed_manager`
+
+Les classes pour la gestion des seeds
+
+**Seed**
+
+- `__init__.py` :
+
+  - paramètres :
+    - crud_forgery : **CrudForgery**
+    - data: **list[BaseModel]**
+    - logger: **Logger**
+    - seeders_logs:**str**
+
+- `up`: lance un seeder .
+
+- `down`: rollback un seeder .
+
+- `start`: lance un seeder .
+
+- `run_seed` : démarre un seed
+
+**SeedManager**
+Le gestionnaire de seed
+
+- `__init__.py` :
+
+  - paramètres :
+    - seeds_dict : **dict[str, Seed]**
+    - session_manager: **SessionManager**
+
+- `up`: lance les seeders .
+
+- `down`: rollback les seeders .
+
+- `start`: lance un seeder .
+
+- `run_seed_manager` : démarre les seeders

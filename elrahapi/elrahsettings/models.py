@@ -22,6 +22,7 @@ class ElrahSettings(BaseSettings):
     seeders_logs: str = "seeders.log"
     issuer: str
     audience: str
+    redis_url:str|None
 
     @property
     def debug(self) -> bool:
