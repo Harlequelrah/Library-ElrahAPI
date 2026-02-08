@@ -1,6 +1,6 @@
 # I - **`Présentation`**
 
-![Logo](https://raw.githubusercontent.com/Harlequelrah/Library-ElrahAPI/main/Elrah.png)
+![Logo](Elrah.png)
 
 # **1.** `Description`
 

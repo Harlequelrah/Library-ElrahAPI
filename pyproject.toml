@@ -1,0 +1,31 @@
+[project]
+name = "elrahapi"
+version = "1.2.1.7"
+description = "Biliothèque personnalisée pour accéler le devéloppement d'API basé sur FastAPI"
+readme = "README.md"
+authors = [
+{email="maximeatsoudegbovi@gmail.com",name="Harlequelrah"}
+]
+license ="LGPL-3.0-only"
+requires-python = ">=3.14"
+dependencies = [
+        "fastapi[standard]>=0.128.0",
+        "alembic>=1.13.3",
+        "argon2-cffi>=23.1.0",
+        "python-jose[cryptography]>=3.3.0",
+        "black>=24.10.0",
+        "sqlalchemy>=2.0.38",
+        "sqlalchemy-utils>=0.41.2",
+        "aiosqlite>=0.21.0",]
+
+[project.urls]
+Repository ="https://github.com/Harlequelrah/Library-ElrahAPI"
+Documentation="https://harlequelrah.github.io/Library-ElrahAPI/docs/documentation"
+Guide="https://harlequelrah.github.io/Library-ElrahAPI/docs/guide"
+
+[project.scripts]
+elrahapi="elrahapi.__main__:main"
+
+[build-system]
+requires=["hatchling"]
+build-backend = "hatchling.build"
