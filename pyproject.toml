@@ -1,7 +1,7 @@
 [project]
 name = "elrahapi"
-version = "1.2.1.7"
-description = "Biliothèque personnalisée pour accéler le devéloppement d'API basé sur FastAPI"
+version = "1.2.1.7.1"
+description = "Biliothèque personnalisée pour accéler le devéloppement d'API basé sur FastAPI."
 readme = "README.md"
 authors = [
 {email="maximeatsoudegbovi@gmail.com",name="Harlequelrah"}
