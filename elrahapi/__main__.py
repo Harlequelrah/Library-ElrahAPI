@@ -83,7 +83,7 @@ def startproject(project_name):
     print(f"The file 'main.py' has been copied to {main_script_dest_path}")
 
     main_project_files_path = os.path.join(main_path_dir, "main_project_files")
-    env_dest_path = project_path + ".env"
+    env_dest_path = project_path + "/.env"
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
         shutil.copy(project_path+"/.env.example",env_dest_path)
