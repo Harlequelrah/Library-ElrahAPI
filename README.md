@@ -86,6 +86,6 @@ docs/
 
 Les liens ci-dessous permettent d'accéder à une documentation web :
 
-- [Documentation](https//elrahapi.elrah.tech/documentation)
+- [Documentation](https//elrahapi.elrah.tech/docs/documentation)
 
-- [Documentation](https://elrahapi.elrah.tech/guide)
+- [Documentation](https://elrahapi.elrah.tech/docs/guide)
