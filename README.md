@@ -88,4 +88,4 @@ Les liens ci-dessous permettent d'accéder à une documentation web :
 
 - [Documentation](https//elrahapi.elrah.tech/docs/documentation)
 
-- [Documentation](https://elrahapi.elrah.tech/docs/guide)
+- [Guide d'utilisation](https://elrahapi.elrah.tech/docs/guide)
