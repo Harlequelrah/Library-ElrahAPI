@@ -10,8 +10,10 @@ from app.settings.config.auth_config import authentication
 from elrahapi.authentication.authentication_router_provider import (
     AuthenticationRouterProvider,
 )
+from elrahapi.router.router_namespace import TypeRoute
 from elrahapi.router.router_provider import CustomRouterProvider
 from elrahapi.router.router_routes_name import DefaultRoutesName
+from elrahapi.router.router_routes_name import DEFAULT_ROUTES_NAME
 
 user_router_provider = CustomRouterProvider(
     prefix="/users",
@@ -71,12 +73,24 @@ user_router = user_router_provider.get_mixed_router(
         DefaultRoutesName.READ_ALL,
     ],
 )
+
+
 authentication_router_provider = AuthenticationRouterProvider(
     authentication=authentication,
 )
 authentication_router = authentication_router_provider.get_auth_router()
-user_privilege_router = user_privilege_router_provider.get_protected_router()
-user_role_router = user_role_router_provider.get_protected_router()
-role_router = role_router_provider.get_protected_router()
-privilege_router = privilege_router_provider.get_protected_router()
-role_privilege_router = role_privilege_router_provider.get_protected_router()
+user_privilege_router = user_privilege_router_provider.get_custom_router(
+    type_route=TypeRoute.PROTECTED, routes_name=DEFAULT_ROUTES_NAME
+)
+user_role_router = user_role_router_provider.get_custom_router(
+    type_route=TypeRoute.PROTECTED, routes_name=DEFAULT_ROUTES_NAME
+)
+role_router = role_router_provider.get_custom_router(
+    type_route=TypeRoute.PROTECTED, routes_name=DEFAULT_ROUTES_NAME
+)
+privilege_router = privilege_router_provider.get_custom_router(
+    type_route=TypeRoute.PROTECTED, routes_name=DEFAULT_ROUTES_NAME
+)
+role_privilege_router = role_privilege_router_provider.get_custom_router(
+    type_route=TypeRoute.PROTECTED, routes_name=DEFAULT_ROUTES_NAME
+)

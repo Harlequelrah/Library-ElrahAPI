@@ -11,7 +11,7 @@ class MetaLogModel:
     status_code: Mapped[int] = mapped_column(index=True)
     method: Mapped[str] = mapped_column(String(30))
     url: Mapped[str]
-    error_message: Mapped[str] = mapped_column(Text)
+    error_message: Mapped[str|None] = mapped_column(Text)
     date_created: Mapped[datetime] = mapped_column(default=func.now())
     remote_address: Mapped[str]
     process_time: Mapped[float] = mapped_column(Numeric(precision=10, scale=6))

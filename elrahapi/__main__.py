@@ -50,17 +50,23 @@ def generate_secret_key(
 
 
 def startproject(project_name):
-    project_path = os.path.join(os.getcwd(), project_name)
+    current_dir = os.getcwd()
+    project_path = os.path.join(current_dir, project_name)
     os.makedirs(project_path, exist_ok=True)
     apps_dir = os.path.join(project_path, "app")
     os.makedirs(apps_dir, exist_ok=True)
 
-    # Initialise le dépôt Git
-    try:
-        subprocess.run(["git", "init", project_path])
-        print(f"Git repo initialized in {project_path}")
-    except Exception as e:
-        print(f"Error initializing the Git repository: {e}")
+    # Initialise le dépôt Git si inexistant
+    if os.path.exists(f"{current_dir}/.git"):
+        print(
+            Fore.CYAN + f"Git repository has been already initialized in {project_path}"
+        )
+    else:
+        try:
+            subprocess.run(["git", "init", project_path])
+            print(f"Git repo initialized in {project_path}")
+        except Exception as e:
+            print(f"Error initializing the Git repository: {e}")
 
     subprocess.run(["alembic", "init", "alembic"], cwd=project_path)
     print(Fore.GREEN + f"Alembic has been initialized in {project_path}")
@@ -86,7 +92,7 @@ def startproject(project_name):
     env_dest_path = project_path + "/.env"
     if os.path.exists(main_project_files_path):
         shutil.copytree(main_project_files_path, project_path, dirs_exist_ok=True)
-        shutil.copy(project_path+"/.env.example",env_dest_path)
+        shutil.copy(project_path + "/.env.example", env_dest_path)
         print(
             "The files .gitignore, __main__.py, and README.md , .env.example ,.env have been copied successfully."
         )
@@ -271,7 +277,9 @@ def set_python_path():
 def create_tables():
     try:
         apps_dir = get_apps_dir()
-        models_metadata_path = os.path.join(apps_dir, "settings/database/models_metadata.py")
+        models_metadata_path = os.path.join(
+            apps_dir, "settings/database/models_metadata.py"
+        )
         env = set_python_path()
         subprocess.run([sys.executable, models_metadata_path], env=env)
     except Exception as e:
