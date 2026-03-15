@@ -1,4 +1,5 @@
-from argon2 import PasswordHasher,exceptions as Ex
+from argon2 import PasswordHasher
+from argon2 import exceptions as Ex
 from elrahapi.authentication.authentication_manager import AuthenticationManager
 from elrahapi.exception.auth_exception import (
     INSUFICIENT_PERMISSIONS_CUSTOM_HTTP_EXCEPTION,
@@ -17,8 +18,8 @@ class UserModel(AdditionalModelFields):
     email: Mapped[str] = mapped_column(unique=True, index=True)
     username: Mapped[str] = mapped_column(unique=True, index=True)
     password: Mapped[str] = mapped_column(String(1024))
-    lastname: Mapped[str]
-    firstname: Mapped[str]
+    lastname: Mapped[str] = mapped_column(String(100))
+    firstname: Mapped[str] = mapped_column(String(150))
     is_active: Mapped[bool] = mapped_column(default=True)
     attempt_login: Mapped[int] = mapped_column(default=0)
 
