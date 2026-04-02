@@ -70,7 +70,7 @@ ou si virtualenv est dejà installé au préalable
 
 Pour des questions ou du support, contactez-moi à **`maximeatsoudegbovi@gmail.com`** ou au **`(+228) 91 36 10 29`**.
 
-La version actuelle est le `1.2.2`
+La version actuelle est le `1.2.2.2`
 
 Vérifier la version en executant `pip show elrahapi`
 
