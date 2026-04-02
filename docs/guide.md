@@ -34,7 +34,7 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
       ```
     - Passer les metadata à target_metadata :
       ```python
-      database.target_metadata=Base.metadata
+      target_metadata=Base.metadata
       ```
 
 ## **4.** `Demarrer le projet `
