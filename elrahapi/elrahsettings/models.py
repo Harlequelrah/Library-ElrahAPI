@@ -6,6 +6,7 @@ class ElrahSettings(BaseSettings):
     project_name: str
     database: str
     environment: str = "development"
+    host:str
     database_username: str
     database_password: str
     database_connector: str
