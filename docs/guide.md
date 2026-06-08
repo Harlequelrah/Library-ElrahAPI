@@ -20,16 +20,14 @@ Pour initialiser un projet , vous avez la commande :
    elrahapi startproject myproject
 ```
 
-**note** : Vous pouvez ajouter les arguments suivant à votre commande :
+**note** : Vous pouvez ajouter les arguments suivant à votre commande --tests , --logger , --auth , --seeders. Consulter la documentation pour en savoir plus.
 
-- --tests : pour rajouter un dossier de tests ;
-- --logger : pour rajouter le repertoire pour le logger ;
-- --auth : pour rajouter l'authentification ;
-- --seeders : pour ajouter un dossier avec des seeders par défault.
+
 
 ### **2.2. Mettre à jour un projet**
-
+Vous pouvez ajouter des repertoires à votre projet avec la commande :
 ```bash
+   cd myproject
    elrahapi updateproject
 ```
 

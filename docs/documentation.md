@@ -19,7 +19,6 @@ nomduprojet/
 ├── __init__.py
 ├── .gitignore
 ├── pytest.ini
-├── tests/
 ├── alembic/
 ├── README.md
 ├── .env
@@ -71,7 +70,21 @@ nomduprojet/
 └── __init__.py
 ```
 
-## **1.2. `Commande de lancement de l'application`**
+## **1.2. `Commande de mise à jour de l'application`**
+
+```bash
+   cd myproject
+   elrahapi updateproject
+```
+
+**note** : Pour les commandes `1.1` et `1.2` : On a les arguments
+
+- --tests : pour rajouter un dossier de tests ;
+- --logger : pour rajouter le repertoire pour le logger ;
+- --auth : pour rajouter l'authentification ;
+- --seeders : pour ajouter un dossier avec des seeders par défault.
+
+## **1.3. `Commande de lancement de l'application`**
 
 ```bash
   elrahapi run
@@ -83,7 +96,7 @@ ou
   fastapi run app/main.py --reload --host=127.0.0.1
 ```
 
-## **1.3. `Commande de génération d'une application`**
+## **1.4. `Commande de génération d'une application`**
 
 Cette commande permet de créer une application dans le projet
 
