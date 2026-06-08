@@ -10,24 +10,38 @@ Voici un petit guide d'utilisation pour explorer et découvrir les fonctionnalit
 
 **NB** : Pour la suite **myproject** designe le nom de votre projet et **myapp** designe le nom d'une application .
 
-## **2.** `créer un projet`
+## **2.** `Gérer un projet`
+
+### **2.1. Créer un projet**
+
+Pour initialiser un projet , vous avez la commande :
 
 ```bash
    elrahapi startproject myproject
 ```
+
+**note** : Vous pouvez ajouter les arguments suivant à votre commande --tests , --logger , --auth , --seeders. Consulter la documentation pour en savoir plus.
+
+
+
+### **2.2. Mettre à jour un projet**
+Vous pouvez ajouter des repertoires à votre projet avec la commande :
+```bash
+   cd myproject
+   elrahapi updateproject
+```
+
+**note** : Vous pouvez ajouter aussi les arguments précités dans l'initialisation d'un projet
 
 ## **3.** `configurer l'environnement`
 
 - Ouvrez le fichier .env et configurez le !
 
 - Configurer alembic au besoin :
-
   - Configurer le alembic.ini par son paramètre `sqlalchemy.url` :
-
     - exemple pour sqlite : `sqlite:///database.db`
 
   - Configurer le alembic/env.py :
-
     - Ajouter l'import :
       ```python
       from app.settings.database.base import Base

@@ -9,6 +9,13 @@ from elrahapi.security.secret import define_algorithm_and_key
 
 init(autoreset=True)
 
+VALID_START_PROJECT_PARAMS = [
+    "seeders",
+    "logger",
+    "auth",
+    "tests",
+]
+
 
 def replace_line(file, line, line_content):
     with open(file, "r", encoding="utf-8") as ficher:
@@ -49,11 +56,94 @@ def generate_secret_key(
     )
 
 
-def startproject(project_name):
+def get_paths(project_name: str) -> dict:
     current_dir = os.getcwd()
-    project_path = os.path.join(current_dir, project_name)
+    env_file_path = os.path.join(current_dir, ".env")
+    if os.path.exists(env_file_path):
+        project_path = current_dir
+    else:
+        project_path = os.path.join(current_dir, project_name)
+    apps_dir = os.path.join(project_path, "app")
+    settings_path = os.path.join(apps_dir, "settings")
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    print(project_path, project_name)
+    return {
+        "project_path": project_path,
+        "apps_dir": apps_dir,
+        "settings_path": settings_path,
+        "script_dir": script_dir,
+    }
+
+
+def copy_subs_dir(project_name: str, params: list[str], update=False):
+    paths = get_paths(project_name=project_name)
+    source_tests_path = os.path.join(paths["script_dir"], "tests")
+    source_settings_path = os.path.join(paths["script_dir"], "settings")
+    config_dest_dir = f"{paths["settings_path"]}/config"
+    database_dest_dir = f"{paths["settings_path"]}/database"
+    database_source_dir = os.path.join(source_settings_path, "database")
+    config_source_dir = os.path.join(source_settings_path, "config")
+    if update is False:
+        for p in [paths["settings_path"], config_dest_dir, database_dest_dir]:
+            os.makedirs(p, exist_ok=True)
+            with open(f"{p}/__init__.py", "w") as f:
+                f.write("# __init__.py\n")
+        for f in ["base", "models_metadata"]:
+            file_source = os.path.join(database_source_dir, f"{f}.py")
+            shutil.copy(file_source, database_dest_dir)
+        config_files = ["env", "database"]
+    else:
+        config_files = []
+    if os.path.exists(source_settings_path):
+        if "auth" in params:
+            config_files.append("auth")
+        if "seeders" in params:
+            config_files.append("seeders_logger")
+        for f in config_files:
+            fname = f"{f}_config.py"
+            if not os.path.exists(f"{config_dest_dir}/{fname}"):
+                print(fname)
+                file_source = os.path.join(config_source_dir, fname)
+                shutil.copy(file_source, config_dest_dir)
+        for param in params:
+            if param == "tests" and not os.path.exists(
+                f"{paths["project_path"]}/tests"
+            ):
+                shutil.copytree(
+                    source_tests_path,
+                    f"{paths["project_path"]}/tests",
+                    dirs_exist_ok=True,
+                )
+            if param == "seeders" and not os.path.exists(
+                f"{paths["settings_path"]}/database/seeders"
+            ):
+                seeders_source = os.path.join(source_settings_path, "database/seeders")
+                seeders_dest = os.path.join(paths["settings_path"], "database/seeders")
+                shutil.copytree(seeders_source, seeders_dest, dirs_exist_ok=True)
+            if param == "auth" and not os.path.exists(f"{paths["settings_path"]}/auth"):
+                auth_source = os.path.join(source_settings_path, "auth")
+                auth_dest = os.path.join(paths["settings_path"], "auth")
+                shutil.copytree(auth_source, auth_dest, dirs_exist_ok=True)
+            if param == "logger" and not os.path.exists(
+                f"{paths["settings_path"]}/logger"
+            ):
+                logger_source = os.path.join(source_settings_path, "logger")
+                logger_dest = os.path.join(paths["settings_path"], "logger")
+                shutil.copytree(logger_source, logger_dest, dirs_exist_ok=True)
+        print(
+            f"The 'settings' folder has been copied successfull with folders : {params}"
+        )
+    else:
+        print("The source folder 'settings' was not found.")
+
+
+def startproject(project_name, params: list[str]):
+    current_dir = os.getcwd()
+    paths = get_paths(project_name=project_name)
+    project_path = paths["project_path"]
     os.makedirs(project_path, exist_ok=True)
     apps_dir = os.path.join(project_path, "app")
+
     os.makedirs(apps_dir, exist_ok=True)
 
     # Initialise le dépôt Git si inexistant
@@ -77,12 +167,7 @@ def startproject(project_name):
     with open(f"{apps_dir}/__init__.py", "w") as f:
         f.write("# __init__.py\n")
 
-    settings_path = os.path.join(apps_dir, "settings")
-    os.makedirs(settings_path, exist_ok=True)
-
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    source_settings_path = os.path.join(script_dir, "settings")
-    main_path_dir = os.path.join(script_dir, "main")
+    main_path_dir = os.path.join(paths["script_dir"], "main")
     main_script_src_path = os.path.join(main_path_dir, "main.py")
     main_script_dest_path = os.path.join(apps_dir, "main.py")
     shutil.copyfile(main_script_src_path, main_script_dest_path)
@@ -99,17 +184,10 @@ def startproject(project_name):
     else:
         print("The source folder 'main_project_files' was not found.")
 
-    source_tests_path = os.path.join(script_dir, "tests")
-    if os.path.exists(source_tests_path):
-        shutil.copytree(
-            source_tests_path, os.path.join(project_path, "tests"), dirs_exist_ok=True
-        )
-        print("The 'tests' folder has been copied successfully.")
-    if os.path.exists(source_settings_path):
-        shutil.copytree(source_settings_path, settings_path, dirs_exist_ok=True)
-        print("The 'settings' folder has been copied successfully.")
-    else:
-        print("The source folder 'settings' was not found.")
+    copy_subs_dir(
+        project_name=project_name,
+        params=params,
+    )
     with open(
         os.path.join(project_path, "requirements.txt"), "w", encoding="utf-8"
     ) as f:
@@ -170,7 +248,7 @@ def get_project_name():
     project_name = None
     if not os.path.exists(env_path):
         print("No .env file found in the current directory.")
-        return
+        return project_name
 
     with open(env_path, "r") as f:
         for line in f:
@@ -303,32 +381,61 @@ def run():
     subprocess.run([sys.executable, main_entry], env=env)
 
 
+def get_project_params(args: list, update=False):
+    params = []
+    start = 3 if update is False else 2
+    for i in range(start, len(args)):
+        if sys.argv[i][2 : len(sys.argv[i])] not in VALID_START_PROJECT_PARAMS:
+            print(
+                Fore.RED
+                + f"Ignoring {args[i][2:len(args[i])]} which is not a valid parameter for startproject"
+            )
+        else:
+            if sys.argv[i].startswith("--"):
+                params.append(args[i][2 : len(args[i])])
+    return params
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: elrahapi <commande> <name> [<action>]")
         sys.exit(1)
     command = sys.argv[1]
     name: str | None = None
-    action: str | None = None
+    action_name: str | None = None
     if len(sys.argv) > 2:
         name = sys.argv[2]
     if len(sys.argv) > 3:
-        action = sys.argv[3]
+        action_name = sys.argv[3]
     if command == "run":
         run()
     elif command == "startapp" and name:
         startapp(name)
     elif command == "startproject" and name:
-        startproject(name)
+        params = get_project_params(sys.argv)
+        startproject(project_name=name, params=params)
+    elif command == "updateproject":
+        params = get_project_params(sys.argv, update=True)
+        if len(params) == 0:
+            print(
+                Fore.RED + "updateproject misses argument try to add flags like --tests"
+            )
+        else:
+            project_name = get_project_name()
+            if project_name:
+                copy_subs_dir(project_name=project_name, params=params, update=True)
+            else:
+                print(
+                    Fore.RED
+                    + "Unable to find project name , ensure that .env is updated"
+                )
     elif command == "create_seed" and name:
         create_seed(name)
     elif command == "run_seed" and name:
-        action_name = action or "up"
         action = True if action_name == "up" else False
         run_seed(seed_name=name, action=action)
     elif command == "run_seed_manager":
-        action_name = name or "up"
-        action = True if action_name == "up" else False
+        action = action_name or "up"
         run_seed_manager(action=action)
     elif command == "create_tables":
         create_tables()
