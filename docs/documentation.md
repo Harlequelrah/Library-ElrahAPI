@@ -68,9 +68,6 @@ nomduprojet/
 │   ├── model.py
 │   ├── router.py
 │   └── schema.py
-├── seeders
-│   └── log
-│       └── __init__.py
 └── __init__.py
 ```
 
@@ -78,6 +75,12 @@ nomduprojet/
 
 ```bash
   elrahapi run
+```
+
+ou
+
+```bash
+  fastapi run app/main.py --reload --host=127.0.0.1
 ```
 
 ## **1.3. `Commande de génération d'une application`**
@@ -122,9 +125,7 @@ ce sous module dispose de quelques variables d'exceptions prédéfinies liés à
 ce sous module contient des fonction utilitaires pour les exceptions
 
 - `raise_custom_http_exception` : lève une erreur CustomHttpException
-
   - **paramètres** :
-
     - `status_code` : **int**
 
     - `detail` : **str**
@@ -142,9 +143,7 @@ Ce module contient des utilitaires comme des fonctions , des variables , des cla
 Ce sous module contient des quelques fonctions utiles .
 
 - **`update_entity`**: mets à jour les champs d'une entité objet .
-
   - **paramètres** :
-
     - existing_entity : l'entité existante à mettre à jour.
 
     - update_entity : **Type[BaseModel]** l'entité pour mettre : l'entité pour la mise à jour .
@@ -152,9 +151,7 @@ Ce sous module contient des quelques fonctions utiles .
   - **sortie** : **existing_entity** , l'entité mise à jour.
 
 - **`validate_value`** : permet valider une valeur pour s'assurer qu'il est conforme à son type.
-
   - **paramètres** :
-
     - value : la valeur à vérifier.
 
   - **sortie** : **value**
@@ -166,9 +163,7 @@ Ce sous module contient des quelques fonctions utiles .
   ```
 
 - **`map_list_to`** : map une liste d'objet d'une classe pydantic en une liste d'objet d'une classe sqlalchemy .
-
   - **paramètres** :
-
     - obj_list : **list[BaseModel]** , la liste d'objet à mapper
 
     - obj_sqlalchemy_class : **type** , la classe sqlalchemy
@@ -178,9 +173,7 @@ Ce sous module contient des quelques fonctions utiles .
   - **sortie** : **list[obj_sqlalchemy_class]**
 
 - **`get_pks`** : retourne une liste des valeurs des clés primaires d'une liste d'instance d'une entité .
-
   - **paramètres** :
-
     - l : **list** , la liste d'instances
 
     - pk_name : **str** , le nom de la clé primaire
@@ -188,17 +181,13 @@ Ce sous module contient des quelques fonctions utiles .
   - **sortie** : **list**
 
 - **`get_filters`** : récupère les paramètres de requête dans un dictionnaire .
-
   - **paramètres** :
-
     - request: **Request**
 
   - **sortie** : **dict[str, Any]**
 
 - **`apply_filters`** : renvoie une requête **Select** filtrée par les valeurs d'un dictionnaire _filters_.
-
   - **paramètres** :
-
     - stmt: **Select**
 
     - crud_models: **CrudModels**
@@ -208,9 +197,7 @@ Ce sous module contient des quelques fonctions utiles .
   - **sortie** : **Select**
 
 - **`exec_stmt`** : execute une requête **Select** en prennant en compte les sessions synchrones et asynchrones.
-
   - **paramètres** :
-
     - stmt: **Select**
 
     - session: **ElrahSession**
@@ -224,9 +211,7 @@ Ce sous module contient des quelques fonctions utiles .
 **Note** : Si with*scalar et with_scalars sont à False la méthode execute* sera utilisée .
 
 - **`get_entities_all_privilege_data`** : renvoie une liste de nom de `PrivilegeCreateModel` pour une liste de noms d'entités.
-
   - **paramètres** :
-
     - entities_names: **list[str]**
 
   - **sortie** : **list[BaseModel]**
@@ -250,7 +235,6 @@ Ce sous module comporte certaines types réutilisables .
 Ce sous module comporte des schémas pydantic réutilisables .
 
 - **`CountModel`** , un schéma de retour des statistiques de `DefaultRoutesName.COUNT` :
-
   - total_count: int
 
   - daily_total_count: int
@@ -260,7 +244,6 @@ Ce sous module comporte des schémas pydantic réutilisables .
   - monthly_total_count: int
 
 - ## **`AdditionalSchemaFields`** , Un schéma utilitaire avec des champs additionels :
-
   - date_created: **datetime**
 
   - date_updated: **datetime**
@@ -288,19 +271,16 @@ Ce module contient des classes et des fonctions utilisées pour l'authentificati
 Ce sous module définit des classes pydantics pour la gestions des tokens :
 
 - AccessToken :
-
   - access_token : **str**
 
   - token_type : **str**
 
 - RefreshToken :
-
   - refresh_token : **str**
 
   - token_type : **str**
 
 - Token :
-
   - access_token : **str**
 
   - refresh_token : **str**
@@ -353,9 +333,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   **methodes**
 
 - `__init__` :
-
   - **paramètres** :
-
     - `settings` : **ElrahSettings** , le schéma pour les configurations de variables d'environnement.
 
     - `authentication_models` : **CrudModels** , definit les classes et attributs pour l'authentification
@@ -363,9 +341,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
     - security : **OAuth2PasswordBearer | HTTPBearer | None**
 
 - `authenticate_user` : authentifie un utilisateur
-
   - **paramètres** :
-
     - password : **str**
 
     - username_or_email : **str**
@@ -375,9 +351,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **authentication_models.sqlalchemy_model**
 
 - `create_access_token` : créer un token d'acces
-
   - **paramètres** :
-
     - data : **dict**
 
     - expires_delta : **timedelta**
@@ -385,9 +359,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **AccessToken**
 
 - `create_refresh_token` : créer un token de rafraichissement
-
   - **paramètres** :
-
     - data : **dict**
 
     - expires_delta : **timedelta**
@@ -395,33 +367,25 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **RefreshToken**
 
 - `get_access_token` : retourne le token d'accès de l'utilisateur actuellement authentifié .
-
   - **sortie** : **str**
 
 - `get_current_user` : retourne l'utilisateur actuellement authentifié .
-
   - **sortie** : **User**
 
 - `validate_token` : valide le token et retourne un payload
-
   - **paramètres** :
-
     - token : **str**
 
   - **sortie** : **dict[str,any]**
 
 - `refresh_token` : rafraichi un token d'acces par un token de rafraichissement
-
   - **paramètres** :
-
     - refresh_token_datat : **RefreshToken**
 
   - **sortie** : **AccessToken**
 
 - `check_authorizations` : vérifie des authorizations suivant des roles ou privilèges en retournant un objet **callable** qui sera utilisé comme dépendence
-
   - **paramètres** :
-
     - privileges_name: **Optional[list[str]]**
 
     - roles_name : **Optional[list[str]]**
@@ -429,9 +393,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **callable**
 
 - `check_authorization` : vérifie une autorisation suivant un role ou un privilège en retournant un objet **callable** qui sera utilisé comme dépendence
-
   - **paramètres** :
-
     - privilege_name: **str**
 
     - role_name : **str**
@@ -439,9 +401,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **callable**
 
 - `get_user_by_sub` : retourne un utilisateur à partir de son username ou email
-
   - **paramètres** :
-
     - username_or_email : **str**
 
     - db : **Session**
@@ -449,26 +409,20 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **authentication_models.sqlalchemy_model**
 
 - `is_unique` : méthode pour vérifier si l'email ou le username est unique .
-
   - **paramètres** :
-
     - sub : **str**
 
   - **sortie** : **bool**
 
 - `read_one_user` : méthode lire un utilisateur à partir de son id , son email ou de son username .
-
   - **paramètres** :
-
     - credential : **str|int**
     - db : Optional[Session] = None
 
   - **sortie** : **authentication_models.sqlalchemy_model**
 
 - `change_password` : méthode pour changer le mot de passe d'un utilisateur
-
   - **paramètres** :
-
     - username_or_email : **str**
 
     - current_password : **str**
@@ -478,9 +432,7 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
   - **sortie** : **Reponse avec status code 204**
 
 - `change_user_state` : méthode pour changer le statut d'activité d'un utilisateur
-
   - **paramètres** :
-
     - pk : la clé primaire
 
   - **sortie** : **Reponse avec status code 204**
@@ -490,7 +442,6 @@ ce sous module définit les classes et fonctions utilisées pour l'authentificat
 Ce sous module définit la classe AuthenticationRouterProvider pour gérer le routage de l'authentification
 
 - **`Attributs`** :
-
   - authentication : **AuthenticationManager**
 
   - read_with_relations : **Optional[bool]**
@@ -502,11 +453,8 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
   - router : **APIRouter**
 
 - **`Methodes`**
-
   - `__init__`
-
     - **parametres** :
-
       - authentication : **AuthenticationManager**
 
       - read_with_relations : **Optional[bool]**
@@ -516,9 +464,7 @@ Ce sous module définit la classe AuthenticationRouterProvider pour gérer le ro
       - privileges : **Optional[list[str]]**
 
   - `get_auth_router ` : renvoie un router configurable pour l'authentification
-
     - **paramètres** :
-
       - init_data : **list[RouteConfig]** = `USER_AUTH_CONFIG_ROUTES`
 
       - authorizations : **Optional[list[AuthorizationConfig]]**
@@ -539,7 +485,6 @@ Ce module comporte des utilitaires pour OTP .
 Ce sous module comporte des schemas pour OTP .
 
 - `OTPVerification` :
-
   - otp : **str**
 
   - temp_token : **str**
@@ -551,11 +496,8 @@ Ce sous module comporte les classes `OTPAuthManager` et `OTPAuthRouterProvider`
 - `OTPAuthManager`
 
 - **méthodes**
-
   - `__init__` :
-
     - **paramètres** :
-
       - redis: **Redis**
 
       - session_manager : **SessionManager**
@@ -565,13 +507,10 @@ Ce sous module comporte les classes `OTPAuthManager` et `OTPAuthRouterProvider`
       - security: **OAuth2PasswordBearer | HTTPBearer | None**
 
 - `generate_otp` : une méthode qui genère un code OTP que vous pouvez adapter à vos besoins.
-
   - **sortie** : code OTP
 
 - `send_otp_mail` : une méthode qui envoie un code OTP par email que vous pouvez adapter à vos besoins.
-
   - **paramètres** :
-
     - user_email : **str**
 
     - otp : **str**
@@ -585,7 +524,6 @@ Ce module contient des classes et des fonctions utilisées pour l'autorisation.
 Ce sous module contient des models Meta pour définir les models liés à l'authorization et pour lire partiellement des données .
 
 - `MetaAuthorization` : classe pour définir les models SQLAlchemy Role et Privilege
-
   - id : **mapped_column(Integer)**
 
   - name : **mapped_column(String)**
@@ -595,7 +533,6 @@ Ce sous module contient des models Meta pour définir les models liés à l'auth
   - is_active : **mapped_column(Boolean)**
 
 - `MetaAuthorizationBaseModel(BaseModel)` : classe pour définir les Models Meta pour Role et Privilege .
-
   - is_active : **bool**
 
 - `MetaAuthorizationReadModel(MetaAuthorizationModel)` , classe pour définir les Models Pydantic complet pour Role et Privilege.
@@ -615,21 +552,17 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.2.2. Sous module `schemas`**
 
 - `RoleBaseModel(BaseModel)` :
-
   - name : **str**
 
   - description : **str**
 
 - `RoleCreateModel(RoleBaseModel)` :
-
   - is_active : **Optional[bool]** , default: True
 
 - `RoleUpdateModel(RoleBaseModel)` :
-
   - is_active : **bool**
 
 - `RolePatchModel(BaseModel)`
-
   - name : **Optional[str]**
 
   - description : **Optional[str]**
@@ -639,7 +572,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 - `RoleReadModel(MetaAuthorizationReadModel)`
 
 - `RoleFullReadModel(MetaAuthorizationReadModel)`
-
   - role_privileges : **list[MetaAuthorizationBaseModel]**
 
   - role_users : **list[MetaRoleUsers]**
@@ -647,7 +579,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.2.3. Sous module `meta_models`**
 
 - `MetaRoleUsers(BaseModel)`
-
   - user_id : int
 
   - is_active : int
@@ -663,21 +594,17 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.3.2 Sous module `schemas`**
 
 - `PrivilegeBaseModel(BaseModel)`
-
   - name : **str**
 
   - description : **str**
 
 - `PrivilegeCreateModel(PrivilegeBaseModel)`:
-
   - is_active : Optional[bool] , default : True
 
 - `PrivilegeUpdateModel(RoleBaseModel)` :
-
   - is_active : **bool**
 
 - `PrivilegePatchModel(BaseModel)` :
-
   - name : **Optional[str]**
 
   - description : **Optional[str]**
@@ -687,7 +614,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 - `PrivilegeReadModel(MetaAuthorizationReadModel)`
 
 - `PrivilegeFullReadModel(PrivilegeReadModel)` :
-
   - privilege_roles : **Optional[list[MetaAuthorizationBaseModel]]**
 
   - privilege_users : **Optional[list[MetaPrivilegeUsers]]**
@@ -695,7 +621,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.3.3 Sous module `meta_models`**
 
 - `MetaPrivilegeUsers` :
-
   - `user_id`:int
 
   - `is_active` : **bool**
@@ -707,7 +632,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.4.1. Sous module `models`**
 
 - `RolePrivilegeModel`
-
   - id : **mapped_column(Integer)**
 
   - role_id : **mapped_column(Integer)**
@@ -717,29 +641,24 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.4.2. Sous module `schemas`**
 
 - `RolePrivilegeCreateModel(BaseModel)`
-
   - role_id : **int**
 
   - privilege_id : **int**
 
 - `RolePrivilegeUpdateModel(BaseModel)`
-
   - role_id : **int**
 
   - privilege_id : **int**
 
 - `RolePrivilegePatchModel(BaseModel)`
-
   - role_id : **Optional[int]**
 
   - privilege_id : **Optional[int]**
 
 - `RolePrivilegeReadModel(RolePrivilegeCreateModel)`
-
   - id : **int**
 
 - `RolePrivilegeFullReadModel(BaseModel)`
-
   - id : **int**
 
   - role : **MetaAuthorizationBaseModel**
@@ -753,7 +672,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.5.1 Sous module `models`**
 
 - `UserPrivilegeModel`
-
   - id : **mapped_column(Integer)**
 
   - user_id : **mapped_column(Integer)**
@@ -765,7 +683,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.5.2 Sous module `schemas`**
 
 - `UserPrivilegeCreateModel(BaseModel)`
-
   - user_id : **int**
 
   - privilege_id : **int**
@@ -773,7 +690,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]** , default : True
 
 - `UserPrivilegeUpdateModel(BaseModel)`
-
   - user_id : **int**
 
   - privilege_id : **int**
@@ -781,7 +697,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **bool**
 
 - `UserPrivilegePatchModel(BaseModel)`
-
   - user_id : **Optional[int]**
 
   - privilege_id : **Optional[int]**
@@ -789,11 +704,9 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]**
 
 - `UserPrivilegeReadModel(UserPrivilegeCreateModel)`
-
   - id : **int**
 
 - `UserPrivilegeFullReadModel(BaseModel)`
-
   - id : **int**
 
   - user : **UserBaseModel**
@@ -803,7 +716,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.5.3. Sous module `meta_models`**
 
 - `UserInUserPrivilege(BaseModel)` :
-
   - privilege : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
@@ -815,7 +727,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.6.1 Sous module `models`**
 
 - `UserRoleModel`
-
   - id : **mapped_column(Integer)**
 
   - user_id : **mapped_column(Integer)**
@@ -827,7 +738,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.6.2 Sous module `schemas`**
 
 - `UserRoleCreateModel(BaseModel)`
-
   - user_id : **int**
 
   - role_id : **int**
@@ -835,7 +745,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]** , default : True
 
 - `UserRoleUpdateModel(BaseModel)`
-
   - user_id : **int**
 
   - role_id : **int**
@@ -843,7 +752,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **bool**
 
 - `UserRolePatchModel(BaseModel)`
-
   - user_id : **Optional[int]**
 
   - role_id : **Optional[int]**
@@ -851,11 +759,9 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
   - is_active : **Optional[bool]**
 
 - `UserRoleReadModel(UserRoleCreateModel)`
-
   - id : **int**
 
 - `UserRoleReadModel(BaseModel)`
-
   - id : **int**
 
   - user : **UserBaseModel**
@@ -867,7 +773,6 @@ Ce sous module contient les models SQLAlchemy et classes pydantic pour l'entité
 #### **2.4.6.3. Sous module `meta_models`**
 
 - `UserRoleInUser(BaseModel)` :
-
   - role : **MetaAuthorizationBaseModel**
 
   - is_active : **bool**
@@ -925,9 +830,7 @@ Ce sous module définit les modèles de Log : `LogModel` et `LogReadModel` pour 
 Ce sous module définit la classe **`LoggerMiddleware`** comme middleware de logs .
 
 - `__init__`
-
   - **paramètres** :
-
     - LogModel
 
     - session_manager : **SessionManager**
@@ -939,9 +842,7 @@ Ce sous module définit la classe **`LoggerMiddleware`** comme middleware de log
 Ce sous module définit la classe **`ErrorMiddleware`** comme middleware de gestion d'erreur .
 
 - `__init__`
-
   - **paramètres** :
-
     - LogModel
 
     - session_manager : **SessionManager**
@@ -953,9 +854,7 @@ Ce sous module définit la classe **`ErrorMiddleware`** comme middleware de gest
 ce sous module définit les methodes pour sauvegarder les logs .
 
 - **`save_log`** : enregistre les logs
-
   - **paramètres**:
-
     - **request** : Request
 
     - **LogModel**
@@ -973,9 +872,7 @@ ce sous module définit les methodes pour sauvegarder les logs .
 - **paramètres**: **Response**
 
 - **`get_response_and_process_time`** : renvoie le temps de la requete et la reponse .
-
   - **paramètres**:
-
     - **request**: Request
 
     - **call_next**:callable
@@ -987,17 +884,13 @@ ce sous module définit les methodes pour sauvegarder les logs .
 - **paramètres**: [ **response** , **process_time** ]
 
 - **`read_response_body`** : **renvoie une chaine de caractère contenant la partie du detail du body si elle existe du corps de la requête**
-
   - **paramètres**:
-
     - **response** : Response
 
 - **paramètres**: **str**
 
 - **`recreate_async_iterator`** : **recree un nouvel itérateur pour la requete**
-
   - `paramètres`:
-
     - **body** : bytes
 
 ## 2.6. **Module `user`**
@@ -1038,17 +931,13 @@ Ce sous module comporte le model `User` utilisé dans le système d'authentifica
 
 - `try_login` :
   tente de connecter un utilisateur et mets à jour attempt_login en fonction .
-
   - **paramètres** :
-
     - is_success : **bool**
 
   - **sortie** : **bool**
 
 - `check_password` : permet de vérifier le mot de passe.
-
   - **paramètres** :
-
     - password : **str**
 
   - **sortie** : **bool**
@@ -1056,25 +945,19 @@ Ce sous module comporte le model `User` utilisé dans le système d'authentifica
 - `change_user_state` : permet de changer le statut d'activité .
 
 - `has_role` : permet de vérifier si l'utilisateur a un role
-
   - **paramètres** :
-
     - roles_name : **list[str]**
 
   - **sortie** : **bool**
 
 - `has_permission`: permet de vérifier si l'utilisateur a un privilege dans ses privileges personnels
-
   - **paramètres** :
-
     - privilege_name : **str**
 
   - **sortie** : **bool**
 
 - `has_privilege` : permet de vérifier si l'utilisateur a un privilege que ce soit par son role ou ses privileges personnels
-
   - **paramètres** :
-
     - privilege_name : **str**
 
   - **sortie** : **bool**
@@ -1086,7 +969,6 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
 **`Models pydantics pour la validations`** :
 
 - `UserBaseModel(BaseModel)`
-
   - email : **EmailStr**
 
   - username : **str**
@@ -1096,15 +978,12 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
   - firstname : **str**
 
 - `UserCreateModel`
-
   - password : **str**
 
 - `UserUpdateModel`
-
   - password : **str**
 
 - `UserPatchModel`
-
   - email: **Optional[str]**
 
   - username: **Optional[str]**
@@ -1114,7 +993,6 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
   - firstname: **Optional[str]**
 
 - **`UserReadModel`**
-
   - id : **int**
 
   - date_created : **datetime**
@@ -1126,13 +1004,11 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
   - attempt_login : **int**
 
 - **`UserFullReadModel(UserReadModel)`**
-
   - user_roles : **Optional[list[UserRoleInUser]]**
 
   - user_privileges : **Optional[list[UserInUserPrivilege]]**
 
 - `UserRequestModel` :
-
   - username : **Optional[str]**
 
   - email : **Optional[str]**
@@ -1140,11 +1016,9 @@ Ce sous module rassemble les classes pydantics liées à `User` pour la validati
   - username_or_email : @property **str|None**
 
 - `UserLoginRequestModel(UserRequestModel)` :
-
   - password : **str**
 
 - `UserChangePasswordRequestModel(UserRequestModel)` :
-
   - current_password : **str**
 
   - new_password : **str**
@@ -1160,27 +1034,19 @@ Contient la classe ConnectionManager pour gérer une connexion avec un websocket
 **methodes**:
 
 - **connect** : permet de connecter un websocket au manager
-
   - **paramètres:**
-
     - websocket : WebSocket
 
 - **disconnect** : permet de déconnecter un websocket
-
   - **paramètres:**
-
     - websocket : WebSocket
 
 - **broadcast** : permet de diffuser un message
-
   - **paramètres:**
-
     - message : **str**
 
 - **send_message** : permet d'envoyer un message
-
   - **paramètres:**
-
     - sender_websocket : WebSocket
 
     - message : **str**
@@ -1196,7 +1062,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 **`CrudForgery`**:
 
 - **`__init__`** :
-
   - **paramètres** :
 
   - session_manager : **SessionManager**
@@ -1204,29 +1069,22 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - crud_models : **CrudModels**
 
 - **`create`** :
-
   - **paramètres** :
-
     - `create_ob`: **Type[BaseModel]** mais potentiellement **CreatePydanticModel**
 
   - **sortie** : **SQLAlchemyModel**
 
 - **`bulk_create`** : permet de créer plusieurs entités
-
   - **paramètres** :
-
     - `create_ob_list`: **list[CreatePydanticModel]**
 
   - **sortie** : **list[SQLAlchemyModel]**
 
 - **`count`** :
-
   - **sortie** : **int**
 
 - **`read_all`** :
-
   - **paramètres** :
-
     - `filter`: **Optional[str]**
 
     - `value`: **Optiona[Any]**
@@ -1244,9 +1102,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - **sortie** : **list[SQLAlchemyModel]**
 
 - **`read_one`** :
-
   - **paramètres** :
-
     - `pk` : **Any**
 
     - `db`: **Optional[Session]** : pour utiliser la même session lors de update , patch et delete .
@@ -1254,9 +1110,7 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - **sortie** : **SQLAlchemyModel**
 
 - **`update`** :
-
   - **paramètres** :
-
     - `pk`: **Any**
 
     - `update_obj`: : **Type[BaseModel]** mais potentiellement **UpdatePydanticModel** ou **PatchPydanticModel**
@@ -1266,17 +1120,13 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
   - **sortie** : **SQLAlchemyModel**
 
 - **`delete`** :
-
   - **paramètres** :
-
     - `pk` : **Any**
 
   - **sortie** : **Reponse avec status code 204**
 
 - **`bulk_delete`** : permet de faire plusieurs suppression d'entités
-
   - **paramètres** :
-
     - `pk_list`: **BulkDeleteModel**
 
   - **sortie** : **Reponse avec status code 204**
@@ -1286,7 +1136,6 @@ Ce sous module comporte la classe CrudForgery pour générer des cruds de base .
 Ce sous module definit CrudModels qui définit l'ensemble des classes et informations sur une entité
 
 - `__init__`:
-
   - `entity_name`: **str**
 
   - `primary_key_name`: **str**
@@ -1316,7 +1165,6 @@ Ce sous module definit CrudModels qui définit l'ensemble des classes et informa
 Ce sous module définit des classes pour les opérations en masse .
 
 - **`BulkDeleteModel`** : pour la suppression multiple
-
   - delete_list : **list**
 
 ## **2.9. Module `router`**
@@ -1328,11 +1176,8 @@ Ce module comporte des classes methodes et autres utilitaires pour automatiser l
 Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterProvider et des classes utilitaires `DEFAULT_ROUTE_CONFIG` , `ResponseModelConfig` et `AuthorizationConfig` les configurations du routeur et des routes.
 
 - **`DEFAULT_ROUTE_CONFIG`**
-
   - `__init__` :
-
     - **paramètres**
-
       - summary : **str**
 
       - description : **str**
@@ -1340,9 +1185,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
 - **`RouteConfig`**
 
 - `__init__` :
-
   - **paramètres**:
-
     - `route_name`: **str**
 
     - `route_path`: **Optional[str]**
@@ -1366,17 +1209,13 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
     - `response_model` : Optional[Any]
 
 - `get_authorizations` : retourne une liste de callable utilisable comme dépendance pour l'authorization
-
   - **paramètres** :
-
     - authentication : **Authentication**
 
   - **sortie** : **list[callable]**
 
 - `validate_route_path` : permet de gérer les valeurs de route_path en fonction de route_name
-
   - **paramètres** :
-
     - route_name : **DefaultRoutesName**
 
     - route_path : **Optional[str]**
@@ -1384,9 +1223,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
   - **sortie** : **str**
 
 - **`AuthorizationConfig`**
-
   - `__init__` :
-
     - **paramètres** :
 
     - route_name : **DefaultRoutesName**
@@ -1396,9 +1233,7 @@ Ce sous module comporte la classe `RouteConfig` pour configurer un CustomRouterP
     - privileges : **list[str]**
 
 - **`ResponseModelConfig`**
-
   - `__init__` :
-
     - **paramètres** :
 
     - route_name : **DefaultRoutesName**
@@ -1439,9 +1274,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 `CustomRouterProvider`
 
 - `__init__` :
-
   - **paramètres**:
-
     - `prefix`: **str**
 
     - `tags`: **list[str]**
@@ -1459,7 +1292,6 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - `relations` : **Optional[list[Relationship]]**
 
 - **`get_public_router`** : renvoie un router avec la configuration de `ROUTES_PUBLIC_CONFIG`
-
   - **paramètres**:
 
   - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
@@ -1467,9 +1299,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
   - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`get_protected_router`** : renvoie un routeur avec la configuration de `ROUTES_PROTECTED_AUTH_CONFIG`
-
   - **paramètres**:
-
     - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
 
     - authorizations: **Optional[list[AuthorizationConfig]]**
@@ -1477,9 +1307,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`get_custom_router_init_data`** : renvoie une liste de configurations de routes personnalisés
-
   - **paramètres** :
-
     - init_data : **Optional[list[RouteConfig]]**
 
     - route_names : **Optional[list[DefaultRoutesName]]**
@@ -1489,9 +1317,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
   - **sortie** : list[RouteConfig]
 
 - **`get_custom_public_router`** : retourne un routeur personnalisé
-
   - **paramètres** :
-
     - init_data : **Optional[list[RouteConfig]]**
 
     - routes_name : **Optional[list[DefaultRoutesName]]**
@@ -1507,9 +1333,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
   - **sortie** : **APIRouter**
 
 - **`get_mixed_router`** : renvoie un routeur avec une configuration personnalisée entre routes publiques et protégées .
-
   - **paramètres**:
-
     - init_data: **Optional[list[RouteConfig]]**
 
     - public_routes_name : **Optional[list[DefaultRoutesName]]**
@@ -1521,9 +1345,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
     - response_model_configs: Optional[list[ResponseModelConfig]]
 
 - **`initialize_router`** : initialise un routeur avec une configuration .
-
   - **paramètres**:
-
     - init_data : **list[RouteConfig]**
 
     - authorizations: **Optional[list[AuthorizationConfig]]**
@@ -1537,9 +1359,7 @@ Ce sous module comporte la classe CustomRouterProvider pour configurer un routeu
 Ce sous module comporte certaines fonctions utilisées dans le cadre du routage .
 
 - `exclude_route` : permet d'exclure des routes d'une liste de routes
-
   - **paramètres:**
-
     - routes : **list[RouteConfig]**
 
     - exclude_routes_name : **Optional[list[DefaultRoutesName]]**
@@ -1547,9 +1367,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **list[RouteConfig]**
 
 - `get_single_route` : permet d'avoir une configuration par défaut d'une route particulière .
-
   - **paramètres:**
-
     - route_name : **DefaultRoutesName**
 
     - type_route : **Optional[TypeRoute]= TypeRoute.PROTECTED**
@@ -1559,9 +1377,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **RouteConfig**
 
 - `initialize_dependencies` : permet d'initialiser les dépendances à passer à une route .
-
   - **paramètres:**
-
     - config : **RouteConfig**
 
     - authentication : **Authentication**
@@ -1573,9 +1389,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **list[Depends]**
 
 - `add_authorizations` : permet d'ajouter des authorizations à des configurations de routes.
-
   - **paramètres:**
-
     - route_config : **list[RouteConfig]**
 
     - authorizations : **list[AuthorizationConfig]**
@@ -1583,9 +1397,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **list[RouteConfig]**
 
 - `format_init_data` : permet de preparer les configurations de routage en excluant des routes et en ajoutant les authorizations.
-
   - **paramètres:**
-
     - init_data : **list[RouteConfig]**
 
     - read_with_relations: **bool**
@@ -1609,9 +1421,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **list[RouteConfig]**
 
 - `set_response_models` : permet de préparer les configurations de routage en ajoutant les models de reponses specifiques.
-
   - **paramètres:**
-
     - routes_config : **list[RouteConfig]**
 
     - response_model_configs : **list[ResponseModelConfig]**
@@ -1619,9 +1429,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
   - **sortie** : **list[RouteConfig]**
 
 - `set_response_model` : permet d'ajouter un model de reponse à une route .
-
   - **paramètres:**
-
     - ReadPydanticModel: **Type[BaseModel]**
 
     - FullReadPydanticModel:**Type[BaseModel]**
@@ -1637,9 +1445,7 @@ Ce sous module comporte certaines fonctions utilisées dans le cadre du routage 
 Ce sous module définit `Relationship` une classe pour permettre de retourner des données en effectuant des jointures .
 
 - `__init__`
-
   - **paramètres**
-
     - relationship_name : **str**
 
     - relationship_crud_models : **CrudModels**
@@ -1671,9 +1477,7 @@ Ce sous module définit des utilitaires pour la sécurité
 - `ALGORITHMS` : **list[str]** , une liste des algorithms de **ALGORITHMS_KEY_SIZES**
 
 - **define_algorithm_and_key** : permet de définir l'algorithme et la clé utilisée pour signé les tokens
-
   - **parametres** :
-
     - secret_key : **Optional[str]**
 
     - algorithm : **Optional[str]**
@@ -1687,13 +1491,10 @@ Ce module définit des classes utilitaires pour la gestion des sessions
 Ce sous module définit la classe SessionManager pour gérer les sessions
 
 - `attributs` :
-
   - `session_manager` : **sessionmaker[Session]** , le générateur de session
 
 - `méthodes` :
-
   - `yield_session` : renvoie une session
-
     - sortie : `Session`
 
 #### 2.11. Module `elrahsettings`
@@ -1703,7 +1504,6 @@ Un module qui definit une classe pour les variables d'environnements et autres c
 ##### 2.11.1 Sous Module `models`
 
 - `attributs` :
-
   - `project_name`:str
   - `databse`:str
   - `env` : str
@@ -1734,7 +1534,6 @@ Un module qui definit une classe les tests
 Une classe avec des méthodes de classe pour les tests.
 
 - `methodes` :
-
   - `exclude_dates_from_dict` : pour exclure les dates d'un dict
   - `_add_token_to_headers` : pour ajouter les headers à un token
   - `_update_expected_value` : pour ajouter les dates à un dictionnaires
@@ -1756,7 +1555,6 @@ Ce sous module contient des constantes utilitaires .
 La classe principale pour la gestion de la base de données `DatabaseManager`
 
 - `__init__.py` :
-
   - paramètres :
     - settings: **ElrahSettings**
     - database_creation_script: **str | None = None**
@@ -1778,7 +1576,6 @@ La classe principale pour la gestion de la base de données `DatabaseManager`
 Ce sous module comporte le gestionnaire de session
 
 - `__init__.py` :
-
   - paramètres :
     - is_async_env : **bool**
     - session_maker: **sessionmaker**
@@ -1808,7 +1605,6 @@ Les classes pour la gestion des seeds
 **Seed**
 
 - `__init__.py` :
-
   - paramètres :
     - crud_forgery : **CrudForgery**
     - data: **list[BaseModel]**
@@ -1827,7 +1623,6 @@ Les classes pour la gestion des seeds
 Le gestionnaire de seed
 
 - `__init__.py` :
-
   - paramètres :
     - seeds_dict : **dict[str, Seed]**
     - session_manager: **SessionManager**
