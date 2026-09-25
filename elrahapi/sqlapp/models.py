@@ -13,4 +13,4 @@
 #         default=func.now(), onupdate=func.now()
 #     )
 #     is_deleted: Mapped[bool] = mapped_column(default=False)
-#     date_deleted: Mapped[datetime] = mapped_column(default=None)
+#     date_deleted: Mapped[datetime|None] = mapped_column(default=None)
